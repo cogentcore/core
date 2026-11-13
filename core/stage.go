@@ -5,6 +5,7 @@
 package core
 
 import (
+	"cogentcore.org/core/math32"
 	"fmt"
 	"image"
 	"strings"
@@ -124,6 +125,12 @@ type Stage struct { //types:add -setters
 	// just pass them down to lower stages.
 	ignoreEvents bool
 
+	// pressOpened is whether a menu stage was opened by pressing the mouse
+	// button on its [Stage.Context] button, which is still down: dragging
+	// over the menu hovers its items, and releasing the button over one
+	// clicks it (see [stages.pressOpenedEvent]).
+	pressOpened bool
+
 	// NewWindow, if true, opens a [WindowStage] or [DialogStage] in its own
 	// separate operating system window ([renderWindow]). This is true by
 	// default for [WindowStage] on non-mobile platforms, otherwise false.
@@ -156,6 +163,13 @@ type Stage struct { //types:add -setters
 	// for sizing new windows and dialogs. Otherwise, only the content size is used.
 	// The saved window position and size takes precedence on multi-window platforms.
 	UseMinSize bool
+
+	// MinSize is the minimum initial size of a dialog in dp, if it is
+	// non-zero, such as to make the window of a dialog wide enough for the
+	// layout of a larger [SizeClasses] than the compact one of a phone. It
+	// only sets the initial size: the window can then be resized, and the
+	// saved window size takes precedence on multi-window platforms.
+	MinSize math32.Vector2
 
 	// Resizable specifies whether a window on desktop platforms can
 	// be resized by the user, and whether a non-full same-window dialog can

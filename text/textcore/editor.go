@@ -353,6 +353,9 @@ func (ed *Editor) keyInput(e events.Event) {
 	}
 	if ed.IsReadOnly() {
 		switch {
+		case kf == keymap.Kill: // (Command+K), as in the context menu
+			e.SetHandled()
+			ed.Clear()
 		case kf == keymap.FocusNext: // tab
 			e.SetHandled()
 			ed.CursorNextLink(true)
@@ -793,7 +796,7 @@ func (ed *Editor) contextMenu(m *core.Scene, pos image.Point) {
 		core.NewFuncButton(m).SetFunc(ed.Lines.Open).SetIcon(icons.Open)
 		core.NewFuncButton(m).SetFunc(ed.Lines.Revert).SetIcon(icons.Reset)
 	} else {
-		core.NewButton(m).SetText("Clear").SetIcon(icons.ClearAll).
+		core.NewButton(m).SetText("Clear").SetIcon(icons.ClearAll).SetKey(keymap.Kill).
 			OnClick(func(e events.Event) {
 				ed.Clear()
 			})

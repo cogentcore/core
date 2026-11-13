@@ -595,3 +595,21 @@ func TestTerminalUserCommand(t *testing.T) {
 	defer b.AsyncUnlock()
 	assert.Equal(t, []string{"echo one", "cd /tmp", `sh -c 'cd /; echo three'`}, cmds)
 }
+
+// TestTerminalMenuKey tests that the key of the menu of the app (Control+M)
+// goes to the app in the lines view, and to the program in full-screen
+// programs (the grid view).
+func TestTerminalMenuKey(t *testing.T) {
+	b, tm := testTerminal(t)
+	b.AsyncLock()
+	defer b.AsyncUnlock()
+	ch := keymap.Menu.Chord().Chords()[0]
+	rn, code, ms, err := ch.Decode()
+	require.NoError(t, err)
+	e := events.NewKey(events.KeyChord, rn, code, ms)
+	tm.linesView.keyChord(e)
+	assert.False(t, e.IsHandled(), "the app gets it")
+	e = events.NewKey(events.KeyChord, rn, code, ms)
+	tm.gridView.keyChord(e)
+	assert.True(t, e.IsHandled(), "the program gets it")
+}

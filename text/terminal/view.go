@@ -191,6 +191,11 @@ func (vw *View) keyChord(e events.Event) {
 		if e.IsHandled() {
 			return
 		}
+		// as does the key of the menu (search) of the app (Control+M,
+		// which is the same as Return for the program)
+		if keymap.Of(e.KeyChord()) == keymap.Menu {
+			return
+		}
 	}
 	mods := e.Modifiers()
 	if mods.HasFlag(key.Meta) { // app shortcuts

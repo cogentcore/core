@@ -154,7 +154,7 @@ func TestStore(t *testing.T) {
 	wg.Wait()
 	var last store
 	last.reload()
-	assert.Len(t, last.dirs, 8*5+1)
+	assert.Len(t, last.file.Data, 8*5+1)
 	_, err := os.Stat(filepath.Join(DataDir, FileName+".lck"))
 	assert.True(t, os.IsNotExist(err), "unlocked")
 }
@@ -166,26 +166,13 @@ func TestStorePrune(t *testing.T) {
 	defer func() { DataDir, MaxDirs = "", 5000 }()
 	MaxDirs = 2
 	var st store
-	st.reload()
-	st.dirs["/old"] = entry{Time: 1}
-	st.dirs["/mid"] = entry{Time: 2}
+	require.NoError(t, st.set("/old", Sort{}))
+	st.file.Data["/old"] = entry{Time: 1}
+	st.file.Data["/mid"] = entry{Time: 2}
+	require.NoError(t, st.file.Update(nil)) // (as another process)
 	require.NoError(t, st.set("/new", Sort{}))
-	assert.Len(t, st.dirs, 2)
-	assert.NotContains(t, st.dirs, "/old")
-}
-
-// TestLockStale tests that a lock file left by a process that ended while
-// holding it is taken over.
-func TestLockStale(t *testing.T) {
-	fn := filepath.Join(t.TempDir(), "x.lck")
-	require.NoError(t, os.WriteFile(fn, nil, 0644))
-	old := time.Now().Add(-time.Minute)
-	require.NoError(t, os.Chtimes(fn, old, old))
-	unlock, err := lockFile(fn)
-	require.NoError(t, err)
-	unlock()
-	_, err = os.Stat(fn)
-	assert.True(t, os.IsNotExist(err))
+	assert.Len(t, st.file.Data, 2)
+	assert.NotContains(t, st.file.Data, "/old")
 }
 
 func TestBplist(t *testing.T) {

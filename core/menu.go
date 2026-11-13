@@ -374,10 +374,10 @@ func (sc *Scene) MenuSearchDialog(title, text string) {
 		}
 	})
 	w.AddItemsFunc(func() {
-		addButtonItems(&w.Items, sc, "")
-		tmps := NewScene()
+		addButtonItems(&w.Items, sc, sc, "")
+		tmps := menuSearchScene(sc)
 		sc.applyContextMenus(tmps, image.Point{})
-		addButtonItems(&w.Items, tmps, "")
+		addButtonItems(&w.Items, sc, tmps, "")
 	})
 	w.OnFinal(events.Change, func(e events.Event) {
 		d.Close()
@@ -388,12 +388,28 @@ func (sc *Scene) MenuSearchDialog(title, text string) {
 	d.RunDialog(sc)
 }
 
+// menuSearchScene returns a new scene for the items of a menu found by the
+// menu search of the given scene, which is not shown, but belongs to the
+// window of the scene, as a menu of it does, so that the dialogs and other
+// popups of its buttons, which use them as their context, are shown there.
+func menuSearchScene(sc *Scene) *Scene {
+	m := NewScene()
+	main := sc.Stage
+	if main != nil && main.Main != nil { // (a popup)
+		main = main.Main
+	}
+	if main != nil && main.Mains != nil {
+		NewPopupStage(MenuStage, m, sc).setPopups(main)
+	}
+	return m
+}
+
 // addButtonItems adds to the given items all of the buttons under
-// the given parent. It navigates through button menus to find other
-// buttons using a recursive approach that updates path with context
-// about the original button menu. Consumers of this function should
-// typically set path to "".
-func addButtonItems(items *[]ChooserItem, parent tree.Node, path string) {
+// the given parent, for the menu search of the given scene. It navigates
+// through button menus to find other buttons using a recursive approach
+// that updates path with context about the original button menu.
+// Consumers of this function should typically set path to "".
+func addButtonItems(items *[]ChooserItem, sc *Scene, parent tree.Node, path string) {
 	parent.AsTree().WalkDown(func(n tree.Node) bool {
 		if ms, ok := n.(MenuSearcher); ok {
 			ms.MenuSearch(items)
@@ -415,7 +431,7 @@ func addButtonItems(items *[]ChooserItem, parent tree.Node, path string) {
 			label = bt.Tooltip
 		}
 		if bt.HasMenu() {
-			tmps := NewScene()
+			tmps := menuSearchScene(sc)
 			bt.Menu(tmps, image.Point{})
 			npath := path
 			if npath != "" {
@@ -424,7 +440,7 @@ func addButtonItems(items *[]ChooserItem, parent tree.Node, path string) {
 			if bt.Name != "overflow-menu" {
 				npath += label
 			}
-			addButtonItems(items, tmps, npath)
+			addButtonItems(items, sc, tmps, npath)
 			return tree.Continue
 		}
 		if path != "" {
