@@ -31,7 +31,7 @@ func NewMarkdown(ctx *Context) goldmark.Markdown {
 	popts := []parser.Option{
 		parser.WithAutoHeadingID(),
 		parser.WithAttribute(),
-		parser.WithBlockParsers(util.Prioritized(attrBlockParser{}, 50)),
+		parser.WithBlockParsers(util.Prioritized(attrBlockParser{}, 50), util.Prioritized(mathBlockParser{}, 60)),
 		parser.WithASTTransformers(util.Prioritized(attrTransformer{}, 100)),
 		parser.WithInlineParsers(util.Prioritized(mathParser{}, 500)),
 	}
@@ -56,6 +56,7 @@ func NewMarkdown(ctx *Context) goldmark.Markdown {
 func MDToHTML(ctx *Context, md []byte) []byte {
 	var buf bytes.Buffer
 	pc := parser.NewContext(parser.WithIDs(&headingIDs{values: map[string]bool{}}))
+	md = escapeTableMath(md)
 	if err := ctx.converter().Convert(md, &buf, parser.WithContext(pc)); err != nil {
 		core.ErrorSnackbar(nil, err)
 	}
@@ -223,6 +224,7 @@ func (r *hookRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
 	reg.Register(ast.KindImage, r.renderImage)
 	reg.Register(ast.KindLink, r.renderLink)
 	reg.Register(kindMath, renderMath)
+	reg.Register(kindMathBlock, r.wrap(renderMathBlock))
 	// Tables are rendered by the GFM table renderer.
 	tr := map[ast.NodeKind]renderer.NodeRendererFunc{}
 	extension.NewTableHTMLRenderer().RegisterFuncs(funcMap(tr))
@@ -303,6 +305,8 @@ func (r *hookRenderer) renderImage(w util.BufWriter, source []byte, node ast.Nod
 			segs = []text.Segment{c.Segment}
 		case *ast.RawHTML:
 			segs = c.Segments.Sliced(0, c.Segments.Len())
+		case *mathNode:
+			segs = []text.Segment{c.Segment}
 		}
 		for _, sg := range segs {
 			if start < 0 || sg.Start < start {
@@ -313,7 +317,7 @@ func (r *hookRenderer) renderImage(w util.BufWriter, source []byte, node ast.Nod
 		return ast.WalkContinue, nil
 	})
 	if start >= 0 {
-		w.Write(util.EscapeHTML(source[start:stop]))
+		w.Write(util.EscapeHTML(smartPunct(source[start:stop])))
 	}
 	w.WriteByte('"')
 	if n.Title != nil {
@@ -353,6 +357,64 @@ func (r *hookRenderer) renderLink(w util.BufWriter, source []byte, node ast.Node
 	}
 	w.WriteByte('>')
 	return ast.WalkContinue, nil
+}
+
+// smartPunct returns the text with the typographic punctuation of the
+// Typographer extension (as gomarkdown's Smartypants did for image alt
+// text, the caption of a figure): dashes for -- and ---, an ellipsis, and
+// curly quotes. HTML tags, `code`, and $math$ are left as they are.
+func smartPunct(b []byte) []byte {
+	var out []byte
+	// quote returns the opening quote o or the closing one c for a quote at i.
+	quote := func(i int, o, c string) string {
+		if i == 0 || bytes.IndexByte([]byte(" \t\n([>"), b[i-1]) >= 0 {
+			return o
+		}
+		return c
+	}
+	for i := 0; i < len(b); i++ {
+		c := b[i]
+		switch c {
+		case '<', '`', '$':
+			// Tags, code, and math are copied as they are.
+			end := map[byte]byte{'<': '>', '`': '`', '$': '$'}[c]
+			if e := bytes.IndexByte(b[i+1:], end); e >= 0 {
+				out = append(out, b[i:i+e+2]...)
+				i += e + 1
+				continue
+			}
+		case '-':
+			if bytes.HasPrefix(b[i:], []byte("---")) {
+				out = append(out, "\u2014"...)
+				i += 2
+				continue
+			}
+			if bytes.HasPrefix(b[i:], []byte("--")) {
+				out = append(out, "\u2013"...)
+				i++
+				continue
+			}
+		case '.':
+			if bytes.HasPrefix(b[i:], []byte("...")) {
+				out = append(out, "\u2026"...)
+				i += 2
+				continue
+			}
+		case '"':
+			out = append(out, quote(i, "\u201c", "\u201d")...)
+			continue
+		case '\'':
+			if i+1 < len(b) && b[i+1] == '\'' { // '' is a double quote
+				out = append(out, quote(i, "\u201c", "\u201d")...)
+				i++
+				continue
+			}
+			out = append(out, quote(i, "\u2018", "\u2019")...)
+			continue
+		}
+		out = append(out, c)
+	}
+	return out
 }
 
 // attrString returns the given attribute value as a string.
