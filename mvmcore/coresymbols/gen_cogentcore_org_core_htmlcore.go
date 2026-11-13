@@ -40,6 +40,7 @@ func New[T tree.NodeValue](ctx *Context) *T {
 			"MDGetAttr":           reflect.ValueOf(p_cogentcore_org_core_htmlcore.MDGetAttr),
 			"MDSetAttr":           reflect.ValueOf(p_cogentcore_org_core_htmlcore.MDSetAttr),
 			"MDToHTML":            reflect.ValueOf(p_cogentcore_org_core_htmlcore.MDToHTML),
+			"Markdown":            reflect.ValueOf((*p_cogentcore_org_core_htmlcore.Markdown)(nil)),
 			"ModalAttr":           reflect.ValueOf(p_cogentcore_org_core_htmlcore.ModalAttr),
 			"NewContext":          reflect.ValueOf(p_cogentcore_org_core_htmlcore.NewContext),
 			"NewImageCache":       reflect.ValueOf(p_cogentcore_org_core_htmlcore.NewImageCache),

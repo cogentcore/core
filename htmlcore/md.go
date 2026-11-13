@@ -6,58 +6,80 @@ package htmlcore
 
 import (
 	"bytes"
+	"io"
 	"regexp"
-	"strconv"
+	"strings"
 	"unicode"
 
 	"cogentcore.org/core/core"
-	"github.com/yuin/goldmark"
-	"github.com/yuin/goldmark/ast"
-	"github.com/yuin/goldmark/extension"
-	east "github.com/yuin/goldmark/extension/ast"
-	"github.com/yuin/goldmark/parser"
-	"github.com/yuin/goldmark/renderer"
-	"github.com/yuin/goldmark/renderer/html"
-	"github.com/yuin/goldmark/text"
-	"github.com/yuin/goldmark/util"
+	"github.com/yuin/goldmark/v2/ast"
+	"github.com/yuin/goldmark/v2/extension"
+	east "github.com/yuin/goldmark/v2/extension/ast"
+	"github.com/yuin/goldmark/v2/parser"
+	"github.com/yuin/goldmark/v2/renderer"
+	"github.com/yuin/goldmark/v2/renderer/html"
+	"github.com/yuin/goldmark/v2/text"
+	"github.com/yuin/goldmark/v2/util"
 )
+
+// Markdown is a goldmark markdown parser and HTML renderer.
+type Markdown struct {
+	Parser   parser.Parser
+	Renderer html.Renderer
+}
+
+// Convert converts the given markdown to HTML, written to w.
+func (md *Markdown) Convert(source []byte, w io.Writer) error {
+	return md.Renderer.Render(w, source, md.Parser.Parse(source))
+}
 
 // NewMarkdown returns a goldmark converter with the extensions used for
 // Cogent Core content: GitHub flavored markdown, heading ids, raw HTML,
 // block attributes in a {...} line before a block, links opening in a new
 // tab, and, if ctx is non-nil, wikilinks and its AttributeHandlers.
-func NewMarkdown(ctx *Context) goldmark.Markdown {
+func NewMarkdown(ctx *Context) *Markdown {
 	// The parser has the GFM syntax, heading ids, and block attributes.
 	popts := []parser.Option{
+		parser.WithExtensions(extension.NewGFMParser(), extension.NewTypographerParser()),
 		parser.WithAutoHeadingID(),
 		parser.WithAttribute(),
-		parser.WithBlockParsers(util.Prioritized(attrBlockParser{}, 50), util.Prioritized(mathBlockParser{}, 60)),
-		parser.WithASTTransformers(util.Prioritized(attrTransformer{}, 100)),
-		parser.WithInlineParsers(util.Prioritized(mathParser{}, 500)),
+		parser.WithIDGenerator(headingIDs{}),
+		parser.WithBlockParsers(util.Prioritized[parser.BlockParser](attrBlockParser{}, 50), util.Prioritized[parser.BlockParser](mathBlockParser{}, 60)),
+		parser.WithASTTransformers(util.Prioritized[parser.ASTTransformer](attrTransformer{}, 100)),
+		parser.WithInlineParsers(util.Prioritized[parser.InlineParser](mathParser{}, 500)),
 	}
 	if ctx != nil {
-		popts = append(popts, parser.WithInlineParsers(util.Prioritized(wikilinkParser{ctx}, 199)))
+		popts = append(popts, parser.WithInlineParsers(util.Prioritized[parser.InlineParser](wikilinkParser{ctx}, 199)))
 	}
 
-	// The renderer writes raw HTML and the attributes of all blocks.
-	ropts := []renderer.Option{
-		html.WithUnsafe(),
-		renderer.WithNodeRenderers(util.Prioritized(&hookRenderer{ctx: ctx}, 100)),
+	// The renderer writes raw HTML, and the attribute handlers run before
+	// the default renderers of blocks.
+	r := &hookRenderer{ctx: ctx}
+	decorators := map[ast.NodeKind]html.NodeRendererDecorator{}
+	for _, k := range hookKinds {
+		decorators[k] = r.decorate
 	}
-	return goldmark.New(
-		goldmark.WithExtensions(extension.GFM, extension.Typographer),
-		goldmark.WithParserOptions(popts...),
-		goldmark.WithRendererOptions(ropts...),
-	)
+	ropts := []html.Option{
+		html.WithUnsafe(),
+		html.WithExtensions(extension.NewGFMHTMLRenderer()),
+		html.WithNodeRenderers(map[ast.NodeKind]html.NodeRenderer{
+			ast.KindCodeBlock: html.NodeRendererFunc(renderCode),
+			ast.KindImage:     html.NodeRendererFunc(renderImage),
+			ast.KindLink:      html.NodeRendererFunc(renderLink),
+			kindMath:          html.NodeRendererFunc(renderMath),
+			kindMathBlock:     html.NodeRendererFunc(renderMathBlock),
+		}),
+		html.WithNodeRendererDecorators(decorators),
+	}
+	return &Markdown{Parser: parser.New(popts...), Renderer: html.New(ropts...)}
 }
 
 // MDToHTML converts the given markdown to HTML, using the given context
 // for wikilinks and attribute handlers.
 func MDToHTML(ctx *Context, md []byte) []byte {
 	var buf bytes.Buffer
-	pc := parser.NewContext(parser.WithIDs(&headingIDs{values: map[string]bool{}}))
 	md = escapeTableMath(md)
-	if err := ctx.converter().Convert(md, &buf, parser.WithContext(pc)); err != nil {
+	if err := ctx.converter().Convert(md, &buf); err != nil {
 		core.ErrorSnackbar(nil, err)
 	}
 	htm := buf.Bytes()
@@ -71,7 +93,7 @@ func MDToHTML(ctx *Context, md []byte) []byte {
 
 // converter returns the goldmark converter of the context, made once on
 // first use, or a new one without Cogent Core extensions for a nil context.
-func (ctx *Context) converter() goldmark.Markdown {
+func (ctx *Context) converter() *Markdown {
 	if ctx == nil {
 		return NewMarkdown(nil)
 	}
@@ -99,11 +121,10 @@ func ReadMDString(ctx *Context, parent core.Widget, s string) error {
 
 // headingIDs generates heading ids as gomarkdown did: lowercase letters
 // and numbers, with a dash for each run of other characters between them.
-type headingIDs struct {
-	values map[string]bool
-}
+// The parser adds -1, -2, ... to repeated ids.
+type headingIDs struct{}
 
-func (s *headingIDs) Generate(value []byte, kind ast.NodeKind) []byte {
+func (headingIDs) Generate(value []byte, kind ast.NodeKind) []byte {
 	var id []rune
 	dash := false
 	for _, r := range string(value) {
@@ -117,18 +138,11 @@ func (s *headingIDs) Generate(value []byte, kind ast.NodeKind) []byte {
 		dash = false
 		id = append(id, unicode.ToLower(r))
 	}
-	res := string(id)
-	if res == "" {
-		res = "heading"
+	if len(id) == 0 {
+		return []byte("heading")
 	}
-	for i, base := 1, res; s.values[res]; i++ {
-		res = base + "-" + strconv.Itoa(i)
-	}
-	s.values[res] = true
-	return []byte(res)
+	return []byte(string(id))
 }
-
-func (s *headingIDs) Put(value []byte) { s.values[string(value)] = true }
 
 // kindAttrBlock is the kind of an [attrBlock].
 var kindAttrBlock = ast.NewNodeKind("AttrBlock")
@@ -141,7 +155,7 @@ type attrBlock struct {
 
 func (n *attrBlock) Kind() ast.NodeKind { return kindAttrBlock }
 
-func (n *attrBlock) Dump(source []byte, level int) { ast.DumpHelper(n, source, level, nil, nil) }
+func (n *attrBlock) Dump(source []byte) *ast.NodeDump { return ast.NewNodeDump(n, nil) }
 
 // attrBlockParser parses a line of only {...} attributes into an [attrBlock].
 type attrBlockParser struct{}
@@ -151,7 +165,8 @@ func (attrBlockParser) Trigger() []byte { return []byte{'{'} }
 func (attrBlockParser) Open(parent ast.Node, reader text.Reader, pc parser.Context) (ast.Node, parser.State) {
 	// The line must be the attributes alone.
 	line, _ := reader.PeekLine()
-	if len(bytes.TrimSpace(line)) < 2 || bytes.TrimSpace(line)[len(bytes.TrimSpace(line))-1] != '}' {
+	trim := bytes.TrimSpace(line)
+	if len(trim) < 2 || trim[len(trim)-1] != '}' {
 		return nil, parser.NoChildren
 	}
 	l, pos := reader.Position()
@@ -163,6 +178,7 @@ func (attrBlockParser) Open(parent ast.Node, reader text.Reader, pc parser.Conte
 	}
 	reader.Advance(len(rest) - 1) // the parser advances past the newline
 	n := &attrBlock{}
+	n.Init(n)
 	for _, a := range attrs {
 		n.SetAttribute(a.Name, a.Value)
 	}
@@ -179,14 +195,23 @@ func (attrBlockParser) CanInterruptParagraph() bool { return false }
 
 func (attrBlockParser) CanAcceptIndentedLine() bool { return false }
 
-// attrTransformer moves the attributes of each [attrBlock] to the next block.
+// attrTransformer moves the attributes of each [attrBlock] to the next
+// block. It also makes the values of all attributes strings, so that they
+// do not need the source (for [MDGetAttr] and the attribute handlers).
 type attrTransformer struct{}
 
 func (attrTransformer) Transform(doc *ast.Document, reader text.Reader, pc parser.Context) {
+	source := reader.Source()
 	var blocks []ast.Node
 	ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
-		if entering && n.Kind() == kindAttrBlock {
+		if !entering {
+			return ast.WalkContinue, nil
+		}
+		if n.Kind() == kindAttrBlock {
 			blocks = append(blocks, n)
+		}
+		for _, a := range n.Attributes() {
+			n.SetAttribute(a.Name, text.NewMultiLineValueFromString(a.Value.Value(source), text.IdentityDecoder))
 		}
 		return ast.WalkContinue, nil
 	})
@@ -196,164 +221,144 @@ func (attrTransformer) Transform(doc *ast.Document, reader text.Reader, pc parse
 				next.SetAttribute(a.Name, a.Value)
 			}
 		}
-		n.Parent().RemoveChild(n.Parent(), n)
+		n.Parent().RemoveChild(n)
 	}
 }
 
-// hookRenderer renders the blocks with attributes: it runs the
-// [Context.AttributeHandlers], and it writes all of the attributes of
-// code blocks on their code element, as gomarkdown did.
+// hookRenderer runs the [Context.AttributeHandlers] for blocks with
+// attributes, before their renderers.
 type hookRenderer struct {
-	ctx  *Context
-	base map[ast.NodeKind]renderer.NodeRendererFunc
+	ctx *Context
 }
 
 // hookKinds are the kinds of blocks that the [hookRenderer] handles.
-var hookKinds = []ast.NodeKind{ast.KindParagraph, ast.KindHeading, ast.KindFencedCodeBlock, ast.KindCodeBlock, ast.KindBlockquote, ast.KindList, ast.KindThematicBreak, ast.KindHTMLBlock}
-
-// funcMap is a NodeRendererFuncRegisterer that records the functions.
-type funcMap map[ast.NodeKind]renderer.NodeRendererFunc
-
-func (m funcMap) Register(k ast.NodeKind, f renderer.NodeRendererFunc) { m[k] = f }
-
-func (r *hookRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
-	// The default renderer functions are called for blocks without handlers.
-	r.base = map[ast.NodeKind]renderer.NodeRendererFunc{}
-	html.NewRenderer(html.WithUnsafe()).RegisterFuncs(funcMap(r.base))
-	reg.Register(ast.KindFencedCodeBlock, r.renderCode)
-	reg.Register(ast.KindImage, r.renderImage)
-	reg.Register(ast.KindLink, r.renderLink)
-	reg.Register(kindMath, renderMath)
-	reg.Register(kindMathBlock, r.wrap(renderMathBlock))
-	// Tables are rendered by the GFM table renderer.
-	tr := map[ast.NodeKind]renderer.NodeRendererFunc{}
-	extension.NewTableHTMLRenderer().RegisterFuncs(funcMap(tr))
-	reg.Register(east.KindTable, r.wrap(tr[east.KindTable]))
-	for _, k := range hookKinds {
-		if k == ast.KindFencedCodeBlock {
-			continue
-		}
-		reg.Register(k, r.wrap(r.base[k]))
-	}
-}
+var hookKinds = []ast.NodeKind{ast.KindParagraph, ast.KindHeading, ast.KindCodeBlock, ast.KindBlockquote, ast.KindList, ast.KindThematicBreak, ast.KindHTMLBlock, east.KindTable, kindMathBlock}
 
 // runHandlers runs the attribute handler for the first attribute of
 // the node that has one, returning whether it handled the node.
-func (r *hookRenderer) runHandlers(w util.BufWriter, n ast.Node, entering bool) bool {
+func (r *hookRenderer) runHandlers(w io.Writer, n ast.Node, entering bool) bool {
 	if r.ctx == nil || len(r.ctx.AttributeHandlers) == 0 {
 		return false
 	}
 	for _, a := range n.Attributes() {
-		if f, has := r.ctx.AttributeHandlers[string(a.Name)]; has {
-			return f(r.ctx, w, n, entering, string(a.Name), attrString(a.Value))
+		if f, has := r.ctx.AttributeHandlers[a.Name]; has {
+			return f(r.ctx, w, n, entering, a.Name, a.Value.Value(nil))
 		}
 	}
 	return false
 }
 
-func (r *hookRenderer) wrap(f renderer.NodeRendererFunc) renderer.NodeRendererFunc {
-	return func(w util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+// decorate returns a renderer that runs the attribute handlers before next.
+func (r *hookRenderer) decorate(next html.NodeRenderer) html.NodeRenderer {
+	return html.NodeRendererFunc(func(w io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 		if n.Attributes() != nil && r.runHandlers(w, n, entering) {
 			return ast.WalkContinue, nil
 		}
-		return f(w, source, n, entering)
-	}
+		return next.Render(w, source, n, entering, rc)
+	})
 }
 
-// renderCode renders a fenced code block with all of its attributes.
-func (r *hookRenderer) renderCode(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
-	if node.Attributes() != nil && r.runHandlers(w, node, entering) {
-		return ast.WalkContinue, nil
-	}
-	n := node.(*ast.FencedCodeBlock)
+// renderCode renders a code block with all of its attributes on its code
+// element, as gomarkdown did.
+func renderCode(writer io.Writer, source []byte, node ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+	w := writer.(util.BufWriter)
+	n := node.(*ast.CodeBlock)
 	if !entering {
 		w.WriteString("</code></pre>\n")
 		return ast.WalkContinue, nil
 	}
 	w.WriteString("<pre><code")
-	if lang := n.Language(source); lang != nil {
+	if lang, ok := n.Language(source); ok {
 		w.WriteString(` class="language-`)
-		w.Write(util.EscapeHTML(lang))
+		html.ContextTextWriter(rc).WriteString(lang)
 		w.WriteByte('"')
 	}
 	if n.Attributes() != nil {
-		html.RenderAttributes(w, n, nil)
+		html.RenderAttributes(w, source, n, nil, rc)
 	}
 	w.WriteByte('>')
-	for i := 0; i < n.Lines().Len(); i++ {
-		line := n.Lines().At(i)
-		w.Write(util.EscapeHTML(line.Value(source)))
-	}
+	n.Value.WriteTo(html.ContextTextWriter(rc), source)
 	return ast.WalkContinue, nil
 }
 
 // renderImage renders an image with its alt text as written, including
 // any markdown or HTML in it (the caption of a figure), as gomarkdown did.
-func (r *hookRenderer) renderImage(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
+func renderImage(writer io.Writer, source []byte, node ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	if !entering {
 		return ast.WalkContinue, nil
 	}
+	w := writer.(util.BufWriter)
 	n := node.(*ast.Image)
 	w.WriteString(`<img src="`)
-	w.Write(util.EscapeHTML(util.URLEscape(n.Destination, true)))
+	html.ContextLinkURLWriter(rc).WriteString(n.Destination.Value(source))
 	w.WriteString(`" alt="`)
-	start, stop := -1, -1
-	ast.Walk(n, func(c ast.Node, entering bool) (ast.WalkStatus, error) {
-		var segs []text.Segment
-		switch c := c.(type) {
-		case *ast.Text:
-			segs = []text.Segment{c.Segment}
-		case *ast.RawHTML:
-			segs = c.Segments.Sliced(0, c.Segments.Len())
-		case *mathNode:
-			segs = []text.Segment{c.Segment}
-		}
-		for _, sg := range segs {
-			if start < 0 || sg.Start < start {
-				start = sg.Start
-			}
-			stop = max(stop, sg.Stop)
-		}
-		return ast.WalkContinue, nil
-	})
-	if start >= 0 {
-		w.Write(util.EscapeHTML(smartPunct(source[start:stop])))
-	}
+	html.ContextTextWriter(rc).Write(smartPunct(imageAlt(source, n.Pos())))
 	w.WriteByte('"')
-	if n.Title != nil {
+	if !n.Title.IsEmpty() {
 		w.WriteString(` title="`)
-		w.Write(util.EscapeHTML(n.Title))
+		n.Title.WriteTo(html.ContextTextWriter(rc), source)
 		w.WriteByte('"')
 	}
 	if n.Attributes() != nil {
-		html.RenderAttributes(w, n, html.ImageAttributeFilter)
+		html.RenderAttributes(w, source, n, html.ImageAttributeFilter, rc)
 	}
 	w.WriteString(">")
 	return ast.WalkSkipChildren, nil
 }
 
+// imageAlt returns the source of the alt text of the image at pos (the
+// position of its "!["): the text up to the matching "]".
+func imageAlt(source []byte, pos int) []byte {
+	if pos < 0 || !bytes.HasPrefix(source[pos:], []byte("![")) {
+		return nil
+	}
+	start := pos + 2
+	depth := 0
+	for i := start; i < len(source); i++ {
+		switch source[i] {
+		case '\\':
+			i++
+		case '`':
+			// A code span is skipped up to its closing backtick.
+			if e := bytes.IndexByte(source[i+1:], '`'); e >= 0 {
+				i += e + 1
+			}
+		case '[':
+			depth++
+		case ']':
+			if depth == 0 {
+				return source[start:i]
+			}
+			depth--
+		}
+	}
+	return nil
+}
+
 // renderLink renders a link, with target="_blank" for an absolute URL,
 // as gomarkdown did with HrefTargetBlank. The destination is not URL
 // escaped, since wikilink handlers return URLs with spaces.
-func (r *hookRenderer) renderLink(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
+func renderLink(writer io.Writer, source []byte, node ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+	w := writer.(util.BufWriter)
 	n := node.(*ast.Link)
 	if !entering {
 		w.WriteString("</a>")
 		return ast.WalkContinue, nil
 	}
+	dest := n.Destination.Value(source)
 	w.WriteString(`<a href="`)
-	w.Write(util.EscapeHTML(n.Destination))
+	html.ContextTextWriter(rc).WriteString(dest)
 	w.WriteByte('"')
-	if n.Title != nil {
+	if !n.Title.IsEmpty() {
 		w.WriteString(` title="`)
-		w.Write(util.EscapeHTML(n.Title))
+		n.Title.WriteTo(html.ContextTextWriter(rc), source)
 		w.WriteByte('"')
 	}
-	if bytes.Contains(n.Destination, []byte("://")) {
+	if strings.Contains(dest, "://") {
 		w.WriteString(` target="_blank"`)
 	}
 	if n.Attributes() != nil {
-		html.RenderAttributes(w, n, html.LinkAttributeFilter)
+		html.RenderAttributes(w, source, n, html.LinkAttributeFilter, rc)
 	}
 	w.WriteByte('>')
 	return ast.WalkContinue, nil
@@ -417,28 +422,17 @@ func smartPunct(b []byte) []byte {
 	return out
 }
 
-// attrString returns the given attribute value as a string.
-func attrString(v any) string {
-	switch v := v.(type) {
-	case []byte:
-		return string(v)
-	case string:
-		return v
-	}
-	return ""
-}
-
 // MDGetAttr gets the given attribute from the given markdown node, returning ""
 // if the attribute is not found.
 func MDGetAttr(n ast.Node, attr string) string {
-	v, ok := n.AttributeString(attr)
+	v, ok := n.Attribute(attr)
 	if !ok {
 		return ""
 	}
-	return attrString(v)
+	return v.Value(nil)
 }
 
 // MDSetAttr sets the given attribute on the given markdown node
 func MDSetAttr(n ast.Node, attr, value string) {
-	n.SetAttributeString(attr, []byte(value))
+	n.SetAttribute(attr, text.NewMultiLineValueFromString(value, text.IdentityDecoder))
 }

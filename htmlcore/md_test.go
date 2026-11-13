@@ -12,7 +12,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/htmlcore/tohtml"
 	"github.com/stretchr/testify/assert"
-	"github.com/yuin/goldmark/ast"
+	"github.com/yuin/goldmark/v2/ast"
 )
 
 func TestMD(t *testing.T) {

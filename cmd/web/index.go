@@ -11,10 +11,9 @@ import (
 	"os"
 
 	"cogentcore.org/core/content/bcontent"
-	"github.com/yuin/goldmark"
-	"github.com/yuin/goldmark/extension"
-	"github.com/yuin/goldmark/parser"
-	"github.com/yuin/goldmark/renderer/html"
+	"github.com/yuin/goldmark/v2/extension"
+	"github.com/yuin/goldmark/v2/parser"
+	"github.com/yuin/goldmark/v2/renderer/html"
 )
 
 // readIndexPage returns the HTML for the optional custom index page of the app,
@@ -52,8 +51,8 @@ func readIndexPage() (string, error) {
 // since those require the GUI packages, which the build tool can not import.
 func mdToHTML(md []byte) []byte {
 	var buf bytes.Buffer
-	goldmark.New(goldmark.WithExtensions(extension.GFM),
-		goldmark.WithParserOptions(parser.WithAutoHeadingID(), parser.WithAttribute()),
-		goldmark.WithRendererOptions(html.WithUnsafe())).Convert(md, &buf)
+	p := parser.New(parser.WithExtensions(extension.NewGFMParser()), parser.WithAutoHeadingID(), parser.WithAttribute())
+	r := html.New(html.WithUnsafe(), html.WithExtensions(extension.NewGFMHTMLRenderer()))
+	r.Render(&buf, md, p.Parse(md))
 	return buf.Bytes()
 }
