@@ -492,12 +492,19 @@ func (tm *Terminal) ClearScrollback() {
 }
 
 // WorkingDir returns the working directory of the shell, as it reports
-// with shell integration (OSC 7), or the starting directory.
+// with shell integration (OSC 7), or else that of its process, where it can
+// be found (Linux, macOS, and the BSDs), or else the starting directory.
 func (tm *Terminal) WorkingDir() string {
 	tm.emulator.Lock()
-	defer tm.emulator.Unlock()
-	if tm.emulator.Dir != "" {
-		return tm.emulator.Dir
+	dir := tm.emulator.Dir
+	tm.emulator.Unlock()
+	if dir != "" {
+		return dir
+	}
+	if tm.pty != nil && tm.pty.Cmd != nil && tm.pty.Cmd.Process != nil {
+		if dir := processDir(tm.pty.Cmd.Process.Pid); dir != "" {
+			return dir
+		}
 	}
 	return tm.Dir
 }

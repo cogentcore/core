@@ -78,7 +78,7 @@ func TestButtonShortcut(t *testing.T) {
 	b := NewBody()
 	bt := NewButton(b).SetShortcut("Command+S")
 	tt, _ := bt.WidgetTooltip(image.Point{})
-	assert.Equal(t, "[Ctrl+S]", tt)
+	assert.Equal(t, "["+commandLabel()+"+S]", tt)
 }
 
 func TestButtonShortcutWithTooltip(t *testing.T) {
@@ -86,14 +86,14 @@ func TestButtonShortcutWithTooltip(t *testing.T) {
 	bt := NewButton(b).SetShortcut("Command+S")
 	bt.SetTooltip("Test")
 	tt, _ := bt.WidgetTooltip(image.Point{})
-	assert.Equal(t, "[Ctrl+S] Test", tt)
+	assert.Equal(t, "["+commandLabel()+"+S] Test", tt)
 }
 
 func TestButtonShortcutKey(t *testing.T) {
 	b := NewBody()
 	bt := NewButton(b).SetKey(keymap.Open)
 	tt, _ := bt.WidgetTooltip(image.Point{})
-	assert.Equal(t, "[Ctrl+O]", tt)
+	assert.Equal(t, "["+commandLabel()+"+O]", tt)
 }
 
 func TestButtonShortcutMenu(t *testing.T) {
@@ -142,4 +142,14 @@ func TestButtonShortcutFocus(t *testing.T) {
 		assert.Equal(t, 1, clicked)
 		assert.True(t, tf.StateIs(states.Focused) || b.Scene.Events.focus == tf.This, "the text field keeps the focus")
 	})
+}
+
+// commandLabel returns the label of the Command modifier of shortcuts on
+// the platform of the tests: Cmd on macOS, as on the web in a Mac, and
+// otherwise Ctrl.
+func commandLabel() string {
+	if key.SystemPlatform == "MacOS" {
+		return "Cmd"
+	}
+	return "Ctrl"
 }

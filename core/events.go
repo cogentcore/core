@@ -622,8 +622,8 @@ func (em *Events) handlePosEvent(e events.Event) {
 		em.cancelLongPress()
 		// a mouse up event acts also acts as a mouse leave
 		// event on mobile, as that is needed to clear any
-		// hovered state
-		if !tree.IsNil(up) && TheApp.Platform().IsMobile() {
+		// hovered state (on a touch device, including on the web)
+		if !tree.IsNil(up) && TheApp.SystemPlatform().IsMobile() {
 			up.AsWidget().Send(events.MouseLeave, e)
 		}
 	case events.Scroll:

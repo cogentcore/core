@@ -6,6 +6,7 @@ package filetree
 
 import (
 	"fmt"
+	"io/fs"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -37,7 +38,13 @@ func (fn *Node) MimeData(md *mimedata.Mimes) {
 	case int(fn.Info.Size) >= core.SystemSettings.BigFileSize:
 		*md = append(*md, mimedata.NewTextData("File exceeds BigFileSize"))
 	default:
-		b, err := os.ReadFile(path) // closes the file, which Windows can't delete while open
+		var b []byte
+		var err error
+		if froot.FS != nil {
+			b, err = fs.ReadFile(froot.FS, path)
+		} else {
+			b, err = os.ReadFile(path) // closes the file, which Windows can't delete while open
+		}
 		if err != nil {
 			slog.Error(err.Error())
 			*md = append(*md, mimedata.NewTextData(err.Error()))
@@ -60,7 +67,29 @@ func (fn *Node) Cut() { //types:add
 // Paste copies the files on the clipboard, from [Node.Copy] or as
 // absolute paths in text, into this directory, or the directory of this file.
 func (fn *Node) Paste() { //types:add
-	md := fn.Clipboard().Read([]string{fileinfo.TextPlain})
+	if !fn.canCopy() {
+		core.ErrorSnackbar(fn, errUnsupported)
+		return
+	}
+	fn.pasteMimeData(fn.Clipboard().Read([]string{fileinfo.TextPlain}))
+}
+
+// pasteMimeData pastes the files of the given clipboard data (see
+// [Node.Paste]): those of a file tree of the same [Tree.FS] for a tree of
+// an FS.
+func (fn *Node) pasteMimeData(md mimedata.Mimes) {
+	if fn.isFS() { // only the files of this filesystem, from its trees
+		var paths []string
+		if isNodeData(md, false) {
+			for _, p := range filePaths(md) {
+				if fn.pathExists(p) {
+					paths = append(paths, p)
+				}
+			}
+		}
+		fn.pasteFiles(paths, false, nil)
+		return
+	}
 	fn.pasteFiles(clipboardPaths(md), false, nil)
 }
 
@@ -69,11 +98,25 @@ func (fn *Node) DragDrop(e events.Event) {
 	e.SetHandled()
 	md, _ := de.Data.(mimedata.Mimes)
 	var paths []string
-	if sn, ok := de.Source.(tree.Node); ok && AsNode(sn) != nil {
-		// from a file tree, possibly in another window
+	var src *Node
+	if sn, ok := de.Source.(tree.Node); ok {
+		src = AsNode(sn)
+	}
+	if src != nil { // from a file tree, possibly in another window
 		paths = filePaths(md)
 	} else { // from another widget or app
 		paths = core.DroppedFiles(de)
+	}
+	if fn.isFS() || (src != nil && src.isFS()) {
+		// files of a [Tree.FS] only move and copy within its tree
+		switch {
+		case src == nil || src.FileRoot() != fn.FileRoot():
+			core.MessageSnackbar(fn, "Files can only be moved or copied within the same filesystem")
+			return
+		case !fn.canCopy() || (de.DropMod == events.DropMove && !src.canRemove()):
+			core.ErrorSnackbar(fn, errUnsupported)
+			return
+		}
 	}
 	fn.pasteFiles(paths, de.DropMod == events.DropMove, func(inPlace []string) {
 		if len(inPlace) > 0 { // already where they were moved to: not to be deleted
@@ -84,8 +127,12 @@ func (fn *Node) DragDrop(e events.Event) {
 }
 
 // DragFiles returns the files of this node and the other selected nodes,
-// for dragging them to other apps (see [core.FileDragger]).
+// for dragging them to other apps (see [core.FileDragger]), which are none
+// for those of a [Tree.FS].
 func (fn *Node) DragFiles() []string {
+	if fn.isFS() { // (not files of the os)
+		return nil
+	}
 	files := []string{string(fn.Filepath)}
 	for _, sn := range fn.GetSelectedNodes() {
 		if sfn := AsNode(sn); sfn != nil && sfn != fn {
@@ -106,13 +153,14 @@ func filePaths(md mimedata.Mimes) []string {
 	return paths
 }
 
-// isNodeData returns whether the given mime data is from [Node.MimeData].
-func isNodeData(md mimedata.Mimes) bool {
+// isNodeData returns whether the given mime data is from [Node.MimeData],
+// with absolute paths if abs, as of the files of the os.
+func isNodeData(md mimedata.Mimes, abs bool) bool {
 	if len(md) == 0 || len(md)%3 != 0 {
 		return false
 	}
 	for i := 0; i < len(md); i += 3 {
-		if md[i].Type != fileinfo.TextPlain || md[i+1].Type != fileinfo.TextPlain || !filepath.IsAbs(string(md[i+1].Data)) {
+		if md[i].Type != fileinfo.TextPlain || md[i+1].Type != fileinfo.TextPlain || (abs && !filepath.IsAbs(string(md[i+1].Data))) {
 			return false
 		}
 	}
@@ -123,7 +171,7 @@ func isNodeData(md mimedata.Mimes) bool {
 // clipboard data: those from [Node.MimeData], or the absolute paths
 // (or file:// URLs) on the lines of text.
 func clipboardPaths(md mimedata.Mimes) []string {
-	if isNodeData(md) {
+	if isNodeData(md, true) {
 		return filePaths(md)
 	}
 	var paths []string
@@ -180,7 +228,7 @@ func (fn *Node) pasteFiles(paths []string, move bool, dropFinal func(inPlace []s
 		fn.pasteToDir(fn, paths, move, dropFinal)
 		return
 	}
-	if len(paths) > 1 || errors.Ignore1(fsx.DirExists(paths[0])) {
+	if len(paths) > 1 || fn.isDirPath(paths[0]) {
 		fn.pasteToDir(AsNode(fn.Parent), paths, move, dropFinal)
 		return
 	}
@@ -194,12 +242,12 @@ func (fn *Node) pasteToDir(tdir *Node, paths []string, move bool, dropFinal func
 	dir := string(tdir.Filepath)
 	var copies, inPlace, existing []string
 	for _, p := range paths {
-		tp := filepath.Join(dir, filepath.Base(p))
+		tp := fn.joinPath(dir, fn.baseOf(p))
 		switch {
-		case tp == filepath.Clean(p):
+		case tp == fn.cleanPath(p):
 			inPlace = append(inPlace, p)
-		case fsx.Exists(tp):
-			existing = append(existing, filepath.Base(p))
+		case fn.pathExists(tp):
+			existing = append(existing, fn.baseOf(p))
 			fallthrough
 		default:
 			copies = append(copies, p)
@@ -209,6 +257,11 @@ func (fn *Node) pasteToDir(tdir *Node, paths []string, move bool, dropFinal func
 		var errs []error
 		if !move {
 			for _, p := range inPlace {
+				if fn.isFS() {
+					_, err := fn.duplicatePath(p)
+					errs = append(errs, err)
+					continue
+				}
 				fi, err := fileinfo.NewFileInfo(p)
 				if err == nil {
 					_, err = fi.Duplicate()
@@ -241,14 +294,16 @@ func (fn *Node) pasteToDir(tdir *Node, paths []string, move bool, dropFinal func
 // the directory of this file, as chosen by the user, who can also compare them.
 func (fn *Node) pasteOntoFile(srcpath string, dropFinal func(inPlace []string)) {
 	tpath := string(fn.Filepath)
-	if filepath.Clean(srcpath) == tpath { // dropped onto itself
+	if fn.cleanPath(srcpath) == tpath { // dropped onto itself
 		return
 	}
-	fname := filepath.Base(srcpath)
+	fname := fn.baseOf(srcpath)
 	tdir := AsNode(fn.Parent)
-	npath := filepath.Join(string(tdir.Filepath), fname) // the source if in this directory
+	npath := fn.joinPath(string(tdir.Filepath), fname) // the source if in this directory
+	srcpath = fn.cleanPath(srcpath)
+	diff := !fn.isFS() // (files of the os)
 	copyTo := func(dst string) {
-		err := fsx.CopyPath(dst, srcpath)
+		err := fn.copyPath(dst, srcpath)
 		fn.FileRoot().UpdatePath(dst)
 		fn.pasteDone(err, nil, dropFinal)
 	}
@@ -259,37 +314,43 @@ func (fn *Node) pasteOntoFile(srcpath string, dropFinal func(inPlace []string)) 
 		switch {
 		case fname == fn.Name:
 			text.SetText(fmt.Sprintf("Overwrite target file: %s with source file of same name?, or diff (compare) two files?", fn.Name))
-			d.AddOK(bar).SetText("Diff (compare)").OnClick(func(e events.Event) {
-				textcore.DiffFiles(fn, tpath, srcpath)
-			})
+			if diff {
+				d.AddOK(bar).SetText("Diff (compare)").OnClick(func(e events.Event) {
+					textcore.DiffFiles(fn, tpath, srcpath)
+				})
+			}
 			d.AddOK(bar).SetText("Overwrite").OnClick(func(e events.Event) {
 				copyTo(tpath)
 			})
-		case npath == filepath.Clean(srcpath) || !fsx.Exists(npath):
-			if npath == filepath.Clean(srcpath) { // in this directory: can only replace the target
+		case npath == srcpath || !fn.pathExists(npath):
+			if npath == srcpath { // in this directory: can only replace the target
 				text.SetText(fmt.Sprintf("Overwrite target file: %s with source file: %s, or diff (compare) the two files?", fn.Name, fname))
 			} else {
 				text.SetText(fmt.Sprintf("Overwrite target file: %s with source file: %s, or copy to: %s in current folder (which doesn't yet exist), or diff (compare) the two files?", fn.Name, fname, fname))
 			}
-			d.AddOK(bar).SetText("Diff (compare)").OnClick(func(e events.Event) {
-				textcore.DiffFiles(fn, tpath, srcpath)
-			})
+			if diff {
+				d.AddOK(bar).SetText("Diff (compare)").OnClick(func(e events.Event) {
+					textcore.DiffFiles(fn, tpath, srcpath)
+				})
+			}
 			d.AddOK(bar).SetText("Overwrite target").OnClick(func(e events.Event) {
 				copyTo(tpath)
 			})
-			if npath != filepath.Clean(srcpath) {
+			if npath != srcpath {
 				d.AddOK(bar).SetText("Copy new file").OnClick(func(e events.Event) {
 					copyTo(npath)
 				})
 			}
 		default:
 			text.SetText(fmt.Sprintf("Overwrite target file: %s with source file: %s, or overwrite existing file with same name as source file (%s), or diff (compare) files?", fn.Name, fname, fname))
-			d.AddOK(bar).SetText("Diff to target").OnClick(func(e events.Event) {
-				textcore.DiffFiles(fn, tpath, srcpath)
-			})
-			d.AddOK(bar).SetText("Diff to existing").OnClick(func(e events.Event) {
-				textcore.DiffFiles(fn, npath, srcpath)
-			})
+			if diff {
+				d.AddOK(bar).SetText("Diff to target").OnClick(func(e events.Event) {
+					textcore.DiffFiles(fn, tpath, srcpath)
+				})
+				d.AddOK(bar).SetText("Diff to existing").OnClick(func(e events.Event) {
+					textcore.DiffFiles(fn, npath, srcpath)
+				})
+			}
 			d.AddOK(bar).SetText("Overwrite target").OnClick(func(e events.Event) {
 				copyTo(tpath)
 			})

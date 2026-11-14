@@ -636,6 +636,7 @@ func TestLayoutGridGrowShrinkable(t *testing.T) {
 // with a long text: it is limited to a readable measure, within which the
 // text wraps, instead of being as wide as the text on one line.
 func TestLayoutContentSizingMeasure(t *testing.T) {
+	skipOnWeb(t, "the window is the size of the page, not of its content")
 	b := NewBody()
 	tx := NewText(b).SetText(wrapText)
 	b.RenderImage(func() {
@@ -724,6 +725,41 @@ func TestLayoutGrowWithinRow(t *testing.T) {
 	})
 	fixedFrame(side, 80, 20)
 	layoutAtWidth(b, 800, 600, func(dp float32) {
+		w := heading.Geom.Size.Alloc.Total.X + side.Geom.Size.Alloc.Total.X
+		assert.LessOrEqual(t, w, 400*dp+1, "the columns fit in the row")
+		assert.GreaterOrEqual(t, w, 400*dp-2, "and fill it")
+		assert.LessOrEqual(t, row.Geom.Size.Internal.X, 400*dp+1, "the row does not overflow")
+	})
+}
+
+// TestLayoutGrowWithinRowAtMax is TestLayoutGrowWithinRow with a heading
+// that is at its Max, whose share of the extra width is given to the side
+// column: the share that it does not use is not rounded up first, which
+// made the row overflow by a pixel (as with the text of the web, whose
+// widths are fractional).
+func TestLayoutGrowWithinRowAtMax(t *testing.T) {
+	b := NewBody()
+	row := NewFrame(b)
+	row.Styler(func(s *styles.Style) {
+		s.Min.X.Dp(400)
+		s.Max.X.Dp(400)
+		s.Gap.Zero()
+		s.Padding.Zero()
+	})
+	heading := columnFrame(row, 0)
+	heading.Styler(func(s *styles.Style) {
+		s.Max.X.Dp(300)
+		s.Padding.Zero()
+	})
+	NewText(heading).SetText(strings.Repeat("x", 80))
+	side := columnFrame(row, 0)
+	side.Styler(func(s *styles.Style) {
+		s.Max.X.Pw(30)
+		s.Padding.Zero()
+	})
+	fixedFrame(side, 80, 20)
+	layoutAtWidth(b, 800, 600, func(dp float32) {
+
 		w := heading.Geom.Size.Alloc.Total.X + side.Geom.Size.Alloc.Total.X
 		assert.LessOrEqual(t, w, 400*dp+1, "the columns fit in the row")
 		assert.GreaterOrEqual(t, w, 400*dp-2, "and fill it")

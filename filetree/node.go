@@ -332,17 +332,15 @@ func (fn *Node) RelativePath() string {
 }
 
 // dirFileList returns the list of files in this directory, in its sort
-// order (see [dirsort.For]), with the directories first if DirsOnTop.
-// Those of an [fs.FS] are in the default sort order.
+// order (see [Node.dirSort]), with the directories first if DirsOnTop.
 func (fn *Node) dirFileList() []fs.FileInfo {
 	path := string(fn.Filepath)
 	var files []fs.FileInfo
 	var dirs []fs.FileInfo // for DirsOnTop mode
 	var di []fs.DirEntry
-	sort := dirsort.Default
+	sort := fn.dirSort()
 	if fn.FileRoot().FS == nil {
 		di = errors.Log1(os.ReadDir(path))
-		sort = dirsort.For(path)
 	} else {
 		di = errors.Log1(fs.ReadDir(fn.FileRoot().FS, path))
 	}
@@ -520,9 +518,17 @@ func (fn *Node) sortBys(by dirsort.Fields, down bool) { //types:add
 }
 
 // sortBy sets the sort order of the files in this directory, which is its
-// sort order in all apps (see [dirsort.Set]).
+// sort order in all apps (see [dirsort.Set]), or in this tree for a
+// directory of a [Tree.FS].
 func (fn *Node) sortBy(s dirsort.Sort) {
-	core.ErrorSnackbar(fn, dirsort.Set(string(fn.Filepath), s), "Could not save the sort order")
+	if root := fn.FileRoot(); root.FS != nil {
+		if root.fsSorts == nil {
+			root.fsSorts = map[string]dirsort.Sort{}
+		}
+		root.fsSorts[string(fn.Filepath)] = s
+	} else {
+		core.ErrorSnackbar(fn, dirsort.Set(string(fn.Filepath), s), "Could not save the sort order")
+	}
 	fn.Update()
 }
 
@@ -553,16 +559,23 @@ func (fn *Node) RelativePathFrom(fpath core.Filename) string {
 // dirsTo opens all the directories above the given filename, and returns the node
 // for element at given path (can be a file or directory itself -- not opened -- just returned)
 func (fn *Node) dirsTo(path string) (*Node, error) {
-	pth, err := filepath.Abs(path)
-	if err != nil {
+	pth := path
+	sep := string(filepath.Separator)
+	var err error
+	if fn.isFS() { // (paths within the FS, separated by /)
+		sep = "/"
+	} else if pth, err = filepath.Abs(path); err != nil {
 		log.Printf("filetree.Node DirsTo path %v could not be turned into an absolute path: %v\n", path, err)
 		return nil, err
 	}
 	rpath := fn.RelativePathFrom(core.Filename(pth))
+	if fn.isFS() {
+		rpath = filepath.ToSlash(rpath)
+	}
 	if rpath == "." {
 		return fn, nil
 	}
-	dirs := strings.Split(rpath, string(filepath.Separator))
+	dirs := strings.Split(rpath, sep)
 	cfn := fn
 	sz := len(dirs)
 	for i := 0; i < sz; i++ {

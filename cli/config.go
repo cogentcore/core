@@ -193,6 +193,13 @@ func config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 		if err == nil {
 			logx.PrintlnDebug("loaded config file:", fn)
 			gotAny = true
+			continue
+		}
+		// a missing (default) config file is fine, but a file that exists
+		// and fails to load (e.g., a TOML syntax error) must be reported,
+		// instead of silently running with the default config.
+		if !errors.Is(err, errNoConfigFile) {
+			errs = append(errs, fmt.Errorf("error loading config file %q: %w", fn, err))
 		}
 	}
 	if !gotAny && opts.NeedConfigFile {

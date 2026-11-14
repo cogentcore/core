@@ -305,9 +305,18 @@ func (st *Stage) runWindow() *Stage {
 		st.setMains(ms)
 	} else {
 		ms := &cw.mains
-		msc := ms.top().Scene
-		sc.SceneGeom.Size = sz
-		sc.fitInWindow(msc.SceneGeom) // does resize
+		if ms.top() == nil {
+			// a window without stages fills the window, as on mobile and
+			// the web, where the window stays when its last stage is closed
+			// (as in the tests, which then run a window again), with its
+			// title, as a new window
+			sc.Resize(math32.Geom2DInt{Size: cw.SystemWindow.Size()})
+			cw.setTitle(st.Title)
+		} else {
+			msc := ms.top().Scene
+			sc.SceneGeom.Size = sz
+			sc.fitInWindow(msc.SceneGeom) // does resize
+		}
 		ms.push(st)
 		st.setMains(ms)
 	}
@@ -339,17 +348,27 @@ func (st *Stage) windowSize(initSz image.Point) image.Point {
 }
 
 // getValidContext ensures that the Context is non-nil and has a valid
-// Scene pointer, using CurrentRenderWindow if the current Context is not valid.
-// If CurrentRenderWindow is nil (should not happen), then it returns false and
-// the calling function must bail.
+// Scene pointer, using the top stage of the current render window if the
+// current Context is not valid, or else of the last main window that has one
+// (when the current window is closing). If there is none (should not happen),
+// then it returns false and the calling function must bail.
 func (st *Stage) getValidContext() bool {
 	if st.Context == nil || st.Context.AsTree().This == nil || st.Context.AsWidget().Scene == nil {
-		cw := getCurrentRenderWindow()
-		if cw == nil {
-			slog.Error("Stage.Run: Context is nil and CurrentRenderWindow is nil, so cannot Run", "Name", st.Name, "Title", st.Title)
+		var top *Stage
+		if cw := getCurrentRenderWindow(); cw != nil {
+			top = cw.mains.top()
+		}
+		if top == nil { // the current window is closing, such as a dialog
+			ws := mainRenderWindows.windows()
+			for i := len(ws) - 1; i >= 0 && top == nil; i-- {
+				top = ws[i].mains.top()
+			}
+		}
+		if top == nil || top.Scene == nil {
+			slog.Error("Stage.Run: Context is nil and there is no window with a stage, so cannot Run", "Name", st.Name, "Title", st.Title)
 			return false
 		}
-		st.Context = cw.mains.top().Scene
+		st.Context = top.Scene
 	}
 	return true
 }
@@ -386,6 +405,14 @@ func (st *Stage) runDialog() *Stage {
 			// dialogs must be at least 400dp wide by default
 			minx := int(ctx.Scene.Styles.UnitContext.Dp(400))
 			sz.X = max(sz.X, minx)
+		}
+		if st.MinSize != (math32.Vector2{}) {
+			uc := &ctx.Scene.Styles.UnitContext
+			sz.X = max(sz.X, int(math32.Ceil(uc.Dp(st.MinSize.X))))
+			sz.Y = max(sz.Y, int(math32.Ceil(uc.Dp(st.MinSize.Y))))
+			if screen := st.targetScreen(); screen != nil && st.NewWindow { // (fits in the screen)
+				sz = image.Pt(min(sz.X, screen.PixelSize.X*9/10), min(sz.Y, screen.PixelSize.Y*9/10))
+			}
 		}
 		sc.SceneGeom.Pos = sc.SceneGeom.Pos.Sub(sz.Div(2)) // center dialogs by default
 		sc.Events.startFocusFirst = true                   // popup dialogs always need focus

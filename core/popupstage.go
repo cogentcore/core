@@ -5,9 +5,12 @@
 package core
 
 import (
+	"image"
+	"slices"
 	"time"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/tree"
 )
 
 // NewPopupStage returns a new PopupStage with given type and scene contents.
@@ -251,9 +254,17 @@ func (pm *stages) popupHandleEvent(e events.Event) {
 
 	if e.HasPos() {
 		pos := e.WindowPos()
+		if top.pressOpened && pm.pressOpenedEvent(top, e) {
+			e.SetHandled()
+			return
+		}
 		// fmt.Println("pos:", pos, "top geom:", ts.SceneGeom)
 		if pos.In(ts.SceneGeom.Bounds()) {
 			top.popupHandleEvent(e)
+			e.SetHandled()
+			return
+		}
+		if pm.parentMenuPress(top, e) {
 			e.SetHandled()
 			return
 		}
@@ -278,4 +289,170 @@ func (pm *stages) popupHandleEvent(e events.Event) {
 	} else { // typically focus, so handle even if not in bounds
 		top.popupHandleEvent(e) // could be set as Handled or not
 	}
+}
+
+// pressOpenedEvent handles the given event for the given top menu stage,
+// which was opened by pressing the mouse button on its context button,
+// which is still down (see [Stage.pressOpened]), returning whether it
+// handled it. Dragging over the menus hovers their items: over an item with
+// a submenu, the submenu opens, and over a menu below the top one (such as
+// the parent of a submenu), the menus above it close. Releasing the mouse
+// button over an item clicks it, other than one with a submenu, which stays
+// open. Releasing it over the context button is a click on it, which leaves
+// the menu open, and releasing it anywhere else closes the menus.
+func (pm *stages) pressOpenedEvent(top *Stage, e events.Event) bool {
+	if e.Type() != events.MouseDrag && e.Type() != events.MouseUp {
+		return false
+	}
+	pos := e.WindowPos()
+	chain := pm.menuChain()
+	if len(chain) == 0 {
+		return false
+	}
+	root := chain[len(chain)-1] // (opened by the pressed button)
+	// the menu under the pointer, if any, and the item there
+	idx := slices.IndexFunc(chain, func(s *Stage) bool {
+		return s.Scene != nil && pos.In(s.Scene.SceneGeom.Bounds())
+	})
+	var under *Stage
+	var item *Button
+	if idx >= 0 {
+		under = chain[idx]
+		item = menuButtonAt(under, pos)
+	}
+	// whether the submenu above the menu under the pointer is that of the item
+	subOpen := idx > 0 && item != nil && chain[idx-1].Context != nil && chain[idx-1].Context.AsWidget() == item.AsWidget()
+
+	if e.Type() == events.MouseDrag {
+		if under == nil {
+			return true
+		}
+		n := idx
+		if subOpen {
+			n--
+		}
+		for _, s := range chain[:n] {
+			pm.deleteStage(s)
+		}
+		chain[n].pressOpened = true
+		under.popupHandleEvent(mouseClone(e, events.MouseMove))
+		if item != nil && item.HasMenu() && !subOpen {
+			if st := item.openMenuStage(e); st != nil {
+				st.pressOpened = true
+			}
+		}
+		return true
+	}
+
+	for _, s := range chain {
+		s.pressOpened = false
+	}
+	// the context button gets the release, ending its press
+	// (a click on it if it is over it, which leaves the menu open)
+	var ctx *WidgetBase
+	if root.Context != nil {
+		ctx = root.Context.AsWidget()
+	}
+	if ctx != nil && ctx.Scene != nil && ctx.Scene.Stage != nil {
+		ctx.Scene.Stage.popupHandleEvent(mouseClone(e, events.MouseUp))
+	}
+	// a release where it was pressed is a click on the context button,
+	// even over the menu, which can overlap it
+	d := pos.Sub(e.WindowStartPos())
+	dragged := max(abs(d.X), abs(d.Y)) > TimingSettings.DragStartDistance
+	switch {
+	case !dragged:
+	case under != nil:
+		if item != nil && item.HasMenu() { // its submenu stays open
+			return true
+		}
+		for _, s := range chain[:idx] {
+			pm.deleteStage(s)
+		}
+		// a click on the item
+		under.popupHandleEvent(mouseClone(e, events.MouseDown))
+		under.popupHandleEvent(e)
+	case ctx == nil || !ctx.posInScBBox(pos.Sub(ctx.Scene.SceneGeom.Pos)):
+		top.closePopupAndBelow()
+	}
+	return true
+}
+
+// menuChain returns the menu stages at the top of the stack, from the top
+// one down: a menu and its submenus, skipping the stages that ignore
+// events, such as the tooltip of an item.
+func (pm *stages) menuChain() []*Stage {
+	var chain []*Stage
+	for i := pm.stack.Len() - 1; i >= 0; i-- {
+		s := pm.stack.ValueByIndex(i)
+		if s.ignoreEvents {
+			continue
+		}
+		if s.Type != MenuStage {
+			break
+		}
+		chain = append(chain, s)
+	}
+	return chain
+}
+
+// menuButtonAt returns the button of the given menu stage at the given
+// position in the window, or nil if there is none.
+func menuButtonAt(st *Stage, pos image.Point) *Button {
+	var bt *Button
+	st.Scene.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		if b := AsButton(cw); b != nil && pos.In(cwb.winBBox()) {
+			bt = b
+			return tree.Break
+		}
+		return tree.Continue
+	})
+	return bt
+}
+
+// parentMenuPress handles a mouse press on a menu below the given top menu
+// stage, in the menus of the same chain (such as the menu of a submenu),
+// returning whether it did: the menus above that menu are closed, and it
+// gets the press, so that its items can be clicked, such as to open
+// another submenu.
+func (pm *stages) parentMenuPress(top *Stage, e events.Event) bool {
+	if top.Type != MenuStage || e.Type() != events.MouseDown {
+		return false
+	}
+	pos := e.WindowPos()
+	chain := pm.menuChain()
+	for i := 1; i < len(chain); i++ {
+		s := chain[i]
+		if s.Scene == nil || !pos.In(s.Scene.SceneGeom.Bounds()) {
+			continue
+		}
+		for _, a := range chain[:i] {
+			pm.deleteStage(a)
+		}
+		s.popupHandleEvent(e)
+		return true
+	}
+	return false
+}
+
+// abs returns the absolute value of the given int.
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
+// mouseClone returns a copy of the given mouse event with the given type,
+// not handled, with the mouse button ([events.Event.NewFromClone] only
+// copies the base event).
+func mouseClone(e events.Event, typ events.Types) events.Event {
+	me, ok := e.(*events.Mouse)
+	if !ok {
+		return e.NewFromClone(typ)
+	}
+	c := *me
+	c.Typ = typ
+	c.ClearHandled()
+	return &c
 }

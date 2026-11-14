@@ -5,10 +5,13 @@
 package core
 
 import (
+	"image"
+	"slices"
 	"sync"
 	"testing"
 	"time"
 
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
 )
@@ -17,6 +20,7 @@ import (
 // stacks change, and raises a stage of another window in the event loop
 // of that window. This test is also for the race detector.
 func TestMenuSearchOtherWindow(t *testing.T) {
+	skipOnWeb(t, "there is one window")
 	a := NewBody("Window A")
 	a.runAndShowNewWindow()
 	b := NewBody("Window B")
@@ -111,4 +115,42 @@ func TestMenuSearchOtherWindow(t *testing.T) {
 		bd.Close()
 		rc.Unlock()
 	}
+}
+
+// TestMenuSearchItemDialog tests that a dialog opened by an item of a menu
+// found by the menu search, with the item as its context, is shown in the
+// window, although the menus of the search are not shown.
+func TestMenuSearchItemDialog(t *testing.T) {
+	b := NewBody("Window")
+	NewToolbar(b).Maker(func(p *tree.Plan) {
+		tree.Add(p, func(w *Button) {
+			w.SetText("Menu").SetMenu(func(m *Scene, pos image.Point) {
+				it := NewButton(m).SetText("Item")
+				it.OnClick(func(e events.Event) {
+					NewBody("Item dialog").RunDialog(it)
+				})
+			})
+		})
+	})
+	b.runAndShowNewWindow()
+	rw := b.Scene.RenderWindow()
+	b.AsyncLock()
+	var items []ChooserItem
+	addButtonItems(&items, b.Scene, b.Scene, "")
+	i := slices.IndexFunc(items, func(it ChooserItem) bool { return it.Text == "Menu > Item" })
+	if !assert.GreaterOrEqual(t, i, 0, "the item is found") {
+		b.AsyncUnlock()
+		return
+	}
+	items[i].Func()
+	b.AsyncUnlock()
+	b.waitNoEvents(rw)
+	b.AsyncLock()
+	assert.Equal(t, "Item dialog", rw.mains.top().Title)
+	b.AsyncUnlock()
+
+	rc := b.Scene.renderContext()
+	rc.Lock()
+	b.Close()
+	rc.Unlock()
 }

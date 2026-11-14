@@ -132,9 +132,11 @@ func (fm *Form) Init() {
 			return
 		}
 		s.Display = styles.Grid
+		s.Grow.X = 1 // with the values, such as text fields, which fill it
+		// a margin at the right, as the values (text fields) fill it
+		s.Padding.Right = s.Gap.X
 		if fm.SizeClass() == SizeCompact {
 			s.Columns = 1
-			s.Grow.X = 1 // with the values, which fill it
 		} else {
 			s.Columns = 2
 		}
@@ -255,6 +257,11 @@ func (fm *Form) Init() {
 					if _, isSwitch := w.(*Switch); fm.SizeClass() == SizeCompact && !fm.Inline && !isSwitch {
 						s.Grow.X = 1
 						s.Max.X.Zero() // such as the 40ch of a TextField
+					}
+					// text fields grow to the width of the form, with no max
+					// (the 40ch of a TextField), as the form is their space
+					if _, isText := w.(*TextField); isText {
+						s.Max.X.Zero()
 					}
 				})
 				doc, _ := types.GetDoc(f.value, f.parent, f.field, label)

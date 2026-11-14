@@ -178,9 +178,12 @@ func (fb *FuncButton) SetText(v string) *FuncButton {
 // given function or method value. For documentation information for
 // the function to be obtained, it must be added to [types].
 func (fb *FuncButton) SetFunc(fun any) *FuncButton {
-	fnm := types.FuncName(fun)
-	if fnm == "" {
+	if fun == nil || reflect.ValueOf(fun).IsNil() {
 		return fb.SetText("None")
+	}
+	fnm := types.FuncName(fun)
+	if fnm == "" { // (as a closure on the web, compiled by goscript)
+		fnm = "reflect.makeFuncStub" // an anonymous function, as in interpreters
 	}
 	fnm = strings.ReplaceAll(fnm, "[...]", "") // remove any labeling for generics
 	// the "-fm" suffix indicates that it is a method

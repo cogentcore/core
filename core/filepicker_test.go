@@ -28,6 +28,7 @@ func TestFilePicker(t *testing.T) {
 // TestFilePickerSort tests that the files of a directory are in its sort
 // order (see [dirsort.For]), and that sorting them by a column sets it.
 func TestFilePickerSort(t *testing.T) {
+	skipOnWeb(t, "uses temporary directories of the operating system")
 	dir := t.TempDir()
 	t0 := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 	for i, f := range []struct {
@@ -68,6 +69,7 @@ func TestFilePickerSort(t *testing.T) {
 }
 
 func TestFilePickerWatch(t *testing.T) {
+	skipOnWeb(t, "watches the files of the operating system")
 	dir := t.TempDir()
 	os.WriteFile(filepath.Join(dir, "a.txt"), []byte("a\n"), 0644)
 	b := NewBody()

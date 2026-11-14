@@ -5,11 +5,16 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/iox/tomlx"
 )
+
+// errNoConfigFile is returned (wrapped) by [openWithIncludes] when the
+// config file is not found, which is not an error for default config files.
+var errNoConfigFile = errors.New("no config file found")
 
 // openWithIncludes reads the config struct from the given config file
 // using the given options, looking on [Options.IncludePaths] for the file.
@@ -20,7 +25,7 @@ import (
 func openWithIncludes(opts *Options, cfg any, file string) error {
 	files := fsx.FindFilesOnPaths(opts.IncludePaths, file)
 	if len(files) == 0 {
-		return fmt.Errorf("OpenWithIncludes: no files found for %q", file)
+		return fmt.Errorf("OpenWithIncludes: %w for %q", errNoConfigFile, file)
 	}
 	err := tomlx.OpenFiles(cfg, files...)
 	if err != nil {

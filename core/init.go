@@ -12,8 +12,7 @@ import (
 func init() {
 	system.HandleRecover = handleRecover
 	system.UpdateLogicalDPIScaleFunc = AppearanceSettings.updateLogicalDPI
-	TheApp.CogentCoreDataDir()            // ensure it exists
-	theWindowGeometrySaver.needToReload() // gets time stamp associated with open, so it doesn't re-open
+	TheApp.CogentCoreDataDir() // ensure it exists
 	theWindowGeometrySaver.open()
 	if TheApp.Platform() != system.Offscreen {
 		// the sort orders of directories are shared by all apps

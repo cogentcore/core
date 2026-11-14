@@ -11,7 +11,6 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/renderers/htmlcanvas"
 	"cogentcore.org/core/system/composer"
 	"golang.org/x/image/draw"
@@ -24,8 +23,9 @@ func grabRenderFrom(w Widget) *image.RGBA {
 	if wb.Geom.TotalBBox.Empty() { // the widget is offscreen
 		return nil
 	}
-	// todo: grab region from canvas!
-	imgRend := paint.NewImageRenderer(math32.FromPoint(wb.Scene.SceneGeom.Size))
+	// rendered by the browser, with its text, as in the canvas of the
+	// scene, rather than by rasterx, which has no fonts on the web (#1552)
+	imgRend := htmlcanvas.NewImage(math32.FromPoint(wb.Scene.SceneGeom.Size))
 	wb.RenderWidget()
 	rend := wb.Scene.Painter.RenderDone()
 	imgRend.Render(rend)
@@ -35,7 +35,12 @@ func grabRenderFrom(w Widget) *image.RGBA {
 	}
 	sz := wb.Geom.TotalBBox.Size()
 	img := image.NewRGBA(image.Rectangle{Max: sz})
-	draw.Draw(img, img.Bounds(), scimg, wb.Geom.TotalBBox.Min, draw.Src)
+	// over the background of the parent, as the widget is shown, where it
+	// does not render its own background
+	if pbg := wb.parentActualBackground(); pbg != nil {
+		draw.Draw(img, img.Bounds(), pbg, wb.Geom.TotalBBox.Min, draw.Src)
+	}
+	draw.Draw(img, img.Bounds(), scimg, wb.Geom.TotalBBox.Min, draw.Over)
 	return img
 }
 
@@ -60,4 +65,43 @@ func (ss *scrimSource) Draw(c composer.Composer) {
 
 func (w *renderWindow) fillInsets(c composer.Composer) {
 	// no-op
+}
+
+// windowImage returns an image of the given window, for the tests (see
+// [Body.RenderImage]), composited from the elements of its composer.
+func windowImage(rw *renderWindow) *image.RGBA {
+	cw, ok := rw.SystemWindow.Composer().(*composer.ComposerWeb)
+	if !ok {
+		return nil
+	}
+	return cw.Image(rw.SystemWindow.Size())
+}
+
+// testImageName returns the name of the test image of the given name in
+// testdata (see [Body.AssertRender]): in testdata/js on the web, as the
+// browser renders text and paths differently than on other platforms.
+func testImageName(name string) string {
+	return "js/" + name
+}
+
+// clearTestWindow closes the stages left in the window of the tests by
+// earlier tests (as dialogs, or windows that were not closed), so that a
+// test starts with an empty window, as elsewhere, where the window of a
+// test is closed with all of its stages, whereas on the web there is one
+// window, which stays.
+func clearTestWindow() {
+	cw := getCurrentRenderWindow()
+	if cw == nil {
+		return
+	}
+	rc := cw.renderContext()
+	rc.Lock()
+	defer rc.Unlock()
+	for range 100 { // (in case a stage does not close)
+		st := cw.mains.top()
+		if st == nil {
+			return
+		}
+		cw.mains.deleteStage(st) // (with its popups)
+	}
 }

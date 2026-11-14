@@ -149,7 +149,7 @@ func (sm *stages) deleteStageAndBelow(st *Stage) bool {
 		} else {
 			if s.Type == styp {
 				sm.stack.DeleteIndex(i, i+1)
-				st.delete()
+				s.delete()
 			}
 		}
 	}

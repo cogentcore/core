@@ -263,3 +263,35 @@ func TestTableRowButtonBackground(t *testing.T) {
 		}
 	})
 }
+
+// TestTableEmptyHeader tests that the header of an empty table has the
+// names of its fields, with their widths, as its cells are invisible,
+// and that of a table with rows the widths of its columns.
+func TestTableEmptyHeader(t *testing.T) {
+	imagex.UpdateTestImagesFor(t) // the image is not compared
+	b := NewBody()
+	var sl []language
+	tb := NewTable(b).SetSlice(&sl)
+	headWidth := func(fli int) float32 {
+		return AsWidget(tb.header.Child(2 * fli)).Geom.Size.Actual.Total.X
+	}
+	b.AssertRender(t, "table/empty-header", func() {
+		for fli := range 2 {
+			assert.Greater(t, headWidth(fli), float32(40), "the name of the field")
+		}
+		sl = append(sl, language{Name: "Go", Rating: 10})
+		tb.Update()
+	}, func() {
+		// (laid out with the row, which can be after the window has
+		// handled its events, as on a slower machine)
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		b.Scene.LayoutScene()
+		gap := tb.ListGrid.Styles.Gap.X.Dots
+		for fli := range 2 {
+			col := AsWidget(tb.ListGrid.Child(fli)).Geom.Size.Alloc.Total.X + gap
+			handle := AsWidget(tb.header.Child(2*fli + 1)).Geom.Size.Actual.Total.X
+			assert.Equal(t, col-handle, headWidth(fli), "the width of the column")
+		}
+	})
+}

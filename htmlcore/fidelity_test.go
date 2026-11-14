@@ -569,6 +569,10 @@ func chromeRender(tagged, dir, shot string, offline bool) (map[int]*fidBox, int,
 	return boxes, max(data.H, 50), viewport, nil
 }
 
+// coreRenderHook, if set, is called with the body of each page that
+// [coreRenderWidth] renders, after its layout (see TestRoundTrip).
+var coreRenderHook func(b *core.Body)
+
 // coreRenderWidth renders the HTML with htmlcore in a viewport of the given
 // width and height (for @media rules and vh lengths), returning the boxes of
 // the widgets of the elements with a data-fid attribute, the rendered image,
@@ -679,6 +683,9 @@ func coreRenderWidth(tagged, dir, baseURL string, width, height int, remote func
 			}
 			return tree.Continue
 		})
+		if coreRenderHook != nil {
+			coreRenderHook(b)
+		}
 	})
 	if img != nil && pageHeight > 0 && pageHeight < img.Bounds().Dy() {
 		img = img.SubImage(image.Rect(0, 0, img.Bounds().Dx(), pageHeight)).(*image.RGBA)

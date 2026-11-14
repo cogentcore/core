@@ -5,15 +5,12 @@
 package dirsort
 
 import (
-	"encoding/json"
-	"errors"
-	"io/fs"
-	"os"
 	"path/filepath"
 	"slices"
-	"strconv"
 	"sync"
 	"time"
+
+	"cogentcore.org/core/base/sharedfile"
 )
 
 // DataDir is the directory of the file of the sort orders that are [Set],
@@ -36,22 +33,13 @@ type entry struct {
 	Time int64
 }
 
-// store is the sort orders of the directories, as last read from the file
-// (or set), and the state of the file when it was read, to read it again
-// when another process changes it.
+// store is the sort orders of the directories, in the file shared by all
+// apps, which is read again when another process changes it.
 type store struct {
 	mu sync.Mutex
 
-	// dirs are the sort orders by directory.
-	dirs map[string]entry
-
-	// file is the path of the file that was read, which changes with
-	// [DataDir] (in tests).
-	file string
-
-	// modTime and size are those of the file when it was read.
-	modTime time.Time
-	size    int64
+	// file is the file of the sort orders by directory.
+	file sharedfile.File[map[string]entry]
 }
 
 // theStore is the store of the sort orders.
@@ -66,32 +54,11 @@ func (st *store) path() string {
 }
 
 // reload reads the file again if it changed since it was read (as another
-// process saved it), under the mutex.
+// process saved it), or if [DataDir] changed, under the mutex. A file that
+// is not valid is replaced when a sort order is set.
 func (st *store) reload() {
-	fn := st.path()
-	if fn == "" {
-		if st.dirs == nil {
-			st.dirs = map[string]entry{}
-		}
-		return
-	}
-	info, err := os.Stat(fn)
-	if err != nil {
-		if st.dirs == nil || st.file != fn {
-			st.dirs, st.file = map[string]entry{}, fn
-		}
-		return
-	}
-	if st.dirs != nil && st.file == fn && info.ModTime().Equal(st.modTime) && info.Size() == st.size {
-		return
-	}
-	dirs := map[string]entry{}
-	if b, err := os.ReadFile(fn); err == nil {
-		// a file that is not valid is replaced when one is set
-		json.Unmarshal(b, &dirs)
-	}
-	st.dirs, st.file = dirs, fn
-	st.modTime, st.size = info.ModTime(), info.Size()
+	st.file.Path = st.path()
+	st.file.Reload()
 }
 
 // get returns the sort order of the given (clean) directory.
@@ -99,7 +66,7 @@ func (st *store) get(dir string) (Sort, bool) {
 	st.mu.Lock()
 	defer st.mu.Unlock()
 	st.reload()
-	e, ok := st.dirs[dir]
+	e, ok := st.file.Data[dir]
 	return e.Sort, ok
 }
 
@@ -108,81 +75,31 @@ func (st *store) get(dir string) (Sort, bool) {
 func (st *store) set(dir string, s Sort) error {
 	st.mu.Lock()
 	defer st.mu.Unlock()
-	fn := st.path()
-	if fn == "" {
-		st.reload()
-		st.dirs[dir] = entry{Sort: s, Time: time.Now().Unix()}
-		return nil
-	}
-	unlock, err := lockFile(fn + ".lck")
-	if err != nil {
-		return err
-	}
-	defer unlock()
-	st.reload()
-	st.dirs[dir] = entry{Sort: s, Time: time.Now().Unix()}
-	st.prune()
-	b, err := json.MarshalIndent(st.dirs, "", "\t")
-	if err != nil {
-		return err
-	}
-	// written whole, then renamed, so that other processes never read
-	// a partial file
-	tmp := fn + ".tmp"
-	if err := os.WriteFile(tmp, b, 0644); err != nil {
-		return err
-	}
-	if err := os.Rename(tmp, fn); err != nil {
-		return err
-	}
-	if info, err := os.Stat(fn); err == nil {
-		st.modTime, st.size = info.ModTime(), info.Size()
-	}
-	return nil
+	st.file.Path = st.path()
+	return st.file.Update(func(dirs *map[string]entry) {
+		if *dirs == nil {
+			*dirs = map[string]entry{}
+		}
+		(*dirs)[dir] = entry{Sort: s, Time: time.Now().Unix()}
+		prune(*dirs)
+	})
 }
 
 // prune drops the sort orders set least recently beyond [MaxDirs].
-func (st *store) prune() {
-	if len(st.dirs) <= MaxDirs {
+func prune(dirs map[string]entry) {
+	if len(dirs) <= MaxDirs {
 		return
 	}
 	type dirTime struct {
 		dir  string
 		time int64
 	}
-	dts := make([]dirTime, 0, len(st.dirs))
-	for d, e := range st.dirs {
+	dts := make([]dirTime, 0, len(dirs))
+	for d, e := range dirs {
 		dts = append(dts, dirTime{d, e.Time})
 	}
 	slices.SortFunc(dts, func(a, b dirTime) int { return int(b.time - a.time) })
 	for _, dt := range dts[MaxDirs:] {
-		delete(st.dirs, dt.dir)
+		delete(dirs, dt.dir)
 	}
-}
-
-// lockStale is how long a lock file can be held before it is taken as
-// left by a process that ended while holding it.
-const lockStale = 2 * time.Second
-
-// lockFile locks the given lock file, by creating it (which only one
-// process can do), waiting for another process to remove it, or taking it
-// over when it is stale. It returns the function to unlock it.
-func lockFile(fn string) (unlock func(), err error) {
-	for range 100 {
-		f, err := os.OpenFile(fn, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0644)
-		if err == nil {
-			f.WriteString(strconv.FormatInt(time.Now().UnixNano(), 10))
-			f.Close()
-			return func() { os.Remove(fn) }, nil
-		}
-		if !errors.Is(err, fs.ErrExist) {
-			return nil, err
-		}
-		if info, err := os.Stat(fn); err == nil && time.Since(info.ModTime()) > lockStale {
-			os.Remove(fn)
-			continue
-		}
-		time.Sleep(20 * time.Millisecond)
-	}
-	return nil, errors.New("dirsort: could not lock " + fn)
 }

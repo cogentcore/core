@@ -57,6 +57,11 @@ type Button struct { //core:embedder
 	// if it is nil. The constructor function should add buttons
 	// to the Scene that it is passed. Position is mouse click position.
 	Menu func(m *Scene, pos image.Point) `json:"-" xml:"-"`
+
+	// menuPressed is whether the menu was opened by pressing the mouse
+	// button on the button, so that the click of releasing it on the
+	// button does not open it again.
+	menuPressed bool
 }
 
 // ButtonTypes is an enum containing the
@@ -173,7 +178,31 @@ func (bt *Button) Init() {
 	})
 
 	bt.SendClickOnEnter()
+	// on desktop platforms, the menu opens when the mouse button is
+	// pressed, so that it can be dragged to an item and released on it
+	// (see [Stage.pressOpened]); a click (releasing it on the button)
+	// leaves the menu open
+	bt.On(events.MouseDown, func(e events.Event) {
+		bt.menuPressed = false
+		if !bt.HasMenu() || e.MouseButton() != events.Left || TheApp.SystemPlatform().IsMobile() {
+			return
+		}
+		if st := bt.openMenuStage(e); st != nil {
+			st.pressOpened = true
+			bt.menuPressed = true
+		}
+	})
+	bt.On(events.MouseUp, func(e events.Event) {
+		if !bt.posInScBBox(e.Pos()) { // (no click to come)
+			bt.menuPressed = false
+		}
+	})
 	bt.OnClick(func(e events.Event) {
+		if bt.menuPressed {
+			bt.menuPressed = false
+			e.SetHandled()
+			return
+		}
 		if bt.openMenu(e) {
 			e.SetHandled()
 		}
@@ -304,8 +333,14 @@ func (bt *Button) HasMenu() bool {
 // openMenu opens any menu associated with this element.
 // It returns whether any menu was opened.
 func (bt *Button) openMenu(e events.Event) bool {
+	return bt.openMenuStage(e) != nil
+}
+
+// openMenuStage opens any menu associated with this element,
+// returning its stage, or nil if there is none.
+func (bt *Button) openMenuStage(e events.Event) *Stage {
 	if !bt.HasMenu() {
-		return false
+		return nil
 	}
 	pos := bt.ContextMenuPos(e)
 	if indic := bt.ChildByName("indicator", 3); indic != nil {
@@ -313,10 +348,10 @@ func (bt *Button) openMenu(e events.Event) bool {
 	}
 	m := NewMenu(bt.Menu, bt.This.(Widget), pos)
 	if m == nil {
-		return false
+		return nil
 	}
 	m.Run()
-	return true
+	return m
 }
 
 func (bt *Button) handleClickDismissMenu() {

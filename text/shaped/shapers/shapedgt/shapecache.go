@@ -456,10 +456,22 @@ func (sh *Shaper) wrapOutputs(outs []shaping.Output, txt []rune, cfg shaping.Wra
 	lines, truncated := sh.wrapParagraph(cfg, maxSize, txt, outs, seg)
 	if adjust != nil {
 		for _, ln := range lines {
+			// the truncator (…) that ends a line that is cut is not of the
+			// text, whose runes adjust measures (its glyphs indexed it out
+			// of range, panicking on the web)
+			if n := len(ln); truncated > 0 && n > 0 && isTruncator(ln[n-1], cfg.Truncator) {
+				ln = ln[:n-1]
+			}
 			adjust(ln)
 		}
 	}
 	return lines, truncated
+}
+
+// isTruncator returns whether the given output is the given truncator,
+// which the line wrapper adds to the end of a line that is cut.
+func isTruncator(o, truncator shaping.Output) bool {
+	return len(o.Glyphs) > 0 && len(truncator.Glyphs) > 0 && &o.Glyphs[0] == &truncator.Glyphs[0]
 }
 
 // segmenter returns the segmenter of the entry, initialized with its text

@@ -176,6 +176,7 @@ func TestTextRichTextRebuild(t *testing.T) {
 // handler, as it does not wait on the other windows: each window is rebuilt
 // by its own event loop. This test is also for the race detector.
 func TestUpdateAllOtherWindow(t *testing.T) {
+	skipOnWeb(t, "there is one window")
 	a := NewBody()
 	NewText(a).SetText("Settings")
 	a.runAndShowNewWindow()
