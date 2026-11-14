@@ -1229,23 +1229,11 @@ func (r *resolver) margins() {
 		// or a panel of a page, as in content), and no more
 		s.Grow.X, s.Shrink.X = 1, 1
 	}
-	spc := core.AppearanceSettings.Spacing / 100
-	if spc <= 0 {
-		spc = 1
-	}
 	top, bottom := dots(st.margin[0]), dots(st.margin[2])
 	bs.marginTop, bs.marginBottom = top, bottom
 	c.collapseMargins(wb, s, ps, bs, pbs, pad, bw, &top, &bottom)
-	s.Margin.Top = units.Dot(top / spc)
-	s.Margin.Bottom = units.Dot(bottom / spc)
-	// The spacing of the page is that of its CSS, not scaled by the
-	// Spacing setting, which applies to the spacing of Cogent Core widgets
-	// (see core.WidgetBase.styleSettings, which multiplies by it), for all
-	// of the widgets of the page: its images, svgs and form controls too.
-	for _, v := range []*units.Value{&s.Margin.Left, &s.Margin.Right, &s.Padding.Top, &s.Padding.Right,
-		&s.Padding.Bottom, &s.Padding.Left, &s.Gap.X, &s.Gap.Y} {
-		v.Value /= spc
-	}
+	s.Margin.Top = units.Dot(top)
+	s.Margin.Bottom = units.Dot(bottom)
 }
 
 // sideDots returns the given sides in dots, using the given function.

@@ -132,21 +132,24 @@ func (wb *WidgetBase) resetStyleSettings() {
 	wb.Styles.Font.Size.Value /= fsz
 }
 
-// styleSettings applies [AppearanceSettingsData.Spacing]
-// and [AppearanceSettingsData.FontSize] to the style values for the widget.
+// styleSettings applies [AppearanceSettingsData.Spacing] (unless
+// [styles.Style.FixedSpacing]) and [AppearanceSettingsData.FontSize]
+// to the style values for the widget.
 func (wb *WidgetBase) styleSettings() {
 	s := &wb.Styles
-	spc := AppearanceSettings.Spacing / 100
-	s.Margin.Top.Value *= spc
-	s.Margin.Right.Value *= spc
-	s.Margin.Bottom.Value *= spc
-	s.Margin.Left.Value *= spc
-	s.Padding.Top.Value *= spc
-	s.Padding.Right.Value *= spc
-	s.Padding.Bottom.Value *= spc
-	s.Padding.Left.Value *= spc
-	s.Gap.X.Value *= spc
-	s.Gap.Y.Value *= spc
+	if !s.FixedSpacing {
+		spc := AppearanceSettings.Spacing / 100
+		s.Margin.Top.Value *= spc
+		s.Margin.Right.Value *= spc
+		s.Margin.Bottom.Value *= spc
+		s.Margin.Left.Value *= spc
+		s.Padding.Top.Value *= spc
+		s.Padding.Right.Value *= spc
+		s.Padding.Bottom.Value *= spc
+		s.Padding.Left.Value *= spc
+		s.Gap.X.Value *= spc
+		s.Gap.Y.Value *= spc
+	}
 
 	fsz := AppearanceSettings.FontSize / 100
 	s.Font.Size.Value *= fsz

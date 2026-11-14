@@ -290,6 +290,10 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 			st.display = c.displayOf(node)
 		}
 		bs.noPointer = s.Abilities.HasFlag(abilities.NoPointerEvents) // (as of pointer-events)
+		// the spacing of the page is that of its CSS, not scaled by the
+		// Spacing setting, which applies to Cogent Core widgets (for all of
+		// the widgets of the page: its images, svgs and form controls too)
+		s.FixedSpacing = true
 		c.resolveCSS(wb, node, st, s, ps, bs, pbs)
 		if node != nil && node.Type == html.ElementNode && st.display == "inline-block" && c.isInlineBox(node) {
 			if d := strings.TrimSpace(c.declaration(node, "display")); d == "" || d == "inline" {
