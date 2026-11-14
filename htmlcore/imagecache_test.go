@@ -9,13 +9,16 @@ import (
 	"image"
 	"image/color"
 	"image/png"
+	"io"
 	"net/http"
+	"sync"
 	"testing"
 	"testing/fstest"
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // testPNG returns a PNG of a 4x3 image filled with the given color.
@@ -161,4 +164,38 @@ func TestImageCacheFailed(t *testing.T) {
 		assert.NoError(t, ReadHTMLString(ctx, core.NewBody(), `<img src="bad.png">`))
 	}
 	assert.Equal(t, map[string]int{"/bad.png": 1}, gets)
+}
+
+// TestImageCacheDecode tests that images decoded before a page is read
+// (see [ImageCache.Decode]), in parallel, are those that reading it finds,
+// without getting and decoding them again, and that
+// data that is not an image is recorded as failed.
+func TestImageCacheDecode(t *testing.T) {
+	var buf bytes.Buffer
+	require.NoError(t, png.Encode(&buf, image.NewRGBA(image.Rect(0, 0, 40, 30))))
+	cache := NewImageCache(1 << 20)
+	urls := []string{"https://example.com/a.png", "https://example.com/b.png", "https://example.com/c.png"}
+	var wg sync.WaitGroup
+	for _, u := range urls {
+		wg.Add(1)
+		go func() { defer wg.Done(); cache.Decode(u, buf.Bytes()) }()
+	}
+	cache.Decode("https://example.com/bad.png", []byte("not an image"))
+	wg.Wait()
+	ctx := NewContext()
+	ctx.PageURL = "https://example.com/"
+	ctx.ImageCache = cache
+	gets := 0
+	ctx.GetURL = func(u string) (*http.Response, error) {
+		gets++
+		return &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader(buf.Bytes()))}, nil
+	}
+	for _, u := range urls {
+		im, err := readImage(ctx, u)
+		require.NoError(t, err)
+		require.NotNil(t, im)
+		assert.Equal(t, 40, im.Bounds().Dx())
+	}
+	assert.Equal(t, 0, gets, "decoded already, not gotten again")
+	assert.True(t, cache.Failed("https://example.com/bad.png"))
 }

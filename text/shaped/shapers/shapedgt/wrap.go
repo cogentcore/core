@@ -352,8 +352,13 @@ func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text,
 			lby := ln.Bounds.Size().Y // the result at this point is centered with this height
 			// which includes the natural line height property of the font itself.
 			lpd := 0.5 * (maxLHt - lby) // half of diff
+			// the extra height of the line is half above its text and half
+			// below it, as the half-leading of CSS, the first line too (as
+			// the labels of buttons with a line height of their height,
+			// which were at their tops)
+			ourOff.Y += lpd
 			if li > 0 {
-				ourOff.Y += (lpd + (maxLHt - lns.LineHeight))
+				ourOff.Y += maxLHt - lns.LineHeight
 			}
 			ln.Bounds.Min.Y -= lpd
 			ln.Bounds.Max.Y += lpd

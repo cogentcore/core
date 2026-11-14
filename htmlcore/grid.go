@@ -341,6 +341,35 @@ func (c *Context) spanStyle(env *lengthEnv, kn *html.Node, s *styles.Style, trac
 	s.Grow.X, s.Shrink.X = 0, 0
 }
 
+// noAutoMin returns whether the given child of a grid has no automatic
+// minimum width, as in CSS: a min-width of 0, or an overflow that makes it
+// a scroll container, so that its content does not widen the flexible
+// tracks that it is in (as the cells of the top stories of nytimes.com,
+// of min-width: 0 in 14 and 6 of 20 tracks of 1fr, whose carousels of
+// stories, as wide as all of them, made the first wider than the page).
+func (c *Context) noAutoMin(kn *html.Node) bool {
+	if kn == nil {
+		return false
+	}
+	if mw := strings.TrimSpace(c.declaration(kn, "min-width")); mw == "0" || mw == "0px" {
+		return true
+	}
+	ov := strings.TrimSpace(c.declaration(kn, "overflow-x"))
+	if ov == "" {
+		ov, _, _ = strings.Cut(strings.TrimSpace(c.declaration(kn, "overflow")), " ")
+	}
+	return ov == "hidden" || ov == "auto" || ov == "scroll"
+}
+
+// containFlexible makes the content of a child in the given flexible
+// tracks not size them (see [Context.noAutoMin]): the tracks share the
+// width by their fr, and it overflows them.
+func containFlexible(s *styles.Style, tracks []string, noMin bool) {
+	if noMin && s.Contain == styles.ContainNone && !slices.ContainsFunc(tracks, func(t string) bool { return !strings.HasSuffix(t, "fr") }) {
+		s.Contain = styles.ContainInlineSize
+	}
+}
+
 // gridTrackStyle sets the style of a child in a grid column with the given
 // track size: a length is its width, a flexible (fr) track grows by its
 // factor (and minmax(0, length) grows up to the length), and the other
@@ -846,12 +875,16 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 			i := col
 			kn, _ := kw.AsWidget().Property("node").(*html.Node)
 			span := spanned(col, cs)
+			noMin := c.noAutoMin(kn)
 			kw.AsWidget().FinalStyler(func(s *styles.Style) {
 				if cs > 1 {
 					s.ColSpan = cs
 					c.spanStyle(env, kn, s, span, gap)
 				} else if len(tracks) > 0 {
 					gridTrackStyle(env, s, trackOf(i), flexible)
+				}
+				if len(tracks) > 0 {
+					containFlexible(s, span, noMin)
 				}
 				if rs > 1 {
 					s.RowSpan = rs
@@ -907,6 +940,7 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 				track := trackOf(col)
 				kn, _ := it.w.AsWidget().Property("node").(*html.Node)
 				span := spanned(col, a.cols)
+				noMin := c.noAutoMin(kn)
 				it.w.AsWidget().FinalStyler(func(s *styles.Style) {
 					s.ColSpan, s.RowSpan = a.cols, a.rows
 					if a.cols == 1 {
@@ -914,6 +948,7 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 					} else {
 						c.spanStyle(env, kn, s, span, gap)
 					}
+					containFlexible(s, span, noMin)
 				})
 				continue
 			}

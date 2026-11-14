@@ -18,6 +18,7 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/tree"
 )
 
 // Player is a player of a video that [Controls] control: a [Video], or
@@ -79,7 +80,8 @@ const (
 // controls) plays and pauses the video, and gives it the focus, for the
 // keys of players (see [Controls.handleKey]). The target must be rendered as a
 // whole when the controls change (see [Video.RenderGroup]), as they are
-// partly transparent over the video.
+// partly transparent over the video. The controls of an audio player (see
+// [Controls.SetAudio]) are one row that fills the target, always shown.
 type Controls struct { //types:add
 	core.Frame
 
@@ -98,8 +100,29 @@ type Controls struct { //types:add
 	// shownAt is when the controls were last shown by the mouse moving.
 	shownAt time.Time
 
+	// skips are the buttons that skip back and forward 10 seconds.
+	skips []*core.Button
+
 	// second is the second of the time that is shown.
 	second int
+
+	// audio is whether the controls are those of an audio player
+	// (see [Controls.SetAudio]).
+	audio bool
+}
+
+// SetAudio makes the controls those of an audio player, as of the audio
+// elements of browsers: one row that fills the target (as a bar of the
+// height of the row), always shown, with the play button, the time, the
+// position, and the volume, without the skip buttons; the right and left
+// arrows skip 5 seconds. It is called before [Controls.SetPlayer].
+func (c *Controls) SetAudio() *Controls {
+	c.audio = true
+	row := c.play.Parent
+	for _, w := range []core.Widget{c.time, c.position, c.mute, c.volume} {
+		tree.MoveToParent(w, row)
+	}
+	return c
 }
 
 // SetPlayer sets the player of the controls and the widget of its video
@@ -163,12 +186,21 @@ func (c *Controls) Init() {
 		s.Color = white
 		s.Padding.Set(units.Dp(4), units.Dp(8))
 		s.Gap.Zero()
+		if c.audio { // (the whole box, with the row in its middle)
+			s.Inset.Top, s.InsetSet.Top = units.Zero(), true
+			s.Justify.Content = styles.Center
+		}
 	})
 
 	// the position, which seeks when it is changed
 	c.position = core.NewSlider(c).SetMin(0).SetStep(1)
 	c.position.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
+	})
+	c.position.FinalStyler(func(s *styles.Style) {
+		if c.audio { // (in the row, after the 20em of sliders)
+			s.Min.X.Dp(40)
+		}
 	})
 	c.position.OnChange(func(e events.Event) {
 		c.player.Seek(time.Duration(c.position.Value * float32(time.Second)))
@@ -195,14 +227,26 @@ func (c *Controls) Init() {
 		})
 		return bt
 	}
-	button(icons.Replay10, "Back 10 seconds", func() { c.player.SkipBy(-10 * time.Second) })
+	back := button(icons.Replay10, "Back 10 seconds", func() { c.player.SkipBy(-10 * time.Second) })
 	c.play = button(icons.PlayArrow, "Play", func() { c.player.TogglePlay() })
-	button(icons.Forward10, "Forward 10 seconds", func() { c.player.SkipBy(10 * time.Second) })
+	forward := button(icons.Forward10, "Forward 10 seconds", func() { c.player.SkipBy(10 * time.Second) })
+	c.skips = []*core.Button{back, forward}
+	for _, bt := range c.skips {
+		bt.Styler(func(s *styles.Style) {
+			if c.audio {
+				s.Display = styles.DisplayNone
+			}
+		})
+	}
 	c.mute = button(icons.VolumeUp, "Mute", func() { c.player.SetMuted(!c.player.IsMuted()) })
 	c.volume = core.NewSlider(row).SetMin(0).SetMax(1).SetStep(0.05)
 	c.volume.FinalStyler(func(s *styles.Style) { // (after the 20em of sliders)
-		s.Min.X.Dp(80)
-		s.Max.X.Dp(80)
+		w := float32(80)
+		if c.audio {
+			w = 50
+		}
+		s.Min.X.Dp(w)
+		s.Max.X.Dp(w)
 		s.Grow.Set(0, 0)
 	})
 	setVolume := func(e events.Event) {
@@ -224,17 +268,29 @@ func (c *Controls) Init() {
 	c.time.Styler(func(s *styles.Style) {
 		s.Color = white
 		s.Margin.Left.Dp(8)
+		if c.audio {
+			s.Margin.Right.Dp(4)
+		}
 	})
 }
 
-// controlsBackground is the partly transparent background of the controls.
-var controlsBackground = colors.Uniform(color.RGBA{0, 0, 0, 150})
+// controlsBackground is the partly transparent background of the controls,
+// and audioBackground is the background of those of an audio player.
+var (
+	controlsBackground = colors.Uniform(color.RGBA{0, 0, 0, 150})
+	audioBackground    = colors.Uniform(color.RGBA{48, 48, 48, 255})
+)
 
 // Render renders the partly transparent background of the controls over
-// the video (see [Controls.ChildBackground]).
+// the video (see [Controls.ChildBackground]), or the background of those of
+// an audio player.
 func (c *Controls) Render() {
 	c.Frame.Render()
-	c.Scene.Painter.FillBox(c.Geom.Pos.Total, c.Geom.Size.Actual.Total, controlsBackground)
+	bg := controlsBackground
+	if c.audio {
+		bg = audioBackground
+	}
+	c.Scene.Painter.FillBox(c.Geom.Pos.Total, c.Geom.Size.Actual.Total, bg)
 }
 
 // ChildBackground returns transparent: the widgets of the controls are over
@@ -262,9 +318,17 @@ func (c *Controls) handleKey(e events.Event) bool {
 	case key.CodeSpacebar:
 		c.player.TogglePlay()
 	case key.CodeRightArrow:
-		c.player.StepFrame(1)
+		if c.audio {
+			c.player.SkipBy(5 * time.Second)
+		} else {
+			c.player.StepFrame(1)
+		}
 	case key.CodeLeftArrow:
-		c.player.StepFrame(-1)
+		if c.audio {
+			c.player.SkipBy(-5 * time.Second)
+		} else {
+			c.player.StepFrame(-1)
+		}
 	case key.CodeUpArrow:
 		c.player.SkipBy(10 * time.Second)
 	case key.CodeDownArrow:
@@ -298,6 +362,8 @@ func (c *Controls) Refresh() {
 	}
 	c.volume.SetValue(p.Volume())
 	c.position.SetMax(float32(max(p.Duration(), time.Second).Seconds()))
+	// (a live stream, of an unknown duration, is not seeked)
+	c.position.SetEnabled(p.Duration() > 0)
 	c.second = -1 // (the time is shown again)
 	c.SetTime(p.CurrentTime())
 	c.play.Update()
@@ -326,7 +392,11 @@ func (c *Controls) SetTime(t time.Duration) {
 	if !c.position.StateIs(states.Sliding) {
 		c.position.SetValue(float32(t.Seconds()))
 	}
-	c.time.SetText(formatTime(t) + " / " + formatTime(c.player.Duration())).UpdateRender()
+	text := formatTime(t) // (only the time of a live stream)
+	if d := c.player.Duration(); d > 0 {
+		text += " / " + formatTime(d)
+	}
+	c.time.SetText(text).UpdateRender()
 }
 
 // mouseMoved shows the controls as the mouse moves over the bottom of the
@@ -384,6 +454,9 @@ func (c *Controls) focusTarget() {
 
 // SetShown shows or hides the controls.
 func (c *Controls) SetShown(shown bool) {
+	if c.audio && !shown {
+		return // (always shown)
+	}
 	if c.This == nil || c.StateIs(states.Invisible) == !shown {
 		return
 	}

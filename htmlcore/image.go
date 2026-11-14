@@ -24,6 +24,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/units"
 	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 )
 
 // handleSVG handles an svg element, which is rendered by an SVG widget.
@@ -206,7 +207,50 @@ func handleImage(ctx *Context, tag string) core.Widget {
 	n := ctx.Node
 	src, density := ctx.imageSource(n) // of its srcset or picture, or its src
 	if src == "" {
-		return nil // an image without a source is not shown
+		if n.DataAtom != atom.Img {
+			return nil // an image without a source is not shown
+		}
+		// an img without a source (as a lazy image, whose source its
+		// scripts set as it is shown) has an image widget without an
+		// image, which shows nothing, in which its image is set when its
+		// source is (see Context.imageChange)
+		img := New[core.Image](ctx)
+		img.Styler(func(s *styles.Style) { s.ObjectFit = styles.FitFill })
+		img.NaturalDp = true
+		img.SetTooltip(GetAttr(n, "alt"))
+		if fsrc, fdensity := ctx.noscriptImage(n); fsrc != "" {
+			// the image of its noscript, until its scripts set its source
+			// (as the many lazy images of nytimes.com, which were gray
+			// boxes until its scripts set them, 20-50s later), gotten in
+			// the background if it can be (see Context.AsyncImages), as it
+			// is gotten before the page is read (see Context.PrefetchURLs)
+			img.Density = fdensity
+			img.SetProperty("src", fsrc)
+			if ctx.AsyncImages == nil {
+				if im, err := readImage(ctx, fsrc); err == nil {
+					img.SetImage(im)
+				}
+				return img
+			}
+			async := ctx.AsyncImages
+			go func() {
+				im, err := readImage(ctx, fsrc)
+				if err != nil || im == nil {
+					return
+				}
+				async(func() {
+					if img.Scene == nil || img.Parent == nil || img.Image != nil {
+						return // (not in the page, or its scripts set its image)
+					}
+					if s, _ := img.Property("src").(string); s != fsrc {
+						return // (its scripts set its source)
+					}
+					img.SetImage(im)
+					img.NeedsLayout()
+				})
+			}()
+		}
+		return img
 	}
 	alt := GetAttr(n, "alt")
 	isSVG := strings.HasSuffix(src, ".svg") || strings.HasPrefix(src, "data:image/svg")
@@ -358,6 +402,7 @@ func readImage(ctx *Context, src string) (image.Image, error) {
 			return nil, err
 		}
 		key = u.String()
+		cache.waitDecoding(key) // (as it is gotten before the page is read)
 		if im := cache.Get(key); im != nil {
 			return im, nil
 		}

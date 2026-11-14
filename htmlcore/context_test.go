@@ -1367,6 +1367,44 @@ func TestGridMinmaxFrMin(t *testing.T) {
 		})
 }
 
+// TestGridFrNoAutoMin tests that the content of a child of a grid without
+// an automatic minimum width (min-width: 0, or overflow: hidden) does not
+// widen the fr tracks that it spans, which share the width by their fr (as
+// the top stories of nytimes.com, in 14 and 6 of 20 tracks of 1fr, whose
+// carousel made the first wider, over the second), and that the content
+// of one with it does.
+func TestGridFrNoAutoMin(t *testing.T) {
+	for _, cell := range []string{"min-width: 0", "overflow: hidden"} {
+		widgetsByID(t, `<div id="g" style="display: grid; grid-template-columns: repeat(20, 1fr); column-gap: 33px; width: 1000px">`+
+			`<div id="a" style="grid-column: span 14; `+cell+`"><div style="width: 900px; height: 10px"></div></div>`+
+			`<div id="b" style="grid-column: span 6; `+cell+`">right</div></div>`,
+			func(ws map[string]*core.WidgetBase, dp float32) {
+				track := float32(1000-19*33) / 20
+				assert.InDelta(t, (14*track+13*33)*dp, ws["a"].Geom.Size.Actual.Total.X, float64(3*dp), cell)
+				assert.InDelta(t, (6*track+5*33)*dp, ws["b"].Geom.Size.Actual.Total.X, float64(3*dp), cell)
+			})
+	}
+	widgetsByID(t, `<div id="g" style="display: grid; grid-template-columns: repeat(20, 1fr); column-gap: 33px; width: 1000px">`+
+		`<div id="a" style="grid-column: span 14"><div style="width: 900px; height: 10px"></div></div>`+
+		`<div id="b" style="grid-column: span 6">right</div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.GreaterOrEqual(t, ws["a"].Geom.Size.Actual.Total.X, 900*dp-1, "the content widens it")
+		})
+}
+
+// TestGridLegacyGap tests that the legacy names of the gaps of grids
+// (grid-column-gap, grid-row-gap and grid-gap) are those of the standard
+// ones (as the grids of nytimes.com, whose columns had no gaps).
+func TestGridLegacyGap(t *testing.T) {
+	for _, gap := range []string{"grid-column-gap: 30px", "grid-gap: 10px 30px", "--x: initial; grid-column-gap: var(--x, 30px)"} {
+		widgetsByID(t, `<div style="display: grid; grid-template-columns: repeat(4, 1fr); width: 400px; `+gap+`"><div id="a">a</div><div id="b">b</div></div>`,
+			func(ws map[string]*core.WidgetBase, dp float32) {
+				a, b := ws["a"].Geom, ws["b"].Geom
+				assert.InDelta(t, 30*dp, b.Pos.Total.X-a.Pos.Total.X-a.Size.Actual.Total.X, float64(dp), gap)
+			})
+	}
+}
+
 // TestGridRowAfterFixedHeight tests that a row of a grid is after the
 // height of the row before it, when its last cell has a smaller fixed
 // height (as the actions of the height of a line of the page headers of
@@ -1449,4 +1487,77 @@ func TestDisplayUnset(t *testing.T) {
 			assert.Less(t, ws["t"].Geom.Size.Actual.Total.X, 200*dp, "the ticker is narrow")
 			assert.Greater(t, ws["t"].Geom.Pos.Total.X, ws["bar"].Geom.Pos.Total.X+800*dp, "at the end of the row")
 		})
+}
+
+// TestInvalidVarUnset tests that a declaration of a var() that has no value
+// (invalid at computed-value time) is unset, as in CSS: the font and color
+// of the parent (inherited) and no margin (initial), not those of the
+// heading (as the rules of reddit.com, of a font of a variable of a theme
+// that it did not use, or of one that had no size, which were as large as
+// headings).
+func TestInvalidVarUnset(t *testing.T) {
+	for _, rule := range []string{"h2 { font: var(--missing) }", "h2 { font: var(--a) } :root { --a: var(--b) }",
+		"h2 { font: var(--a) } :root { --a: normal var(--sans) } :root { --sans: Arial, sans-serif }",
+		"h2 { font-size: var(--missing); font-weight: var(--missing); margin: var(--missing) }"} {
+		widgetsByID(t, `<style>`+rule+`</style><div style="font-size: 14px; font-weight: 400"><h2 id="h">rule</h2></div>`,
+			func(ws map[string]*core.WidgetBase, dp float32) {
+				s := &ws["h"].Styles
+				assert.InDelta(t, 14*dp, s.Font.Size.Dots, 0.5, rule)
+				assert.Equal(t, rich.Normal, s.Font.Weight, rule)
+			})
+	}
+	widgetsByID(t, `<style>h2 { margin: var(--missing) }</style><h2 id="h">rule</h2>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.Zero(t, ws["h"].Styles.Margin.Top.Dots)
+		})
+}
+
+// TestLineHeightHalfLeading tests that the text of a line that is taller
+// than its font is in the middle of it, with half of the extra height above
+// it, as the half-leading of CSS, in the first line too (as the labels of
+// the buttons of reddit.com, of a line height of their height, which were
+// at their tops).
+func TestLineHeightHalfLeading(t *testing.T) {
+	rows := func(lh string) (top, bottom int) {
+		b := core.NewBody()
+		b.Scene.Styler(func(s *styles.Style) { s.Padding.Zero() })
+		require.NoError(t, ReadHTMLString(NewContext(), b, `<body style="margin: 0"><div style="font: 14px sans-serif; line-height: `+lh+`">Sign Up</div></body>`))
+		img := b.RenderImage()
+		top, bottom = -1, -1
+		for y := range img.Bounds().Dy() {
+			for x := range img.Bounds().Dx() {
+				if c := img.RGBAAt(x, y); c.A > 200 && c.R < 100 && c.G < 100 && c.B < 100 {
+					if top < 0 {
+						top = y
+					}
+					bottom = y
+					break
+				}
+			}
+		}
+		return
+	}
+	t20, b20 := rows("20px")
+	t40, b40 := rows("40px")
+	assert.InDelta(t, t20+10, t40, 1.5, "half of the extra 20px is above the text")
+	assert.InDelta(t, b20+10, b40, 1.5)
+}
+
+// TestAcceptFor tests that requests of images, style sheets and scripts
+// accept what browsers accept for them, not pages (the image servers of
+// reddit.com sent pages that show images to requests that accept pages).
+func TestAcceptFor(t *testing.T) {
+	for u, want := range map[string]string{
+		"https://i.redd.it/a24lk9c16m1i1.jpeg":                        imageAcceptHeader,
+		"https://cf.preview.redd.it/x-v0-ab.png?width=1080&auto=webp": imageAcceptHeader,
+		"https://example.com/style.css?v=2":                           "text/css,*/*;q=0.1",
+		"https://example.com/app.js":                                  "*/*",
+		"https://www.reddit.com/r/ebikes/":                            acceptHeader,
+	} {
+		req, err := http.NewRequest(http.MethodGet, u, nil)
+		require.NoError(t, err)
+		SetRequestHeaders(req)
+		assert.Equal(t, want, req.Header.Get("Accept"), u)
+		assert.NotContains(t, req.Header.Get("Accept"), "avif", u)
+	}
 }

@@ -69,6 +69,10 @@ type blockState struct {
 	// which percentage heights of its children are relative to.
 	definiteHeight bool
 
+	// maxHeight is whether the element has a max-height, which the flex
+	// items of a column of it shrink to fit (see resolver.flexMaxColumn).
+	maxHeight bool
+
 	// openTop and openBottom are whether the margins of the first
 	// and last children collapse with those of the widget, when it
 	// has no padding or border there.
@@ -290,6 +294,10 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 			st.display = c.displayOf(node)
 		}
 		bs.noPointer = s.Abilities.HasFlag(abilities.NoPointerEvents) // (as of pointer-events)
+		// the spacing of the page is that of its CSS, not scaled by the
+		// Spacing setting, which applies to Cogent Core widgets (for all of
+		// the widgets of the page: its images, svgs and form controls too)
+		s.FixedSpacing = true
 		c.resolveCSS(wb, node, st, s, ps, bs, pbs)
 		if node != nil && node.Type == html.ElementNode && st.display == "inline-block" && c.isInlineBox(node) {
 			if d := strings.TrimSpace(c.declaration(node, "display")); d == "" || d == "inline" {
@@ -320,6 +328,15 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 			case "flex", "inline-flex", "grid", "inline-grid":
 				s.Justify.Content = styles.Start
 			default:
+				if s.Direction == styles.Column {
+					// the content of a button that is a block is in the
+					// middle of its height, as in browsers, and its text is
+					// aligned by its text-align (as the listen buttons of
+					// npr.org, of text-align: left, whose labels were at
+					// their tops)
+					s.Justify.Content = styles.Center
+					break
+				}
 				switch s.Text.Align {
 				case text.Center:
 					s.Justify.Content = styles.Center

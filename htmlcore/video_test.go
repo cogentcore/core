@@ -55,6 +55,33 @@ func TestVideoBox(t *testing.T) {
 	})
 }
 
+// TestAudioBox tests that an audio element with controls is a [VideoBox]
+// that is Audio, of 300 by 54 (or of the width of its CSS), with the URL of
+// its audio, and that one without controls is not displayed.
+func TestAudioBox(t *testing.T) {
+	src := `<div style="width: 800px"><p id="p1">before</p><audio id="a" src="a.mp3"></audio>` +
+		`<audio id="b" controls src="b.mp3">no audio</audio><br>` +
+		`<audio id="c" controls style="width: 100%"><source src="c.ogg" type="audio/ogg"><source src="c.mp3"></audio>` +
+		`<p id="p2">after</p></div>`
+	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
+		assert.Nil(t, ws["a"], "not displayed without controls")
+		size := func(id string) math32.Vector2 { return ws[id].Geom.Size.Actual.Total }
+		for _, id := range []string{"b", "c"} {
+			require.NotNil(t, ws[id], id)
+			vb, ok := ws[id].This.(*VideoBox)
+			require.True(t, ok, id)
+			assert.True(t, vb.Audio, id)
+			assert.Nil(t, vb.Image, id)
+			assert.Equal(t, 0, vb.NumChildren(), "its children are not shown")
+			assert.InDelta(t, 54*dp, size(id).Y, 3, id)
+		}
+		assert.InDelta(t, 300*dp, size("b").X, 3)
+		assert.InDelta(t, 800*dp, size("c").X, 3)
+		assert.Equal(t, "b.mp3", VideoSourceOf(ws["b"].This.(core.Widget)))
+		assert.Equal(t, "c.ogg", VideoSourceOf(ws["c"].This.(core.Widget)), "its first source")
+	})
+}
+
 func TestVideoSource(t *testing.T) {
 	ctx := NewContext()
 	ctx.PageURL = "https://example.com/dir/page.html"

@@ -64,7 +64,9 @@ func ReadDocument(ctx *Context, parent core.Widget, n *html.Node) error {
 	ctx.Title = ""
 	ctx.reading = true
 	defer func() { ctx.reading = false }()
-	return readHTMLNode(ctx, parent, n)
+	err := readHTMLNode(ctx, parent, n)
+	ctx.lockStylesOf(parent)
+	return err
 }
 
 // ReadHTMLString reads HTML from the given string and adds corresponding
@@ -103,6 +105,10 @@ func readHTMLNode(ctx *Context, parent core.Widget, n *html.Node) error {
 			n = last
 			continue
 		}
+		if ctx.keepRead[n] != nil {
+			keptPlaceholder(parent, n) // kept as it is (see Context.keptElements)
+			continue
+		}
 		readOneNode(ctx, parent, n)
 	}
 	return nil
@@ -123,6 +129,7 @@ func readOneNode(ctx *Context, parent core.Widget, n *html.Node) {
 			ctx.addStyleOrigin(ctx.Style, originAuthor)
 		}
 		restore := ctx.setCheckedAttrs(n)
+		keptMasks := ctx.keepAncestorMasks() // (as the rules are matched)
 		ctx.addStyleSheets(n)
 		ctx.deferMatch = false
 		if reuse && !ctx.reuseMatches(n, prev) {
@@ -132,6 +139,8 @@ func readOneNode(ctx *Context, parent core.Widget, n *html.Node) {
 			ctx.snapshot(n)
 		}
 		ctx.matchedRules = len(ctx.rules)
+		ctx.matchedPseudo = len(ctx.pseudoRules)
+		keptMasks()
 		restore()
 		ctx.rootFont = 0
 		ctx.rootFontSize() // of this document, while ctx.Node is it

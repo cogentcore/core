@@ -314,6 +314,10 @@ func (r *resolver) isVideo() bool {
 // known), or of its aspect when only its width or height is set.
 func (r *resolver) videoSize() {
 	st, s := r.st, r.s
+	if r.wb.Property("audio") == true {
+		r.audioSize()
+		return
+	}
 	size := r.wb.Property("video-size").(math32.Vector2)
 	if size.X <= 0 || size.Y <= 0 {
 		size = math32.Vec2(VideoDefaultWidth, VideoDefaultHeight)
@@ -328,6 +332,21 @@ func (r *resolver) videoSize() {
 	case st.width == nil && st.height.Unit == units.UnitDp:
 		s.Min.X = units.Dp(st.height.Value * s.AspectRatio)
 		s.Max.X, s.Grow.X = s.Min.X, 0
+	}
+}
+
+// audioSize sets the size of the box of an audio element with controls
+// (see handleAudio): [AudioDefaultWidth] by [AudioDefaultHeight], as in
+// browsers, unless its CSS sets them, without an aspect ratio.
+func (r *resolver) audioSize() {
+	st, s := r.st, r.s
+	if st.width == nil {
+		s.Min.X = units.Dp(AudioDefaultWidth)
+		s.Max.X, s.Grow.X = s.Min.X, 0
+	}
+	if st.height == nil {
+		s.Min.Y = units.Dp(AudioDefaultHeight)
+		s.Max.Y, s.Grow.Y = s.Min.Y, 0
 	}
 }
 
@@ -882,7 +901,12 @@ func (r *resolver) sizes() {
 		s.Grow.X = 0
 		_, isImage := wb.This.(*core.Image)
 		isImage = isImage || r.isIframe() // (replaced elements)
-		if st.width.Unit == units.UnitPw && !isImage {
+		if st.width.Unit == units.UnitPw && st.width.Value == 0 {
+			// A width of 0% is no width, not a Max of 0, which is no Max
+			// (as the bar of the other parties of the election results of
+			// nytimes.com, which took a share of the width of the bars).
+			s.Min.X, s.Max.X = units.Dot(0), units.Dot(0)
+		} else if st.width.Unit == units.UnitPw && !isImage {
 			// A percentage of the width of the parent fills that much
 			// of it, which as a minimum would make a parent that is as
 			// wide as its content grow without end.
@@ -1028,8 +1052,17 @@ func (r *resolver) sizes() {
 	// the viewport, which did not scroll).
 	flexHeight := r.flexDefiniteHeight()
 	bs.definiteHeight = st.height != nil || s.AspectRatio > 0 || insetHeight || flexHeight
+	// (a max-height of a length, or inherited, not a percentage, which is
+	// of no height in an element whose height is not definite)
+	bs.maxHeight = (st.maxHeight != nil && st.maxHeight.Unit != units.UnitPh) ||
+		(st.height == nil && s.Max.Y.Value > 0 && s.Max.Y.Unit != units.UnitPh)
+	if st.height == nil && st.maxHeight == nil && s.Overflow.Y != styles.OverflowVisible && r.flexMaxColumn() && r.ps.Max.Y.Value > 0 && r.ps.Max.Y.Unit != units.UnitPh {
+		// it is as high as its content up to the max-height of its column,
+		// and it shrinks in it to fit the others (see flexMaxColumn)
+		s.Max.Y = r.ps.Max.Y
+	}
 	if tag := wb.Property("tag"); tag == "body" || tag == "html" ||
-		(st.height == nil && st.maxHeight == nil && !insetHeight && !flexHeight && s.Overflow.Y != styles.OverflowVisible) {
+		(st.height == nil && st.maxHeight == nil && !insetHeight && !flexHeight && !r.flexMaxColumn() && s.Overflow.Y != styles.OverflowVisible) {
 		s.Overflow.Y = styles.OverflowVisible
 	}
 	if s.Position == styles.PositionAbsolute || s.Position == styles.PositionFixed {
@@ -1224,30 +1257,11 @@ func (r *resolver) margins() {
 		// or a panel of a page, as in content), and no more
 		s.Grow.X, s.Shrink.X = 1, 1
 	}
-	spc := core.AppearanceSettings.Spacing / 100
-	if spc <= 0 {
-		spc = 1
-	}
 	top, bottom := dots(st.margin[0]), dots(st.margin[2])
 	bs.marginTop, bs.marginBottom = top, bottom
 	c.collapseMargins(wb, s, ps, bs, pbs, pad, bw, &top, &bottom)
-	s.Margin.Top = units.Dot(top / spc)
-	s.Margin.Bottom = units.Dot(bottom / spc)
-	// The spacing of the page is that of its CSS, not scaled by the
-	// Spacing setting, which applies to the spacing of Cogent Core widgets
-	// (see core.WidgetBase.styleSettings, which multiplies by it).
-	if frameOf(wb.This) != nil || isTextWidget(wb) {
-		for _, v := range []*units.Value{&s.Margin.Left, &s.Margin.Right, &s.Padding.Top, &s.Padding.Right,
-			&s.Padding.Bottom, &s.Padding.Left, &s.Gap.X, &s.Gap.Y} {
-			v.Value /= spc
-		}
-	}
-}
-
-// isTextWidget returns whether the widget is a [core.Text].
-func isTextWidget(wb *core.WidgetBase) bool {
-	_, ok := wb.This.(*core.Text)
-	return ok
+	s.Margin.Top = units.Dot(top)
+	s.Margin.Bottom = units.Dot(bottom)
 }
 
 // sideDots returns the given sides in dots, using the given function.
@@ -1275,4 +1289,13 @@ func (r *resolver) flexDefiniteHeight() bool {
 		return st.flexGrow > 0
 	}
 	return false
+}
+
+// flexMaxColumn returns whether the element is a flex item of a column with
+// a max-height, which it shrinks in to fit (see core.Frame.shrinkColumnHeights),
+// so that its overflow scrolls (or clips) it, as in CSS (as the content of
+// the cookie dialog of reddit.com, above its buttons).
+func (r *resolver) flexMaxColumn() bool {
+	ps, pbs := r.ps, r.pbs
+	return ps != nil && pbs != nil && pbs.maxHeight && (pbs.display == "flex" || pbs.display == "inline-flex") && ps.Direction == styles.Column
 }

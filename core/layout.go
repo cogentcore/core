@@ -1663,6 +1663,7 @@ func (fr *Frame) SizeDownSetAllocs(iter int) {
 	} else {
 		fr.sizeDownAllocActual(iter) // set allocations as is
 	}
+	fr.shrinkColumnHeights()
 }
 
 // childSpace returns the content size that the frame allocates to its
@@ -1756,6 +1757,18 @@ func (fr *Frame) ManageOverflow(iter int, updateSize bool) bool {
 // sizeDownGrow grows the element sizes based on total extra and Grow
 func (fr *Frame) sizeDownGrow(iter int, extra math32.Vector2) bool {
 	redo := false
+	// The Max of a child relative to the size of this frame (a percentage
+	// or a calc of one), which its SizeUp could not know, is of the size
+	// allocated to this frame before its children grow, so that the width
+	// that one of them cannot take goes to the others (as the bars of the
+	// parties of the election results of nytimes.com, of 55% and 44%, which
+	// were halves of the width up to the 44%).
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		if relativeMax(&cwb.Styles) {
+			cwb.updateParentRelSizes()
+		}
+		return tree.Continue
+	})
 	if fr.Styles.Display == styles.Stacked {
 		redo = fr.sizeDownGrowStacked(iter, extra)
 	} else {
@@ -2425,6 +2438,64 @@ func (fr *Frame) sizeDownAllocActualCells(iter int) {
 		ksz.SetContentFromTotal(&ksz.Alloc)
 		return tree.Continue
 	})
+}
+
+// shrinkColumnHeights shrinks the heights allocated to the children of a
+// flex column that has a maximum height (as a max-height in CSS) whose
+// children are higher than it: those that scroll or clip their content
+// (whose minimum height is not that of their content, as in CSS) shrink in
+// proportion to their heights, down to their Min, so that the others fit
+// (as the content of the cookie dialog of reddit.com, which scrolls above
+// its buttons, which were below the dialog).
+func (fr *Frame) shrinkColumnHeights() {
+	s := &fr.Styles
+	if s.Display != styles.Flex || s.Direction != styles.Column || s.Wrap || s.Max.Y.Dots <= 0 {
+		return
+	}
+	sz := &fr.Geom.Size
+	avail := sz.Alloc.Content.Y - sz.InnerSpace.Y
+	used := float32(0)
+	var shrinks []*WidgetBase
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		used += cwb.Geom.Size.Alloc.Total.Y
+		if cwb.Styles.Overflow.Y != styles.OverflowVisible && cwb.Geom.Size.Alloc.Total.Y > cwb.Styles.Min.Y.Dots {
+			shrinks = append(shrinks, cwb)
+		}
+		return tree.Continue
+	})
+	deficit := used - avail
+	for range 4 { // (those at their Min do not shrink more)
+		if deficit <= 0.5 || len(shrinks) == 0 {
+			return
+		}
+		total := float32(0)
+		for _, cwb := range shrinks {
+			total += cwb.Geom.Size.Alloc.Total.Y
+		}
+		if total <= 0 {
+			return
+		}
+		var left []*WidgetBase
+		for _, cwb := range shrinks {
+			ksz := &cwb.Geom.Size
+			h := ksz.Alloc.Total.Y
+			nh := max(h-deficit*h/total, cwb.Styles.Min.Y.Dots)
+			ksz.Alloc.Total.Y = nh
+			ksz.SetContentFromTotal(&ksz.Alloc)
+			if ksz.Actual.Total.Y > nh { // (it scrolls or clips the rest)
+				ksz.Actual.Total.Y = nh
+				ksz.SetContentFromTotal(&ksz.Actual)
+			}
+			// (its content size, which its final size fits, up to this; it
+			// is that of its styles again at the next layout, see SizeUp)
+			ksz.Max.Y = ksz.Alloc.Content.Y
+			deficit -= h - nh
+			if nh > cwb.Styles.Min.Y.Dots {
+				left = append(left, cwb)
+			}
+		}
+		shrinks = left
+	}
 }
 
 func (fr *Frame) sizeDownAllocActualStacked(iter int) {
@@ -3365,4 +3436,16 @@ func (wb *WidgetBase) DirectRenderDrawBBoxes(srcFullBBox image.Rectangle) (destB
 		empty = true
 	}
 	return
+}
+
+// relativeMax returns whether the Max size of the given style is relative
+// to the size of the parent (a percentage of it, or a calc of one).
+func relativeMax(s *styles.Style) bool {
+	for d := math32.X; d <= math32.Y; d++ {
+		mx := s.Max.Dim(d)
+		if mx.Custom != nil || mx.Unit == units.UnitPw || mx.Unit == units.UnitPh {
+			return true
+		}
+	}
+	return false
 }

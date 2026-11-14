@@ -14,7 +14,9 @@ import (
 // Playback plays a [Media], independent of any widget: it calls OnFrame
 // with each video frame at its time, and plays the audio on the speaker.
 // A [Video] shows a playback; other widgets (as an image of a web page)
-// can show one too.
+// can show one too. Media with only audio (as an MP3 file or stream) is
+// timed by its audio played (see [Playback.OnTime]), also when there is
+// no speaker, when it is played silently at its rate.
 type Playback struct {
 
 	// Media is the media that is played.
@@ -38,6 +40,11 @@ type Playback struct {
 	// OnFrame is called with each video frame at the time to show it,
 	// in the goroutine of the playback.
 	OnFrame func(f Frame)
+
+	// OnTime is called, if set, with the current time of media that has
+	// only audio (no frames) as it plays, ten times a second, in the
+	// goroutine of the playback.
+	OnTime func(t time.Duration)
 
 	// OnEnd is called, if set, at the end of the media (unless Loop),
 	// in the goroutine of the playback.
@@ -98,13 +105,23 @@ func (p *Playback) playFrom(t time.Duration, paused bool) error {
 		p.pausedAt, p.resume = time.Now(), make(chan struct{})
 	}
 	p.mu.Unlock()
-	frames, samples, errs, err := p.start(t, done)
+	frames, samples, errs, a, err := p.start(t, done)
 	if err != nil {
 		p.Stop() // (not playing)
 		return err
 	}
-	go p.run(done, frames, samples, errs)
+	if p.audioOnly() {
+		go p.runAudio(done, t, a, errs)
+	} else {
+		go p.run(done, frames, samples, errs)
+	}
 	return nil
+}
+
+// audioOnly returns whether the media has only audio, whose playing is
+// timed by its audio (see [Playback.runAudio]).
+func (p *Playback) audioOnly() bool {
+	return p.Media.HasAudio && !p.Media.HasVideo
 }
 
 // Seek plays the media from the given time (within its duration), keeping
@@ -174,17 +191,22 @@ func (p *Playback) Audio() (volume float32, muted bool) {
 }
 
 // start starts decoding the media from the given time, and playing its
-// audio, if any (also when it is muted, so that it can be heard later).
-func (p *Playback) start(t time.Duration, done chan struct{}) (<-chan Frame, <-chan [2]float64, <-chan error, error) {
-	hasAudio := p.Media.HasAudio && audioAvailable()
+// audio, if any (also when it is muted, so that it can be heard later),
+// which it returns. Media with only audio is played without a speaker too
+// (silently), as its audio times it.
+func (p *Playback) start(t time.Duration, done chan struct{}) (<-chan Frame, <-chan [2]float64, <-chan error, *audio, error) {
+	hasAudio := p.Media.HasAudio && (audioAvailable() || p.audioOnly())
 	frames, samples, errs, err := p.Media.DecodeFrom(t, p.Width, p.Height, hasAudio, done)
 	if err != nil || !hasAudio {
-		return frames, samples, errs, err
+		return frames, samples, errs, nil, err
 	}
 	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.audio != nil { // (of the playing before, as in a loop)
+		p.audio.stop()
+	}
 	p.audio = playAudio(samples, p.paused, p.Volume, p.Muted) // (with the lock, as SetMuted)
-	p.mu.Unlock()
-	return frames, samples, errs, nil
+	return frames, samples, errs, p.audio, nil
 }
 
 // run shows the frames at their times, until the end of the media
@@ -219,7 +241,7 @@ func (p *Playback) run(done chan struct{}, frames <-chan Frame, samples <-chan [
 				return
 			}
 			var err error
-			if frames, samples, errs, err = p.start(0, done); err != nil {
+			if frames, samples, errs, _, err = p.start(0, done); err != nil {
 				p.error(err)
 				return
 			}
@@ -272,6 +294,64 @@ func (p *Playback) run(done chan struct{}, frames <-chan Frame, samples <-chan [
 		p.position = f.Time
 		p.mu.Unlock()
 		p.OnFrame(f)
+	}
+}
+
+// runAudio plays media that has only audio from the given time, as the
+// given audio plays it, until the end of the media (playing it again for
+// Loop), or until done is closed. Its position is the time of the audio
+// played, which is given to OnTime ten times a second.
+func (p *Playback) runAudio(done chan struct{}, from time.Duration, a *audio, errs <-chan error) {
+	tick := time.NewTicker(100 * time.Millisecond)
+	defer tick.Stop()
+	for {
+		select {
+		case <-done:
+			return
+		case <-tick.C:
+			p.audioTime(done, from+a.time())
+			continue
+		case <-a.ended:
+		}
+
+		// At the end of the media, it is played again for Loop.
+		p.audioTime(done, from+a.time())
+		if err := <-errs; err != nil {
+			p.error(err)
+			return
+		}
+		if !p.Loop {
+			p.mu.Lock()
+			current := p.done == done
+			if current {
+				p.ended = true
+			}
+			p.mu.Unlock()
+			if current && p.OnEnd != nil {
+				p.OnEnd()
+			}
+			return
+		}
+		var err error
+		if _, _, errs, a, err = p.start(0, done); err != nil {
+			p.error(err)
+			return
+		}
+		from = 0
+	}
+}
+
+// audioTime sets the position of media that has only audio to the given
+// time, if the given playing is the current one, and calls OnTime with it.
+func (p *Playback) audioTime(done chan struct{}, t time.Duration) {
+	p.mu.Lock()
+	current := p.done == done
+	if current {
+		p.position = t
+	}
+	p.mu.Unlock()
+	if current && p.OnTime != nil {
+		p.OnTime(t)
 	}
 }
 
@@ -334,11 +414,27 @@ func (p *Playback) Resume() {
 	if !p.paused {
 		return
 	}
+	if p.Media != nil && p.Media.Duration <= 0 && p.Media.Source == nil && time.Since(p.pausedAt) > liveStale {
+		// a live stream (of no duration, as a radio stream) that was paused
+		// long plays again from its live point, as what was received before
+		// the pause is stale (and its connection may have ended), in the
+		// background, as it is opened again
+		go func() {
+			if err := p.PlayFrom(0); err != nil && p.OnError != nil {
+				p.OnError(err)
+			}
+		}()
+		return
+	}
 	p.paused = false
 	p.pauseShift += time.Since(p.pausedAt)
 	close(p.resume)
 	p.setAudioPaused(false)
 }
+
+// liveStale is how long a live stream is paused after which it plays again
+// from its live point when it is resumed (see [Playback.Resume]).
+var liveStale = 10 * time.Second
 
 // setAudioPaused pauses or resumes the audio, with the lock held.
 func (p *Playback) setAudioPaused(paused bool) {
@@ -382,6 +478,8 @@ func (p *Playback) Stop() {
 		close(p.resume)
 	}
 	p.paused, p.pauseShift, p.ended = false, 0, false
-	p.setAudioPaused(true)
+	if p.audio != nil {
+		p.audio.stop()
+	}
 	p.audio = nil
 }

@@ -133,6 +133,18 @@ func (c *Context) addRuleList(root *html.Node, rules []*css.Rule, origin cssOrig
 		}
 		for _, sel := range selectors {
 			sel = strings.TrimSpace(sel)
+			kind := scopeAll
+			if c.curScope != nil {
+				var ok bool
+				if sel, kind, ok = scopedSelector(sel); !ok {
+					continue
+				}
+			} else if strings.Contains(sel, ":host") || strings.Contains(sel, "::slotted") {
+				continue // (of shadow trees only)
+			} else if origin == originUserAgent {
+				kind = scopeAny // (the styles of the user agent apply to all)
+			}
+			c.curScopeKind = kind
 			if strings.Contains(sel, ":hover") {
 				c.addHoverTrigger(sel)
 			}
@@ -147,28 +159,65 @@ func (c *Context) addRuleList(root *html.Node, rules []*css.Rule, origin cssOrig
 				c.recordRule(root, sel, cs, rule.Declarations, origin, spec)
 			}
 			if !c.recordOnly && !c.deferMatch { // (see Context.addedStyle and Context.ReuseStyles)
-				for _, n := range c.selectNodes(root, sel) {
-					c.addDecls(n, rule.Declarations, origin, spec)
+				if kind == scopeHost {
+					if cs != nil && c.selMatch(cs, c.curScope) {
+						c.addDecls(c.curScope, rule.Declarations, origin, spec)
+					}
+				} else {
+					for _, n := range c.selectNodes(root, sel) {
+						if c.inScope(n, c.curScope, kind) {
+							c.addDecls(n, rule.Declarations, origin, spec)
+						}
+					}
 				}
 			}
+			c.curScopeKind = scopeAll
 			c.curRule = 0
 		}
 	}
 }
 
+// propertyName returns the name of the property of a declaration with the
+// given name: in lower case, and the standard one of a legacy alias of it
+// (see [legacyAliases]).
+func propertyName(p string) string {
+	p = strings.ToLower(strings.TrimSpace(p))
+	if a, ok := legacyAliases[p]; ok {
+		return a
+	}
+	return p
+}
+
+// legacyAliases are the old names of properties that browsers still
+// support as aliases of the standard ones, by their standard names (as the
+// grid-column-gap of the grids of nytimes.com, without which their columns
+// had no gaps between them).
+var legacyAliases = map[string]string{
+	"grid-gap": "gap", "grid-row-gap": "row-gap", "grid-column-gap": "column-gap",
+}
+
 // addDecls adds the given declarations to the given node.
 func (c *Context) addDecls(n *html.Node, decls []*css.Declaration, origin cssOrigin, spec int) {
+	custom := false
 	for _, d := range decls {
-		prop, value := strings.ToLower(strings.TrimSpace(d.Property)), strings.TrimSpace(d.Value)
+		prop, value := propertyName(d.Property), strings.TrimSpace(d.Value)
 		if !validDeclaration(prop, value) {
 			continue // dropped, so that the declaration before it applies
 		}
 		c.cssOrder++
+		c.noteVars(value)
+		custom = custom || strings.HasPrefix(prop, "--")
 		c.styles[n] = append(c.styles[n], &cssDecl{Property: prop,
 			Value: c.absoluteURLs(value), Important: d.Important, origin: origin, specificity: spec, order: c.cssOrder,
 			container: c.curContainer, rule: c.curRule})
 	}
-	c.varMemo = nil
+	if custom {
+		// (the memo has the values of custom properties only, which the
+		// hints and inline styles of each element, as they were added,
+		// otherwise cleared for each element, so that each var() looked
+		// up the elements that it is in again)
+		c.varMemo = nil
+	}
 	if c.curContainer != nil {
 		if c.containerQueried == nil {
 			c.containerQueried = map[*html.Node]bool{}
@@ -253,10 +302,29 @@ func (c *Context) declarations(n *html.Node) []*cssDecl {
 	return c.styles[n]
 }
 
+// allDeclarations returns the declarations of the given node as
+// [Context.declarations] does, but with those of all of its @container
+// rules, whatever their conditions.
+func (c *Context) allDeclarations(n *html.Node) []*cssDecl {
+	if n == nil {
+		return nil
+	}
+	if !c.containerQueried[n] {
+		return c.declarations(n)
+	}
+	c.declarations(n) // (sorted, with hints)
+	return c.styles[n]
+}
+
 // declaration returns the value of the given property for the given node
 // from its declarations (not inherited), or "" if it has none.
 func (c *Context) declaration(n *html.Node, prop string) string {
-	ds := c.declarations(n)
+	return declarationIn(c.declarations(n), prop)
+}
+
+// declarationIn returns the value of the given property in the given
+// declarations, as [Context.declaration].
+func declarationIn(ds []*cssDecl, prop string) string {
 	for i := len(ds) - 1; i >= 0; i-- {
 		if ds[i].Property == prop {
 			if ds[i].invalid {
@@ -393,6 +461,10 @@ type compiledSelector struct {
 	// an id ('#'), a class ('.'), or an element name ('t'), or none (0).
 	keyKind byte
 	key     string
+
+	// anc is the mask of the keys of the elements that the elements that
+	// it selects are in (see [ancestorKeys]).
+	anc keyMask
 }
 
 // selectorCache has the compiled selectors, with nil for ones
@@ -415,6 +487,7 @@ func compileSelector(sel string) *compiledSelector {
 		sp := s.Specificity()
 		cs = &compiledSelector{sel: s, specificity: sp[0]*10000 + sp[1]*100 + sp[2]}
 		cs.keyKind, cs.key = selectorKey(sel)
+		cs.anc = ancestorKeys(sel)
 	}
 	selectorCache[sel] = cs
 	return cs
@@ -593,7 +666,7 @@ func (c *Context) selectNodes(root *html.Node, sel string) []*html.Node {
 	}
 	var matches []*html.Node
 	for _, n := range cands {
-		if cs.sel.Match(n) {
+		if c.selMatch(cs, n) {
 			matches = append(matches, n)
 		}
 	}
@@ -692,9 +765,38 @@ func (c *Context) resolveVars(n *html.Node, ds []*cssDecl) {
 			visiting = map[string]bool{d.Property: true}
 		}
 		v, ok := c.substituteVars(n, d.Value, visiting)
+		if ok && d.Property == "font" && !fontShorthandValid(v) {
+			// a value of var() that is not a valid font, as a style and a
+			// family without a size, is invalid at computed-value time,
+			// which unsets the font (as the rules of reddit.com, whose
+			// headings had the font of a theme that had no size, which
+			// browsers draw in the font of the text around them)
+			ok = false
+		}
 		d.Value = v
 		d.invalid = !ok
 	}
+}
+
+// fontShorthandValid returns whether the given value of the font shorthand
+// is valid: a size (as 14px or medium, after any style, variant and
+// weight) and a family after it, or a CSS-wide keyword or system font.
+func fontShorthandValid(v string) bool {
+	fs := strings.Fields(strings.ToLower(v))
+	if len(fs) == 1 {
+		switch fs[0] {
+		case "inherit", "initial", "unset", "revert", "revert-layer", "caption", "icon", "menu",
+			"message-box", "small-caption", "status-bar":
+			return true
+		}
+	}
+	for i, f := range fs {
+		if len(f) > 0 && (f[0] >= '0' && f[0] <= '9' || f[0] == '.') || cssFontSizes[f] > 0 ||
+			strings.HasPrefix(f, "calc(") || strings.HasPrefix(f, "clamp(") || strings.HasPrefix(f, "min(") || strings.HasPrefix(f, "max(") {
+			return i+1 < len(fs) // (the family after the size)
+		}
+	}
+	return false
 }
 
 // substituteVars returns the given value with its var() functions replaced
@@ -864,7 +966,11 @@ func (c *Context) displayOf(n *html.Node) string {
 		return "none" // as a child of a shadow host that is in no slot
 	}
 	d := c.declaration(n, "display")
-	if n == nil || n.Type != html.ElementNode || n.Parent == nil || n.Parent.Type != html.ElementNode {
+	if n == nil || n.Type != html.ElementNode {
+		return d
+	}
+	parent := c.parentOf(n) // (in the composed tree, see shadow.go)
+	if parent == nil || parent.Type != html.ElementNode {
 		return d
 	}
 	// absolutely positioned and floating elements are blockified too
@@ -881,7 +987,15 @@ func (c *Context) displayOf(n *html.Node) string {
 			return "flex"
 		}
 	}
-	switch c.declaration(n.Parent, "display") {
+	// (the parent of an element whose own box is none, as a slot, is that of
+	// the box that its children are in)
+	for i := 0; i < 8 && parent != nil && parent.Type == html.ElementNode && c.declaration(parent, "display") == "contents"; i++ {
+		parent = c.parentOf(parent)
+	}
+	if parent == nil || parent.Type != html.ElementNode {
+		return d
+	}
+	switch c.declaration(parent, "display") {
 	case "flex", "inline-flex", "grid", "inline-grid":
 		switch d {
 		case "", "inline", "inline-block", "list-item", "flow-root":
@@ -971,12 +1085,14 @@ func (c *Context) addStyleSheets(root *html.Node) {
 			case "style":
 				c.recordSheet(n)
 				if c.mediaMatches(GetAttr(n, "media")) {
+					defer c.enterScope(n)()
 					c.addStyleOrigin(nodeText(n), originAuthor)
 				}
 				return
 			case "link":
 				c.recordSheet(n)
 				if strings.EqualFold(GetAttr(n, "rel"), "stylesheet") && c.mediaMatches(GetAttr(n, "media")) {
+					defer c.enterScope(n)()
 					c.addLinkedStyle(GetAttr(n, "href"))
 				}
 				return

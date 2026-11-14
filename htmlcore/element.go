@@ -37,7 +37,7 @@ var documentTags = map[string]bool{"style": true, "link": true, "script": true, 
 // boxTags are the elements that have a box even with a display of
 // contents (as replaced elements and form controls).
 var boxTags = map[string]bool{"html": true, "head": true, "body": true, "img": true, "input": true,
-	"button": true, "select": true, "textarea": true, "svg": true, "video": true, "iframe": true,
+	"button": true, "select": true, "textarea": true, "svg": true, "video": true, "audio": true, "iframe": true,
 	"canvas": true, "br": true}
 
 // textBlockTags are the elements that are blocks of text, with
@@ -139,6 +139,8 @@ func handleElement(ctx *Context) {
 		newWidget = handleIframe(ctx)
 	case "video":
 		newWidget = handleVideo(ctx)
+	case "audio": // (with controls, as it is not displayed without them)
+		newWidget = handleAudio(ctx)
 	case "table":
 		newWidget = handleTable(ctx)
 	case "th", "td":
@@ -232,6 +234,7 @@ func handleBox(ctx *Context, tag, display string) core.Widget {
 				ctx.containers = map[*html.Node]*containerFrame{}
 			}
 			ctx.containers[ctx.Node] = w
+			ctx.containersChanged()
 			ctx.NewParent = w
 			return w
 		}

@@ -186,6 +186,13 @@ type Style struct { //types:add
 	// max-content in CSS (as a ticker of items in a row that scrolls).
 	MaxContentWidth bool
 
+	// FixedSpacing is whether the spacing of the element (its margin,
+	// padding and gap) is fixed: not scaled by the Spacing setting of the app
+	// (see core.AppearanceSettingsData.Spacing), as for the elements of
+	// web pages, whose spacing is that of their CSS. (The FontSize
+	// setting still applies.)
+	FixedSpacing bool
+
 	// FlexBasis, if positive, is the width that the widget starts from in a
 	// row that wraps, which its line needs room for (down to its min-content
 	// width), instead of its preferred width, as the flex-basis of CSS (as

@@ -73,9 +73,18 @@ func (c *Context) KeepContainerSizes(prev *Context) {
 
 // isContainer returns whether the given element is a container, and
 // whether only its width is queried (container-type: inline-size).
+//
+// Its container-type is that of all of its declarations, of its @container
+// rules whatever their conditions: the conditions of those of an element
+// are those of the containers that it is in, which are found with this
+// for each of the elements that it is in, so that with them, the
+// declarations of each were found again for each element in it, and for
+// each of its own (reading volkskrant.nl, of many @container rules, took
+// 30s).
 func (c *Context) isContainer(n *html.Node) (container, inline bool) {
-	typ := strings.ToLower(c.declaration(n, "container-type"))
-	if v := c.declaration(n, "container"); v != "" { // name / type
+	ds := c.allDeclarations(n)
+	typ := strings.ToLower(declarationIn(ds, "container-type"))
+	if v := declarationIn(ds, "container"); v != "" { // name / type
 		if _, t, ok := strings.Cut(v, "/"); ok {
 			typ = strings.ToLower(t)
 		}
@@ -108,6 +117,7 @@ func (cf *containerFrame) SizeFinal() {
 	cf.ctx.containerMu.Lock()
 	cf.prev, cf.size = cf.size, sz
 	cf.ctx.containerMu.Unlock()
+	cf.ctx.containersChanged()
 	cf.Defer(func() {
 		cf.Restyle()
 		cf.NeedsLayout()
@@ -177,14 +187,54 @@ func parseContainerCond(prelude string, outer *containerCond) *containerCond {
 
 // containerDecls returns the given declarations of the given element
 // without those of @container rules whose conditions it does not match.
+//
+// They are kept for the element (see [queriedDecls]), as they are found
+// for each of its properties, until its declarations or the containers
+// change (see [Context.containersChanged]).
 func (c *Context) containerDecls(n *html.Node, ds []*cssDecl) []*cssDecl {
+	if len(ds) == 0 {
+		return ds
+	}
+	c.containerQueryMu.Lock()
+	q, ok := c.queried[n]
+	gen := c.containerGen
+	c.containerQueryMu.Unlock()
+	if ok && q.gen == gen && q.first == ds[0] && q.n == len(ds) {
+		return q.decls
+	}
 	out := make([]*cssDecl, 0, len(ds))
 	for _, d := range ds {
 		if d.container == nil || c.containerMatches(n, d.container) {
 			out = append(out, d)
 		}
 	}
+	c.containerQueryMu.Lock()
+	if c.queried == nil {
+		c.queried = map[*html.Node]queriedDecls{}
+	}
+	c.queried[n] = queriedDecls{decls: out, first: ds[0], n: len(ds), gen: gen}
+	c.containerQueryMu.Unlock()
 	return out
+}
+
+// queriedDecls are the declarations of an element without those of the
+// @container rules whose conditions it does not match (see
+// [Context.containerDecls]), for its declarations of the given first one
+// and number, and the given generation of the containers.
+type queriedDecls struct {
+	decls []*cssDecl
+	first *cssDecl
+	n     int
+	gen   int
+}
+
+// containersChanged marks the declarations of the elements with
+// @container rules to be found again (see [Context.containerDecls]), as a
+// container has been read, or styled, or resized.
+func (c *Context) containersChanged() {
+	c.containerQueryMu.Lock()
+	c.containerGen++
+	c.containerQueryMu.Unlock()
 }
 
 // containerMatches returns whether the given element matches the given
@@ -210,11 +260,7 @@ func (c *Context) containerMatches(n *html.Node, cc *containerCond) bool {
 			}
 			break
 		}
-		saved, checking := c.MediaWidth, c.checkingMedia
-		c.MediaWidth, c.checkingMedia = width, true
-		m := c.mediaListMatches(strings.ToLower(cc.query))
-		c.MediaWidth, c.checkingMedia = saved, checking
-		if !m {
+		if !c.containerQueryMatches(cc.query, width) {
 			return false
 		}
 	}
@@ -224,8 +270,9 @@ func (c *Context) containerMatches(n *html.Node, cc *containerCond) bool {
 // containerNamed returns whether the given container has the given name
 // (of container-name, or the container shorthand).
 func (c *Context) containerNamed(n *html.Node, name string) bool {
-	names := c.declaration(n, "container-name")
-	if v := c.declaration(n, "container"); v != "" {
+	ds := c.allDeclarations(n) // (as for isContainer)
+	names := declarationIn(ds, "container-name")
+	if v := declarationIn(ds, "container"); v != "" {
 		names, _, _ = strings.Cut(v, "/")
 	}
 	for _, f := range strings.Fields(names) {
@@ -234,4 +281,36 @@ func (c *Context) containerNamed(n *html.Node, name string) bool {
 		}
 	}
 	return false
+}
+
+// containerQueryKey is a query of an @container rule for a width of its
+// container, for [Context.containerQueries].
+type containerQueryKey struct {
+	query         string
+	width, height float32
+}
+
+// containerQueryMatches returns whether the given query of an @container
+// rule matches for the given width of its container. The matches are kept,
+// as the queries are matched for each property of the elements that they
+// are for (see [Context.declaration]), and parsed each time.
+func (c *Context) containerQueryMatches(query string, width float32) bool {
+	key := containerQueryKey{query, width, c.MediaHeight}
+	c.containerQueryMu.Lock()
+	m, ok := c.containerQueries[key]
+	c.containerQueryMu.Unlock()
+	if ok {
+		return m
+	}
+	saved, checking := c.MediaWidth, c.checkingMedia
+	c.MediaWidth, c.checkingMedia = width, true
+	m = c.mediaListMatches(strings.ToLower(query))
+	c.MediaWidth, c.checkingMedia = saved, checking
+	c.containerQueryMu.Lock()
+	if c.containerQueries == nil {
+		c.containerQueries = map[containerQueryKey]bool{}
+	}
+	c.containerQueries[key] = m
+	c.containerQueryMu.Unlock()
+	return m
 }

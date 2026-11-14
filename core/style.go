@@ -7,6 +7,7 @@ package core
 import (
 	"image"
 	"reflect"
+	"sync"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
@@ -97,7 +98,19 @@ func (wb *WidgetBase) resetStyleWidget() {
 }
 
 // runStylers runs the [WidgetBase.Stylers].
+// StyleLockProperty is the name of the property of a widget that, if it
+// is a [sync.Locker], is held while the stylers of the widget run, as for
+// the widgets of web pages, whose stylers read the styles of their
+// elements, which are found again (in another goroutine) as the scripts of
+// the page change it, without the lock of the widgets (see
+// htmlcore.Context.PrepareReread).
+const StyleLockProperty = "style-lock"
+
 func (wb *WidgetBase) runStylers() {
+	if l, ok := wb.Property(StyleLockProperty).(sync.Locker); ok {
+		l.Lock()
+		defer l.Unlock()
+	}
 	wb.Stylers.Do(func(s *[]func(s *styles.Style)) {
 		for _, f := range *s {
 			f(&wb.Styles)
@@ -119,21 +132,24 @@ func (wb *WidgetBase) resetStyleSettings() {
 	wb.Styles.Font.Size.Value /= fsz
 }
 
-// styleSettings applies [AppearanceSettingsData.Spacing]
-// and [AppearanceSettingsData.FontSize] to the style values for the widget.
+// styleSettings applies [AppearanceSettingsData.Spacing] (unless
+// [styles.Style.FixedSpacing]) and [AppearanceSettingsData.FontSize]
+// to the style values for the widget.
 func (wb *WidgetBase) styleSettings() {
 	s := &wb.Styles
-	spc := AppearanceSettings.Spacing / 100
-	s.Margin.Top.Value *= spc
-	s.Margin.Right.Value *= spc
-	s.Margin.Bottom.Value *= spc
-	s.Margin.Left.Value *= spc
-	s.Padding.Top.Value *= spc
-	s.Padding.Right.Value *= spc
-	s.Padding.Bottom.Value *= spc
-	s.Padding.Left.Value *= spc
-	s.Gap.X.Value *= spc
-	s.Gap.Y.Value *= spc
+	if !s.FixedSpacing {
+		spc := AppearanceSettings.Spacing / 100
+		s.Margin.Top.Value *= spc
+		s.Margin.Right.Value *= spc
+		s.Margin.Bottom.Value *= spc
+		s.Margin.Left.Value *= spc
+		s.Padding.Top.Value *= spc
+		s.Padding.Right.Value *= spc
+		s.Padding.Bottom.Value *= spc
+		s.Padding.Left.Value *= spc
+		s.Gap.X.Value *= spc
+		s.Gap.Y.Value *= spc
+	}
 
 	fsz := AppearanceSettings.FontSize / 100
 	s.Font.Size.Value *= fsz

@@ -33,9 +33,22 @@ const (
 	VideoDefaultHeight = 150
 )
 
+// An audio element (see handleAudio) is displayed only with controls (as
+// the bar of a player), as a box of AudioDefaultWidth by AudioDefaultHeight
+// CSS pixels unless its CSS sets its size, as in Chrome. It is the box of a
+// video element (in which an app plays its audio, with its "video-src"),
+// with the "audio" property: on desktop platforms, a [VideoBox] with
+// [VideoBox.Audio], without an image. Audio elements that are not
+// displayed (without controls, as those that the scripts of pages make)
+// are played by an app too, as from its scripts.
+const (
+	AudioDefaultWidth  = 300
+	AudioDefaultHeight = 54
+)
+
 // VideoSource returns the absolute URL of the video of the given video
-// element: its src, or else the src of its first source element with one,
-// or "" for none.
+// element (or of the audio of an audio element): its src, or else the src
+// of its first source element with one, or "" for none.
 func (c *Context) VideoSource(n *html.Node) string {
 	src := strings.TrimSpace(GetAttr(n, "src"))
 	for ch := n.FirstChild; src == "" && ch != nil; ch = ch.NextSibling {

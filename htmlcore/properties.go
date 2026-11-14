@@ -24,8 +24,12 @@ import (
 // state of the style pass (as its length environment) and the parent style.
 type styleOp func(st *cssState, s, ps *styles.Style)
 
-// compileDecls compiles the given declarations, in the order of the cascade,
-// without those that are invalid (see [Context.compileCSS]).
+// compileDecls compiles the given declarations, in the order of the cascade
+// (see [Context.compileCSS]). One that is invalid, of a var() that has no
+// value (invalid at computed-value time), is unset, as in CSS: inherited,
+// or initial (as the headings of the rules of reddit.com, of a font of a
+// variable of a theme that it did not use, which were of the font of h2,
+// not of the text that they were in).
 // The font properties are first, as in CSS the font size of an element
 // is computed before the lengths that are relative to it (as the ch unit,
 // and em in calc()).
@@ -33,9 +37,14 @@ func (c *Context) compileDecls(decls []*cssDecl) []styleOp {
 	var ops []styleOp
 	for _, font := range []bool{true, false} {
 		for _, d := range decls {
-			if !d.invalid && fontProperties[d.Property] == font {
-				ops = append(ops, c.compileCSS(d.Property, d.Value)...)
+			if fontProperties[d.Property] != font {
+				continue
 			}
+			v := d.Value
+			if d.invalid {
+				v = "unset"
+			}
+			ops = append(ops, c.compileCSS(d.Property, v)...)
 		}
 	}
 	return ops
@@ -72,6 +81,15 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			lval = "inherit"
 		}
 	}
+	if ls, ok := keywordLonghands[prop]; ok && (lval == "inherit" || lval == "initial") {
+		// a shorthand is its longhands (as the font of a var() that has no
+		// value, which is unset, inherited)
+		var ops []styleOp
+		for _, l := range ls {
+			ops = append(ops, c.compileCSS(l, lval)...)
+		}
+		return ops
+	}
 	if prop == "clip" || prop == "clip-path" {
 		// a clip to nothing hides the element (as the visually hidden
 		// skip links of go.dev, of clip: rect(0 0 0 0), unset on focus);
@@ -107,6 +125,11 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			}
 			st.background, st.hasBg, st.bgCurrentColor = bg, true, false
 		})
+	}
+	if lval == "initial" && (prop == "margin-top" || prop == "margin-right" || prop == "margin-bottom" || prop == "margin-left") {
+		// the margins of the cascade are those of the state (see setMargin)
+		i := sideIndex(prop)
+		return op(func(st *cssState, s, ps *styles.Style) { setMargin(st, i, "0") })
 	}
 	if lval == "inherit" || lval == "initial" {
 		return op(func(st *cssState, s, ps *styles.Style) {
@@ -513,14 +536,18 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		wrap := lval == "wrap" || lval == "wrap-reverse"
 		return op(func(st *cssState, s, ps *styles.Style) { s.Wrap = wrap })
 	case "flex-flow":
-		var ops []styleOp
+		// a direction and a wrap, in any order, each initial when omitted
+		// (the wrap is not a direction: a flex-flow of column nowrap, as
+		// the election results of nytimes.com, is a column)
+		dir, wrap := "row", "nowrap"
 		for _, f := range strings.Fields(lval) {
-			ops = append(ops, c.compileCSS("flex-direction", f)...)
 			if strings.Contains(f, "wrap") {
-				ops = append(ops, c.compileCSS("flex-wrap", f)...)
+				wrap = f
+			} else {
+				dir = f
 			}
 		}
-		return ops
+		return append(c.compileCSS("flex-direction", dir), c.compileCSS("flex-wrap", wrap)...)
 	case "flex-grow", "flex-shrink":
 		f, err := strconv.ParseFloat(lval, 32)
 		if err != nil {
@@ -860,6 +887,14 @@ var webkitAliases = map[string]bool{
 	"border-radius": true, "flex": true, "flex-direction": true, "flex-wrap": true, "flex-flow": true,
 	"flex-grow": true, "flex-shrink": true, "flex-basis": true, "order": true, "align-items": true,
 	"align-self": true, "justify-content": true, "user-select": true, "appearance": true,
+}
+
+// keywordLonghands are the longhands of the shorthands, which their
+// CSS-wide keywords (inherit, initial) apply to (the others are applied
+// to the style whole, see styles.Style.FromProperty).
+var keywordLonghands = map[string][]string{
+	"font":   {"font-style", "font-weight", "font-size", "line-height", "font-family"},
+	"margin": {"margin-top", "margin-right", "margin-bottom", "margin-left"},
 }
 
 // inheritedProperties are the properties that are inherited in CSS, for

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	neturl "net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -96,6 +97,19 @@ type Context struct {
 	// as the closed dropdown panels of the menus of MDN, which its shadow
 	// root shows (in a slot) only when they are open.
 	Unrendered func(n *html.Node) bool
+
+	// ShadowScope, if set, returns the host of the shadow root whose tree
+	// the given node is in, or nil if it is in the document, for a page that
+	// is read as its composed tree, with the content of the shadow roots of
+	// elements in their place (see shadow.go). The rules of the style sheets
+	// of a shadow tree apply only to it, and those of the document not to it.
+	ShadowScope func(n *html.Node) *html.Node
+
+	// ComposedParent, if set, returns the parent of the given node in the
+	// composed tree of the page (see ShadowScope), as it was read, which is
+	// not its parent in the document for the content of shadow roots and
+	// the nodes in slots.
+	ComposedParent func(n *html.Node) *html.Node
 
 	// ToggleDetails, if set, toggles the given details element open or
 	// closed in the document that the page is read from (its open
@@ -214,6 +228,13 @@ type Context struct {
 	// by default; see [NewImageCache].
 	ImageCache *ImageCache
 
+	// AsyncImages, if set, is how the images of the noscripts of lazy
+	// images (see Context.noscriptImage) are set as they are gotten in the
+	// background: it calls the given function, which sets them, with the
+	// lock of the widgets of the page held (or not, if the page is gone).
+	// If it is nil, they are gotten as the page is read.
+	AsyncImages func(f func())
+
 	// StageSize, if positive, is the size of the content of the body (in
 	// runes of text, with estimates for other elements) after which
 	// [ReadHTML] stops adding the widgets of its top-level elements,
@@ -231,6 +252,26 @@ type Context struct {
 	// reading is whether HTML is being read, so that HTML read by an
 	// element handler meanwhile is read within that read (see [ReadHTML]).
 	reading bool
+
+	// keepRead has the elements that are kept as they are, with their old
+	// widgets, as elements are read again (see [Context.keptElements]).
+	keepRead map[*html.Node]core.Widget
+
+	// matchKept has the elements that may be kept as they are as elements
+	// are read again, whose declarations are found again only for
+	// themselves, not those in them (see [Context.shallowKept]).
+	matchKept map[*html.Node]bool
+
+	// matchAll is whether all of the elements in those whose declarations
+	// are found again are matched again (see [Context.invalidation]), as
+	// for rules added to the style sheets.
+	matchAll bool
+
+	// addRoot, if set (as elements are read again; see Context.Reread),
+	// adds the element that the given element is in that is read again
+	// for a change of it that its widgets can not be styled again for (as
+	// of its display or pseudo-elements), returning whether it can be.
+	addRoot func(n *html.Node) bool
 }
 
 // pageState is the state of the pages read with a [Context], which
@@ -296,9 +337,43 @@ type pageState struct {
 	// and containerMu guards the sizes of the containers in containers.
 	curContainer     *containerCond
 	containerQueried map[*html.Node]bool
-	containers       map[*html.Node]*containerFrame
-	keptContainers   map[*html.Node]containerSizes
-	containerMu      sync.Mutex
+
+	// curScope is the host of the shadow root of the style sheet whose
+	// rules are being added, if it is in a shadow tree (see shadowScope).
+	curScope     *html.Node
+	curScopeKind scopeKind
+
+	containers     map[*html.Node]*containerFrame
+	keptContainers map[*html.Node]containerSizes
+	containerMu    sync.Mutex
+
+	// styleMu guards the styles of the elements (their declarations and
+	// the state of reading them), which the stylers of the widgets of the
+	// context read (see [core.StyleLockProperty]) while they are found
+	// again without the lock of the widgets (see [Context.PrepareReread]).
+	styleMu sync.Mutex
+
+	// containerQueries are the matches of the queries of @container rules
+	// for the widths of their containers (see
+	// [Context.containerQueryMatches]), guarded by containerQueryMu.
+	containerQueries map[containerQueryKey]bool
+
+	// varsUsed are the custom properties that the declarations of the
+	// page use (with var()), for [Context.unusedCustomProps].
+	varsUsed map[string]bool
+
+	// attrsSelected are whether the style rules select elements by the
+	// attributes (see Context.inertAttr), for attrsRules rules.
+	attrsSelected    map[string]bool
+	attrsRules       int
+	containerQueryMu sync.Mutex
+
+	// queried are the declarations of the elements with @container rules
+	// that apply to them, for containerGen, the generation of the
+	// containers and the declarations (see [Context.containerDecls]),
+	// guarded by containerQueryMu.
+	queried      map[*html.Node]queriedDecls
+	containerGen int
 
 	// sheets has the style and link elements whose style sheets have
 	// been added, and rereads is the number of times that elements have
@@ -329,6 +404,20 @@ type pageState struct {
 	// all of the elements are from (not those recorded since, as those
 	// added to style sheets, whose elements were not matched again).
 	matchedRules int
+
+	// matchedPseudo is the number of the rules of pseudo-elements that the
+	// declarations of the elements have been matched with, as matchedRules.
+	matchedPseudo int
+
+	// ancestorMasks are the masks of the keys of the ancestors of the
+	// elements, while they are kept (see [Context.keepAncestorMasks]).
+	ancestorMasks map[*html.Node]keyMask
+
+	// addedShallow and addedDeep are the elements that the rules added to
+	// the style sheets select (see [Context.addedRuleTargets]), whose
+	// declarations are found again, with those in the deep ones (for the
+	// custom properties of the rules, which they inherit).
+	addedShallow, addedDeep []*html.Node
 
 	// rules are the style rules that have been added, in order, by which
 	// the declarations of elements are found again when they change (see
@@ -412,6 +501,11 @@ func (c *Context) ReadRest() (core.Widget, int, error) {
 	c.reading = true
 	defer func() { c.reading = false }()
 	err := readHTMLNode(c, parent, n)
+	for _, k := range parent.AsTree().Children[start:] {
+		if w, ok := k.(core.Widget); ok {
+			c.lockStylesOf(w)
+		}
+	}
 	return parent, start, err
 }
 
@@ -527,7 +621,11 @@ func (c *Context) addStyle(style string) {
 
 // addStyleOrigin adds the given CSS style string with the given origin.
 func (c *Context) addStyleOrigin(style string, origin cssOrigin) {
-	c.addRules(rootNode(c.Node), parseCSS(style), origin)
+	root := rootNode(c.Node)
+	if c.curScope != nil { // (of a style sheet of a shadow tree, see shadow.go)
+		root = c.curScope
+	}
+	c.addRules(root, parseCSS(style), origin)
 }
 
 // LinkButton is a helper function that makes the given button
@@ -619,6 +717,7 @@ func (c *Context) NewPage() *Context {
 	n.WidgetHandlers = c.WidgetHandlers
 	n.DelayedImageLoad = c.DelayedImageLoad
 	n.ImageCache = c.ImageCache
+	n.AsyncImages = c.AsyncImages
 	n.StageSize = c.StageSize
 	n.Style = c.Style
 	return n
@@ -709,9 +808,33 @@ const acceptHeader = "text/html,application/xhtml+xml,application/xml;q=0.9,imag
 // set by the Go HTTP client, which decompresses the gzip responses.)
 func SetRequestHeaders(req *http.Request) {
 	req.Header.Set("User-Agent", UserAgent)
-	req.Header.Set("Accept", acceptHeader)
+	req.Header.Set("Accept", acceptFor(req.URL))
 	req.Header.Set("Accept-Language", AcceptLanguage)
 }
+
+// acceptFor returns the Accept header of a request of the given URL: that
+// of browsers for an image, style sheet or script (by the extension of its
+// path), as the image servers of reddit.com send pages that show images to
+// requests that accept pages (whose images were not shown), or else that
+// of pages ([acceptHeader]).
+func acceptFor(u *neturl.URL) string {
+	if u == nil {
+		return acceptHeader
+	}
+	switch strings.ToLower(path.Ext(u.Path)) {
+	case ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".bmp", ".ico", ".avif", ".apng":
+		return imageAcceptHeader
+	case ".css":
+		return "text/css,*/*;q=0.1"
+	case ".js", ".mjs":
+		return "*/*"
+	}
+	return acceptHeader
+}
+
+// imageAcceptHeader is the Accept header of the requests of images, as
+// browsers send it, without image/avif (see [acceptHeader]).
+const imageAcceptHeader = "image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8"
 
 // httpClient is the client of the default [Context.GetURL], with a timeout
 // so that a server that does not respond does not stop the reading of a
@@ -849,4 +972,23 @@ func (c *Context) openLink(link *html.Node, url string, e events.Event) {
 		return
 	}
 	c.OpenURL(url, e)
+}
+
+// LockStyles locks the styles of the elements of the context (see
+// [Context.PrepareReread]), as for reading them without the lock of the
+// widgets of the page, as the stylers of its widgets do (see
+// [core.StyleLockProperty]); they must not be locked while the lock of the
+// widgets is taken.
+func (c *Context) LockStyles() { c.styleMu.Lock() }
+
+// UnlockStyles unlocks the styles of the elements (see [Context.LockStyles]).
+func (c *Context) UnlockStyles() { c.styleMu.Unlock() }
+
+// lockStylesOf makes the given widget and those in it hold the lock of the
+// styles of the context as they are styled (see [core.StyleLockProperty]).
+func (c *Context) lockStylesOf(root core.Widget) {
+	root.AsWidget().WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		cwb.SetProperty(core.StyleLockProperty, &c.styleMu)
+		return tree.Continue
+	})
 }

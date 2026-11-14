@@ -54,12 +54,18 @@ func (m *Media) Decode(width, height int, audio bool, done <-chan struct{}) (<-c
 // DecodeFrom is like [Media.Decode], starting at the given time of the
 // media: the frames and audio before it are not sent.
 func (m *Media) DecodeFrom(start time.Duration, width, height int, audio bool, done <-chan struct{}) (<-chan Frame, <-chan [2]float64, <-chan error, error) {
-	// Open the media again, for this decoding, from its start.
+	// Open the media again, for this decoding, from its start, unless the
+	// decoder that opened it is kept for it (see Media.probe).
 	var d *decoder
 	var err error
-	if m.Source != nil {
+	if start == 0 && audio && m.Source == nil {
+		d = m.takeProbe()
+	}
+	switch {
+	case d != nil:
+	case m.Source != nil:
 		d, err = openSourceDecoder(m.Source, start, audio)
-	} else {
+	default:
 		d, err = openDecoder(m.Path, m.Options, audio)
 	}
 	if err != nil {
