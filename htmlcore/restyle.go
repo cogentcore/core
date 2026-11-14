@@ -614,6 +614,9 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 		u.widgets = append(u.widgets, ws...)
 	}
 	for _, n := range whole {
+		if htmlChildOf(n) == n {
+			continue // (read again whole, as the scripts added it; see Context.rereadHTML)
+		}
 		if d := c.displayOf(n); d != oldDisplay[n] {
 			undo()
 			// it may not have a frame of its own

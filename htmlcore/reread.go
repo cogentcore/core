@@ -377,10 +377,25 @@ func (c *Context) prepareReread(self, children []*html.Node, apply *func()) bool
 	if len(roots) == 0 && !restyleAll && len(changed) == 0 && htmlChildren == nil {
 		return true // (only elements that are not rendered changed, or images)
 	}
+	// the children of the html element that are read again (see
+	// rereadHTML), its head and those but its body, have their
+	// declarations found too, with those of the elements that the scripts
+	// add to them (as the scripts and styles that the scripts of npr.org
+	// added to its head, as it added an element after the body, which had
+	// no display: none of their own, so that their text was shown at the
+	// top of the page), and their style sheets are added
+	var htmlKids []*html.Node
+	if htmlChildren != nil {
+		for k := htmlChildren.FirstChild; k != nil; k = k.NextSibling {
+			if htmlChildOf(k) == k {
+				htmlKids = append(htmlKids, k)
+			}
+		}
+	}
 	// the style sheets added in the elements to read again (as those that
 	// the scripts of nytimes.com add with the parts of the page) add their
 	// rules, as those added to the head
-	for _, r := range roots {
+	for _, r := range append(slices.Clip(roots), htmlKids...) {
 		ok := true
 		walkElements(r, func(n *html.Node) {
 			if ok && (n.DataAtom == atom.Style || n.DataAtom == atom.Link) && !c.sheets[n] {
@@ -444,6 +459,9 @@ func (c *Context) prepareReread(self, children []*html.Node, apply *func()) bool
 		if n.Parent == nil {
 			return false
 		}
+		if htmlChildren != nil && htmlChildOf(n) != nil {
+			return true // (read again with the children of the html element)
+		}
 		r := c.rereadRoot(n.Parent)
 		if r == nil || !c.readableRoot(r, root, func(k *html.Node) bool { return contains(r, k) }) {
 			return false
@@ -454,7 +472,7 @@ func (c *Context) prepareReread(self, children []*html.Node, apply *func()) bool
 	defer func() { c.addRoot = nil }()
 	c.matchKept = c.shallowKept(prelim)
 	c.matchAll = restyleAll
-	u, ok := c.updateDecls(changed, roots, inRoots)
+	u, ok := c.updateDecls(changed, append(slices.Clip(roots), htmlKids...), inRoots)
 	c.matchKept, c.matchAll = nil, false
 	if !ok {
 		return false // (with the fallback of updateDecls)
@@ -535,6 +553,21 @@ func (c *Context) htmlRereadable(h *html.Node, roots []*html.Node, selfDirty map
 		}
 	}
 	return true
+}
+
+// htmlChildOf returns the child of the html element that the given element
+// is (or is in), other than its body, which are read again whole with the
+// children of the html element (see [Context.rereadHTML]), or nil.
+func htmlChildOf(n *html.Node) *html.Node {
+	for ; n != nil && n.Parent != nil; n = n.Parent {
+		if n.Parent.Type == html.ElementNode && n.Parent.DataAtom == atom.Html {
+			if n.Type == html.ElementNode && n.DataAtom != atom.Body {
+				return n
+			}
+			return nil
+		}
+	}
+	return nil
 }
 
 // rereadHTML reads the children of the given html element again, but its

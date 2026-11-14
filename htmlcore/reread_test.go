@@ -820,3 +820,46 @@ func TestNoscriptImages(t *testing.T) {
 		}, 5*time.Second, 10*time.Millisecond)
 	})
 }
+
+// TestRereadHTMLChildScripts tests that the scripts and styles that scripts
+// add to the html element (before, between or after its head and body), or
+// to its head as they add an element after its body, as on npr.org, are
+// not rendered (their text was shown at the top of the page), and that the
+// rules of the styles apply, as for the page read anew.
+func TestRereadHTMLChildScripts(t *testing.T) {
+	const page = `<html><head><script>var gtm = 1</script><style>.a { color: red }</style></head><body><div id="app"><p id="p">hello</p></div></body></html>`
+	for _, where := range []string{"before head", "after head", "after body", "in head"} {
+		for _, add := range []string{`<script>(function() { googletagmanager })()</script>`, `<style>#p { color: blue; width: 200px }</style>`} {
+			testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+				h := documentElement(doc)
+				var head, body *html.Node
+				for k := h.FirstChild; k != nil; k = k.NextSibling {
+					switch k.DataAtom {
+					case atom.Head:
+						head = k
+					case atom.Body:
+						body = k
+					}
+				}
+				ns, err := html.ParseFragment(strings.NewReader(add), head)
+				require.NoError(t, err)
+				for _, n := range ns {
+					switch where {
+					case "before head":
+						h.InsertBefore(n, head)
+					case "after head":
+						h.InsertBefore(n, body)
+					case "in head":
+						head.AppendChild(n)
+					default:
+						h.AppendChild(n)
+					}
+				}
+				if where == "in head" { // (as an element to measure with)
+					h.AppendChild(&html.Node{Type: html.ElementNode, Data: "div", DataAtom: atom.Div})
+				}
+				return nil, []*html.Node{h}
+			})
+		}
+	}
+}
