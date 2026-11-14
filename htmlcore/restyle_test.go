@@ -58,6 +58,13 @@ func widgetStates(bd *core.Body) map[string]string {
 				s := &wb.Styles
 				m[id] = fmt.Sprintf("pos %v size %v color %v bg %v opacity %v", wb.Geom.Pos.Total, wb.Geom.Size.Actual.Total,
 					colors.AsHex(colors.ToUniform(s.Color)), colors.AsHex(colors.ToUniform(s.Background)), s.Opacity) + fmt.Sprintf(" translate %v rotate %v", s.Translate, s.Rotate)
+				if im, ok := k.(*core.Image); ok {
+					if im.Image != nil {
+						m[id] += fmt.Sprintf(" image %v", im.Image.Bounds())
+					} else {
+						m[id] += " no image"
+					}
+				}
 			}
 		}
 		return tree.Continue
@@ -423,4 +430,38 @@ func TestCompoundMaySelect(t *testing.T) {
 	assert.False(t, sib, "~= is not a combinator")
 	_, sib, _ = splitLastCompound(".a ~ .b")
 	assert.True(t, sib)
+}
+
+// TestInvalidationLang tests that a change of the lang of the html element
+// (as nytimes.com sets it) does not select the elements in it again for the
+// rules of the classes of others (as [class~=x]:hover .y), and that a change
+// of its classes does.
+func TestInvalidationLang(t *testing.T) {
+	const page = `<html lang="en" class="a"><head><style>[class~=x]:hover .y { color: red }
+div:lang(fr) .y { color: blue }</style></head><body><div id="y" class="y">y</div></body></html>`
+	ctx := NewContext()
+	doc, err := ParseHTML(ctx, strings.NewReader(page))
+	require.NoError(t, err)
+	require.NoError(t, ReadDocument(ctx, core.NewBody(), doc))
+	root, y := documentElement(doc), elementByID(doc, "y")
+	setAttr := func(key, val string) {
+		for i, a := range root.Attr {
+			if a.Key == key {
+				root.Attr[i].Val = val
+			}
+		}
+	}
+	setAttr("lang", "en-US")
+	selects, _, ok := ctx.invalidation(root)
+	require.True(t, ok)
+	assert.False(t, selects(y), "lang")
+	setAttr("lang", "en")
+	setAttr("class", "a  a ")
+	selects, _, ok = ctx.invalidation(root)
+	require.True(t, ok)
+	assert.False(t, selects(y), "the same classes")
+	setAttr("class", "a x")
+	selects, _, ok = ctx.invalidation(root)
+	require.True(t, ok)
+	assert.True(t, selects(y), "class x")
 }

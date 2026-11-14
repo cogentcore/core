@@ -323,10 +323,29 @@ func (c *Context) prepareReread(self, children []*html.Node, apply *func()) bool
 		}
 		return true
 	}
+	// the images whose sources changed, which are set in their widgets
+	// (see Context.imageChange)
+	var swaps []*imageSwap
+	srcRules := -1
 	for _, n := range self {
+		if sw, ok := c.imageChange(n, &srcRules); ok {
+			swaps = append(swaps, sw)
+			continue
+		}
 		if !addChanged(n, true) {
 			return false
 		}
+	}
+	for _, sw := range swaps {
+		sw.load(c)
+	}
+	applySwaps := func() {
+		for _, sw := range swaps {
+			sw.apply()
+		}
+	}
+	if len(swaps) > 0 {
+		*apply = applySwaps
 	}
 	for _, n := range children {
 		if !addChanged(n, false) {
@@ -346,7 +365,7 @@ func (c *Context) prepareReread(self, children []*html.Node, apply *func()) bool
 		return c.noChange("a change of the children of the html element")
 	}
 	if len(roots) == 0 && !restyleAll && len(changed) == 0 && htmlChildren == nil {
-		return true // (only elements that are not rendered changed)
+		return true // (only elements that are not rendered changed, or images)
 	}
 	// the style sheets added in the elements to read again (as those that
 	// the scripts of nytimes.com add with the parts of the page) add their
@@ -481,6 +500,7 @@ func (c *Context) prepareReread(self, children []*html.Node, apply *func()) bool
 			applyHTML()
 		}
 		u.apply(c)
+		applySwaps()
 	}
 	return true
 }
