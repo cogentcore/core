@@ -1052,8 +1052,17 @@ func (r *resolver) sizes() {
 	// the viewport, which did not scroll).
 	flexHeight := r.flexDefiniteHeight()
 	bs.definiteHeight = st.height != nil || s.AspectRatio > 0 || insetHeight || flexHeight
+	// (a max-height of a length, or inherited, not a percentage, which is
+	// of no height in an element whose height is not definite)
+	bs.maxHeight = (st.maxHeight != nil && st.maxHeight.Unit != units.UnitPh) ||
+		(st.height == nil && s.Max.Y.Value > 0 && s.Max.Y.Unit != units.UnitPh)
+	if st.height == nil && st.maxHeight == nil && s.Overflow.Y != styles.OverflowVisible && r.flexMaxColumn() && r.ps.Max.Y.Value > 0 && r.ps.Max.Y.Unit != units.UnitPh {
+		// it is as high as its content up to the max-height of its column,
+		// and it shrinks in it to fit the others (see flexMaxColumn)
+		s.Max.Y = r.ps.Max.Y
+	}
 	if tag := wb.Property("tag"); tag == "body" || tag == "html" ||
-		(st.height == nil && st.maxHeight == nil && !insetHeight && !flexHeight && s.Overflow.Y != styles.OverflowVisible) {
+		(st.height == nil && st.maxHeight == nil && !insetHeight && !flexHeight && !r.flexMaxColumn() && s.Overflow.Y != styles.OverflowVisible) {
 		s.Overflow.Y = styles.OverflowVisible
 	}
 	if s.Position == styles.PositionAbsolute || s.Position == styles.PositionFixed {
@@ -1280,4 +1289,13 @@ func (r *resolver) flexDefiniteHeight() bool {
 		return st.flexGrow > 0
 	}
 	return false
+}
+
+// flexMaxColumn returns whether the element is a flex item of a column with
+// a max-height, which it shrinks in to fit (see core.Frame.shrinkColumnHeights),
+// so that its overflow scrolls (or clips) it, as in CSS (as the content of
+// the cookie dialog of reddit.com, above its buttons).
+func (r *resolver) flexMaxColumn() bool {
+	ps, pbs := r.ps, r.pbs
+	return ps != nil && pbs != nil && pbs.maxHeight && (pbs.display == "flex" || pbs.display == "inline-flex") && ps.Direction == styles.Column
 }

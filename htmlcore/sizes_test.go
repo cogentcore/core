@@ -1570,3 +1570,23 @@ func TestPercentBars(t *testing.T) {
 	r, g, b, _ := img.At(x, y).RGBA()
 	assert.Equal(t, [3]uint32{0xffff, 0xffff, 0xffff}, [3]uint32{r, g, b}, "white under the marker, below the row")
 }
+
+// TestFlexColumnMaxHeightShrink tests that a flex item of a column with a
+// max-height that scrolls its content (whose minimum height is not that of
+// its content) shrinks to fit the column, and scrolls, so that the items
+// after it are in the column (as the buttons of the cookie dialog of
+// reddit.com, below its content, which were below the dialog).
+func TestFlexColumnMaxHeightShrink(t *testing.T) {
+	for _, mh := range []string{"max-height: 300px", "max-height: inherit", "height: 100%; max-height: inherit"} {
+		widgetsByID(t, `<div style="max-height: 300px; width: 200px; display: flex; flex-direction: column"><div id="c" style="display: flex; flex-direction: column; `+mh+`">`+
+			`<div id="a" style="flex: 1 1; overflow-y: auto"><div style="height: 600px">long</div></div>`+
+			`<div id="f" style="height: 50px">footer</div></div></div>`,
+			func(ws map[string]*core.WidgetBase, dp float32) {
+				c, a, f := ws["c"].Geom, ws["a"].Geom, ws["f"].Geom
+				assert.InDelta(t, 300*dp, c.Size.Actual.Total.Y, float64(dp), mh)
+				assert.InDelta(t, 250*dp, a.Size.Actual.Total.Y, float64(dp), mh)
+				assert.InDelta(t, 250*dp, f.Pos.Total.Y-c.Pos.Total.Y, float64(dp), mh)
+				assert.True(t, core.AsFrame(ws["a"].This).HasScroll[math32.Y], mh)
+			})
+	}
+}

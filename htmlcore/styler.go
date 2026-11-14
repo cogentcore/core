@@ -69,6 +69,10 @@ type blockState struct {
 	// which percentage heights of its children are relative to.
 	definiteHeight bool
 
+	// maxHeight is whether the element has a max-height, which the flex
+	// items of a column of it shrink to fit (see resolver.flexMaxColumn).
+	maxHeight bool
+
 	// openTop and openBottom are whether the margins of the first
 	// and last children collapse with those of the widget, when it
 	// has no padding or border there.
