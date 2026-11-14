@@ -612,3 +612,38 @@ p:nth-last-of-type(2) + div span { color: green }
 	assert.False(t, placeChangedDeep(elementByID(doc, "side"), first, notFirst, places, siblings), "side is not li")
 	assert.True(t, placeChangedDeep(elementByID(doc, "app"), nodeSnap{count: 2}, nodeSnap{count: 3}, places, siblings), "nth-last-of-type before a sibling")
 }
+
+// TestRereadImageSource tests that setting the source of a lazy img (as
+// scripts do as it is shown), or of a source of its picture, sets the image
+// in its widget, keeping the widgets of the elements that it is in (it read
+// the nearest one that could be read again alone, as the whole #app of
+// nytimes.com).
+func TestRereadImageSource(t *testing.T) {
+	const png = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+	const page = `<html><body><div id="wrap" style="display: grid; grid-template-columns: 1fr 1fr; width: 400px">
+<div id="a"><picture><source id="s" media="(min-width: 1px)"><img id="i" class="lazy" style="width: 50px; height: 40px"></picture></div>
+<div id="b">b</div></div></body></html>`
+	setAttr := func(n *html.Node, key, val string) {
+		for i, a := range n.Attr {
+			if a.Key == key {
+				n.Attr[i].Val = val
+				return
+			}
+		}
+		n.Attr = append(n.Attr, html.Attribute{Key: key, Val: val})
+	}
+	t.Run("img", func(t *testing.T) {
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+			i := elementByID(doc, "i")
+			setAttr(i, "src", png)
+			return []*html.Node{i}, nil
+		}, "wrap", "a", "b", "i")
+	})
+	t.Run("source", func(t *testing.T) {
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+			s := elementByID(doc, "s")
+			setAttr(s, "srcset", png)
+			return []*html.Node{s}, nil
+		}, "wrap", "a", "b", "i")
+	})
+}

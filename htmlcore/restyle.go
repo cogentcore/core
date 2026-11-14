@@ -1284,12 +1284,16 @@ func (c *Context) invalidation(n *html.Node) (selects func(k *html.Node) bool, s
 	// whether its keys (classes and id) are as they were, so that the
 	// compound selectors that it may be selected by are known (see
 	// compoundMaySelect)
-	sameKeys := old.class == GetAttr(n, "class") && old.id == GetAttr(n, "id")
+	keysChanged := false // (its classes or id, as tokens; not :lang for its lang)
+	for _, t := range tokens {
+		keysChanged = keysChanged || !sameStates(tokens) && (t[0] == '.' || t[0] == '#')
+	}
+	sameKeys := !keysChanged
 	var keys []*compiledSelector
 	all := false
 	check := func(text string, cs *compiledSelector, decls []*css.Declaration) bool {
 		prefix, sib, last := splitLastCompound(text)
-		if (len(tokens) > 0 && !sameStates(tokens)) && (strings.Contains(prefix, "[class") || strings.Contains(prefix, "[id")) {
+		if keysChanged && (strings.Contains(prefix, "[class") || strings.Contains(prefix, "[id")) {
 			// (selected by its class or id other than by the names of
 			// them, as [class*=icon-])
 			if sib {
