@@ -164,6 +164,37 @@ func (c *Context) headChanged(head *html.Node) bool {
 // for the page to be read again: for a new style sheet, a change of the
 // html element itself, or more elements to read than [Context.rereadLimit].
 func (c *Context) Reread(self, children []*html.Node) bool {
+	apply := c.PrepareReread(self, children)
+	if apply == nil {
+		return false
+	}
+	apply()
+	return true
+}
+
+// PrepareReread reads the given elements again as [Context.Reread] does,
+// into new widgets, with the styles of the context locked (see
+// [Context.LockStyles]), and without the lock of the widgets of the page
+// (as it takes time: as long as a second, on nytimes.com, in which the app
+// did not respond), and returns the function that puts the new widgets in
+// the page, with the lock of the widgets held, or nil if they can not be
+// read again (see [Context.Fallback]).
+func (c *Context) PrepareReread(self, children []*html.Node) func() {
+	c.styleMu.Lock()
+	defer c.styleMu.Unlock()
+	var apply func()
+	if !c.prepareReread(self, children, &apply) {
+		return nil
+	}
+	if apply == nil {
+		apply = func() {}
+	}
+	return apply
+}
+
+// prepareReread is [Context.PrepareReread], setting the function that
+// applies it, if any, and returning whether it can.
+func (c *Context) prepareReread(self, children []*html.Node, apply *func()) bool {
 	c.containersChanged() // (declarations may change)
 	defer c.containersChanged()
 	if len(self) == 0 && len(children) == 0 {
@@ -370,6 +401,14 @@ func (c *Context) Reread(self, children []*html.Node) bool {
 	c.rereads++
 	c.keepRead = keep
 	defer func() { c.keepRead = nil }()
+	// the elements are read into new widgets (here, without the lock of
+	// the widgets of the page), which are put in the page by apply
+	type read struct {
+		r       *html.Node
+		old, pw core.Widget
+		tmp     *core.Frame
+	}
+	var reads []read
 	for _, r := range roots {
 		old := c.elementWidgets[r][0]
 		pw := old.AsTree().Parent.(core.Widget)
@@ -377,15 +416,25 @@ func (c *Context) Reread(self, children []*html.Node) bool {
 		tmp := core.NewFrame()
 		c.inlineParent = nil
 		readOneNode(c, tmp, r)
-		rc := &reconciler{c: c, touched: touched, selfDirty: selfDirty, kept: keep, pairs: map[core.Widget]core.Widget{}}
-		rc.replaceIn(pw, old, tmp.Children)
-		rc.placeKept()
-		rc.remap(r)
+		c.lockStylesOf(tmp)
+		reads = append(reads, read{r, old, pw, tmp})
 	}
+	var applyHTML func()
 	if htmlChildren != nil {
-		c.rereadHTML(htmlChildren, touched, selfDirty)
+		applyHTML = c.rereadHTML(htmlChildren, touched, selfDirty)
 	}
-	u.apply(c)
+	*apply = func() {
+		for _, rd := range reads {
+			rc := &reconciler{c: c, touched: touched, selfDirty: selfDirty, kept: keep, pairs: map[core.Widget]core.Widget{}}
+			rc.replaceIn(rd.pw, rd.old, rd.tmp.Children)
+			rc.placeKept()
+			rc.remap(rd.r)
+		}
+		if applyHTML != nil {
+			applyHTML()
+		}
+		u.apply(c)
+	}
 	return true
 }
 
@@ -413,8 +462,9 @@ func (c *Context) htmlRereadable(h *html.Node, roots []*html.Node, selfDirty map
 
 // rereadHTML reads the children of the given html element again, but its
 // body, whose widgets are kept as they are (see [Context.keptElements]),
-// in the widget that the page is read into.
-func (c *Context) rereadHTML(h *html.Node, touched, selfDirty map[*html.Node]bool) {
+// in the widget that the page is read into, returning the function that
+// puts them in it (with the lock of the widgets held).
+func (c *Context) rereadHTML(h *html.Node, touched, selfDirty map[*html.Node]bool) func() {
 	var body *html.Node
 	for k := h.FirstChild; k != nil; k = k.NextSibling {
 		if k.DataAtom == atom.Body {
@@ -435,14 +485,17 @@ func (c *Context) rereadHTML(h *html.Node, touched, selfDirty map[*html.Node]boo
 	c.inlineParent = nil
 	c.Node = h
 	readHTMLNode(c, tmp, h.FirstChild)
-	rc := &reconciler{c: c, touched: touched, selfDirty: selfDirty, kept: keep, pairs: map[core.Widget]core.Widget{}}
-	p := &tree.Plan{EnforceEmpty: true}
-	rc.planChildren(p, content.AsTree().Children, tmp.Children, childNames(content))
-	p.Update(content)
-	rc.updateAdded()
-	rc.placeKept()
-	rc.remap(h)
-	content.AsWidget().NeedsLayout()
+	c.lockStylesOf(tmp)
+	return func() {
+		rc := &reconciler{c: c, touched: touched, selfDirty: selfDirty, kept: keep, pairs: map[core.Widget]core.Widget{}}
+		p := &tree.Plan{EnforceEmpty: true}
+		rc.planChildren(p, content.AsTree().Children, tmp.Children, childNames(content))
+		p.Update(content)
+		rc.updateAdded()
+		rc.placeKept()
+		rc.remap(h)
+		content.AsWidget().NeedsLayout()
+	}
 }
 
 // unshown returns whether the given element is never shown, nor its

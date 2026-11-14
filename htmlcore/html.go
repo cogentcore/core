@@ -64,7 +64,9 @@ func ReadDocument(ctx *Context, parent core.Widget, n *html.Node) error {
 	ctx.Title = ""
 	ctx.reading = true
 	defer func() { ctx.reading = false }()
-	return readHTMLNode(ctx, parent, n)
+	err := readHTMLNode(ctx, parent, n)
+	ctx.lockStylesOf(parent)
+	return err
 }
 
 // ReadHTMLString reads HTML from the given string and adds corresponding
