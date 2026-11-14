@@ -9,6 +9,7 @@ import (
 	"net/http"
 	neturl "net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -784,9 +785,33 @@ const acceptHeader = "text/html,application/xhtml+xml,application/xml;q=0.9,imag
 // set by the Go HTTP client, which decompresses the gzip responses.)
 func SetRequestHeaders(req *http.Request) {
 	req.Header.Set("User-Agent", UserAgent)
-	req.Header.Set("Accept", acceptHeader)
+	req.Header.Set("Accept", acceptFor(req.URL))
 	req.Header.Set("Accept-Language", AcceptLanguage)
 }
+
+// acceptFor returns the Accept header of a request of the given URL: that
+// of browsers for an image, style sheet or script (by the extension of its
+// path), as the image servers of reddit.com send pages that show images to
+// requests that accept pages (whose images were not shown), or else that
+// of pages ([acceptHeader]).
+func acceptFor(u *neturl.URL) string {
+	if u == nil {
+		return acceptHeader
+	}
+	switch strings.ToLower(path.Ext(u.Path)) {
+	case ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".bmp", ".ico", ".avif", ".apng":
+		return imageAcceptHeader
+	case ".css":
+		return "text/css,*/*;q=0.1"
+	case ".js", ".mjs":
+		return "*/*"
+	}
+	return acceptHeader
+}
+
+// imageAcceptHeader is the Accept header of the requests of images, as
+// browsers send it, without image/avif (see [acceptHeader]).
+const imageAcceptHeader = "image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8"
 
 // httpClient is the client of the default [Context.GetURL], with a timeout
 // so that a server that does not respond does not stop the reading of a

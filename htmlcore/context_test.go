@@ -1542,3 +1542,22 @@ func TestLineHeightHalfLeading(t *testing.T) {
 	assert.InDelta(t, t20+10, t40, 1.5, "half of the extra 20px is above the text")
 	assert.InDelta(t, b20+10, b40, 1.5)
 }
+
+// TestAcceptFor tests that requests of images, style sheets and scripts
+// accept what browsers accept for them, not pages (the image servers of
+// reddit.com sent pages that show images to requests that accept pages).
+func TestAcceptFor(t *testing.T) {
+	for u, want := range map[string]string{
+		"https://i.redd.it/a24lk9c16m1i1.jpeg":                        imageAcceptHeader,
+		"https://cf.preview.redd.it/x-v0-ab.png?width=1080&auto=webp": imageAcceptHeader,
+		"https://example.com/style.css?v=2":                           "text/css,*/*;q=0.1",
+		"https://example.com/app.js":                                  "*/*",
+		"https://www.reddit.com/r/ebikes/":                            acceptHeader,
+	} {
+		req, err := http.NewRequest(http.MethodGet, u, nil)
+		require.NoError(t, err)
+		SetRequestHeaders(req)
+		assert.Equal(t, want, req.Header.Get("Accept"), u)
+		assert.NotContains(t, req.Header.Get("Accept"), "avif", u)
+	}
+}
