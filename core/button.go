@@ -184,7 +184,7 @@ func (bt *Button) Init() {
 	// leaves the menu open
 	bt.On(events.MouseDown, func(e events.Event) {
 		bt.menuPressed = false
-		if !bt.HasMenu() || e.MouseButton() != events.Left || TheApp.Platform().IsMobile() {
+		if !bt.HasMenu() || e.MouseButton() != events.Left || TheApp.SystemPlatform().IsMobile() {
 			return
 		}
 		if st := bt.openMenuStage(e); st != nil {

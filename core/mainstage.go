@@ -251,9 +251,6 @@ func (st *Stage) runWindow() *Stage {
 	// The current window is read once, as the event loop of a window that
 	// is closed sets it to another window.
 	cw := getCurrentRenderWindow()
-	if cw != nil && cw.mains.top() == nil { // (closed, as when its last stage was closed)
-		cw = nil
-	}
 	if cw == nil || newWindow {
 		// If we have no current render window, we need to be in a new window,
 		// and we need a *temporary* Mains to get initial pref size.
@@ -308,9 +305,16 @@ func (st *Stage) runWindow() *Stage {
 		st.setMains(ms)
 	} else {
 		ms := &cw.mains
-		msc := ms.top().Scene
-		sc.SceneGeom.Size = sz
-		sc.fitInWindow(msc.SceneGeom) // does resize
+		if ms.top() == nil {
+			// a window without stages fills the window, as on mobile and
+			// the web, where the window stays when its last stage is closed
+			// (as in the tests, which then run a window again)
+			sc.Resize(math32.Geom2DInt{Size: cw.SystemWindow.Size()})
+		} else {
+			msc := ms.top().Scene
+			sc.SceneGeom.Size = sz
+			sc.fitInWindow(msc.SceneGeom) // does resize
+		}
 		ms.push(st)
 		st.setMains(ms)
 	}

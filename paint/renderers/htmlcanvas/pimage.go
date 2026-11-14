@@ -32,10 +32,19 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 	// todo: handle masks!
 
 	// Fast path for [image.Uniform]
+	// (draw.Src replaces what is there, so it is cleared first, other than
+	// for an opaque color, and draw.Over draws over it, which is nothing for
+	// a transparent color, rather than clearing it, which erased what was
+	// under a widget with a transparent background)
 	if u, ok := usrc.(*image.Uniform); nilSrc || ok && umask == nil {
-		if u == nil || u.C == colors.Transparent {
+		var a uint8
+		if u != nil {
+			a = colors.AsRGBA(u.C).A
+		}
+		if pr.Op == draw.Src && a < 255 {
 			rs.ctx.Call("clearRect", pr.Rect.Min.X, pr.Rect.Min.Y, pr.Rect.Dx(), pr.Rect.Dy())
-		} else {
+		}
+		if a > 0 {
 			rs.setFillStyle(rs.imageToStyle(u))
 			rs.ctx.Call("fillRect", pr.Rect.Min.X, pr.Rect.Min.Y, pr.Rect.Dx(), pr.Rect.Dy())
 		}
