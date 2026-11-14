@@ -470,16 +470,21 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 			})
 		}
 	}
-	// the declarations as they are now
+	// the declarations as they are now (the values of custom properties
+	// are found again if any of them changed)
 	pseudoChanged := map[*html.Node]bool{}
+	varsChanged := false
 	for _, n := range order {
 		ds := c.matchDecls(n)
 		queried := false
 		for _, d := range ds {
 			queried = queried || d.container != nil
 		}
+		if hasCustomDecls(c.styles[n]) || hasCustomDecls(ds) {
+			varsChanged = true
+			c.varMemo = nil // (as the elements in it inherit them)
+		}
 		c.styles[n] = ds
-		c.varMemo = nil
 		delete(c.sorted, n)
 		delete(c.hinted, n) // its attributes are added again
 		if queried {
@@ -515,6 +520,9 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 			c.setPseudo(n, kind, nd, len(nd) > 0)
 			pseudoChanged[n] = true
 		}
+	}
+	if varsChanged {
+		c.varMemo = nil
 	}
 	u := &declUpdate{undo: undo, freeChanged: pseudoChanged}
 	for _, n := range order {
@@ -1434,6 +1442,17 @@ func neverRendered(n *html.Node) bool {
 	switch n.DataAtom {
 	case atom.Source, atom.Track, atom.Script, atom.Noscript, atom.Template, atom.Style, atom.Link, atom.Meta, atom.Base, atom.Param:
 		return true
+	}
+	return false
+}
+
+// hasCustomDecls returns whether the given declarations have custom
+// properties.
+func hasCustomDecls(ds []*cssDecl) bool {
+	for _, d := range ds {
+		if strings.HasPrefix(d.Property, "--") {
+			return true
+		}
 	}
 	return false
 }

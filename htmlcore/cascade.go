@@ -158,6 +158,7 @@ func (c *Context) addRuleList(root *html.Node, rules []*css.Rule, origin cssOrig
 
 // addDecls adds the given declarations to the given node.
 func (c *Context) addDecls(n *html.Node, decls []*css.Declaration, origin cssOrigin, spec int) {
+	custom := false
 	for _, d := range decls {
 		prop, value := strings.ToLower(strings.TrimSpace(d.Property)), strings.TrimSpace(d.Value)
 		if !validDeclaration(prop, value) {
@@ -165,11 +166,18 @@ func (c *Context) addDecls(n *html.Node, decls []*css.Declaration, origin cssOri
 		}
 		c.cssOrder++
 		c.noteVars(value)
+		custom = custom || strings.HasPrefix(prop, "--")
 		c.styles[n] = append(c.styles[n], &cssDecl{Property: prop,
 			Value: c.absoluteURLs(value), Important: d.Important, origin: origin, specificity: spec, order: c.cssOrder,
 			container: c.curContainer, rule: c.curRule})
 	}
-	c.varMemo = nil
+	if custom {
+		// (the memo has the values of custom properties only, which the
+		// hints and inline styles of each element, as they were added,
+		// otherwise cleared for each element, so that each var() looked
+		// up the elements that it is in again)
+		c.varMemo = nil
+	}
 	if c.curContainer != nil {
 		if c.containerQueried == nil {
 			c.containerQueried = map[*html.Node]bool{}

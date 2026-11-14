@@ -792,13 +792,15 @@ func (rc *reconciler) remap(r *html.Node) {
 		w.AsWidget().WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
 			delete(c.blocks, cw)
 			if n := ownNode(cw); n != nil && rootNode(n) != root {
+				if hasCustomDecls(c.styles[n]) {
+					c.varMemo = nil
+				}
 				delete(c.elementWidgets, n)
 				delete(c.nodeWidgets, n)
 				delete(c.styles, n)
 				delete(c.sorted, n)
 				delete(c.hinted, n)
 				delete(c.containers, n)
-				c.varMemo = nil
 			}
 			return tree.Continue
 		})

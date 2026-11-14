@@ -452,6 +452,9 @@ func (c *Context) reuseMatches(root *html.Node, prev *Context) bool {
 // setMatched sets the declarations of the rules that match the given
 // element.
 func (c *Context) setMatched(n *html.Node, ds []*cssDecl) {
+	if hasCustomDecls(ds) || hasCustomDecls(c.styles[n]) {
+		c.varMemo = nil
+	}
 	if len(ds) == 0 {
 		delete(c.styles, n)
 	} else {
