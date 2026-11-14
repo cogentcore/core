@@ -11,7 +11,6 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/paint"
 	"cogentcore.org/core/paint/renderers/htmlcanvas"
 	"cogentcore.org/core/system/composer"
 	"golang.org/x/image/draw"
@@ -24,8 +23,9 @@ func grabRenderFrom(w Widget) *image.RGBA {
 	if wb.Geom.TotalBBox.Empty() { // the widget is offscreen
 		return nil
 	}
-	// todo: grab region from canvas!
-	imgRend := paint.NewImageRenderer(math32.FromPoint(wb.Scene.SceneGeom.Size))
+	// rendered by the browser, with its text, as in the canvas of the
+	// scene, rather than by rasterx, which has no fonts on the web (#1552)
+	imgRend := htmlcanvas.NewImage(math32.FromPoint(wb.Scene.SceneGeom.Size))
 	wb.RenderWidget()
 	rend := wb.Scene.Painter.RenderDone()
 	imgRend.Render(rend)
@@ -35,7 +35,12 @@ func grabRenderFrom(w Widget) *image.RGBA {
 	}
 	sz := wb.Geom.TotalBBox.Size()
 	img := image.NewRGBA(image.Rectangle{Max: sz})
-	draw.Draw(img, img.Bounds(), scimg, wb.Geom.TotalBBox.Min, draw.Src)
+	// over the background of the parent, as the widget is shown, where it
+	// does not render its own background
+	if pbg := wb.parentActualBackground(); pbg != nil {
+		draw.Draw(img, img.Bounds(), pbg, wb.Geom.TotalBBox.Min, draw.Src)
+	}
+	draw.Draw(img, img.Bounds(), scimg, wb.Geom.TotalBBox.Min, draw.Over)
 	return img
 }
 
