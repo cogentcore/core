@@ -11,6 +11,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -356,4 +357,65 @@ func TestPlaybackAudioStream(t *testing.T) {
 		t.Fatal("the stream did not end")
 	}
 	assert.InDelta(t, 1.5, al.last().Seconds(), 0.15)
+}
+
+// TestPlaybackStreamOpenedOnce tests that a stream that is played as soon
+// as it is opened is requested once: the decoder that opened it to read its
+// properties decodes it (the live stream of npr.org, opened twice, took 2.8s
+// to start).
+func TestPlaybackStreamOpenedOnce(t *testing.T) {
+	data, err := os.ReadFile("testdata/tone.mp3")
+	require.NoError(t, err)
+	var reqs atomic.Int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		reqs.Add(1)
+		w.Header().Set("Content-Type", "audio/mpeg")
+		for i := 0; i < len(data); i += 1024 {
+			w.Write(data[i:min(i+1024, len(data))])
+			w.(http.Flusher).Flush()
+		}
+	}))
+	defer srv.Close()
+	p, al := newAudioPlayback(t, srv.URL+"/live.mp3")
+	require.NoError(t, p.Play())
+	select {
+	case <-al.ended:
+	case <-time.After(5 * time.Second):
+		t.Fatal("the stream did not end")
+	}
+	assert.Equal(t, int32(1), reqs.Load())
+}
+
+// TestPlaybackLiveResume tests that a live stream (of no duration) that is
+// resumed after a long pause is requested again, to play from its live
+// point, and plays.
+func TestPlaybackLiveResume(t *testing.T) {
+	old := liveStale
+	liveStale = 100 * time.Millisecond
+	defer func() { liveStale = old }()
+	data, err := os.ReadFile("testdata/tone.mp3")
+	require.NoError(t, err)
+	var reqs atomic.Int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		reqs.Add(1)
+		w.Header().Set("Content-Type", "audio/mpeg")
+		for range 40 { // (a long stream, sent as it plays)
+			for i := 0; i < len(data); i += 1024 {
+				if _, err := w.Write(data[i:min(i+1024, len(data))]); err != nil {
+					return
+				}
+				w.(http.Flusher).Flush()
+				time.Sleep(30 * time.Millisecond)
+			}
+		}
+	}))
+	defer srv.Close()
+	p, al := newAudioPlayback(t, srv.URL+"/live.mp3")
+	defer p.Stop()
+	require.NoError(t, p.Play())
+	require.Eventually(t, func() bool { return al.last() > 0 }, 5*time.Second, 20*time.Millisecond)
+	p.Pause()
+	time.Sleep(300 * time.Millisecond)
+	p.Resume()
+	require.Eventually(t, func() bool { return reqs.Load() == 2 && p.IsPlaying() }, 5*time.Second, 20*time.Millisecond, "requested again, and playing")
 }

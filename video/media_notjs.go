@@ -28,9 +28,9 @@ func OpenMedia(fpath string, options map[string]string) (*Media, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer d.free()
 	m := &Media{Path: fpath, Options: options}
 	d.setProperties(m)
+	m.keepProbe(d) // (for its first decoding, see Media.probe)
 	return m, nil
 }
 

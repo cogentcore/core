@@ -6,6 +6,7 @@ package video
 
 import (
 	"io"
+	"sync"
 	"time"
 )
 
@@ -59,6 +60,40 @@ type Media struct {
 	// audio (as an MP3 file or stream) has no size nor frames, and its
 	// playing is timed by its audio (see [Playback]).
 	HasVideo bool
+
+	// probe is the decoder that opened the media to read its properties,
+	// kept for its first decoding from its start (see takeProbe), so that
+	// it is not opened again (as a stream of a URL, which is read again
+	// from the network: the live stream of npr.org took 2.8s to start).
+	probe   *decoder
+	probeMu sync.Mutex
+}
+
+// probeKeep is how long the decoder that opened a media is kept for its
+// first decoding (see [Media.probe]); it is freed if none starts by then.
+const probeKeep = 10 * time.Second
+
+// keepProbe keeps the given decoder that opened the media, for its first
+// decoding (see takeProbe), until [probeKeep] has passed.
+func (m *Media) keepProbe(d *decoder) {
+	m.probeMu.Lock()
+	m.probe = d
+	m.probeMu.Unlock()
+	time.AfterFunc(probeKeep, func() {
+		if d := m.takeProbe(); d != nil {
+			d.free()
+		}
+	})
+}
+
+// takeProbe returns the decoder that opened the media, if it is still
+// kept, which the caller then owns, or nil.
+func (m *Media) takeProbe() *decoder {
+	m.probeMu.Lock()
+	defer m.probeMu.Unlock()
+	d := m.probe
+	m.probe = nil
+	return d
 }
 
 // Source is a source of the media of a [Media] other than a file or URL,

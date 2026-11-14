@@ -414,11 +414,27 @@ func (p *Playback) Resume() {
 	if !p.paused {
 		return
 	}
+	if p.Media != nil && p.Media.Duration <= 0 && p.Media.Source == nil && time.Since(p.pausedAt) > liveStale {
+		// a live stream (of no duration, as a radio stream) that was paused
+		// long plays again from its live point, as what was received before
+		// the pause is stale (and its connection may have ended), in the
+		// background, as it is opened again
+		go func() {
+			if err := p.PlayFrom(0); err != nil && p.OnError != nil {
+				p.OnError(err)
+			}
+		}()
+		return
+	}
 	p.paused = false
 	p.pauseShift += time.Since(p.pausedAt)
 	close(p.resume)
 	p.setAudioPaused(false)
 }
+
+// liveStale is how long a live stream is paused after which it plays again
+// from its live point when it is resumed (see [Playback.Resume]).
+var liveStale = 10 * time.Second
 
 // setAudioPaused pauses or resumes the audio, with the lock held.
 func (p *Playback) setAudioPaused(paused bool) {
