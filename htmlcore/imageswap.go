@@ -28,6 +28,10 @@ type imageSwap struct {
 	src     string
 	density float32
 	im      image.Image
+
+	// restyle is whether its class or style changed too, for which it is
+	// styled again (see Context.updateDecls)
+	restyle bool
 }
 
 // imageAttrs are the attributes of img and source elements that only
@@ -46,17 +50,20 @@ func (c *Context) imageChange(n *html.Node, srcRules *int) (*imageSwap, bool) {
 		return nil, false
 	}
 	o, ok := c.snaps[n]
-	if !ok || o.class != GetAttr(n, "class") || o.id != GetAttr(n, "id") || o.style != GetAttr(n, "style") {
+	if !ok || o.id != GetAttr(n, "id") {
 		return nil, false
 	}
+	// (its class and style may change too, as lazy loaders mark the images
+	// that they have loaded, for which it is restyled; see restyle)
+	restyle := o.class != GetAttr(n, "class") || o.style != GetAttr(n, "style")
 	ov, nv := attrValues(o.others), attrValues(otherAttrs(n))
 	for k, v := range ov {
-		if w, ok := nv[k]; (!ok || w != v) && !imageAttrs[k] {
+		if w, ok := nv[k]; (!ok || w != v) && !imageAttrs[k] && !c.inertAttr(k) {
 			return nil, false
 		}
 	}
 	for k := range nv {
-		if _, ok := ov[k]; !ok && !imageAttrs[k] {
+		if _, ok := ov[k]; !ok && !imageAttrs[k] && !c.inertAttr(k) {
 			return nil, false
 		}
 	}
@@ -102,7 +109,7 @@ func (c *Context) imageChange(n *html.Node, srcRules *int) (*imageSwap, bool) {
 	if *srcRules > 0 {
 		return nil, false // (selected by them, which are not matched again)
 	}
-	return &imageSwap{n: n, img: img, w: w, src: src, density: density}, true
+	return &imageSwap{n: n, img: img, w: w, src: src, density: density, restyle: restyle && n == img}, !restyle || n == img
 }
 
 // load gets the image of the swap, and records the state of its element,
@@ -116,13 +123,84 @@ func (sw *imageSwap) load(c *Context) {
 	if sw.im == nil {
 		sw.im, _ = readImage(c, sw.src) // (none if it can not be gotten, as for an error)
 	}
-	if p := sw.n.Parent; p != nil {
+	if !sw.restyle {
+		c.resnap(sw.n) // (as updateDecls does for those that it styles again)
+	}
+}
+
+// resnap records the state of the given element (see [nodeSnap]), as its
+// declarations are for it.
+func (c *Context) resnap(n *html.Node) {
+	if p := n.Parent; p != nil {
 		snapChildren(p, func(k *html.Node, s nodeSnap) {
-			if k == sw.n {
+			if k == n {
 				c.snaps[k] = s
 			}
 		})
 	}
+}
+
+// inertAttr returns whether a change of the given attribute changes nothing
+// that is rendered: a custom one, with a hyphen (as data-*, and the
+// pinger-seen that the analytics of nytimes.com add to the images that they
+// have seen, for which they were read again; not those of the context, as
+// for :hover), that no style rule selects elements by.
+func (c *Context) inertAttr(name string) bool {
+	if !strings.Contains(name, "-") || strings.HasPrefix(name, "data-htmlcore-") || strings.Contains(name, ":") ||
+		name == "http-equiv" || name == "accept-charset" {
+		return false
+	}
+	if n := len(c.rules) + len(c.pseudoRules); c.attrsSelected == nil || c.attrsRules != n {
+		c.attrsSelected, c.attrsRules = map[string]bool{}, n
+	}
+	sel, ok := c.attrsSelected[name]
+	if !ok {
+		for _, r := range c.rules {
+			if sel = hasAttrSelector(r.text, name); sel {
+				break
+			}
+		}
+		for _, r := range c.pseudoRules {
+			if sel = sel || hasAttrSelector(r.text, name); sel {
+				break
+			}
+		}
+		c.attrsSelected[name] = sel
+	}
+	return !sel
+}
+
+// inertChange returns whether the given element, which has widgets of its
+// own, has changed only in its attributes whose changes change nothing that
+// is rendered (see [Context.inertAttr]). (The attributes of the elements
+// without widgets, in runs of text, are in the markup of the text.)
+func (c *Context) inertChange(n *html.Node) bool {
+	if c.snaps == nil || n.Type != html.ElementNode {
+		return false
+	}
+	if ws := c.elementWidgets[n]; len(ws) == 0 || ownNode(ws[0]) != n {
+		return false
+	}
+	o, ok := c.snaps[n]
+	if !ok || o.class != GetAttr(n, "class") || o.id != GetAttr(n, "id") || o.style != GetAttr(n, "style") {
+		return false
+	}
+	others := otherAttrs(n)
+	if others == o.others {
+		return false // (a change of its states, as for :hover)
+	}
+	ov, nv := attrValues(o.others), attrValues(others)
+	for k, v := range ov {
+		if w, ok := nv[k]; (!ok || w != v) && !c.inertAttr(k) {
+			return false
+		}
+	}
+	for k := range nv {
+		if _, ok := ov[k]; !ok && !c.inertAttr(k) {
+			return false
+		}
+	}
+	return true
 }
 
 // apply sets the image of the swap in its widget, with the lock of the

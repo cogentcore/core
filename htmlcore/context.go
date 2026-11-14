@@ -328,7 +328,12 @@ type pageState struct {
 
 	// varsUsed are the custom properties that the declarations of the
 	// page use (with var()), for [Context.unusedCustomProps].
-	varsUsed         map[string]bool
+	varsUsed map[string]bool
+
+	// attrsSelected are whether the style rules select elements by the
+	// attributes (see Context.inertAttr), for attrsRules rules.
+	attrsSelected    map[string]bool
+	attrsRules       int
 	containerQueryMu sync.Mutex
 
 	// queried are the declarations of the elements with @container rules

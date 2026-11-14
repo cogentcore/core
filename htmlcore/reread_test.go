@@ -639,6 +639,24 @@ func TestRereadImageSource(t *testing.T) {
 			return []*html.Node{i}, nil
 		}, "wrap", "a", "b", "i")
 	})
+	t.Run("img seen", func(t *testing.T) {
+		// (with the pinger-seen of the analytics of nytimes.com)
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+			i := elementByID(doc, "i")
+			setAttr(i, "src", png)
+			setAttr(i, "pinger-seen", "true")
+			return []*html.Node{i}, nil
+		}, "wrap", "a", "b", "i")
+	})
+	t.Run("img loaded", func(t *testing.T) {
+		// (with a class of the images that are loaded, as lazy loaders set)
+		testReread(t, strings.Replace(page, "<html><body>", "<html><head><style>.lazyLoaded { opacity: 0.5 }</style></head><body>", 1), true, func(doc *html.Node) (self, children []*html.Node) {
+			i := elementByID(doc, "i")
+			setAttr(i, "src", png)
+			setAttr(i, "class", "lazyLoaded")
+			return []*html.Node{i}, nil
+		}, "wrap", "a", "b", "i")
+	})
 	t.Run("srcset with lines", func(t *testing.T) {
 		// (as on nytimes.com: its URLs have =, which were other attributes)
 		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
@@ -684,4 +702,24 @@ func TestRereadInsertBeforeKept(t *testing.T) {
 	assert.False(t, siblingSelects(elementByID(doc, "app"), subjects))
 	assert.True(t, siblingSelects(elementByID(doc, "side"), subjects))
 	assert.True(t, siblingSelects(elementByID(doc, "r"), subjects))
+}
+
+// TestRereadInertAttrs tests that a change of custom attributes that no
+// style rule selects by (as the pinger-seen that the analytics of
+// nytimes.com add to the images that they have seen) reads nothing again,
+// and that one that a rule selects by is read again, as the page anew.
+func TestRereadInertAttrs(t *testing.T) {
+	for _, style := range []string{"", "[pinger-seen] { color: red }"} {
+		page := `<html><head><style>.v { height: 10px }` + style + `</style></head><body><div id="wrap" style="width: 400px">
+<div id="v" class="v">v</div><div id="w">w</div></div></body></html>`
+		var kept []string
+		if style == "" {
+			kept = []string{"wrap", "v", "w"}
+		}
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+			v := elementByID(doc, "v")
+			v.Attr = append(v.Attr, html.Attribute{Key: "pinger-seen", Val: "true"}, html.Attribute{Key: "data-testid", Val: "x"})
+			return []*html.Node{v}, nil
+		}, kept...)
+	}
 }

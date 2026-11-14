@@ -328,8 +328,18 @@ func (c *Context) prepareReread(self, children []*html.Node, apply *func()) bool
 	var swaps []*imageSwap
 	srcRules := -1
 	for _, n := range self {
+		if c.inertChange(n) {
+			c.resnap(n)
+			continue
+		}
 		if sw, ok := c.imageChange(n, &srcRules); ok {
 			swaps = append(swaps, sw)
+			if sw.restyle {
+				changed = append(changed, n) // (styled again, see updateDecls)
+				if root == nil {
+					root = rootNode(n)
+				}
+			}
 			continue
 		}
 		if !addChanged(n, true) {
