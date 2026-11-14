@@ -1871,20 +1871,23 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 						gr = gsum
 					}
 					redo = true
-					asz = math32.Round(mx + exd*(gr/gsum))
+					share := mx + exd*(gr/gsum)
+					asz = math32.Round(share)
 					oasz := asz
 					styles.SetClampMax(&asz, ksz.maxTotal().Dim(ma))
 					if asz < oasz { // didn't consume its full amount
 						ksz.slot.SetDim(ma, oasz)
-						if exitr == 0 {
-							maxExtra.SetDim(ma, maxExtra.Dim(ma)+(oasz-asz))
+						if exitr == 0 { // (of its share as it is, not rounded)
+							maxExtra.SetDim(ma, maxExtra.Dim(ma)+(share-asz))
 							exn.SetDim(ma, exn.Dim(ma)+gr)
 						}
 					} else {
 						if exitr == 1 { // get more!
 							nsum := gsum - exn.Dim(ma)
 							if nsum > 0 {
-								asz += math32.Round(maxExtra.Dim(ma) * (gr / nsum))
+								// (rounded with its share, rather than each
+								// rounded up, which overflowed by a pixel)
+								asz = math32.Round(share + maxExtra.Dim(ma)*(gr/nsum))
 							}
 						}
 					}
