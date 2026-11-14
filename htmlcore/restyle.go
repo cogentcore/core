@@ -56,6 +56,7 @@ type styleRule struct {
 type pseudoRule struct {
 	root   *html.Node
 	sel    *compiledSelector
+	text   string // of its selector
 	kind   string
 	decls  []*css.Declaration
 	origin cssOrigin
@@ -156,7 +157,7 @@ func (c *Context) matchDecls(n *html.Node) []*cssDecl {
 	defer func() { c.cssBase, c.curContainer = base, container }()
 	for _, i := range c.index().candidates(n) {
 		r := c.rules[i]
-		if !contains(r.root, n) || !r.sel.sel.Match(n) {
+		if !contains(r.root, n) || !c.selMatch(r.sel, n) {
 			continue
 		}
 		c.cssBase = r.cssBase // for its URLs
@@ -166,6 +167,7 @@ func (c *Context) matchDecls(n *html.Node) []*cssDecl {
 				continue
 			}
 			c.cssOrder++
+			c.noteVars(value)
 			ds = append(ds, &cssDecl{Property: prop, Value: c.absoluteURLs(value), Important: d.Important,
 				origin: r.origin, specificity: r.spec, order: c.cssOrder, container: r.container, rule: i + 1})
 		}
@@ -178,11 +180,12 @@ func (c *Context) matchDecls(n *html.Node) []*cssDecl {
 func (c *Context) matchPseudo(n *html.Node, kind string) []*cssDecl {
 	var ds []*cssDecl
 	for _, r := range c.pseudoRules {
-		if r.kind != kind || r.sel == nil || !contains(r.root, n) || !r.sel.sel.Match(n) {
+		if r.kind != kind || r.sel == nil || !contains(r.root, n) || !c.selMatch(r.sel, n) {
 			continue
 		}
 		for _, d := range r.decls {
 			c.cssOrder++
+			c.noteVars(d.Value)
 			ds = append(ds, &cssDecl{Property: strings.ToLower(strings.TrimSpace(d.Property)), Value: c.absoluteURLs(strings.TrimSpace(d.Value)),
 				Important: d.Important, origin: r.origin, specificity: r.spec, order: c.cssOrder})
 		}
@@ -230,16 +233,34 @@ type nodeStyles struct {
 // or a table), or one of an element that has no widget of its own (as an
 // inline element in a run of text).
 func (c *Context) Restyle(changed []*html.Node) bool {
+	apply := c.PrepareRestyle(changed)
+	if apply == nil {
+		return false
+	}
+	apply()
+	return true
+}
+
+// PrepareRestyle finds the declarations of the given changed elements as
+// [Context.Restyle] does, with the styles of the context locked (see
+// [Context.LockStyles]), and without the lock of the widgets of the page
+// (as it takes time), and returns the function that styles the widgets
+// again, with the lock of the widgets held, or nil if they can not be (see
+// [Context.Fallback]).
+func (c *Context) PrepareRestyle(changed []*html.Node) func() {
+	c.styleMu.Lock()
+	defer c.styleMu.Unlock()
+	c.containersChanged() // (declarations may change)
+	defer c.containersChanged()
 	c.fallback = ""
 	if len(changed) == 0 {
-		return true
+		return func() {}
 	}
 	u, ok := c.updateDecls(changed, nil, nil)
 	if !ok {
-		return false
+		return nil
 	}
-	u.apply(c)
-	return true
+	return func() { u.apply(c) }
 }
 
 // declUpdate is an update of the declarations of the elements of a page
@@ -298,6 +319,10 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 		root = rootNode(changed[0])
 	} else if len(whole) > 0 {
 		root = rootNode(whole[0])
+	} else if len(c.addedShallow) > 0 {
+		root = rootNode(c.addedShallow[0])
+	} else if len(c.addedDeep) > 0 {
+		root = rootNode(c.addedDeep[0])
 	} else {
 		return &declUpdate{undo: func() {}}, true
 	}
@@ -316,6 +341,11 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 		}
 		affected[n] = true
 		order = append(order, n)
+		if c.matchKept[n] {
+			// kept with its widgets (see Context.keptElements): the
+			// elements in it match as they did (see Context.shallowKept)
+			return true
+		}
 		for k := n.FirstChild; k != nil; k = k.NextSibling {
 			if !add(k) {
 				return false
@@ -324,6 +354,17 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 		return true
 	}
 	tooMany := fmt.Sprintf("more than %d elements to style again", maxRestyled)
+	for _, n := range c.addedShallow {
+		if !affected[n] {
+			affected[n] = true
+			order = append(order, n)
+		}
+	}
+	for _, n := range c.addedDeep {
+		if !add(n) {
+			return nil, c.noChange(tooMany)
+		}
+	}
 	for _, n := range whole {
 		if !add(n) {
 			return nil, c.noChange(tooMany)
@@ -337,6 +378,47 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 			// svg and math, which are read differently
 			return nil, c.noChange("a change in svg or math: " + describeNode(n))
 		}
+		selects, siblings, ok := c.invalidation(n)
+		if ok {
+			// only the elements that the rules of its changed classes
+			// and id may select, as the invalidation sets of browsers (a
+			// class of the html or body element of npr.org matched all of
+			// its 8000 elements again)
+			var walk func(k *html.Node) bool
+			walk = func(k *html.Node) bool {
+				for ; k != nil; k = k.NextSibling {
+					if k.Type != html.ElementNode {
+						continue
+					}
+					if selects(k) && !affected[k] {
+						if len(order) >= maxRestyled {
+							return false
+						}
+						affected[k] = true
+						order = append(order, k)
+					}
+					if !walk(k.FirstChild) {
+						return false
+					}
+				}
+				return true
+			}
+			if !affected[n] {
+				affected[n] = true
+				order = append(order, n)
+			}
+			if !walk(n.FirstChild) {
+				return nil, c.noChange(tooMany)
+			}
+			if siblings {
+				for s := n.NextSibling; s != nil; s = s.NextSibling {
+					if !add(s) {
+						return nil, c.noChange(tooMany)
+					}
+				}
+			}
+			continue
+		}
 		for s := n; s != nil; s = s.NextSibling {
 			if !add(s) {
 				return nil, c.noChange(tooMany)
@@ -344,6 +426,7 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 		}
 	}
 	restore := c.setCheckedAttrs(root) // for :checked and :hover
+	defer c.keepAncestorMasks()()
 	defer restore()
 	if c.relational {
 		// the elements that :has() selectors select, which may be any,
@@ -352,6 +435,7 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 			return nil, c.noChange("the elements that :has() selects")
 		}
 	}
+
 	// the declarations as they were (all of them first, as those of an
 	// element depend on those of the elements that it is in, for var())
 	saved := map[*html.Node]*nodeStyles{}
@@ -403,16 +487,21 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 			})
 		}
 	}
-	// the declarations as they are now
+	// the declarations as they are now (the values of custom properties
+	// are found again if any of them changed)
 	pseudoChanged := map[*html.Node]bool{}
+	varsChanged := false
 	for _, n := range order {
 		ds := c.matchDecls(n)
 		queried := false
 		for _, d := range ds {
 			queried = queried || d.container != nil
 		}
+		if hasCustomDecls(c.styles[n]) || hasCustomDecls(ds) {
+			varsChanged = true
+			c.varMemo = nil // (as the elements in it inherit them)
+		}
 		c.styles[n] = ds
-		c.varMemo = nil
 		delete(c.sorted, n)
 		delete(c.hinted, n) // its attributes are added again
 		if queried {
@@ -440,7 +529,7 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 				c.setPseudo(n, kind, nd, len(nd) > 0)
 				continue
 			}
-			if !isFree(n) {
+			if !isFree(n) && !(c.addRoot != nil && c.addRoot(n)) {
 				undo()
 				// its pseudo-element, which may be a widget
 				return nil, c.noChange("a change of the ::" + kind + " of " + describeNode(n))
@@ -449,10 +538,17 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 			pseudoChanged[n] = true
 		}
 	}
+	if varsChanged {
+		c.varMemo = nil
+	}
 	u := &declUpdate{undo: undo, freeChanged: pseudoChanged}
 	for _, n := range order {
-		if inHead(n) {
-			continue // (not rendered, as a style element that is added)
+		if inHead(n) || neverRendered(n) {
+			// not rendered (as a style element that is added, or the
+			// source elements of a picture, whose display the slideshows
+			// of npr.org changed many times a second, each reading the
+			// page again)
+			continue
 		}
 		nw := effectiveDecls(c.declarations(n))
 		props := changedProps(old[n], nw)
@@ -470,14 +566,31 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 			continue // not rendered, before and after
 		}
 		ws := c.elementWidgets[n]
+		// a change that the widgets can not be styled again for is read
+		// again, with the elements that it is in, as elements are read
+		// again (see Context.addRoot), or else the page is
+		readAgain := func() bool {
+			if c.addRoot != nil && c.addRoot(n) {
+				u.freeChanged[n] = true
+				return true
+			}
+			return false
+		}
 		if d := c.displayOf(n); d != oldDisplay[n] {
+			if readAgain() {
+				continue
+			}
 			undo()
 			return nil, c.noChange(fmt.Sprintf("display of %s from %q to %q", describeNode(n), oldDisplay[n], d))
 		}
-		if len(ws) == 0 && !c.undisplayed(n) {
+		if len(ws) == 0 && !c.undisplayed(n) && !c.unusedCustomProps(props) {
+			if readAgain() {
+				continue
+			}
 			undo()
 			return nil, c.noChange(fmt.Sprintf("%s of %s, which has no widget of its own", strings.Join(props, ", "), describeNode(n)))
 		}
+		read := false
 		for _, p := range props {
 			if p == "position" && inFlowPosition(old[n][p]) && inFlowPosition(nw[p]) {
 				// static and relative are both in the flow, so the widget
@@ -487,10 +600,16 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 				continue
 			}
 			if !c.restylable(n, p) {
+				if read = readAgain(); read {
+					break
+				}
 				undo()
 				return nil, c.noChange(fmt.Sprintf("%s of %s", p, describeNode(n)))
 			}
 			u.layout = u.layout || !paintProperties[p]
+		}
+		if read {
+			continue
 		}
 		u.widgets = append(u.widgets, ws...)
 	}
@@ -511,6 +630,7 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 		// all of the elements have been matched with all of the rules (as
 		// with those added to style sheets; see Context.ReuseStyles)
 		c.matchedRules = len(c.rules)
+		c.matchedPseudo = len(c.pseudoRules)
 	}
 	return u, true
 }
@@ -595,7 +715,7 @@ func (c *Context) relationalChanges(root *html.Node, changed []*html.Node, add f
 			r := c.rules[i]
 			// (the key of its selector first, which most elements do not
 			// have, then its scope, after a match, as it walks up)
-			if had(i) != (r.sel.keyIn(n) && r.sel.sel.Match(n) && contains(r.root, n)) {
+			if had(i) != (r.sel.keyIn(n) && c.selMatch(r.sel, n) && contains(r.root, n)) {
 				return add(n)
 			}
 		}
@@ -1045,6 +1165,388 @@ var restylableProperties = func() map[string]bool {
 func inHead(n *html.Node) bool {
 	for p := n; p != nil; p = p.Parent {
 		if p.Type == html.ElementNode && p.DataAtom == atom.Head {
+			return true
+		}
+	}
+	return false
+}
+
+// unusedCustomProps returns whether the given properties are all custom
+// properties that no declaration of the page uses (with var()), so that
+// their changes change nothing (as the --vwo-el-* properties that the
+// A/B testing scripts of volkskrant.nl set on the html element, which has
+// no widget of its own, for which the page was read whole).
+func (c *Context) unusedCustomProps(props []string) bool {
+	for _, p := range props {
+		if !strings.HasPrefix(p, "--") {
+			return false
+		}
+	}
+	for _, p := range props {
+		if c.varsUsed[p] {
+			return false
+		}
+	}
+	return true
+}
+
+// noteVars records the custom properties that the given value of a
+// declaration uses (with var()), for [Context.unusedCustomProps].
+func (c *Context) noteVars(value string) {
+	for {
+		i := strings.Index(value, "var(")
+		if i < 0 {
+			return
+		}
+		value = strings.TrimLeft(value[i+4:], " \t\n")
+		j := 0
+		for j < len(value) && isNameChar(value[j]) {
+			j++
+		}
+		if j > 0 {
+			if c.varsUsed == nil {
+				c.varsUsed = map[string]bool{}
+			}
+			c.varsUsed[value[:j]] = true
+		}
+		value = value[j:]
+	}
+}
+
+// invalidation returns, for the given element whose attributes have
+// changed, whether the elements in it are selected by a rule that may
+// select them differently for the change, and whether its siblings after
+// it may be, if only its class and id changed (and its style, which
+// applies to it alone): the invalidation sets of browsers, as for a class
+// added to the body element, which only the rules that have the class
+// before their last compound selectors (as .modal-open .modal) select the
+// elements in it differently for. It returns ok false, for all of the
+// elements in it and after it to be matched again, if it can not tell.
+func (c *Context) invalidation(n *html.Node) (selects func(k *html.Node) bool, siblings, ok bool) {
+	old, has := c.snaps[n]
+	if !has || c.matchAll {
+		// (as for rules added to the style sheets)
+		return nil, false, false
+	}
+	var tokens []string
+	if old.attrs == attrsHash(n) {
+		// not a change of its attributes: of its states (as :hover and
+		// :checked), or an attribute set to the value that it had
+		tokens = statePseudoClasses
+	}
+	if style := GetAttr(n, "style"); style != old.style && (strings.Contains(old.style, "--") || strings.Contains(style, "--")) {
+		// custom properties, which the elements in it inherit (only if its
+		// style changed: the html element of nytimes.com has them, and
+		// the changes of its lang and class matched its 7000 elements
+		// again, for 1s each)
+		return nil, false, false
+	}
+	oldClasses, newClasses := strings.Fields(old.class), strings.Fields(GetAttr(n, "class"))
+	for _, cl := range oldClasses {
+		if !slices.Contains(newClasses, cl) {
+			tokens = append(tokens, "."+cl)
+		}
+	}
+	for _, cl := range newClasses {
+		if !slices.Contains(oldClasses, cl) {
+			tokens = append(tokens, "."+cl)
+		}
+	}
+	if id := GetAttr(n, "id"); id != old.id {
+		for _, v := range []string{old.id, id} {
+			if v != "" {
+				tokens = append(tokens, "#"+v)
+			}
+		}
+	}
+	// the other attributes, as [data-state] or [aria-expanded=true]
+	var attrTokens []string
+	if others := otherAttrs(n); others != old.others {
+		ov, nv := attrValues(old.others), attrValues(others)
+		for k, v := range ov {
+			if w, ok := nv[k]; !ok || w != v {
+				attrTokens = append(attrTokens, k)
+			}
+		}
+		for k := range nv {
+			if _, ok := ov[k]; !ok {
+				attrTokens = append(attrTokens, k)
+			}
+		}
+		for _, a := range attrTokens {
+			if a == hoverAttr {
+				// (the attribute of :hover, while the states are set)
+				tokens = append(tokens, ":hover")
+			}
+			tokens = append(tokens, attrPseudoClasses[a]...)
+		}
+	}
+	// whether its keys (classes and id) are as they were, so that the
+	// compound selectors that it may be selected by are known (see
+	// compoundMaySelect)
+	keysChanged := false // (its classes or id, as tokens; not :lang for its lang)
+	for _, t := range tokens {
+		keysChanged = keysChanged || !sameStates(tokens) && (t[0] == '.' || t[0] == '#')
+	}
+	sameKeys := !keysChanged
+	var keys []*compiledSelector
+	all := false
+	check := func(text string, cs *compiledSelector, decls []*css.Declaration) bool {
+		prefix, sib, last := splitLastCompound(text)
+		if keysChanged && (strings.Contains(prefix, "[class") || strings.Contains(prefix, "[id")) {
+			// (selected by its class or id other than by the names of
+			// them, as [class*=icon-])
+			if sib {
+				siblings = true
+			}
+			if cs == nil || cs.keyKind == 0 {
+				all = true
+			} else {
+				keys = append(keys, cs)
+			}
+		}
+		for _, a := range attrTokens {
+			// (the selectors of attributes, of [name, as with a value)
+			inLast, inPrefix := hasAttrSelector(last, a), hasAttrSelector(prefix, a)
+			if inPrefix && sameKeys && !compoundMaySelect(prefix, n, func(comp string) bool { return hasAttrSelector(comp, a) }) {
+				inPrefix = false
+			}
+			if inLast && hasCustomProps(decls) {
+				return false
+			}
+			if inPrefix {
+				if sib {
+					siblings = true
+				}
+				if cs == nil || cs.keyKind == 0 {
+					all = true
+				} else {
+					keys = append(keys, cs)
+				}
+			}
+		}
+		// whether the rule may select it differently: for its states, if
+		// it may select it at all, by its key (its classes, id, and name
+		// are as they were; a rule of the :hover of a class with custom
+		// properties matched the 7000 elements of nytimes.com again as
+		// its scripts set the attributes of its html element to the
+		// values that they had)
+		mayChange := func() bool {
+			if sameStates(tokens) {
+				return cs == nil || cs.keyIn(n)
+			}
+			return len(attrTokens) > 0 || cs == nil || c.matchChanged(n, old, cs)
+		}
+		for _, t := range tokens {
+			if hasToken(last, t) && hasCustomProps(decls) && mayChange() {
+				// a rule that selects it differently, with custom
+				// properties, which the elements in it inherit
+				return false
+			}
+			if !hasToken(prefix, t) || sameKeys && !compoundMaySelect(prefix, n, func(comp string) bool { return hasToken(comp, t) }) {
+				continue
+			}
+			if sib {
+				siblings = true
+			}
+			if cs == nil || cs.keyKind == 0 {
+				all = true
+			} else {
+				keys = append(keys, cs)
+			}
+		}
+		return true
+	}
+	for _, r := range c.rules {
+		if !check(r.text, r.sel, r.decls) {
+			return nil, false, false
+		}
+	}
+	for _, r := range c.pseudoRules {
+		if !check(r.text, r.sel, nil) {
+			return nil, false, false
+		}
+	}
+	selects = func(k *html.Node) bool {
+		if all {
+			return true
+		}
+		for _, cs := range keys {
+			if cs.keyIn(k) {
+				return true
+			}
+		}
+		return false
+	}
+	return selects, siblings, true
+}
+
+// compoundMaySelect returns whether a compound selector of the given part
+// of a selector before its subject for which has returns true (one that has
+// the pseudo-class of a state or the attribute that changed) may select the
+// given element (by its keys; see [compoundKeys]), whose change those of
+// the elements in it and after it are selected by (as .menu:hover .item,
+// or [lang=en] .x, for an element that is not a .menu, or has no lang).
+func compoundMaySelect(prefix string, n *html.Node, has func(comp string) bool) bool {
+	if strings.ContainsAny(prefix, "\\|") {
+		return true
+	}
+	own := ownKeys(n)
+	from := 0
+	check := func(comp string) bool {
+		return has(comp) && own.has(compoundKeys(comp))
+	}
+	for _, cb := range combinators(prefix) {
+		if check(prefix[from:cb.start]) {
+			return true
+		}
+		from = cb.at + 1
+	}
+	return check(prefix[from:])
+}
+
+// splitLastCompound returns the given selector before its last compound
+// selector, whether it has a combinator of siblings (+ or ~) there, and
+// the last compound selector.
+func splitLastCompound(sel string) (prefix string, siblings bool, last string) {
+	depth, at := 0, -1
+	for i := 0; i < len(sel); i++ {
+		switch sel[i] {
+		case '(', '[':
+			depth++
+		case ')', ']':
+			depth--
+		case ' ', '>', '+', '~':
+			if depth == 0 {
+				at = i
+			}
+		}
+	}
+	if at < 0 {
+		return "", false, sel
+	}
+	prefix = sel[:at+1]
+	sib := false
+	for _, cb := range combinators(prefix) {
+		// (not as in [class~=a])
+		sib = sib || cb.sibling
+	}
+	return prefix, sib, sel[at+1:]
+}
+
+// hasToken returns whether the given selector text has the given class
+// (.name) or id (#name), not as the start of a longer name.
+func hasToken(text, token string) bool {
+	for i := 0; ; {
+		j := strings.Index(text[i:], token)
+		if j < 0 {
+			return false
+		}
+		end := i + j + len(token)
+		if end >= len(text) || !isNameChar(text[end]) {
+			return true
+		}
+		i = end
+	}
+}
+
+// hasAttrSelector returns whether the given selector text selects elements
+// by the given attribute ([name, [name=, [name~= and so on).
+func hasAttrSelector(text, name string) bool {
+	for i := 0; ; {
+		j := strings.Index(text[i:], "[")
+		if j < 0 {
+			return false
+		}
+		rest := strings.TrimLeft(text[i+j+1:], " ")
+		if strings.HasPrefix(rest, name) && (len(rest) == len(name) || !isNameChar(rest[len(name)])) {
+			return true
+		}
+		i += j + 1
+	}
+}
+
+// hasCustomProps returns whether the given declarations have custom
+// properties (--name).
+func hasCustomProps(decls []*css.Declaration) bool {
+	for _, d := range decls {
+		if strings.HasPrefix(strings.TrimSpace(d.Property), "--") {
+			return true
+		}
+	}
+	return false
+}
+
+// attrPseudoClasses are the pseudo-classes that select elements by the
+// given attributes (see [Context.invalidation]).
+var attrPseudoClasses = map[string][]string{
+	"disabled":        {":disabled", ":enabled"},
+	"checked":         {":checked", ":indeterminate", ":default"},
+	"selected":        {":checked", ":default"},
+	"required":        {":required", ":optional"},
+	"readonly":        {":read-only", ":read-write"},
+	"open":            {":open", ":closed"},
+	"lang":            {":lang"},
+	"dir":             {":dir"},
+	"href":            {":link", ":any-link", ":visited"},
+	"placeholder":     {":placeholder-shown"},
+	"value":           {":placeholder-shown", ":valid", ":invalid"},
+	"type":            {":checked", ":valid", ":invalid", ":read-only", ":read-write"},
+	"contenteditable": {":read-only", ":read-write"},
+	"hidden":          {},
+}
+
+// statePseudoClasses are the pseudo-classes of the states of elements,
+// which a change of them may select others by (see [Context.invalidation]).
+var statePseudoClasses = []string{":hover", ":checked", ":focus", ":focus-within", ":focus-visible", ":active", ":target", ":default", ":indeterminate", ":open"}
+
+// sameStates returns whether the given tokens are those of the states
+// (see [statePseudoClasses]).
+func sameStates(tokens []string) bool {
+	return len(tokens) > 0 && &tokens[0] == &statePseudoClasses[0]
+}
+
+// matchChanged returns whether the given selector matches the given
+// element differently with its class and id now and with those of the
+// given state of it (as before they changed).
+func (c *Context) matchChanged(n *html.Node, old nodeSnap, cs *compiledSelector) bool {
+	now := cs.sel.Match(n)
+	saved := n.Attr
+	attrs := make([]html.Attribute, 0, len(saved)+2)
+	for _, a := range saved {
+		if a.Namespace == "" && (a.Key == "class" || a.Key == "id") {
+			continue
+		}
+		attrs = append(attrs, a)
+	}
+	if old.class != "" {
+		attrs = append(attrs, html.Attribute{Key: "class", Val: old.class})
+	}
+	if old.id != "" {
+		attrs = append(attrs, html.Attribute{Key: "id", Val: old.id})
+	}
+	n.Attr = attrs
+	before := cs.sel.Match(n)
+	n.Attr = saved
+	return now != before
+}
+
+// neverRendered returns whether the given element never has a box of its
+// own, whatever its styles: the sources and tracks of media, and the
+// elements of scripts and of the head.
+func neverRendered(n *html.Node) bool {
+	switch n.DataAtom {
+	case atom.Source, atom.Track, atom.Script, atom.Noscript, atom.Template, atom.Style, atom.Link, atom.Meta, atom.Base, atom.Param:
+		return true
+	}
+	return false
+}
+
+// hasCustomDecls returns whether the given declarations have custom
+// properties.
+func hasCustomDecls(ds []*cssDecl) bool {
+	for _, d := range ds {
+		if strings.HasPrefix(d.Property, "--") {
 			return true
 		}
 	}

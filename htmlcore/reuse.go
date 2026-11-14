@@ -44,6 +44,11 @@ type nodeSnap struct {
 	parent *html.Node
 	attrs  uint64
 
+	// class, id, and style are its class, id, and style attributes, and
+	// others its other attributes (as name=value lines), for the elements
+	// that a change of them may select (see [Context.invalidation]).
+	class, id, style, others string
+
 	// index and typeIndex are its index in the elements of its parent,
 	// and in those of the same name, as :nth-child selects it.
 	index, typeIndex int32
@@ -74,6 +79,45 @@ func attrsHash(n *html.Node) uint64 {
 	return h.Sum64()
 }
 
+// otherAttrs returns the attributes of the given element but its class,
+// id, and style, as name=value lines (with the namespaces of those that
+// have one), or "" for none.
+func otherAttrs(n *html.Node) string {
+	var sb strings.Builder
+	for _, a := range n.Attr {
+		if a.Namespace == "" && (a.Key == "class" || a.Key == "id" || a.Key == "style") {
+			continue
+		}
+		if a.Namespace != "" {
+			sb.WriteString(a.Namespace)
+			sb.WriteByte(':')
+		}
+		sb.WriteString(a.Key)
+		sb.WriteByte('=')
+		// (escaped, as the srcsets of nytimes.com have lines, which were
+		// other attributes, as their URLs have =)
+		sb.WriteString(attrEscaper.Replace(a.Val))
+		sb.WriteByte('\n')
+	}
+	return sb.String()
+}
+
+// attrEscaper escapes the values of attributes in [otherAttrs], whose
+// lines they are in.
+var attrEscaper = strings.NewReplacer("\\", "\\\\", "\n", "\\n")
+
+// attrValues returns the names of the attributes in the given lines of
+// [otherAttrs] with their values (escaped).
+func attrValues(lines string) map[string]string {
+	m := map[string]string{}
+	for _, l := range strings.Split(lines, "\n") {
+		if k, v, ok := strings.Cut(l, "="); ok {
+			m[k] = v
+		}
+	}
+	return m
+}
+
 // snapChildren calls the given function with the state of each of the
 // elements of the given parent (see [nodeSnap]).
 func snapChildren(p *html.Node, f func(k *html.Node, s nodeSnap)) {
@@ -97,7 +141,8 @@ func snapChildren(p *html.Node, f func(k *html.Node, s nodeSnap)) {
 		for g := k.FirstChild; g != nil && empty; g = g.NextSibling {
 			empty = g.Type != html.ElementNode && (g.Type != html.TextNode || g.Data == "")
 		}
-		snaps[i] = nodeSnap{parent: p, attrs: attrsHash(k), index: int32(i), typeIndex: counts[j],
+		snaps[i] = nodeSnap{parent: p, attrs: attrsHash(k), class: GetAttr(k, "class"), id: GetAttr(k, "id"), style: GetAttr(k, "style"), others: otherAttrs(k),
+			index: int32(i), typeIndex: counts[j],
 			last: i == len(kids)-1, empty: empty, count: int32(len(kids))}
 		counts[j]++
 	}
@@ -181,33 +226,172 @@ func (k placeKinds) differ(o, s nodeSnap) bool {
 		k.empty && o.empty != s.empty
 }
 
+// deepPlace is a compound selector of a style rule before its subject
+// that selects elements by their places, followed by a combinator of
+// descendants or children (as li:first-child in li:first-child a): the
+// elements in an element that it may select may have other matches as the
+// place of that element changes.
+type deepPlace struct {
+	kinds placeKinds
+	keys  keyMask // of the compound selector (see compoundKeys)
+}
+
+// deepPlaces returns the compound selectors of the style rules of the
+// context before their subjects that select elements by their places,
+// that are followed by combinators of descendants or children (see
+// [deepPlace]), and the kinds of places that those followed by combinators
+// of siblings select by (as p:last-of-type + div), for which the elements
+// after an element whose place changes, and those in them, may have other
+// matches. It refines the deep kinds of [Context.placeUses], with which
+// the change of the place of an element made all of the elements in it
+// match again: on nytimes.com, the scripts that added and removed a div at
+// the end of the body changed whether its #app was the last of its type,
+// which a rule selected another element by, matching its 6500 elements
+// again, for 1s, each time.
+func (c *Context) deepPlaces() (places []deepPlace, siblings placeKinds) {
+	seen := map[deepPlace]bool{}
+	for _, r := range c.rules {
+		t := r.text
+		if !strings.Contains(t, ":") || !hasPlaceClass(t) {
+			continue
+		}
+		from := 0
+		for _, cb := range combinators(t) {
+			comp := t[from:cb.start]
+			from = cb.at + 1
+			var k placeKinds
+			for pc, pk := range placeClasses {
+				if strings.Contains(comp, pc) {
+					k = k.or(pk)
+				}
+			}
+			if k == (placeKinds{}) {
+				continue
+			}
+			if cb.sibling {
+				siblings = siblings.or(k)
+				continue
+			}
+			var keys keyMask // (none: it may select any element)
+			if !strings.ContainsAny(comp, "\\|") {
+				keys = compoundKeys(comp)
+			}
+			dp := deepPlace{k, keys}
+			if !seen[dp] {
+				seen[dp] = true
+				places = append(places, dp)
+			}
+		}
+	}
+	return
+}
+
+// hasPlaceClass returns whether the given selector has a pseudo-class of
+// places (see [placeClasses]).
+func hasPlaceClass(sel string) bool {
+	for pc := range placeClasses {
+		if strings.Contains(sel, pc) {
+			return true
+		}
+	}
+	return false
+}
+
+// placeChangedDeep returns whether the given states of the given element
+// differ in a way that may change the matches of the elements in it or
+// after it, for the given compound selectors and kinds of places of
+// siblings (see [Context.deepPlaces]): those that may select it (by its
+// keys; see [ancestorKeys]) and select by a kind of place in which its
+// states differ.
+func placeChangedDeep(n *html.Node, o, s nodeSnap, places []deepPlace, siblings placeKinds) bool {
+	if siblings.differ(o, s) {
+		return true
+	}
+	var own keyMask
+	gotOwn := false
+	for _, p := range places {
+		if !p.kinds.differ(o, s) {
+			continue
+		}
+		if !gotOwn {
+			own, gotOwn = ownKeys(n), true
+		}
+		if own.has(p.keys) {
+			return true
+		}
+	}
+	return false
+}
+
 // placeUses returns the kinds of places that the style rules of the
-// context select elements by, and those that they select by in compound
-// selectors before their subjects (as li:first-child a, or
-// p:last-of-type + div), for which the elements in and after an element
-// whose place changes may have other matches.
-func (c *Context) placeUses() (uses, deep placeKinds) {
+// context select elements by (see [Context.deepPlaces] for those that they
+// select the elements in or after them by).
+func (c *Context) placeUses() (uses placeKinds) {
 	for _, r := range c.rules {
 		t := r.text
 		if !strings.Contains(t, ":") {
 			continue
 		}
-		start := -1
 		for pc, k := range placeClasses {
-			i := strings.Index(t, pc)
-			if i < 0 {
-				continue
-			}
-			uses = uses.or(k)
-			if start < 0 {
-				start = subjectStart(t)
-			}
-			if i < start {
-				deep = deep.or(k)
+			if strings.Contains(t, pc) {
+				uses = uses.or(k)
 			}
 		}
 	}
 	return
+}
+
+// siblingSubjects returns the keys of the compound selectors of the style
+// rules of the context that follow combinators of siblings and are followed
+// by combinators of descendants or children (as .b in .a ~ .b .c, and in
+// .a + .b > .c): the elements in an element that one may select may have
+// other matches as the elements before it change. (An element inserted at
+// the start of the body of nytimes.com, by its ad scripts, matched the 6800
+// elements of its #app again, which no such selector selects, as a rule
+// had a combinator of siblings followed by one of descendants.)
+func (c *Context) siblingSubjects() []keyMask {
+	var masks []keyMask
+	seen := map[keyMask]bool{}
+	for _, r := range c.rules {
+		t := r.text
+		if !strings.ContainsAny(t, "+~") {
+			continue
+		}
+		combs := combinators(t)
+		from := 0
+		for i, cb := range combs {
+			comp := t[from:cb.start]
+			from = cb.at + 1
+			if i == 0 || !combs[i-1].sibling || cb.sibling {
+				continue
+			}
+			var keys keyMask // (none: it may select any element)
+			if !strings.ContainsAny(comp, "\\|") {
+				keys = compoundKeys(comp)
+			}
+			if !seen[keys] {
+				seen[keys] = true
+				masks = append(masks, keys)
+			}
+		}
+	}
+	return masks
+}
+
+// siblingSelects returns whether a compound selector of the given keys
+// (see [Context.siblingSubjects]) may select the given element (or any,
+// if there are none, for the selectors that it could not tell).
+func siblingSelects(n *html.Node, masks []keyMask) bool {
+	if len(masks) == 0 {
+		return true
+	}
+	own := ownKeys(n)
+	for _, m := range masks {
+		if own.has(m) {
+			return true
+		}
+	}
+	return false
 }
 
 // siblingCombinators returns whether a style rule of the context may
@@ -293,7 +477,8 @@ func (c *Context) reuseMatches(root *html.Node, prev *Context) bool {
 		return true
 	}
 	siblings, inSiblings := c.siblingCombinators()
-	uses, deep := c.placeUses()
+	uses := c.placeUses()
+	deepPlaces, siblingPlaces := c.deepPlaces()
 	// later adds the elements after the given one (from it, if first), for
 	// the combinators of siblings
 	later := func(k *html.Node) {
@@ -320,7 +505,7 @@ func (c *Context) reuseMatches(root *html.Node, prev *Context) bool {
 	for n, s := range c.snaps {
 		o, ok := prev.snaps[n]
 		switch {
-		case !ok || o.parent != s.parent || o.attrs != s.attrs || deep.differ(o, s):
+		case !ok || o.parent != s.parent || o.attrs != s.attrs || placeChangedDeep(n, o, s, deepPlaces, siblingPlaces):
 			// (and those of a place that selectors select those in or after
 			// it by)
 			changed = append(changed, n)
@@ -413,6 +598,9 @@ func (c *Context) reuseMatches(root *html.Node, prev *Context) bool {
 // setMatched sets the declarations of the rules that match the given
 // element.
 func (c *Context) setMatched(n *html.Node, ds []*cssDecl) {
+	if hasCustomDecls(ds) || hasCustomDecls(c.styles[n]) {
+		c.varMemo = nil
+	}
 	if len(ds) == 0 {
 		delete(c.styles, n)
 	} else {
@@ -448,6 +636,7 @@ func (c *Context) ruleDecls(n *html.Node, ids []int) []*cssDecl {
 				continue
 			}
 			c.cssOrder++
+			c.noteVars(value)
 			ds = append(ds, &cssDecl{Property: prop, Value: c.absoluteURLs(value), Important: d.Important,
 				origin: r.origin, specificity: r.spec, order: c.cssOrder, container: r.container, rule: i + 1})
 		}

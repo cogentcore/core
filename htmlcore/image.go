@@ -24,6 +24,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/units"
 	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 )
 
 // handleSVG handles an svg element, which is rendered by an SVG widget.
@@ -206,7 +207,18 @@ func handleImage(ctx *Context, tag string) core.Widget {
 	n := ctx.Node
 	src, density := ctx.imageSource(n) // of its srcset or picture, or its src
 	if src == "" {
-		return nil // an image without a source is not shown
+		if n.DataAtom != atom.Img {
+			return nil // an image without a source is not shown
+		}
+		// an img without a source (as a lazy image, whose source its
+		// scripts set as it is shown) has an image widget without an
+		// image, which shows nothing, in which its image is set when its
+		// source is (see Context.imageChange)
+		img := New[core.Image](ctx)
+		img.Styler(func(s *styles.Style) { s.ObjectFit = styles.FitFill })
+		img.NaturalDp = true
+		img.SetTooltip(GetAttr(n, "alt"))
+		return img
 	}
 	alt := GetAttr(n, "alt")
 	isSVG := strings.HasSuffix(src, ".svg") || strings.HasPrefix(src, "data:image/svg")
@@ -358,6 +370,7 @@ func readImage(ctx *Context, src string) (image.Image, error) {
 			return nil, err
 		}
 		key = u.String()
+		cache.waitDecoding(key) // (as it is gotten before the page is read)
 		if im := cache.Get(key); im != nil {
 			return im, nil
 		}

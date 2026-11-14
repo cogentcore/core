@@ -226,6 +226,26 @@ type Context struct {
 	// reading is whether HTML is being read, so that HTML read by an
 	// element handler meanwhile is read within that read (see [ReadHTML]).
 	reading bool
+
+	// keepRead has the elements that are kept as they are, with their old
+	// widgets, as elements are read again (see [Context.keptElements]).
+	keepRead map[*html.Node]core.Widget
+
+	// matchKept has the elements that may be kept as they are as elements
+	// are read again, whose declarations are found again only for
+	// themselves, not those in them (see [Context.shallowKept]).
+	matchKept map[*html.Node]bool
+
+	// matchAll is whether all of the elements in those whose declarations
+	// are found again are matched again (see [Context.invalidation]), as
+	// for rules added to the style sheets.
+	matchAll bool
+
+	// addRoot, if set (as elements are read again; see Context.Reread),
+	// adds the element that the given element is in that is read again
+	// for a change of it that its widgets can not be styled again for (as
+	// of its display or pseudo-elements), returning whether it can be.
+	addRoot func(n *html.Node) bool
 }
 
 // pageState is the state of the pages read with a [Context], which
@@ -295,6 +315,34 @@ type pageState struct {
 	keptContainers   map[*html.Node]containerSizes
 	containerMu      sync.Mutex
 
+	// styleMu guards the styles of the elements (their declarations and
+	// the state of reading them), which the stylers of the widgets of the
+	// context read (see [core.StyleLockProperty]) while they are found
+	// again without the lock of the widgets (see [Context.PrepareReread]).
+	styleMu sync.Mutex
+
+	// containerQueries are the matches of the queries of @container rules
+	// for the widths of their containers (see
+	// [Context.containerQueryMatches]), guarded by containerQueryMu.
+	containerQueries map[containerQueryKey]bool
+
+	// varsUsed are the custom properties that the declarations of the
+	// page use (with var()), for [Context.unusedCustomProps].
+	varsUsed map[string]bool
+
+	// attrsSelected are whether the style rules select elements by the
+	// attributes (see Context.inertAttr), for attrsRules rules.
+	attrsSelected    map[string]bool
+	attrsRules       int
+	containerQueryMu sync.Mutex
+
+	// queried are the declarations of the elements with @container rules
+	// that apply to them, for containerGen, the generation of the
+	// containers and the declarations (see [Context.containerDecls]),
+	// guarded by containerQueryMu.
+	queried      map[*html.Node]queriedDecls
+	containerGen int
+
 	// sheets has the style and link elements whose style sheets have
 	// been added, and rereads is the number of times that elements have
 	// been read again (see [Context.Reread]).
@@ -324,6 +372,20 @@ type pageState struct {
 	// all of the elements are from (not those recorded since, as those
 	// added to style sheets, whose elements were not matched again).
 	matchedRules int
+
+	// matchedPseudo is the number of the rules of pseudo-elements that the
+	// declarations of the elements have been matched with, as matchedRules.
+	matchedPseudo int
+
+	// ancestorMasks are the masks of the keys of the ancestors of the
+	// elements, while they are kept (see [Context.keepAncestorMasks]).
+	ancestorMasks map[*html.Node]keyMask
+
+	// addedShallow and addedDeep are the elements that the rules added to
+	// the style sheets select (see [Context.addedRuleTargets]), whose
+	// declarations are found again, with those in the deep ones (for the
+	// custom properties of the rules, which they inherit).
+	addedShallow, addedDeep []*html.Node
 
 	// rules are the style rules that have been added, in order, by which
 	// the declarations of elements are found again when they change (see
@@ -407,6 +469,11 @@ func (c *Context) ReadRest() (core.Widget, int, error) {
 	c.reading = true
 	defer func() { c.reading = false }()
 	err := readHTMLNode(c, parent, n)
+	for _, k := range parent.AsTree().Children[start:] {
+		if w, ok := k.(core.Widget); ok {
+			c.lockStylesOf(w)
+		}
+	}
 	return parent, start, err
 }
 
@@ -844,4 +911,23 @@ func (c *Context) openLink(link *html.Node, url string, e events.Event) {
 		return
 	}
 	c.OpenURL(url, e)
+}
+
+// LockStyles locks the styles of the elements of the context (see
+// [Context.PrepareReread]), as for reading them without the lock of the
+// widgets of the page, as the stylers of its widgets do (see
+// [core.StyleLockProperty]); they must not be locked while the lock of the
+// widgets is taken.
+func (c *Context) LockStyles() { c.styleMu.Lock() }
+
+// UnlockStyles unlocks the styles of the elements (see [Context.LockStyles]).
+func (c *Context) UnlockStyles() { c.styleMu.Unlock() }
+
+// lockStylesOf makes the given widget and those in it hold the lock of the
+// styles of the context as they are styled (see [core.StyleLockProperty]).
+func (c *Context) lockStylesOf(root core.Widget) {
+	root.AsWidget().WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		cwb.SetProperty(core.StyleLockProperty, &c.styleMu)
+		return tree.Continue
+	})
 }

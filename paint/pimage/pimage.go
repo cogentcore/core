@@ -149,11 +149,28 @@ func NewSetPixel(at image.Point, clr image.Image) *Params {
 	return pr
 }
 
+// transparent returns whether the given image is a uniform transparent
+// color.
+func transparent(src image.Image) bool {
+	u, ok := imagex.Unwrap(src).(*image.Uniform)
+	if !ok {
+		return false
+	}
+	_, _, _, a := u.RGBA()
+	return a == 0
+}
+
 // Render performs the image operation on given destination image.
 // This uses the native Go image package draw function.
 func (pr *Params) Render(dest *image.RGBA) {
 	switch pr.Cmd {
 	case Draw:
+		if pr.Op == draw.Over && transparent(pr.Source) {
+			// (it changes nothing, but draw blends each pixel: the
+			// transparent backgrounds of web pages, as of nytimes.com,
+			// took most of the time of rendering them)
+			return
+		}
 		if pr.Rect == (image.Rectangle{}) {
 			pr.Rect = dest.Bounds()
 		}

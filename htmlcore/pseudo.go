@@ -53,7 +53,7 @@ func (c *Context) addPseudoRule(root *html.Node, sel, kind string, decls []*css.
 	if c.pseudoStyles == nil {
 		c.pseudoStyles = map[pseudoKey][]*cssDecl{}
 	}
-	c.pseudoRules = append(c.pseudoRules, &pseudoRule{root: root, sel: compileSelector(sel), kind: kind, decls: decls, origin: origin, spec: spec})
+	c.pseudoRules = append(c.pseudoRules, &pseudoRule{root: root, sel: compileSelector(sel), text: sel, kind: kind, decls: decls, origin: origin, spec: spec})
 	if strings.Contains(sel, ":has(") {
 		c.relational = true
 	}
@@ -65,6 +65,7 @@ func (c *Context) addPseudoRule(root *html.Node, sel, kind string, decls []*css.
 		for _, d := range decls {
 			p := strings.ToLower(strings.TrimSpace(d.Property))
 			c.cssOrder++
+			c.noteVars(d.Value)
 			c.pseudoStyles[key] = append(c.pseudoStyles[key], &cssDecl{Property: p, Value: c.absoluteURLs(strings.TrimSpace(d.Value)),
 				Important: d.Important, origin: origin, specificity: spec, order: c.cssOrder})
 		}
@@ -163,7 +164,9 @@ func (c *Context) pseudoBoxNode(el *html.Node, kind string) *html.Node {
 		}
 	}
 	c.styles[pn] = decls
-	c.varMemo = nil
+	if hasCustomDecls(decls) {
+		c.varMemo = nil
+	}
 	if c.hinted == nil {
 		c.hinted = map[*html.Node]bool{}
 	}

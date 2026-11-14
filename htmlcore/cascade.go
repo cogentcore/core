@@ -158,17 +158,26 @@ func (c *Context) addRuleList(root *html.Node, rules []*css.Rule, origin cssOrig
 
 // addDecls adds the given declarations to the given node.
 func (c *Context) addDecls(n *html.Node, decls []*css.Declaration, origin cssOrigin, spec int) {
+	custom := false
 	for _, d := range decls {
 		prop, value := strings.ToLower(strings.TrimSpace(d.Property)), strings.TrimSpace(d.Value)
 		if !validDeclaration(prop, value) {
 			continue // dropped, so that the declaration before it applies
 		}
 		c.cssOrder++
+		c.noteVars(value)
+		custom = custom || strings.HasPrefix(prop, "--")
 		c.styles[n] = append(c.styles[n], &cssDecl{Property: prop,
 			Value: c.absoluteURLs(value), Important: d.Important, origin: origin, specificity: spec, order: c.cssOrder,
 			container: c.curContainer, rule: c.curRule})
 	}
-	c.varMemo = nil
+	if custom {
+		// (the memo has the values of custom properties only, which the
+		// hints and inline styles of each element, as they were added,
+		// otherwise cleared for each element, so that each var() looked
+		// up the elements that it is in again)
+		c.varMemo = nil
+	}
 	if c.curContainer != nil {
 		if c.containerQueried == nil {
 			c.containerQueried = map[*html.Node]bool{}
@@ -253,10 +262,29 @@ func (c *Context) declarations(n *html.Node) []*cssDecl {
 	return c.styles[n]
 }
 
+// allDeclarations returns the declarations of the given node as
+// [Context.declarations] does, but with those of all of its @container
+// rules, whatever their conditions.
+func (c *Context) allDeclarations(n *html.Node) []*cssDecl {
+	if n == nil {
+		return nil
+	}
+	if !c.containerQueried[n] {
+		return c.declarations(n)
+	}
+	c.declarations(n) // (sorted, with hints)
+	return c.styles[n]
+}
+
 // declaration returns the value of the given property for the given node
 // from its declarations (not inherited), or "" if it has none.
 func (c *Context) declaration(n *html.Node, prop string) string {
-	ds := c.declarations(n)
+	return declarationIn(c.declarations(n), prop)
+}
+
+// declarationIn returns the value of the given property in the given
+// declarations, as [Context.declaration].
+func declarationIn(ds []*cssDecl, prop string) string {
 	for i := len(ds) - 1; i >= 0; i-- {
 		if ds[i].Property == prop {
 			if ds[i].invalid {
@@ -393,6 +421,10 @@ type compiledSelector struct {
 	// an id ('#'), a class ('.'), or an element name ('t'), or none (0).
 	keyKind byte
 	key     string
+
+	// anc is the mask of the keys of the elements that the elements that
+	// it selects are in (see [ancestorKeys]).
+	anc keyMask
 }
 
 // selectorCache has the compiled selectors, with nil for ones
@@ -415,6 +447,7 @@ func compileSelector(sel string) *compiledSelector {
 		sp := s.Specificity()
 		cs = &compiledSelector{sel: s, specificity: sp[0]*10000 + sp[1]*100 + sp[2]}
 		cs.keyKind, cs.key = selectorKey(sel)
+		cs.anc = ancestorKeys(sel)
 	}
 	selectorCache[sel] = cs
 	return cs
@@ -593,7 +626,7 @@ func (c *Context) selectNodes(root *html.Node, sel string) []*html.Node {
 	}
 	var matches []*html.Node
 	for _, n := range cands {
-		if cs.sel.Match(n) {
+		if c.selMatch(cs, n) {
 			matches = append(matches, n)
 		}
 	}

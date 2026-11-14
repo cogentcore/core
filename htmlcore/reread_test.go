@@ -5,6 +5,9 @@
 package htmlcore
 
 import (
+	"fmt"
+	"io"
+	"net/http"
 	"strings"
 	"testing"
 
@@ -13,6 +16,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 )
 
 // widgetsByElement returns the widgets of the elements with ids in the
@@ -145,7 +149,7 @@ func TestReread(t *testing.T) {
 			return nil, []*html.Node{l}
 		}, "main", "i2", "para")
 	})
-	t.Run("remove", func(t *testing.T) {
+	t.Run("remove from body", func(t *testing.T) {
 		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
 			l := elementByID(doc, "list")
 			l.RemoveChild(elementByID(doc, "i1"))
@@ -204,7 +208,9 @@ func TestReread(t *testing.T) {
 		})
 	})
 	t.Run("html", func(t *testing.T) {
-		testReread(t, page, false, func(doc *html.Node) (self, children []*html.Node) {
+		// styled again, with all of the elements, as the selectors of the
+		// rules may select elements by its attributes (as :lang)
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
 			h := elementByID(doc, "top").Parent.Parent.Parent
 			setAttr(h, "lang", "fr")
 			return []*html.Node{h}, nil
@@ -270,7 +276,9 @@ func TestReread(t *testing.T) {
 		})
 	})
 	t.Run("style sheet", func(t *testing.T) {
-		testReread(t, page, false, func(doc *html.Node) (self, children []*html.Node) {
+		// (its rules are added, as those added to the style sheets, and
+		// the elements that they select restyled)
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
 			m := elementByID(doc, "main")
 			appendHTML(t, m, `<style>.item { color: red }</style>`)
 			return nil, []*html.Node{m}
@@ -306,4 +314,412 @@ func TestRereadFallback(t *testing.T) {
 		assert.True(t, ctx.Restyle([]*html.Node{a}))
 		assert.Equal(t, "", ctx.Fallback())
 	})
+}
+
+// TestRereadBodyClass tests that a class added to the body element styles
+// it again, and the elements that the rules of the class select by it (as
+// .modal-open .dialog), without reading the page again, as the scripts of
+// npr.org do as it loads, which read all of it again each time.
+func TestRereadBodyClass(t *testing.T) {
+	const page = `<html><head><style>
+.box { width: 100px; height: 20px; background: blue }
+.dark { background: black; color: white }
+.dark .box { background: green }
+.other .box { background: red }
+</style></head><body><div style="width: 400px">
+<div id="a" class="box">a</div><div id="b"><div id="c" class="box">c</div></div><p id="p">text</p>
+</div></body></html>`
+	testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+		body := elementByID(doc, "a").Parent.Parent
+		setAttr(body, "class", "dark")
+		return []*html.Node{body}, nil
+	}, "p")
+}
+
+// TestRereadHTMLChildren tests that an element added to the html element
+// after the body, as scripts add to measure things (as on npr.org), and
+// removed, reads only the children of the html element again, with the
+// body kept as it is.
+func TestRereadHTMLChildren(t *testing.T) {
+	const page = `<html><head><style>.box { width: 100px; height: 20px; background: blue }</style></head>` +
+		`<body><div id="a" class="box">a</div><p id="p">text</p></body></html>`
+	htmlOf := func(doc *html.Node) *html.Node { return elementByID(doc, "a").Parent.Parent }
+	t.Run("add", func(t *testing.T) {
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+			h := htmlOf(doc)
+			// (made here: a fragment parsed in the html element is in a
+			// body of its own)
+			h.AppendChild(&html.Node{Type: html.ElementNode, Data: "div", DataAtom: atom.Div,
+				Attr: []html.Attribute{{Key: "id", Val: "probe"}, {Key: "style", Val: "position: absolute; width: 50px; height: 50px"}}})
+			return nil, []*html.Node{h}
+		}, "a", "p")
+	})
+	t.Run("remove", func(t *testing.T) {
+		// (in the body, where the parser puts it, which is read again,
+		// but for its first element; p, which is last now, is read again
+		// for its margins)
+		probe := strings.Replace(page, `</body>`, `</body><div id="probe" style="width: 50px; height: 50px"></div>`, 1)
+		testReread(t, probe, true, func(doc *html.Node) (self, children []*html.Node) {
+			pr := elementByID(doc, "probe")
+			h := pr.Parent
+			h.RemoveChild(pr)
+			return nil, []*html.Node{h}
+		}, "a")
+	})
+}
+
+// TestRereadKeepsUnchanged tests that the elements that have not changed,
+// in an element whose children have changed, are kept as they are without
+// being read again (see [Context.keptElements]), so that elements added to
+// a large body (as the scripts of npr.org add, many times as it loads) do
+// not read all of it again (here in a div, as the body of a page that
+// scrolls has a scrollbar only once it is laid out again), and that the
+// result is as the page read anew,
+// also for the rules of siblings that the change affects.
+func TestRereadKeepsUnchanged(t *testing.T) {
+	var b strings.Builder
+	b.WriteString(`<html><head><style>.item { height: 1px; background: blue }
+.item + .item { margin-top: 1px }
+.first:first-child { height: 3px }
+.added { height: 2px }</style></head><body><div id="wrap" style="width: 400px">`)
+	for i := range 1500 {
+		fmt.Fprintf(&b, `<div id="d%d" class="item"><span>x</span></div>`, i)
+	}
+	b.WriteString(`</div></body></html>`)
+	page := b.String()
+	t.Run("append to body", func(t *testing.T) {
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+			wrap := elementByID(doc, "wrap")
+			// (not of the class item: the rule for an item after an item
+			// does not apply to one added at the end, as read again, also
+			// when all of the items are read again)
+			appendHTML(t, wrap, `<div id="new" class="added"><span>x</span></div>`)
+			return nil, []*html.Node{wrap}
+		}, "d0", "d700", "d1499")
+	})
+	t.Run("insert before the first", func(t *testing.T) {
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+			d0 := elementByID(doc, "d0")
+			ns, err := html.ParseFragment(strings.NewReader(`<div id="new" class="item first"><span>x</span></div>`), d0.Parent)
+			require.NoError(t, err)
+			for _, n := range ns {
+				d0.Parent.InsertBefore(n, d0)
+			}
+			return nil, []*html.Node{d0.Parent}
+		}, "d700", "d1499")
+	})
+	t.Run("remove one", func(t *testing.T) {
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+			d := elementByID(doc, "d5")
+			p := d.Parent
+			p.RemoveChild(d)
+			return nil, []*html.Node{p}
+		}, "d0", "d700", "d1499")
+	})
+}
+
+// TestRereadAddedRules tests that the rules added to a style sheet (as
+// CSS-in-JS libraries add them, as on nytimes.com) restyle the elements
+// that they select, found by the keys of their selectors, and the elements
+// in them for the custom properties that they set, as the page read anew.
+func TestRereadAddedRules(t *testing.T) {
+	const page = `<html><head><style id="css">.box { width: 100px; height: 20px }
+.label { color: var(--c, black) }</style></head><body><div style="width: 400px">
+<div id="a" class="box"><div id="la" class="label">a</div></div><div id="b" class="box other">b</div>
+<p id="p">text</p></div></body></html>`
+	testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+		st := elementByID(doc, "css")
+		st.AppendChild(&html.Node{Type: html.TextNode, Data: "#a { --c: red; background: blue } .other { height: 40px } p { color: green }"})
+		return nil, []*html.Node{st}
+	}, "a", "b", "p")
+}
+
+// TestPrepareRereadConcurrent tests that elements are read again (see
+// [Context.PrepareReread]) and restyled without the lock of the widgets of
+// the page, while the widgets are styled with it (as they are rendered),
+// whose stylers hold the lock of the styles of the context (see
+// [core.StyleLockProperty]), so that there are no data races (run with
+// -race), and the page is as read anew.
+func TestPrepareRereadConcurrent(t *testing.T) {
+	var b strings.Builder
+	b.WriteString(`<html><head><style>.item { height: 10px; color: var(--c, black) } .on .item { background: blue }
+.x { --c: red }</style></head><body><div id="wrap" style="width: 400px">`)
+	for i := range 200 {
+		fmt.Fprintf(&b, `<div id="d%d" class="item"><span>item %d</span></div>`, i, i)
+	}
+	b.WriteString(`</div></body></html>`)
+	ctx := NewContext()
+	doc, err := ParseHTML(ctx, strings.NewReader(b.String()))
+	require.NoError(t, err)
+	bd := core.NewBody()
+	require.NoError(t, ReadDocument(ctx, bd, doc))
+	var got map[string]string
+	bd.RenderImage(func() {
+		wrap := elementByID(doc, "wrap")
+		for i := range 20 {
+			done := make(chan func())
+			go func() {
+				// (as the scripts change the page, without the lock)
+				appendHTML(t, wrap, fmt.Sprintf(`<div class="item x">new %d</div>`, i))
+				setAttr(wrap, "class", []string{"on", ""}[i%2])
+				apply := ctx.PrepareRestyle([]*html.Node{wrap})
+				applyReread := ctx.PrepareReread(nil, []*html.Node{wrap})
+				done <- func() {
+					if apply != nil {
+						apply()
+					}
+					if applyReread != nil {
+						applyReread()
+					}
+				}
+			}()
+			// (as the page is rendered meanwhile)
+			for range 3 {
+				bd.AsyncLock()
+				bd.StyleTree()
+				bd.AsyncUnlock()
+			}
+			apply := <-done
+			bd.AsyncLock()
+			apply()
+			bd.AsyncUnlock()
+		}
+	}, func() {
+		bd.AsyncLock()
+		got = widgetStates(bd)
+		bd.AsyncUnlock()
+	})
+	var want map[string]string
+	fresh := core.NewBody()
+	require.NoError(t, ReadDocument(NewContext(), fresh, doc))
+	fresh.RenderImage(func() {}, func() { want = widgetStates(fresh) })
+	assert.Equal(t, want, got)
+}
+
+// TestRereadTitle tests that a change of the title of the page (as scripts
+// set it) changes the title of the context, without reading the page again.
+func TestRereadTitle(t *testing.T) {
+	const page = `<html><head><title>Old</title></head><body><p id="p">text</p></body></html>`
+	testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+		title := elementByID(doc, "p").Parent.Parent.FirstChild.FirstChild
+		title.FirstChild.Data = " New   title "
+		return nil, []*html.Node{title}
+	}, "p")
+	ctx := NewContext()
+	doc, err := ParseHTML(ctx, strings.NewReader(page))
+	require.NoError(t, err)
+	bd := core.NewBody()
+	require.NoError(t, ReadDocument(ctx, bd, doc))
+	title := elementByID(doc, "p").Parent.Parent.FirstChild.FirstChild
+	title.FirstChild.Data = "New"
+	require.True(t, ctx.Reread(nil, []*html.Node{title}), ctx.Fallback())
+	assert.Equal(t, "New", ctx.Title)
+}
+
+// TestRereadLinkedSheet tests that a link to a style sheet that scripts add
+// to the head adds its rules, restyling the elements that they select,
+// without reading the page again whole, as the page read anew.
+func TestRereadLinkedSheet(t *testing.T) {
+	const page = `<html><head><title>t</title></head><body><div style="width: 400px"><div id="a" class="box">a</div><p id="p">text</p></div></body></html>`
+	get := func(u string) (*http.Response, error) {
+		return &http.Response{StatusCode: 200, Header: http.Header{"Content-Type": {"text/css"}},
+			Body: io.NopCloser(strings.NewReader(".box { height: 40px; background: blue }"))}, nil
+	}
+	newCtx := func() *Context {
+		ctx := NewContext()
+		ctx.PageURL = "https://example.com/"
+		ctx.GetURL = get
+		return ctx
+	}
+	ctx := newCtx()
+	doc, err := ParseHTML(ctx, strings.NewReader(page))
+	require.NoError(t, err)
+	bd := core.NewBody()
+	require.NoError(t, ReadDocument(ctx, bd, doc))
+	var got, want map[string]string
+	var ok bool
+	bd.RenderImage(func() {
+		bd.AsyncLock()
+		head := elementByID(doc, "a").Parent.Parent.Parent.FirstChild
+		head.AppendChild(&html.Node{Type: html.ElementNode, Data: "link", DataAtom: atom.Link,
+			Attr: []html.Attribute{{Key: "rel", Val: "stylesheet"}, {Key: "href", Val: "/new.css"}}})
+		ok = ctx.Reread(nil, []*html.Node{head})
+		bd.AsyncUnlock()
+	}, func() {
+		bd.AsyncLock()
+		got = widgetStates(bd)
+		bd.AsyncUnlock()
+	})
+	require.True(t, ok, ctx.Fallback())
+	fresh := core.NewBody()
+	require.NoError(t, ReadDocument(newCtx(), fresh, doc))
+	fresh.RenderImage(func() {}, func() { want = widgetStates(fresh) })
+	assert.Equal(t, want, got)
+	assert.Contains(t, got["a"], "bg #0000FF")
+}
+
+// TestRereadAddsRoots tests that the elements whose changes as they are
+// styled again their widgets can not be styled for (as of their
+// pseudo-elements or display), as for a class added to the body, are read
+// again with the elements that they are in, not the page whole (as on
+// nytimes.com), as the page read anew.
+func TestRereadAddsRoots(t *testing.T) {
+	const page = `<html><head><style>.dark .icon::before { content: "x" } .dark .menu { display: none }</style></head>` +
+		`<body><div style="width: 400px"><div id="w"><span id="icon" class="icon">i</span></div>` +
+		`<div id="m"><div class="menu">menu</div><div id="other">other</div></div><p id="p">text</p></div></body></html>`
+	testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+		body := elementByID(doc, "p").Parent.Parent
+		setAttr(body, "class", "dark")
+		return []*html.Node{body}, nil
+	}, "p")
+}
+
+// TestRereadPlaceOfKept tests that the elements in a kept element whose
+// place changes are matched again when a rule may select them by its place
+// (as div:last-of-type > .y), as the page read anew.
+func TestRereadPlaceOfKept(t *testing.T) {
+	const page = `<html><head><style>.side:last-of-type .x { color: red }
+div:last-of-type > .y { height: 5px }
+.y { height: 2px; background: blue }</style></head><body>
+<div id="app" style="width: 400px"><p id="x" class="x">x</p><div id="y" class="y"></div></div></body></html>`
+	testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+		body := elementByID(doc, "app").Parent
+		// (scripts add and remove elements at the end of the body)
+		appendHTML(t, body, `<div id="new"></div>`)
+		return nil, []*html.Node{body}
+	})
+}
+
+// TestDeepPlaces tests that the changes of the places of elements may
+// change the matches of the elements in them only for the rules that may
+// select them by their places (see [Context.deepPlaces]).
+func TestDeepPlaces(t *testing.T) {
+	ctx := NewContext()
+	doc, err := ParseHTML(ctx, strings.NewReader(`<html><head><style>.side:last-of-type .x { color: red }
+li:first-child > a { color: blue }
+p:nth-last-of-type(2) + div span { color: green }
+.y:last-child { color: gray }</style></head><body><div id="app" class="main"></div><div id="side" class="side"></div><ul><li id="li"></li></ul></body></html>`))
+	require.NoError(t, err)
+	require.NoError(t, ReadDocument(ctx, core.NewBody(), doc))
+	places, siblings := ctx.deepPlaces()
+	assert.Len(t, places, 2)
+	assert.Equal(t, placeKinds{typeCount: true}, siblings)
+	last, notLast := nodeSnap{lastType: true}, nodeSnap{lastType: false}
+	first, notFirst := nodeSnap{index: 0}, nodeSnap{index: 1}
+	assert.False(t, placeChangedDeep(elementByID(doc, "app"), last, notLast, places, siblings), "app is not .side")
+	assert.True(t, placeChangedDeep(elementByID(doc, "side"), last, notLast, places, siblings))
+	assert.True(t, placeChangedDeep(elementByID(doc, "li"), first, notFirst, places, siblings))
+	assert.False(t, placeChangedDeep(elementByID(doc, "side"), first, notFirst, places, siblings), "side is not li")
+	assert.True(t, placeChangedDeep(elementByID(doc, "app"), nodeSnap{count: 2}, nodeSnap{count: 3}, places, siblings), "nth-last-of-type before a sibling")
+}
+
+// TestRereadImageSource tests that setting the source of a lazy img (as
+// scripts do as it is shown), or of a source of its picture, sets the image
+// in its widget, keeping the widgets of the elements that it is in (it read
+// the nearest one that could be read again alone, as the whole #app of
+// nytimes.com).
+func TestRereadImageSource(t *testing.T) {
+	const png = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+	const page = `<html><body><div id="wrap" style="display: grid; grid-template-columns: 1fr 1fr; width: 400px">
+<div id="a"><picture><source id="s" media="(min-width: 1px)"><img id="i" class="lazy" style="width: 50px; height: 40px"></picture></div>
+<div id="b">b</div></div></body></html>`
+	setAttr := func(n *html.Node, key, val string) {
+		for i, a := range n.Attr {
+			if a.Key == key {
+				n.Attr[i].Val = val
+				return
+			}
+		}
+		n.Attr = append(n.Attr, html.Attribute{Key: key, Val: val})
+	}
+	t.Run("img", func(t *testing.T) {
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+			i := elementByID(doc, "i")
+			setAttr(i, "src", png)
+			return []*html.Node{i}, nil
+		}, "wrap", "a", "b", "i")
+	})
+	t.Run("img seen", func(t *testing.T) {
+		// (with the pinger-seen of the analytics of nytimes.com)
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+			i := elementByID(doc, "i")
+			setAttr(i, "src", png)
+			setAttr(i, "pinger-seen", "true")
+			return []*html.Node{i}, nil
+		}, "wrap", "a", "b", "i")
+	})
+	t.Run("img loaded", func(t *testing.T) {
+		// (with a class of the images that are loaded, as lazy loaders set)
+		testReread(t, strings.Replace(page, "<html><body>", "<html><head><style>.lazyLoaded { opacity: 0.5 }</style></head><body>", 1), true, func(doc *html.Node) (self, children []*html.Node) {
+			i := elementByID(doc, "i")
+			setAttr(i, "src", png)
+			setAttr(i, "class", "lazyLoaded")
+			return []*html.Node{i}, nil
+		}, "wrap", "a", "b", "i")
+	})
+	t.Run("srcset with lines", func(t *testing.T) {
+		// (as on nytimes.com: its URLs have =, which were other attributes)
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+			i := elementByID(doc, "i")
+			setAttr(i, "srcset", "\n  "+png+" 1x\n")
+			return []*html.Node{i}, nil
+		}, "wrap", "a", "b", "i")
+	})
+	t.Run("source", func(t *testing.T) {
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+			s := elementByID(doc, "s")
+			setAttr(s, "srcset", png)
+			return []*html.Node{s}, nil
+		}, "wrap", "a", "b", "i")
+	})
+}
+
+// TestRereadInsertBeforeKept tests that an element inserted before a kept
+// element (as the ad scripts of nytimes.com insert at the start of its
+// body) matches the elements in it again only if a rule with a combinator
+// of siblings followed by one of descendants may select it, as the page
+// read anew.
+func TestRereadInsertBeforeKept(t *testing.T) {
+	for _, style := range []string{".x ~ .side .y { color: red }", ".x ~ #app .y { color: red }", ".x ~ div .y { color: red }"} {
+		page := `<html><head><style>` + style + `
+.y { height: 10px }</style></head><body><div id="app" style="width: 400px"><div id="y" class="y">y</div></div></body></html>`
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+			app := elementByID(doc, "app")
+			ns, err := html.ParseFragment(strings.NewReader(`<div id="new" class="x" style="width: 400px">x</div>`), app.Parent)
+			require.NoError(t, err)
+			for _, n := range ns {
+				app.Parent.InsertBefore(n, app)
+			}
+			return nil, []*html.Node{app.Parent}
+		})
+	}
+	ctx := NewContext()
+	doc, err := ParseHTML(ctx, strings.NewReader(`<html><head><style>.x ~ .side .y { color: red }
+.a + .b > .c, .p ~ .q + .r .s { color: blue }</style></head><body><div id="app"></div><div id="side" class="side"></div><div id="r" class="r"></div></body></html>`))
+	require.NoError(t, err)
+	require.NoError(t, ReadDocument(ctx, core.NewBody(), doc))
+	subjects := ctx.siblingSubjects()
+	assert.False(t, siblingSelects(elementByID(doc, "app"), subjects))
+	assert.True(t, siblingSelects(elementByID(doc, "side"), subjects))
+	assert.True(t, siblingSelects(elementByID(doc, "r"), subjects))
+}
+
+// TestRereadInertAttrs tests that a change of custom attributes that no
+// style rule selects by (as the pinger-seen that the analytics of
+// nytimes.com add to the images that they have seen) reads nothing again,
+// and that one that a rule selects by is read again, as the page anew.
+func TestRereadInertAttrs(t *testing.T) {
+	for _, style := range []string{"", "[pinger-seen] { color: red }"} {
+		page := `<html><head><style>.v { height: 10px }` + style + `</style></head><body><div id="wrap" style="width: 400px">
+<div id="v" class="v">v</div><div id="w">w</div></div></body></html>`
+		var kept []string
+		if style == "" {
+			kept = []string{"wrap", "v", "w"}
+		}
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+			v := elementByID(doc, "v")
+			v.Attr = append(v.Attr, html.Attribute{Key: "pinger-seen", Val: "true"}, html.Attribute{Key: "data-testid", Val: "x"})
+			return []*html.Node{v}, nil
+		}, kept...)
+	}
 }

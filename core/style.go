@@ -7,6 +7,7 @@ package core
 import (
 	"image"
 	"reflect"
+	"sync"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
@@ -97,7 +98,19 @@ func (wb *WidgetBase) resetStyleWidget() {
 }
 
 // runStylers runs the [WidgetBase.Stylers].
+// StyleLockProperty is the name of the property of a widget that, if it
+// is a [sync.Locker], is held while the stylers of the widget run, as for
+// the widgets of web pages, whose stylers read the styles of their
+// elements, which are found again (in another goroutine) as the scripts of
+// the page change it, without the lock of the widgets (see
+// htmlcore.Context.PrepareReread).
+const StyleLockProperty = "style-lock"
+
 func (wb *WidgetBase) runStylers() {
+	if l, ok := wb.Property(StyleLockProperty).(sync.Locker); ok {
+		l.Lock()
+		defer l.Unlock()
+	}
 	wb.Stylers.Do(func(s *[]func(s *styles.Style)) {
 		for _, f := range *s {
 			f(&wb.Styles)

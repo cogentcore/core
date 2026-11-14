@@ -18,6 +18,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
@@ -1056,6 +1057,32 @@ func TestContainerQuery(t *testing.T) {
 	})
 }
 
+// TestNestedContainerQueries tests the conditions of @container rules of
+// elements in many nested containers, each with @container rules of its
+// own, whose declarations were found again for each element in them and
+// each of their properties (reading volkskrant.nl took 30s), and that the
+// innermost element has those of its nearest container.
+func TestNestedContainerQueries(t *testing.T) {
+	var b strings.Builder
+	b.WriteString(`<style>.c { container-type: inline-size; padding-left: 4px }
+@container (width > 100px) { .c { color: blue } .box { height: 20px } }
+@container (width <= 100px) { .box { height: 40px } }</style><div style="width: 600px">`)
+	for range 40 {
+		b.WriteString(`<div class="c">`)
+	}
+	b.WriteString(`<div class="box" id="wide"></div>`)
+	for range 40 {
+		b.WriteString(`</div>`)
+	}
+	b.WriteString(`</div>`)
+	start := time.Now()
+	widgetsByID(t, b.String(), func(ws map[string]*core.WidgetBase, dp float32) {
+		require.NotNil(t, ws["wide"])
+		assert.InDelta(t, 20*dp, ws["wide"].Geom.Size.Actual.Total.Y, 1, "in a container of more than 100px")
+	})
+	assert.Less(t, time.Since(start), 5*time.Second)
+}
+
 // TestFloatIntoNextSectionWithUniversalRule tests that a float in a section
 // is beside the content of the next section, also with a rule for all
 // elements that does not change their boxes (as the rule for reduced
@@ -1481,4 +1508,27 @@ ul{list-style:none;margin:0;padding:0}
 		assert.LessOrEqual(t, mx, vis, "its content fits its width")
 		assert.False(t, fr.HasScroll[math32.X], "no horizontal scrolling")
 	})
+}
+
+// TestFlexFlowColumnNowrap tests that a flex-flow with a direction and a
+// wrap keeps the direction (as the election results of nytimes.com, a
+// column nowrap of sections that are containers, which were laid out in
+// a row with no width, drawn over each other), and that the parts that
+// are omitted are initial.
+func TestFlexFlowColumnNowrap(t *testing.T) {
+	widgetsByID(t, `<div style="width: 600px"><div id="wrap" style="display: flex; flex-flow: column nowrap">`+
+		`<section id="first" style="container-type: inline-size"><div style="display: flex; flex-flow: row nowrap; gap: 30px">`+
+		`<a id="senate" style="flex: 1">Senate 55 44</a><a id="house" style="flex: 1">House 256 169</a></div></section>`+
+		`<section id="last" style="container-type: inline-size">Key races</section></div>`+
+		`<div id="reset" style="display: flex; flex-direction: column; flex-flow: wrap"><span>a</span><span>b</span></div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			first, last := ws["first"].Geom, ws["last"].Geom
+			assert.InDelta(t, 600*dp, first.Size.Actual.Total.X, 1, "first section as wide as the column")
+			assert.InDelta(t, 600*dp, last.Size.Actual.Total.X, 1, "last section as wide as the column")
+			assert.GreaterOrEqual(t, last.Pos.Total.Y, first.Pos.Total.Y+first.Size.Actual.Total.Y-1, "sections in a column")
+			senate, house := ws["senate"].Geom, ws["house"].Geom
+			assert.GreaterOrEqual(t, house.Pos.Total.X, senate.Pos.Total.X+senate.Size.Actual.Total.X, "chambers side by side")
+			assert.Equal(t, styles.Row, ws["reset"].Styles.Direction, "flex-flow of only a wrap is a row")
+			assert.True(t, ws["reset"].Styles.Wrap, "flex-flow of wrap wraps")
+		})
 }
