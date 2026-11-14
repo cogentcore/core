@@ -1493,9 +1493,11 @@ func TestDisplayUnset(t *testing.T) {
 // (invalid at computed-value time) is unset, as in CSS: the font and color
 // of the parent (inherited) and no margin (initial), not those of the
 // heading (as the rules of reddit.com, of a font of a variable of a theme
-// that it did not use, which were as large as headings).
+// that it did not use, or of one that had no size, which were as large as
+// headings).
 func TestInvalidVarUnset(t *testing.T) {
 	for _, rule := range []string{"h2 { font: var(--missing) }", "h2 { font: var(--a) } :root { --a: var(--b) }",
+		"h2 { font: var(--a) } :root { --a: normal var(--sans) } :root { --sans: Arial, sans-serif }",
 		"h2 { font-size: var(--missing); font-weight: var(--missing); margin: var(--missing) }"} {
 		widgetsByID(t, `<style>`+rule+`</style><div style="font-size: 14px; font-weight: 400"><h2 id="h">rule</h2></div>`,
 			func(ws map[string]*core.WidgetBase, dp float32) {

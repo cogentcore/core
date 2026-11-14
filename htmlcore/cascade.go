@@ -744,9 +744,38 @@ func (c *Context) resolveVars(n *html.Node, ds []*cssDecl) {
 			visiting = map[string]bool{d.Property: true}
 		}
 		v, ok := c.substituteVars(n, d.Value, visiting)
+		if ok && d.Property == "font" && !fontShorthandValid(v) {
+			// a value of var() that is not a valid font, as a style and a
+			// family without a size, is invalid at computed-value time,
+			// which unsets the font (as the rules of reddit.com, whose
+			// headings had the font of a theme that had no size, which
+			// browsers draw in the font of the text around them)
+			ok = false
+		}
 		d.Value = v
 		d.invalid = !ok
 	}
+}
+
+// fontShorthandValid returns whether the given value of the font shorthand
+// is valid: a size (as 14px or medium, after any style, variant and
+// weight) and a family after it, or a CSS-wide keyword or system font.
+func fontShorthandValid(v string) bool {
+	fs := strings.Fields(strings.ToLower(v))
+	if len(fs) == 1 {
+		switch fs[0] {
+		case "inherit", "initial", "unset", "revert", "revert-layer", "caption", "icon", "menu",
+			"message-box", "small-caption", "status-bar":
+			return true
+		}
+	}
+	for i, f := range fs {
+		if len(f) > 0 && (f[0] >= '0' && f[0] <= '9' || f[0] == '.') || cssFontSizes[f] > 0 ||
+			strings.HasPrefix(f, "calc(") || strings.HasPrefix(f, "clamp(") || strings.HasPrefix(f, "min(") || strings.HasPrefix(f, "max(") {
+			return i+1 < len(fs) // (the family after the size)
+		}
+	}
+	return false
 }
 
 // substituteVars returns the given value with its var() functions replaced
