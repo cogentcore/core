@@ -413,3 +413,19 @@ func TestRereadKeepsUnchanged(t *testing.T) {
 		}, "d0", "d700", "d1499")
 	})
 }
+
+// TestRereadAddedRules tests that the rules added to a style sheet (as
+// CSS-in-JS libraries add them, as on nytimes.com) restyle the elements
+// that they select, found by the keys of their selectors, and the elements
+// in them for the custom properties that they set, as the page read anew.
+func TestRereadAddedRules(t *testing.T) {
+	const page = `<html><head><style id="css">.box { width: 100px; height: 20px }
+.label { color: var(--c, black) }</style></head><body><div style="width: 400px">
+<div id="a" class="box"><div id="la" class="label">a</div></div><div id="b" class="box other">b</div>
+<p id="p">text</p></div></body></html>`
+	testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+		st := elementByID(doc, "css")
+		st.AppendChild(&html.Node{Type: html.TextNode, Data: "#a { --c: red; background: blue } .other { height: 40px } p { color: green }"})
+		return nil, []*html.Node{st}
+	}, "a", "b", "p")
+}

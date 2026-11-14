@@ -136,6 +136,7 @@ func readOneNode(ctx *Context, parent core.Widget, n *html.Node) {
 			ctx.snapshot(n)
 		}
 		ctx.matchedRules = len(ctx.rules)
+		ctx.matchedPseudo = len(ctx.pseudoRules)
 		restore()
 		ctx.rootFont = 0
 		ctx.rootFontSize() // of this document, while ctx.Node is it
