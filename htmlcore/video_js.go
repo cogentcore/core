@@ -16,6 +16,15 @@ import (
 	"cogentcore.org/core/video"
 )
 
+// handleAudio handles an audio element with controls: a [video.Video] of
+// its audio, with the controls of the browser, of the size of an audio
+// element (see [resolver.audioSize]).
+func handleAudio(ctx *Context) core.Widget {
+	w := handleVideo(ctx)
+	w.AsWidget().SetProperty("audio", true)
+	return w
+}
+
 // handleVideo handles a video element: a [video.Video], which is a video
 // element of the browser on the web, with the attributes of the element
 // (see video.go).

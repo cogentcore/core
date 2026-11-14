@@ -9,6 +9,7 @@ package video
 import (
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"sync"
 	"testing"
 	"time"
@@ -237,4 +238,122 @@ func TestPlaybackStepFrame(t *testing.T) {
 	time.Sleep(200 * time.Millisecond)
 	assert.Equal(t, n+2, fl.len(), "one frame each")
 	p.Stop()
+}
+
+// audioLog records the times that a playback of media with only audio
+// gives to OnTime, and when it ends.
+type audioLog struct {
+	mu    sync.Mutex
+	times []time.Duration
+	ended chan struct{}
+}
+
+func newAudioPlayback(t *testing.T, path string) (*Playback, *audioLog) {
+	m, err := OpenMedia(path, nil)
+	require.NoError(t, err)
+	al := &audioLog{ended: make(chan struct{})}
+	p := &Playback{Media: m, Muted: true,
+		OnFrame: func(Frame) { t.Error("a frame of media with only audio") },
+		OnTime: func(tm time.Duration) {
+			al.mu.Lock()
+			al.times = append(al.times, tm)
+			al.mu.Unlock()
+		},
+		OnEnd: func() { close(al.ended) },
+	}
+	return p, al
+}
+
+func (al *audioLog) last() time.Duration {
+	al.mu.Lock()
+	defer al.mu.Unlock()
+	if len(al.times) == 0 {
+		return 0
+	}
+	return al.times[len(al.times)-1]
+}
+
+func TestPlaybackAudioOnly(t *testing.T) {
+	p, al := newAudioPlayback(t, "testdata/tone.mp3")
+	m := p.Media
+	assert.True(t, m.HasAudio)
+	assert.False(t, m.HasVideo)
+	assert.Zero(t, m.Width)
+	assert.InDelta(t, 1.5, m.Duration.Seconds(), 0.1)
+	_, err := m.FirstFrame(16, 0)
+	assert.Error(t, err, "media with only audio has no frames")
+
+	// it plays for the time of its audio, which it is timed by
+	start := time.Now()
+	require.NoError(t, p.Play())
+	assert.True(t, p.IsPlaying())
+	select {
+	case <-al.ended:
+	case <-time.After(5 * time.Second):
+		t.Fatal("the audio did not end")
+	}
+	elapsed := time.Since(start)
+	assert.Greater(t, elapsed, 1200*time.Millisecond)
+	assert.Less(t, elapsed, 3500*time.Millisecond)
+	assert.True(t, p.IsEnded())
+	assert.False(t, p.IsPlaying())
+	assert.InDelta(t, 1.5, p.Position().Seconds(), 0.15)
+	al.mu.Lock()
+	defer al.mu.Unlock()
+	assert.Greater(t, len(al.times), 5)
+	for i := 1; i < len(al.times); i++ {
+		assert.GreaterOrEqual(t, al.times[i], al.times[i-1])
+	}
+}
+
+func TestPlaybackAudioOnlyPause(t *testing.T) {
+	p, al := newAudioPlayback(t, "testdata/tone.mp3")
+	require.NoError(t, p.Play())
+	defer p.Stop()
+	time.Sleep(500 * time.Millisecond)
+	p.Pause()
+	time.Sleep(150 * time.Millisecond) // (the last time given)
+	paused := p.Position()
+	assert.Greater(t, paused, 200*time.Millisecond)
+	time.Sleep(400 * time.Millisecond)
+	assert.Equal(t, paused, p.Position(), "the time does not move while paused")
+	assert.True(t, p.IsPaused())
+
+	// a seek while paused stays paused, at the time
+	require.NoError(t, p.Seek(time.Second))
+	time.Sleep(250 * time.Millisecond)
+	assert.True(t, p.IsPaused())
+	assert.InDelta(t, 1.0, p.Position().Seconds(), 0.05)
+	p.Resume()
+	select {
+	case <-al.ended:
+	case <-time.After(3 * time.Second):
+		t.Fatal("the audio did not end after it was resumed")
+	}
+	assert.InDelta(t, 1.5, al.last().Seconds(), 0.15)
+}
+
+// TestPlaybackAudioStream plays audio that is streamed over HTTP without a
+// length, as a live radio stream (as an Icecast MP3 stream).
+func TestPlaybackAudioStream(t *testing.T) {
+	data, err := os.ReadFile("testdata/tone.mp3")
+	require.NoError(t, err)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "audio/mpeg")
+		for i := 0; i < len(data); i += 1024 { // (chunked, without a length)
+			w.Write(data[i:min(i+1024, len(data))])
+			w.(http.Flusher).Flush()
+		}
+	}))
+	defer srv.Close()
+	p, al := newAudioPlayback(t, srv.URL+"/live.mp3")
+	assert.True(t, p.Media.HasAudio)
+	assert.False(t, p.Media.HasVideo)
+	require.NoError(t, p.Play())
+	select {
+	case <-al.ended:
+	case <-time.After(5 * time.Second):
+		t.Fatal("the stream did not end")
+	}
+	assert.InDelta(t, 1.5, al.last().Seconds(), 0.15)
 }

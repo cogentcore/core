@@ -179,7 +179,7 @@ func (c *Context) isTextElement(n *xhtml.Node) bool {
 			return false
 		}
 		switch n.Data {
-		case "img", "button", "input", "select", "textarea", "svg", "video", "iframe", "canvas", "object", "embed", "math":
+		case "img", "button", "input", "select", "textarea", "svg", "video", "audio", "iframe", "canvas", "object", "embed", "math":
 			return false
 		}
 		switch c.displayOf(n) {

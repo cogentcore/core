@@ -53,14 +53,16 @@ func OpenSource(src Source) (*Media, error) {
 
 // setProperties sets the properties of the given media from the decoder.
 func (d *decoder) setProperties(m *Media) {
-	m.HasAudio = d.audio != nil
-	par := d.video.stream.CodecParameters()
-	m.Width, m.Height = par.Width(), par.Height()
-	if m.Rotation = d.rotation; m.Rotation == 90 || m.Rotation == 270 {
-		m.Width, m.Height = m.Height, m.Width // (its frames are turned)
-	}
-	if fr := d.video.stream.AvgFrameRate(); fr.Num() > 0 && fr.Den() > 0 {
-		m.FrameRate = fr.Float64()
+	m.HasAudio, m.HasVideo = d.audio != nil, d.video != nil
+	if d.video != nil { // (audio-only media has no size)
+		par := d.video.stream.CodecParameters()
+		m.Width, m.Height = par.Width(), par.Height()
+		if m.Rotation = d.rotation; m.Rotation == 90 || m.Rotation == 270 {
+			m.Width, m.Height = m.Height, m.Width // (its frames are turned)
+		}
+		if fr := d.video.stream.AvgFrameRate(); fr.Num() > 0 && fr.Den() > 0 {
+			m.FrameRate = fr.Float64()
+		}
 	}
 	if du := d.inputs[0].fc.Duration(); du > 0 {
 		m.Duration = time.Duration(du) * time.Second / time.Duration(astiav.TimeBase)
@@ -255,15 +257,22 @@ func (d *decoder) openStreams(audio bool) error {
 			*target = ds
 		}
 	}
-	if d.video == nil {
+	// Media is played with a video stream, or with only an audio stream
+	// (as of the audio elements of web pages).
+	switch {
+	case d.video == nil && d.audio == nil && audio:
+		return errors.New("no video or audio stream")
+	case d.video == nil && d.audio == nil:
 		return errors.New("no video stream")
 	}
 	d.frameTime = time.Second / 30
-	if fr := d.video.stream.AvgFrameRate(); fr.Num() > 0 && fr.Den() > 0 {
-		d.frameTime = time.Duration(float64(time.Second) / fr.Float64())
-	}
-	if dm, ok := d.video.stream.CodecParameters().SideData().DisplayMatrix().Get(); ok {
-		d.rotation = ((int(math.Round(dm.Rotation()/90))%4 + 4) % 4) * 90
+	if d.video != nil {
+		if fr := d.video.stream.AvgFrameRate(); fr.Num() > 0 && fr.Den() > 0 {
+			d.frameTime = time.Duration(float64(time.Second) / fr.Float64())
+		}
+		if dm, ok := d.video.stream.CodecParameters().SideData().DisplayMatrix().Get(); ok {
+			d.rotation = ((int(math.Round(dm.Rotation()/90))%4 + 4) % 4) * 90
+		}
 	}
 
 	// Allocate the frames used for converting.
@@ -374,17 +383,22 @@ func (d *decoder) run(sink decodeSink) error {
 // runInput decodes the given input, sending the results of its streams
 // to the sink, until its end, an error, or the sink returns false.
 func (d *decoder) runInput(in *input, sink decodeSink) error {
-	// Read packets and send them to the decoder of their stream.
+	// Read packets and send them to the decoder of their stream. The end
+	// of an HTTP stream of an unknown length (as of a radio stream that
+	// ends, or a file sent without a length) is an I/O error of FFmpeg
+	// once it has been read.
+	read := false
 	for {
 		if err := in.fc.ReadFrame(in.packet); err != nil {
-			if errors.Is(err, astiav.ErrEof) {
+			if errors.Is(err, astiav.ErrEof) || (read && errors.Is(err, astiav.ErrEio) && in.reader == nil) {
 				break
 			}
 			return fmt.Errorf("video: reading packet: %w", err)
 		}
+		read = true
 		var s *decodeStream
 		switch idx := in.packet.StreamIndex(); {
-		case d.video.in == in && idx == d.video.stream.Index():
+		case d.video != nil && d.video.in == in && idx == d.video.stream.Index():
 			s = d.video
 		case d.audio != nil && d.audio.in == in && idx == d.audio.stream.Index():
 			s = d.audio

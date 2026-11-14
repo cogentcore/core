@@ -28,8 +28,12 @@ import (
 type VideoBox struct {
 	core.Frame
 
-	// Image shows the poster of the video, and its frames.
+	// Image shows the poster of the video, and its frames (nil for Audio).
 	Image *core.Image
+
+	// Audio is whether it is the box of an audio element with controls,
+	// a bar (see handleAudio).
+	Audio bool
 }
 
 // (the type is registered when the package is initialized, as typegen
@@ -56,6 +60,18 @@ func (vb *VideoBox) RenderGroup() bool { return true }
 // (as the size of a video once it is opened, which updates the box).
 func (vb *VideoBox) SetVideoSize(width, height int) {
 	vb.SetProperty("video-size", math32.Vec2(float32(width), float32(height)))
+}
+
+// handleAudio handles an audio element with controls: a [VideoBox] that
+// is Audio, without an image, with the URL of the audio in its "video-src"
+// property, for an app to play it with its controls (see video.go).
+func handleAudio(ctx *Context) core.Widget {
+	vb := New[VideoBox](ctx)
+	vb.Audio = true
+	vb.SetProperty("audio", true)
+	vb.SetProperty("video-src", ctx.VideoSource(ctx.Node))
+	vb.SetVideoSize(0, 0) // (sized as audio, see [resolver.audioSize])
+	return vb
 }
 
 // handleVideo handles a video element: a [VideoBox] with an image of its

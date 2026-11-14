@@ -54,6 +54,11 @@ type Media struct {
 
 	// HasAudio is whether the media has an audio stream.
 	HasAudio bool
+
+	// HasVideo is whether the media has a video stream: media with only
+	// audio (as an MP3 file or stream) has no size nor frames, and its
+	// playing is timed by its audio (see [Playback]).
+	HasVideo bool
 }
 
 // Source is a source of the media of a [Media] other than a file or URL,

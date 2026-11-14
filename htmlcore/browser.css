@@ -90,4 +90,5 @@ dialog:modal {
 }
 svg:not(:root) { overflow: hidden; }
 input[type=hidden] { display: none; }
+audio:not([controls]) { display: none !important; }
 textarea { font-family: monospace; padding: 2px; white-space: pre-wrap; }

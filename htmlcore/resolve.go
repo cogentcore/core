@@ -314,6 +314,10 @@ func (r *resolver) isVideo() bool {
 // known), or of its aspect when only its width or height is set.
 func (r *resolver) videoSize() {
 	st, s := r.st, r.s
+	if r.wb.Property("audio") == true {
+		r.audioSize()
+		return
+	}
 	size := r.wb.Property("video-size").(math32.Vector2)
 	if size.X <= 0 || size.Y <= 0 {
 		size = math32.Vec2(VideoDefaultWidth, VideoDefaultHeight)
@@ -328,6 +332,21 @@ func (r *resolver) videoSize() {
 	case st.width == nil && st.height.Unit == units.UnitDp:
 		s.Min.X = units.Dp(st.height.Value * s.AspectRatio)
 		s.Max.X, s.Grow.X = s.Min.X, 0
+	}
+}
+
+// audioSize sets the size of the box of an audio element with controls
+// (see handleAudio): [AudioDefaultWidth] by [AudioDefaultHeight], as in
+// browsers, unless its CSS sets them, without an aspect ratio.
+func (r *resolver) audioSize() {
+	st, s := r.st, r.s
+	if st.width == nil {
+		s.Min.X = units.Dp(AudioDefaultWidth)
+		s.Max.X, s.Grow.X = s.Min.X, 0
+	}
+	if st.height == nil {
+		s.Min.Y = units.Dp(AudioDefaultHeight)
+		s.Max.Y, s.Grow.Y = s.Min.Y, 0
 	}
 }
 
