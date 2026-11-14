@@ -358,6 +358,7 @@ func readImage(ctx *Context, src string) (image.Image, error) {
 			return nil, err
 		}
 		key = u.String()
+		cache.waitDecoding(key) // (as it is gotten before the page is read)
 		if im := cache.Get(key); im != nil {
 			return im, nil
 		}
