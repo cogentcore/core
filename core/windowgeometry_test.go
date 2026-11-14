@@ -18,6 +18,7 @@ import (
 // saved in the file shared by all apps, merged with the geometries that
 // another app saved in it since it was read.
 func TestWindowGeometrySaveCached(t *testing.T) {
+	skipOnWeb(t, "the window is the page, whose geometry is not saved")
 	fn := filepath.Join(t.TempDir(), "window-geometry.json")
 	ws := &windowGeometrySaver{inited: true}
 	ws.geometries.Path = fn

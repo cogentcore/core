@@ -195,6 +195,7 @@ func TestTabsOSDragData(t *testing.T) {
 // (as onto the desktop) moves into a new window, initialized by
 // [Tabs.DragToWindow], and that the last tab does not (its window moves).
 func TestTabsDroppedNowhere(t *testing.T) {
+	skipOnWeb(t, "there is one window")
 	b := NewBody("one")
 	ts := newDragTabs(b, "A", "B")
 	var nt *Tabs
@@ -233,6 +234,7 @@ func TestTabsDroppedNowhere(t *testing.T) {
 // them) moves into them, in the event loops of the windows, and that its
 // window closes when it was its last tab.
 func TestTabsTransferWindows(t *testing.T) {
+	skipOnWeb(t, "there is one window")
 	drag := func(b *Body) *Tabs { return NewTabs(b).SetType(FunctionalTabs) }
 	b1 := NewBody("one")
 	src := newDragTabs(b1, "A")
@@ -295,6 +297,7 @@ func TestTabsDropIndex(t *testing.T) {
 // operating system onto a window where nothing takes it (as onto the
 // content of a page) moves to the end of its tabs.
 func TestTabsDropInScene(t *testing.T) {
+	skipOnWeb(t, "there is one window")
 	drag := func(b *Body) *Tabs { return NewTabs(b).SetType(FunctionalTabs) }
 	b1 := NewBody("one")
 	src := newDragTabs(b1, "A", "B")
