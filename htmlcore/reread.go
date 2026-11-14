@@ -51,17 +51,18 @@ func describeNode(n *html.Node) string {
 }
 
 // maxReread is the number of elements beyond which the elements that
-// [Context.Reread] would read again are read with the rest of the page:
-// they are read with the lock of the page held (unlike a page that is
-// read again whole, whose new widgets are only shown with it held), which
-// takes about 0.1ms for each (as for theguardian.com, whose body of 5000
-// elements took 650ms, while the widgets of all of it were shown and laid
-// out in about 100ms). On a page of more elements, a third of them may be
-// read again (see [Context.rereadLimit]).
+// [Context.Reread] would read again are read with the rest of the page,
+// on a page of few elements; on a page of more elements, two thirds of
+// them may be read again (see [Context.rereadLimit]), as they are read
+// without the lock of the widgets of the page (see
+// [Context.PrepareReread]), and only their widgets are put in the page
+// with it, while those of all of the page are for a page read whole (as
+// for the main element of npr.org, of 4000 of its 6000 elements, for
+// which it was read whole, as the limit was a third).
 const maxReread = 1000
 
 // rereadLimit returns the number of elements beyond which the elements to
-// read again are read with the rest of the page: [maxReread], or a third
+// read again are read with the rest of the page: [maxReread], or two thirds
 // of the elements of a large page, which takes far longer to read again
 // whole (as the pull request files of GitHub, of 35000 elements, read
 // again whole in 9s for each 3000 elements of the diffs that it loads as
@@ -71,7 +72,7 @@ func (c *Context) rereadLimit(root *html.Node) int {
 	if root != nil {
 		walkElements(root, func(*html.Node) { n++ })
 	}
-	return max(maxReread, n/3)
+	return max(maxReread, n*2/3)
 }
 
 // recordSheet records the given style or link element as one whose style
@@ -122,25 +123,43 @@ func (c *Context) addedStyle(n *html.Node) bool {
 	return true
 }
 
+// addedSheet adds the rules of the given new style or link element (see
+// [Context.addedStyle]): those of a link to a style sheet are gotten
+// (with the media of the link, and its imports), and recorded, not
+// applied, as those added to style elements, so that the elements that
+// they may select are matched again (see [Context.addedRuleTargets]),
+// instead of the page being read again whole (as for the style sheets of
+// the parts of nytimes.com, which its scripts add as it loads). It returns
+// false for a change of a style element that is not an addition to it.
+func (c *Context) addedSheet(n *html.Node) bool {
+	if n.DataAtom == atom.Style {
+		return c.addedStyle(n)
+	}
+	c.recordSheet(n)
+	if !strings.EqualFold(strings.TrimSpace(GetAttr(n, "rel")), "stylesheet") || !c.mediaMatches(GetAttr(n, "media")) {
+		return true
+	}
+	base, node := c.cssBase, c.Node
+	c.cssBase, c.Node = "", n
+	c.recordOnly = true
+	c.addLinkedStyle(GetAttr(n, "href"))
+	c.recordOnly = false
+	c.cssBase, c.Node = base, node
+	return true
+}
+
 // headChanged handles a change of the children of the given head element:
-// a new style element adds its rules (see [Context.addedStyle]), and the
-// other elements of the head are not rendered, except a link to a new
-// style sheet (which is gotten as the page is read again), for which it
-// returns false.
+// a new style element, or link to a style sheet, adds its rules (see
+// [Context.addedSheet]), and the other elements of the head are not
+// rendered. It returns false for a change of a style element that is not
+// an addition to it.
 func (c *Context) headChanged(head *html.Node) bool {
 	for k := head.FirstChild; k != nil; k = k.NextSibling {
 		if k.Type != html.ElementNode || c.sheets[k] {
 			continue
 		}
-		switch k.DataAtom {
-		case atom.Style:
-			if !c.addedStyle(k) {
-				return false
-			}
-		case atom.Link:
-			if strings.EqualFold(GetAttr(k, "rel"), "stylesheet") {
-				return false
-			}
+		if (k.DataAtom == atom.Style || k.DataAtom == atom.Link) && !c.addedSheet(k) {
+			return false
 		}
 	}
 	return true
@@ -235,9 +254,15 @@ func (c *Context) prepareReread(self, children []*html.Node, apply *func()) bool
 			restyleAll = true
 			return true
 		}
+		if n.DataAtom == atom.Title && inHead(n) {
+			// the title of the page (as scripts set it), which is not
+			// rendered: it is the title of the context (see Context.Title)
+			c.Title = strings.Join(strings.Fields(nodeText(n)), " ")
+			return true
+		}
 		if !own && n.DataAtom == atom.Head {
 			if !c.headChanged(n) {
-				return c.noChange("a new style sheet linked in the head")
+				return c.noChange("a change of a style sheet in the head that is not an addition to it")
 			}
 			if root == nil {
 				root = rootNode(n)
@@ -323,6 +348,21 @@ func (c *Context) prepareReread(self, children []*html.Node, apply *func()) bool
 	if len(roots) == 0 && !restyleAll && len(changed) == 0 && htmlChildren == nil {
 		return true // (only elements that are not rendered changed)
 	}
+	// the style sheets added in the elements to read again (as those that
+	// the scripts of nytimes.com add with the parts of the page) add their
+	// rules, as those added to the head
+	for _, r := range roots {
+		ok := true
+		walkElements(r, func(n *html.Node) {
+			if ok && (n.DataAtom == atom.Style || n.DataAtom == atom.Link) && !c.sheets[n] {
+				ok = c.addedSheet(n)
+				restyleAll = true
+			}
+		})
+		if !ok {
+			return c.noChange("a change of a style sheet in " + describeNode(r) + " that is not an addition to it")
+		}
+	}
 	targeted := false
 	if restyleAll {
 		html := documentElement(root)
@@ -351,9 +391,6 @@ func (c *Context) prepareReread(self, children []*html.Node, apply *func()) bool
 			if !inKept(prelim, n) {
 				size++
 			}
-			if (n.Data == "style" || n.Data == "link") && !c.sheets[n] {
-				ok = false
-			}
 			for _, w := range c.elementWidgets[n] {
 				if !widgetIn(w, c.elementWidgets[r][0]) {
 					ok = false // (as one moved elsewhere)
@@ -361,21 +398,31 @@ func (c *Context) prepareReread(self, children []*html.Node, apply *func()) bool
 			}
 		})
 		if !ok {
-			return c.noChange("a new style sheet, or an element moved, in " + describeNode(r))
+			return c.noChange("an element moved, in " + describeNode(r))
 		}
 		if size > limit {
 			return c.noChange(fmt.Sprintf("%d elements to read again (more than %d), in %s", size, limit, describeNode(r)))
 		}
-		c.elementWidgets[r][0].AsWidget().WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
-			if n := ownNode(cw); n != nil && rootNode(n) == root && !inRoots(n) {
-				ok = false
-			}
-			return ok
-		})
-		if !ok {
+		if !c.readableRoot(r, root, inRoots) {
 			return c.noChange("widgets of other elements in those of " + describeNode(r))
 		}
 	}
+	// the elements whose changes as they are styled again their widgets can
+	// not be styled for (as of their display or pseudo-elements, as on
+	// nytimes.com) are read again too, with the elements that they are in,
+	// instead of the page whole
+	c.addRoot = func(n *html.Node) bool {
+		if n.Parent == nil {
+			return false
+		}
+		r := c.rereadRoot(n.Parent)
+		if r == nil || !c.readableRoot(r, root, func(k *html.Node) bool { return contains(r, k) }) {
+			return false
+		}
+		roots = outermost(append(roots, r))
+		return true
+	}
+	defer func() { c.addRoot = nil }()
 	c.matchKept = c.shallowKept(prelim)
 	c.matchAll = restyleAll
 	u, ok := c.updateDecls(changed, roots, inRoots)
@@ -1231,4 +1278,33 @@ func (c *Context) addedRuleTargets(root *html.Node) (shallow, deep []*html.Node,
 		}
 	})
 	return shallow, deep, true
+}
+
+// readableRoot returns whether the given element (in the document of the
+// given root) can be read again (see [Context.Reread]): its widgets are all
+// in its frame, which has only those of the elements for which in returns
+// true (those read again).
+func (c *Context) readableRoot(r, root *html.Node, in func(n *html.Node) bool) bool {
+	ws := c.elementWidgets[r]
+	if len(ws) == 0 {
+		return false
+	}
+	ok := true
+	walkElements(r, func(n *html.Node) {
+		for _, w := range c.elementWidgets[n] {
+			if !widgetIn(w, ws[0]) {
+				ok = false // (as one moved elsewhere)
+			}
+		}
+	})
+	if !ok {
+		return false
+	}
+	ws[0].AsWidget().WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		if n := ownNode(cw); n != nil && rootNode(n) == root && !in(n) {
+			ok = false
+		}
+		return ok
+	})
+	return ok
 }

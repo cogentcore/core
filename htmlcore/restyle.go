@@ -528,7 +528,7 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 				c.setPseudo(n, kind, nd, len(nd) > 0)
 				continue
 			}
-			if !isFree(n) {
+			if !isFree(n) && !(c.addRoot != nil && c.addRoot(n)) {
 				undo()
 				// its pseudo-element, which may be a widget
 				return nil, c.noChange("a change of the ::" + kind + " of " + describeNode(n))
@@ -565,14 +565,31 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 			continue // not rendered, before and after
 		}
 		ws := c.elementWidgets[n]
+		// a change that the widgets can not be styled again for is read
+		// again, with the elements that it is in, as elements are read
+		// again (see Context.addRoot), or else the page is
+		readAgain := func() bool {
+			if c.addRoot != nil && c.addRoot(n) {
+				u.freeChanged[n] = true
+				return true
+			}
+			return false
+		}
 		if d := c.displayOf(n); d != oldDisplay[n] {
+			if readAgain() {
+				continue
+			}
 			undo()
 			return nil, c.noChange(fmt.Sprintf("display of %s from %q to %q", describeNode(n), oldDisplay[n], d))
 		}
 		if len(ws) == 0 && !c.undisplayed(n) && !c.unusedCustomProps(props) {
+			if readAgain() {
+				continue
+			}
 			undo()
 			return nil, c.noChange(fmt.Sprintf("%s of %s, which has no widget of its own", strings.Join(props, ", "), describeNode(n)))
 		}
+		read := false
 		for _, p := range props {
 			if p == "position" && inFlowPosition(old[n][p]) && inFlowPosition(nw[p]) {
 				// static and relative are both in the flow, so the widget
@@ -582,10 +599,16 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 				continue
 			}
 			if !c.restylable(n, p) {
+				if read = readAgain(); read {
+					break
+				}
 				undo()
 				return nil, c.noChange(fmt.Sprintf("%s of %s", p, describeNode(n)))
 			}
 			u.layout = u.layout || !paintProperties[p]
+		}
+		if read {
+			continue
 		}
 		u.widgets = append(u.widgets, ws...)
 	}
