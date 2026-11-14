@@ -1178,6 +1178,10 @@ func (c *Context) shallowKept(keep map[*html.Node]core.Widget) map[*html.Node]bo
 	}
 	places, siblingPlaces := c.deepPlaces()
 	_, inSiblings := c.siblingCombinators()
+	var sibSubjects []keyMask
+	if inSiblings {
+		sibSubjects = c.siblingSubjects()
+	}
 	parents := map[*html.Node]bool{}
 	for k := range keep {
 		parents[k.Parent] = true
@@ -1187,7 +1191,7 @@ func (c *Context) shallowKept(keep map[*html.Node]core.Widget) map[*html.Node]bo
 		newBefore := false // an element before it that is new (inserted)
 		snapChildren(p, func(k *html.Node, s nodeSnap) {
 			o, ok := c.snaps[k]
-			if keep[k] != nil && ok && !placeChangedDeep(k, o, s, places, siblingPlaces) && !(inSiblings && (newBefore || o.index != s.index)) {
+			if keep[k] != nil && ok && !placeChangedDeep(k, o, s, places, siblingPlaces) && !(inSiblings && (newBefore || o.index != s.index) && siblingSelects(k, sibSubjects)) {
 				shallow[k] = true
 			}
 			newBefore = newBefore || !ok

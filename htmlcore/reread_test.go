@@ -639,6 +639,14 @@ func TestRereadImageSource(t *testing.T) {
 			return []*html.Node{i}, nil
 		}, "wrap", "a", "b", "i")
 	})
+	t.Run("srcset with lines", func(t *testing.T) {
+		// (as on nytimes.com: its URLs have =, which were other attributes)
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+			i := elementByID(doc, "i")
+			setAttr(i, "srcset", "\n  "+png+" 1x\n")
+			return []*html.Node{i}, nil
+		}, "wrap", "a", "b", "i")
+	})
 	t.Run("source", func(t *testing.T) {
 		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
 			s := elementByID(doc, "s")
@@ -646,4 +654,34 @@ func TestRereadImageSource(t *testing.T) {
 			return []*html.Node{s}, nil
 		}, "wrap", "a", "b", "i")
 	})
+}
+
+// TestRereadInsertBeforeKept tests that an element inserted before a kept
+// element (as the ad scripts of nytimes.com insert at the start of its
+// body) matches the elements in it again only if a rule with a combinator
+// of siblings followed by one of descendants may select it, as the page
+// read anew.
+func TestRereadInsertBeforeKept(t *testing.T) {
+	for _, style := range []string{".x ~ .side .y { color: red }", ".x ~ #app .y { color: red }", ".x ~ div .y { color: red }"} {
+		page := `<html><head><style>` + style + `
+.y { height: 10px }</style></head><body><div id="app" style="width: 400px"><div id="y" class="y">y</div></div></body></html>`
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+			app := elementByID(doc, "app")
+			ns, err := html.ParseFragment(strings.NewReader(`<div id="new" class="x" style="width: 400px">x</div>`), app.Parent)
+			require.NoError(t, err)
+			for _, n := range ns {
+				app.Parent.InsertBefore(n, app)
+			}
+			return nil, []*html.Node{app.Parent}
+		})
+	}
+	ctx := NewContext()
+	doc, err := ParseHTML(ctx, strings.NewReader(`<html><head><style>.x ~ .side .y { color: red }
+.a + .b > .c, .p ~ .q + .r .s { color: blue }</style></head><body><div id="app"></div><div id="side" class="side"></div><div id="r" class="r"></div></body></html>`))
+	require.NoError(t, err)
+	require.NoError(t, ReadDocument(ctx, core.NewBody(), doc))
+	subjects := ctx.siblingSubjects()
+	assert.False(t, siblingSelects(elementByID(doc, "app"), subjects))
+	assert.True(t, siblingSelects(elementByID(doc, "side"), subjects))
+	assert.True(t, siblingSelects(elementByID(doc, "r"), subjects))
 }

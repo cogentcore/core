@@ -94,14 +94,20 @@ func otherAttrs(n *html.Node) string {
 		}
 		sb.WriteString(a.Key)
 		sb.WriteByte('=')
-		sb.WriteString(a.Val)
+		// (escaped, as the srcsets of nytimes.com have lines, which were
+		// other attributes, as their URLs have =)
+		sb.WriteString(attrEscaper.Replace(a.Val))
 		sb.WriteByte('\n')
 	}
 	return sb.String()
 }
 
-// attrNames returns the names of the attributes in the given lines of
-// [otherAttrs] with their values.
+// attrEscaper escapes the values of attributes in [otherAttrs], whose
+// lines they are in.
+var attrEscaper = strings.NewReplacer("\\", "\\\\", "\n", "\\n")
+
+// attrValues returns the names of the attributes in the given lines of
+// [otherAttrs] with their values (escaped).
 func attrValues(lines string) map[string]string {
 	m := map[string]string{}
 	for _, l := range strings.Split(lines, "\n") {
@@ -333,6 +339,59 @@ func (c *Context) placeUses() (uses placeKinds) {
 		}
 	}
 	return
+}
+
+// siblingSubjects returns the keys of the compound selectors of the style
+// rules of the context that follow combinators of siblings and are followed
+// by combinators of descendants or children (as .b in .a ~ .b .c, and in
+// .a + .b > .c): the elements in an element that one may select may have
+// other matches as the elements before it change. (An element inserted at
+// the start of the body of nytimes.com, by its ad scripts, matched the 6800
+// elements of its #app again, which no such selector selects, as a rule
+// had a combinator of siblings followed by one of descendants.)
+func (c *Context) siblingSubjects() []keyMask {
+	var masks []keyMask
+	seen := map[keyMask]bool{}
+	for _, r := range c.rules {
+		t := r.text
+		if !strings.ContainsAny(t, "+~") {
+			continue
+		}
+		combs := combinators(t)
+		from := 0
+		for i, cb := range combs {
+			comp := t[from:cb.start]
+			from = cb.at + 1
+			if i == 0 || !combs[i-1].sibling || cb.sibling {
+				continue
+			}
+			var keys keyMask // (none: it may select any element)
+			if !strings.ContainsAny(comp, "\\|") {
+				keys = compoundKeys(comp)
+			}
+			if !seen[keys] {
+				seen[keys] = true
+				masks = append(masks, keys)
+			}
+		}
+	}
+	return masks
+}
+
+// siblingSelects returns whether a compound selector of the given keys
+// (see [Context.siblingSubjects]) may select the given element (or any,
+// if there are none, for the selectors that it could not tell).
+func siblingSelects(n *html.Node, masks []keyMask) bool {
+	if len(masks) == 0 {
+		return true
+	}
+	own := ownKeys(n)
+	for _, m := range masks {
+		if own.has(m) {
+			return true
+		}
+	}
+	return false
 }
 
 // siblingCombinators returns whether a style rule of the context may
