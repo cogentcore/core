@@ -164,6 +164,7 @@ func (c *Context) addDecls(n *html.Node, decls []*css.Declaration, origin cssOri
 			continue // dropped, so that the declaration before it applies
 		}
 		c.cssOrder++
+		c.noteVars(value)
 		c.styles[n] = append(c.styles[n], &cssDecl{Property: prop,
 			Value: c.absoluteURLs(value), Important: d.Important, origin: origin, specificity: spec, order: c.cssOrder,
 			container: c.curContainer, rule: c.curRule})

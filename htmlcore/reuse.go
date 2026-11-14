@@ -448,6 +448,7 @@ func (c *Context) ruleDecls(n *html.Node, ids []int) []*cssDecl {
 				continue
 			}
 			c.cssOrder++
+			c.noteVars(value)
 			ds = append(ds, &cssDecl{Property: prop, Value: c.absoluteURLs(value), Important: d.Important,
 				origin: r.origin, specificity: r.spec, order: c.cssOrder, container: r.container, rule: i + 1})
 		}

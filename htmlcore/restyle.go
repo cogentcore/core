@@ -476,7 +476,7 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 			undo()
 			return nil, c.noChange(fmt.Sprintf("display of %s from %q to %q", describeNode(n), oldDisplay[n], d))
 		}
-		if len(ws) == 0 && !c.undisplayed(n) {
+		if len(ws) == 0 && !c.undisplayed(n) && !c.unusedCustomProps(props) {
 			undo()
 			return nil, c.noChange(fmt.Sprintf("%s of %s, which has no widget of its own", strings.Join(props, ", "), describeNode(n)))
 		}
@@ -1051,4 +1051,46 @@ func inHead(n *html.Node) bool {
 		}
 	}
 	return false
+}
+
+// unusedCustomProps returns whether the given properties are all custom
+// properties that no declaration of the page uses (with var()), so that
+// their changes change nothing (as the --vwo-el-* properties that the
+// A/B testing scripts of volkskrant.nl set on the html element, which has
+// no widget of its own, for which the page was read whole).
+func (c *Context) unusedCustomProps(props []string) bool {
+	for _, p := range props {
+		if !strings.HasPrefix(p, "--") {
+			return false
+		}
+	}
+	for _, p := range props {
+		if c.varsUsed[p] {
+			return false
+		}
+	}
+	return true
+}
+
+// noteVars records the custom properties that the given value of a
+// declaration uses (with var()), for [Context.unusedCustomProps].
+func (c *Context) noteVars(value string) {
+	for {
+		i := strings.Index(value, "var(")
+		if i < 0 {
+			return
+		}
+		value = strings.TrimLeft(value[i+4:], " \t\n")
+		j := 0
+		for j < len(value) && isNameChar(value[j]) {
+			j++
+		}
+		if j > 0 {
+			if c.varsUsed == nil {
+				c.varsUsed = map[string]bool{}
+			}
+			c.varsUsed[value[:j]] = true
+		}
+		value = value[j:]
+	}
 }

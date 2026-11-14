@@ -275,3 +275,32 @@ func TestHasCompound(t *testing.T) {
 		}
 	}
 }
+
+// TestRestyleUnusedCustomProps tests that a change of custom properties of
+// the html element, which has no widget of its own, that no declaration
+// uses is restyled (it changes nothing), as the --vwo-el-* properties that
+// the A/B testing scripts of volkskrant.nl set, for which the page was
+// read whole, while one that is used can not be.
+func TestRestyleUnusedCustomProps(t *testing.T) {
+	const page = `<html><head><style>.v { width: var(--w, 10px); height: 10px }</style></head>` +
+		`<body><div class="v">v</div></body></html>`
+	for _, tc := range []struct {
+		style    string
+		restyled bool
+	}{{"--vwo-el-opacity: 0", true}, {"--w: 50px", false}} {
+		ctx := NewContext()
+		doc, err := ParseHTML(ctx, strings.NewReader(page))
+		require.NoError(t, err)
+		bd := core.NewBody()
+		require.NoError(t, ReadDocument(ctx, bd, doc))
+		root := documentElement(doc)
+		root.Attr = append(root.Attr, html.Attribute{Key: "style", Val: tc.style})
+		var ok bool
+		bd.RenderImage(func() {
+			bd.AsyncLock()
+			ok = ctx.Restyle([]*html.Node{root})
+			bd.AsyncUnlock()
+		})
+		assert.Equal(t, tc.restyled, ok, tc.style)
+	}
+}
