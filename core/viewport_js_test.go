@@ -17,8 +17,9 @@ func init() {
 	LoadAllSettings() // (first, as in NewBody, which then does not load them again)
 	AppearanceSettings.Spacing = 100
 	if fe := js.Global().Get("frameElement"); fe.Truthy() {
+		// (important, as the test runner sets the size of the frame again)
 		style := fe.Get("style")
-		style.Set("width", "1280px")
-		style.Set("height", "1024px")
+		style.Call("setProperty", "width", "1280px", "important")
+		style.Call("setProperty", "height", "1024px", "important")
 	}
 }

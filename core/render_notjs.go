@@ -142,3 +142,8 @@ func windowImage(rw *renderWindow) *image.RGBA {
 func testImageName(name string) string {
 	return name
 }
+
+// clearTestWindow is for the tests on the web (see the web version), and
+// does nothing elsewhere, where the windows of tests are closed with all
+// of their stages.
+func clearTestWindow() {}

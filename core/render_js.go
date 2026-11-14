@@ -83,3 +83,25 @@ func windowImage(rw *renderWindow) *image.RGBA {
 func testImageName(name string) string {
 	return "js/" + name
 }
+
+// clearTestWindow closes the stages left in the window of the tests by
+// earlier tests (as dialogs, or windows that were not closed), so that a
+// test starts with an empty window, as elsewhere, where the window of a
+// test is closed with all of its stages, whereas on the web there is one
+// window, which stays.
+func clearTestWindow() {
+	cw := getCurrentRenderWindow()
+	if cw == nil {
+		return
+	}
+	rc := cw.renderContext()
+	rc.Lock()
+	defer rc.Unlock()
+	for range 100 { // (in case a stage does not close)
+		st := cw.mains.top()
+		if st == nil {
+			return
+		}
+		cw.mains.deleteStage(st) // (with its popups)
+	}
+}

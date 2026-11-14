@@ -82,8 +82,10 @@ func (b *Body) RenderImage(fun ...func()) *image.RGBA {
 	return img
 }
 
-// runAndShowNewWindow runs a new window and waits for it to be shown.
+// runAndShowNewWindow runs a new window and waits for it to be shown,
+// in an empty window on the web (see [clearTestWindow]).
 func (b *Body) runAndShowNewWindow() {
+	clearTestWindow()
 	showed := make(chan struct{})
 	b.OnFinal(events.Show, func(e events.Event) {
 		showed <- struct{}{}
