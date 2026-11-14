@@ -183,6 +183,25 @@ func TestTreeTableStructOf(t *testing.T) {
 	b.AssertRender(t, "tree-table/struct-of")
 }
 
+// waitDragOver waits for the drag in the window of the body to be over
+// a drop target, moving the mouse to the given point again while it is
+// not: the hovers of a drag are updated by the moves after it starts,
+// and moves are combined when the event loop is behind them (as with
+// the race detector).
+func waitDragOver(b *Body, src *events.Source, pt image.Point) {
+	for range 100 {
+		b.AsyncLock()
+		em := &b.Scene.Events
+		over := em.drag != nil && len(em.dragHovers) > 0
+		b.AsyncUnlock()
+		if over {
+			return
+		}
+		src.MouseMove(pt)
+		time.Sleep(20 * time.Millisecond)
+	}
+}
+
 // TestTreeTableDragDrop tests dragging an item by its tree cell with the
 // mouse and moving it into another item (with Shift), with the menu of
 // the drop.
@@ -212,6 +231,7 @@ func TestTreeTableDragDrop(t *testing.T) {
 			src.MouseMove(from.Add(to.Sub(from).Mul(i).Div(10)))
 			time.Sleep(20 * time.Millisecond)
 		}
+		waitDragOver(b, src, to)
 		src.MouseButton(events.MouseUp, events.Left, to, shift)
 
 		var menu *Stage
@@ -479,6 +499,7 @@ func TestTreeTableDragMoves(t *testing.T) {
 				src.MouseMove(fp.Add(tp.Sub(fp).Mul(i).Div(10)))
 				time.Sleep(20 * time.Millisecond)
 			}
+			waitDragOver(b, src, tp)
 			b.AsyncLock()
 			dragCopy = b.Scene.Events.dragCopy
 			b.AsyncUnlock()

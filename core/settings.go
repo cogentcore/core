@@ -396,7 +396,9 @@ func (as *AppearanceSettingsData) Apply() { //types:add
 	if as.Highlighting == "" {
 		as.Highlighting = "emacs"
 	}
-	rich.Settings = as.Text
+	if rich.Settings != as.Text { // (only when changed, as it is read in other goroutines)
+		rich.Settings = as.Text
+	}
 
 	// TODO(kai): move HiStyle to a separate text editor settings
 	// if TheViewInterface != nil {
@@ -410,7 +412,9 @@ func (as *AppearanceSettingsData) Apply() { //types:add
 // settings and zoom factor. set this as [system.UpdateLogicalDPIFunc] function.
 func (as *AppearanceSettingsData) updateLogicalDPI() {
 	// zoom is percentage, but LogicalDPIScale is multiplier
-	system.LogicalDPIScale = as.Zoom / 100
+	if scale := as.Zoom / 100; system.LogicalDPIScale != scale {
+		system.LogicalDPIScale = scale // (only when changed, as it is read in other goroutines)
+	}
 	// fmt.Println("system ldpi:", system.LogicalDPIScale)
 	n := system.TheApp.NScreens()
 	for i := 0; i < n; i++ {

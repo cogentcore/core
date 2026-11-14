@@ -84,7 +84,7 @@ func (sm *stages) push(st *Stage) {
 	sm.Lock()
 	defer sm.Unlock()
 
-	sm.modified = true
+	sm.setModified()
 	sm.stack.Add(sm.uniqueName(st.Name), st)
 }
 
@@ -101,7 +101,7 @@ func (sm *stages) deleteStage(st *Stage) bool {
 	for i := l - 1; i >= 0; i-- {
 		s := sm.stack.ValueByIndex(i)
 		if st == s {
-			sm.modified = true
+			sm.setModified()
 			sm.stack.DeleteIndex(i, i+1)
 			st.delete()
 			got = true
@@ -141,7 +141,7 @@ func (sm *stages) deleteStageAndBelow(st *Stage) bool {
 		s := sm.stack.ValueByIndex(i)
 		if !got {
 			if st == s {
-				sm.modified = true
+				sm.setModified()
 				sm.stack.DeleteIndex(i, i+1)
 				st.delete()
 				got = true
@@ -167,7 +167,7 @@ func (sm *stages) moveToTop(st *Stage) bool {
 		s := sm.stack.ValueByIndex(i)
 		if st == s {
 			k := sm.stack.KeyByIndex(i)
-			sm.modified = true
+			sm.setModified()
 			sm.stack.DeleteIndex(i, i+1)
 			sm.stack.InsertAtIndex(sm.stack.Len(), k, s)
 			return true
@@ -186,7 +186,7 @@ func (sm *stages) popType(typ StageTypes) *Stage {
 	for i := l - 1; i >= 0; i-- {
 		st := sm.stack.ValueByIndex(i)
 		if st.Type == typ {
-			sm.modified = true
+			sm.setModified()
 			sm.stack.DeleteIndex(i, i+1)
 			return st
 		}
@@ -214,7 +214,7 @@ func (sm *stages) deleteAll() {
 	if sz == 0 {
 		return
 	}
-	sm.modified = true
+	sm.setModified()
 	for i := sz - 1; i >= 0; i-- {
 		st := sm.stack.ValueByIndex(i)
 		st.delete()

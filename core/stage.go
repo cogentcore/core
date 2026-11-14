@@ -277,6 +277,7 @@ func (st *Stage) setScene(sc *Scene) *Stage {
 // and also sets the RenderContext from that.
 func (st *Stage) setMains(sm *stages) *Stage {
 	st.storeMains(sm)
+	st.Sprites.stage = st
 	st.renderContext = sm.renderContext
 	return st
 }

@@ -131,6 +131,9 @@ func computeLogicalDPI(dpr, scale float32) float32 {
 
 // SetLogicalDPIScale sets the LogicalDPIScale factor for given screen name
 func SetLogicalDPIScale(scrnName string, dpiScale float32) {
+	if s, ok := LogicalDPIScales[scrnName]; ok && s == dpiScale {
+		return // (unchanged, as it is read in other goroutines)
+	}
 	if LogicalDPIScales == nil {
 		LogicalDPIScales = make(map[string]float32)
 	}
@@ -146,7 +149,9 @@ func (sc *Screen) UpdateLogicalDPI() {
 			scale = dsc
 		}
 	}
-	sc.LogicalDPI = computeLogicalDPI(sc.DevicePixelRatio, scale)
+	if dpi := computeLogicalDPI(sc.DevicePixelRatio, scale); sc.LogicalDPI != dpi {
+		sc.LogicalDPI = dpi // (only when changed, as it is read in other goroutines)
+	}
 }
 
 // UpdatePhysicalDPI updates the value of [Screen.PhysicalDPI] based on
