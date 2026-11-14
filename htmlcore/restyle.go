@@ -230,6 +230,8 @@ type nodeStyles struct {
 // or a table), or one of an element that has no widget of its own (as an
 // inline element in a run of text).
 func (c *Context) Restyle(changed []*html.Node) bool {
+	c.containersChanged() // (declarations may change)
+	defer c.containersChanged()
 	c.fallback = ""
 	if len(changed) == 0 {
 		return true

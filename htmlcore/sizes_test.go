@@ -18,6 +18,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
@@ -1054,6 +1055,32 @@ func TestContainerQuery(t *testing.T) {
 		require.NotNil(t, ws["box"])
 		assert.InDelta(t, 537*dp*2/3, ws["box"].Geom.Size.Actual.Total.Y, 3, "of aspect 3/2")
 	})
+}
+
+// TestNestedContainerQueries tests the conditions of @container rules of
+// elements in many nested containers, each with @container rules of its
+// own, whose declarations were found again for each element in them and
+// each of their properties (reading volkskrant.nl took 30s), and that the
+// innermost element has those of its nearest container.
+func TestNestedContainerQueries(t *testing.T) {
+	var b strings.Builder
+	b.WriteString(`<style>.c { container-type: inline-size; padding-left: 4px }
+@container (width > 100px) { .c { color: blue } .box { height: 20px } }
+@container (width <= 100px) { .box { height: 40px } }</style><div style="width: 600px">`)
+	for range 40 {
+		b.WriteString(`<div class="c">`)
+	}
+	b.WriteString(`<div class="box" id="wide"></div>`)
+	for range 40 {
+		b.WriteString(`</div>`)
+	}
+	b.WriteString(`</div>`)
+	start := time.Now()
+	widgetsByID(t, b.String(), func(ws map[string]*core.WidgetBase, dp float32) {
+		require.NotNil(t, ws["wide"])
+		assert.InDelta(t, 20*dp, ws["wide"].Geom.Size.Actual.Total.Y, 1, "in a container of more than 100px")
+	})
+	assert.Less(t, time.Since(start), 5*time.Second)
 }
 
 // TestFloatIntoNextSectionWithUniversalRule tests that a float in a section

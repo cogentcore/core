@@ -253,10 +253,29 @@ func (c *Context) declarations(n *html.Node) []*cssDecl {
 	return c.styles[n]
 }
 
+// allDeclarations returns the declarations of the given node as
+// [Context.declarations] does, but with those of all of its @container
+// rules, whatever their conditions.
+func (c *Context) allDeclarations(n *html.Node) []*cssDecl {
+	if n == nil {
+		return nil
+	}
+	if !c.containerQueried[n] {
+		return c.declarations(n)
+	}
+	c.declarations(n) // (sorted, with hints)
+	return c.styles[n]
+}
+
 // declaration returns the value of the given property for the given node
 // from its declarations (not inherited), or "" if it has none.
 func (c *Context) declaration(n *html.Node, prop string) string {
-	ds := c.declarations(n)
+	return declarationIn(c.declarations(n), prop)
+}
+
+// declarationIn returns the value of the given property in the given
+// declarations, as [Context.declaration].
+func declarationIn(ds []*cssDecl, prop string) string {
 	for i := len(ds) - 1; i >= 0; i-- {
 		if ds[i].Property == prop {
 			if ds[i].invalid {

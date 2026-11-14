@@ -295,6 +295,19 @@ type pageState struct {
 	keptContainers   map[*html.Node]containerSizes
 	containerMu      sync.Mutex
 
+	// containerQueries are the matches of the queries of @container rules
+	// for the widths of their containers (see
+	// [Context.containerQueryMatches]), guarded by containerQueryMu.
+	containerQueries map[containerQueryKey]bool
+	containerQueryMu sync.Mutex
+
+	// queried are the declarations of the elements with @container rules
+	// that apply to them, for containerGen, the generation of the
+	// containers and the declarations (see [Context.containerDecls]),
+	// guarded by containerQueryMu.
+	queried      map[*html.Node]queriedDecls
+	containerGen int
+
 	// sheets has the style and link elements whose style sheets have
 	// been added, and rereads is the number of times that elements have
 	// been read again (see [Context.Reread]).
