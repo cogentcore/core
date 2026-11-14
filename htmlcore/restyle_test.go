@@ -304,3 +304,25 @@ func TestRestyleUnusedCustomProps(t *testing.T) {
 		assert.Equal(t, tc.restyled, ok, tc.style)
 	}
 }
+
+// TestRestyleSourceDisplay tests that a change of the display of a source
+// element of a picture, which is never rendered, restyles the page (it
+// changes nothing), as the slideshows of npr.org change it many times a
+// second, each of which read the page again.
+func TestRestyleSourceDisplay(t *testing.T) {
+	const page = `<html><body><picture><source id="s" srcset="a.png" style="display: none"><img src="a.png"></picture></body></html>`
+	ctx := NewContext()
+	doc, err := ParseHTML(ctx, strings.NewReader(page))
+	require.NoError(t, err)
+	bd := core.NewBody()
+	require.NoError(t, ReadDocument(ctx, bd, doc))
+	s := elementByID(doc, "s")
+	setAttr(s, "style", "display: block")
+	var ok bool
+	bd.RenderImage(func() {
+		bd.AsyncLock()
+		ok = ctx.Restyle([]*html.Node{s})
+		bd.AsyncUnlock()
+	})
+	assert.True(t, ok, ctx.Fallback())
+}

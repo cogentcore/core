@@ -413,6 +413,10 @@ type compiledSelector struct {
 	// an id ('#'), a class ('.'), or an element name ('t'), or none (0).
 	keyKind byte
 	key     string
+
+	// anc is the mask of the keys of the elements that the elements that
+	// it selects are in (see [ancestorKeys]).
+	anc keyMask
 }
 
 // selectorCache has the compiled selectors, with nil for ones
@@ -435,6 +439,7 @@ func compileSelector(sel string) *compiledSelector {
 		sp := s.Specificity()
 		cs = &compiledSelector{sel: s, specificity: sp[0]*10000 + sp[1]*100 + sp[2]}
 		cs.keyKind, cs.key = selectorKey(sel)
+		cs.anc = ancestorKeys(sel)
 	}
 	selectorCache[sel] = cs
 	return cs
@@ -613,7 +618,7 @@ func (c *Context) selectNodes(root *html.Node, sel string) []*html.Node {
 	}
 	var matches []*html.Node
 	for _, n := range cands {
-		if cs.sel.Match(n) {
+		if c.selMatch(cs, n) {
 			matches = append(matches, n)
 		}
 	}
