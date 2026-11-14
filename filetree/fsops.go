@@ -14,53 +14,103 @@ import (
 
 	"cogentcore.org/core/base/dirsort"
 	"cogentcore.org/core/base/fsx"
+	"github.com/hack-pad/hackpadfs"
 )
 
-// WriteFS is an [fs.FS] that a file tree can change, such as an in-memory
-// filesystem, with the file operations of its context menu, drag and drop,
-// and copy and paste (see [Tree.FS]). Its paths are those of an fs.FS,
-// separated by /. A tree of an fs.FS that is not a WriteFS is read-only.
-type WriteFS interface {
+// The files of a [Tree.FS] are changed with the interfaces of hackpadfs
+// for each operation, which extend those of [io/fs], as the os functions:
+// [hackpadfs.MkdirAllFS] (or MkdirFS) for New folder, [hackpadfs.RenameFS]
+// for Rename, [hackpadfs.RemoveAllFS] (or RemoveFS) for Delete,
+// [hackpadfs.WriteFileFS] (or OpenFileFS) for New file, and [CopyFS], or
+// else those of making directories and writing files, for copying, as in
+// Duplicate, drag and drop, and copy and paste. Those that an FS does not
+// have are disabled, as for a read-only FS. A [hackpadfs.MountFS] can
+// have any of them, in its mounted filesystems.
+
+// CopyFS is an [fs.FS] that copies its own files and directories, as for
+// those that are more than their bytes, such as typed data. Those of
+// another FS are copied by reading and writing them (see [Tree.FS]).
+type CopyFS interface {
 	fs.FS
-
-	// MkdirAll makes the directory at the given path, with any of its
-	// parent directories that do not exist yet.
-	MkdirAll(path string) error
-
-	// Rename renames (moves) the file or directory at the old path to the
-	// new path, which does not exist.
-	Rename(oldpath, newpath string) error
-
-	// RemoveAll removes the file or directory at the given path, with all
-	// that it contains.
-	RemoveAll(path string) error
 
 	// CopyPath copies the file or directory at the source path to the
 	// destination path, replacing anything there.
 	CopyPath(dst, src string) error
 }
 
-// errReadOnly is the error of a change to a read-only [Tree.FS].
-var errReadOnly = errors.New("the files cannot be changed: their filesystem is read-only")
+// errUnsupported is the error of a change to the files of a [Tree.FS] that
+// it does not support, as for a read-only one.
+var errUnsupported = errors.New("the filesystem of the files does not support this change")
 
-// writeFS returns the [WriteFS] of the tree of the node, or nil if it is
-// that of the operating system, or the error of a read-only [Tree.FS].
-func (fn *Node) writeFS() (WriteFS, error) {
-	fsys := fn.FileRoot().FS
-	if fsys == nil {
-		return nil, nil
+// fsErr returns the given error of an operation of hackpadfs, with
+// [errUnsupported] for an operation that the FS does not have.
+func fsErr(err error) error {
+	if errors.Is(err, hackpadfs.ErrNotImplemented) {
+		return fmt.Errorf("%w: %w", errUnsupported, err)
 	}
-	if wfs, ok := fsys.(WriteFS); ok {
-		return wfs, nil
-	}
-	return nil, errReadOnly
+	return err
 }
 
-// canWrite returns whether the files of the tree of the node can be
-// changed: those of the operating system, and of a [WriteFS].
-func (fn *Node) canWrite() bool {
-	_, err := fn.writeFS()
-	return err == nil
+// fsHas returns whether the [Tree.FS] of the node has any of the
+// interfaces of the given values, or is a [hackpadfs.MountFS], which can
+// have them in its mounted filesystems. It is true for the os.
+func fsHas(fn *Node, has ...func(fs.FS) bool) bool {
+	fsys := fn.FileRoot().FS
+	if fsys == nil {
+		return true
+	}
+	if _, ok := fsys.(hackpadfs.MountFS); ok {
+		return true
+	}
+	for _, h := range has {
+		if h(fsys) {
+			return true
+		}
+	}
+	return false
+}
+
+// is returns whether the given FS has the interface T.
+func is[T any](fsys fs.FS) bool {
+	_, ok := fsys.(T)
+	return ok
+}
+
+// canMkdir, canRename, canRemove, canCreate, and canCopy return whether
+// the files of the tree of the node can be changed with the operations of
+// those names (see [CopyFS]), as those of the os can.
+func (fn *Node) canMkdir() bool {
+	return fsHas(fn, is[hackpadfs.MkdirAllFS], is[hackpadfs.MkdirFS])
+}
+
+func (fn *Node) canRename() bool {
+	return fsHas(fn, is[hackpadfs.RenameFS])
+}
+
+func (fn *Node) canRemove() bool {
+	return fsHas(fn, is[hackpadfs.RemoveAllFS], is[hackpadfs.RemoveFS])
+}
+
+func (fn *Node) canCreate() bool {
+	return fsHas(fn, is[hackpadfs.WriteFileFS], is[hackpadfs.OpenFileFS])
+}
+
+func (fn *Node) canCopy() bool {
+	return fsHas(fn, is[CopyFS]) || (fn.canMkdir() && fn.canCreate())
+}
+
+// mkdirAll, rename, and removeAll do those operations of hackpadfs on the
+// [Tree.FS] of the node.
+func (fn *Node) mkdirAll(p string) error {
+	return fsErr(hackpadfs.MkdirAll(fn.FileRoot().FS, p, 0o775))
+}
+
+func (fn *Node) rename(oldpath, newpath string) error {
+	return fsErr(hackpadfs.Rename(fn.FileRoot().FS, oldpath, newpath))
+}
+
+func (fn *Node) removeAll(p string) error {
+	return fsErr(hackpadfs.RemoveAll(fn.FileRoot().FS, p))
 }
 
 // isFS returns whether the tree of the node is of a [Tree.FS].
@@ -114,16 +164,37 @@ func (fn *Node) isDirPath(p string) bool {
 }
 
 // copyPath copies the file or directory at the source path to the
-// destination path, in the tree of the node.
+// destination path, in the tree of the node: with [CopyFS] in a
+// [Tree.FS] that has it, and otherwise by reading and writing the files.
 func (fn *Node) copyPath(dst, src string) error {
-	wfs, err := fn.writeFS()
-	switch {
-	case err != nil:
-		return err
-	case wfs != nil:
-		return wfs.CopyPath(dst, src)
+	fsys := fn.FileRoot().FS
+	if fsys == nil {
+		return fsx.CopyPath(dst, src)
 	}
-	return fsx.CopyPath(dst, src)
+	if cfs, ok := fsys.(CopyFS); ok {
+		return cfs.CopyPath(dst, src)
+	}
+	if !fn.canCopy() {
+		return errUnsupported
+	}
+	return fs.WalkDir(fsys, src, func(p string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		to := dst + p[len(src):]
+		info, err := d.Info()
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return fsErr(hackpadfs.MkdirAll(fsys, to, info.Mode().Perm()|0o700))
+		}
+		b, err := fs.ReadFile(fsys, p)
+		if err != nil {
+			return err
+		}
+		return fsErr(hackpadfs.WriteFullFile(fsys, to, b, info.Mode().Perm()))
+	})
 }
 
 // duplicatePath copies the file or directory at the given path to a new

@@ -19,19 +19,24 @@ import (
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"github.com/hack-pad/hackpadfs"
+	"github.com/hack-pad/hackpadfs/mem"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-// memFS is a [WriteFS] in memory, for the tests.
+// memFS is an in-memory FS for the tests, with the hackpadfs interfaces
+// of the operations, other than writing files, and [CopyFS], whose
+// copies it counts.
 type memFS struct {
 	fstest.MapFS
+	copies int
 }
 
-func (m *memFS) MkdirAll(p string) error {
+func (m *memFS) MkdirAll(p string, perm fs.FileMode) error {
 	for d := p; d != "." && d != "/"; d = path.Dir(d) {
 		if _, ok := m.MapFS[d]; !ok {
-			m.MapFS[d] = &fstest.MapFile{Mode: fs.ModeDir | 0o755, ModTime: time.Now()}
+			m.MapFS[d] = &fstest.MapFile{Mode: fs.ModeDir | perm, ModTime: time.Now()}
 		}
 	}
 	return nil
@@ -70,6 +75,7 @@ func (m *memFS) CopyPath(dst, src string) error {
 	if _, err := fs.Stat(m, src); err != nil {
 		return err
 	}
+	m.copies++
 	m.RemoveAll(dst)
 	for _, k := range m.within(src) {
 		f := *m.MapFS[k]
@@ -79,32 +85,60 @@ func (m *memFS) CopyPath(dst, src string) error {
 	return nil
 }
 
-// newFSTree returns a tree of a new [memFS], or of a read-only one, with
-// a.txt, sub/b.txt, and the directory other, in a window.
-func newFSTree(t *testing.T, writable bool) (*Tree, *memFS) {
-	m := &memFS{fstest.MapFS{
-		"a.txt":     {Data: []byte("a\n"), ModTime: time.Now()},
+// testFSKinds are the kinds of FS of the tests: the in-memory one of
+// hackpadfs (with Mkdir, Remove, OpenFile, and others), a [memFS], and a
+// read-only one.
+type testFSKind int
+
+const (
+	hackpadMem testFSKind = iota
+	copyFS
+	readOnly
+)
+
+// newFSTree returns a tree of a new FS of the given kind, with a.txt,
+// sub/b.txt, and the directory other, in a window.
+func newFSTree(t *testing.T, kind testFSKind) (*Tree, fs.FS) {
+	files := fstest.MapFS{
+		"a.txt":     {Data: []byte("a\n"), Mode: 0o644, ModTime: time.Now()},
 		"sub":       {Mode: fs.ModeDir | 0o755},
-		"sub/b.txt": {Data: []byte("b\n")},
+		"sub/b.txt": {Data: []byte("b\n"), Mode: 0o644},
 		"other":     {Mode: fs.ModeDir | 0o755},
-	}}
+	}
+	var fsys fs.FS = files
+	switch kind {
+	case hackpadMem:
+		mfs, err := mem.NewFS()
+		require.NoError(t, err)
+		for _, p := range slices.Sorted(maps.Keys(files)) {
+			if files[p].Mode.IsDir() {
+				require.NoError(t, hackpadfs.MkdirAll(mfs, p, 0o755))
+			} else {
+				require.NoError(t, hackpadfs.WriteFullFile(mfs, p, files[p].Data, 0o644))
+			}
+		}
+		fsys = mfs
+	case copyFS:
+		fsys = &memFS{MapFS: files}
+	}
 	b := core.NewBody()
 	ft := NewTree(b)
 	ft.Dirs.setOpen("sub", true)
 	ft.Dirs.setOpen("other", true)
-	if writable {
-		ft.OpenPathFS(m, ".")
-	} else {
-		ft.OpenPathFS(m.MapFS, ".")
-	}
+	ft.OpenPathFS(fsys, ".")
 	runTestWindow(t, b)
-	return ft, m
+	return ft, fsys
 }
 
 // fsNode returns the node of the given path of the tree, or nil.
 func fsNode(ft *Tree, p string) *Node {
 	ft.AsyncLock()
 	defer ft.AsyncUnlock()
+	return fsNode2(ft, p)
+}
+
+// fsNode2 is [fsNode] under the lock.
+func fsNode2(ft *Tree, p string) *Node {
 	n, ok := ft.FindFile(p)
 	if !ok || string(n.Filepath) != p {
 		return nil
@@ -112,40 +146,66 @@ func fsNode(ft *Tree, p string) *Node {
 	return n
 }
 
-// TestWriteFS tests the file operations of a tree of a [WriteFS]: making
-// a folder, renaming, duplicating, and deleting, moving with drag and
-// drop, and copying with copy and paste.
+// TestWriteFS tests the file operations of a tree of an FS that can be
+// changed: making a folder and a file, renaming, duplicating, and
+// deleting, moving with drag and drop, and copying with copy and paste,
+// with the hackpadfs interfaces (and the fallbacks of hackpadfs, as for
+// the in-memory one of hackpadfs, without MkdirAll and RemoveAll), and
+// with [CopyFS] or by reading and writing the files.
 func TestWriteFS(t *testing.T) {
-	ft, m := newFSTree(t, true)
+	for _, kind := range []testFSKind{hackpadMem, copyFS} {
+		testWriteFS(t, kind)
+	}
+}
+
+func testWriteFS(t *testing.T, kind testFSKind) {
+	ft, fsys := newFSTree(t, kind)
 	do := func(f func()) {
 		ft.AsyncLock()
 		defer ft.AsyncUnlock()
 		f()
+	}
+	read := func(p string) string {
+		b, err := fs.ReadFile(fsys, p)
+		if err != nil {
+			return "(none)"
+		}
+		return string(b)
+	}
+	exists := func(p string) bool {
+		_, err := fs.Stat(fsys, p)
+		return err == nil
 	}
 	waitFor := func(what string, cond func() bool) {
 		t.Helper()
 		deadline := time.Now().Add(5 * time.Second)
 		for !cond() {
 			if time.Now().After(deadline) {
-				t.Fatalf("timeout waiting for %s; files: %v", what, slices.Sorted(maps.Keys(m.MapFS)))
+				t.Fatalf("%d: timeout waiting for %s", kind, what)
 			}
 			time.Sleep(10 * time.Millisecond)
 		}
 	}
 	has := func(p string) func() bool { return func() bool { return fsNode(ft, p) != nil } }
 
-	// a new folder
+	// a new folder, and a new file in the hackpadfs one (with OpenFile)
 	do(func() { AsNode(ft.This).newFolder("new") })
-	assert.True(t, m.MapFS["new"].Mode.IsDir())
+	assert.True(t, exists("new"))
 	waitFor("the new folder", has("new"))
+	if kind == hackpadMem {
+		do(func() { AsNode(ft.This).newFile("n.txt", false) })
+		assert.Equal(t, "", read("n.txt"))
+		waitFor("the new file", has("n.txt"))
+		do(func() { require.NoError(t, fsNode2(ft, "n.txt").DeleteFile()) })
+	}
 
 	// rename a file and a directory, with its files
 	do(func() { require.NoError(t, fsNode2(ft, "a.txt").RenameFile("c.txt")) })
-	assert.Equal(t, "a\n", string(m.MapFS["c.txt"].Data))
-	assert.Nil(t, m.MapFS["a.txt"])
+	assert.Equal(t, "a\n", read("c.txt"))
+	assert.False(t, exists("a.txt"))
 	waitFor("the renamed file", has("c.txt"))
 	do(func() { require.NoError(t, fsNode2(ft, "sub").RenameFile("sub2")) })
-	assert.Equal(t, "b\n", string(m.MapFS["sub2/b.txt"].Data))
+	assert.Equal(t, "b\n", read("sub2/b.txt"))
 	waitFor("the renamed directory", has("sub2/b.txt"))
 	do(func() {
 		assert.Error(t, fsNode2(ft, "c.txt").RenameFile("sub2"), "exists")
@@ -153,10 +213,10 @@ func TestWriteFS(t *testing.T) {
 
 	// duplicate, and delete
 	do(func() { require.NoError(t, fsNode2(ft, "c.txt").duplicateFile()) })
-	assert.Equal(t, "a\n", string(m.MapFS["c_Copy.txt"].Data))
+	assert.Equal(t, "a\n", read("c_Copy.txt"))
 	waitFor("the copy", has("c_Copy.txt"))
 	do(func() { require.NoError(t, fsNode2(ft, "c_Copy.txt").DeleteFile()) })
-	assert.Nil(t, m.MapFS["c_Copy.txt"])
+	assert.False(t, exists("c_Copy.txt"))
 	waitFor("the deletion", func() bool { return fsNode(ft, "c_Copy.txt") == nil })
 
 	// move a directory with drag and drop
@@ -169,8 +229,8 @@ func TestWriteFS(t *testing.T) {
 		fsNode2(ft, "other").DragDrop(de)
 	})
 	waitFor("the moved directory", has("other/sub2"))
-	assert.Equal(t, "b\n", string(m.MapFS["other/sub2/b.txt"].Data))
-	waitFor("the source deleted", func() bool { return m.MapFS["sub2"] == nil && fsNode(ft, "sub2") == nil })
+	assert.Equal(t, "b\n", read("other/sub2/b.txt"))
+	waitFor("the source deleted", func() bool { return !exists("sub2") && fsNode(ft, "sub2") == nil })
 
 	// copy and paste a file into a directory
 	do(func() {
@@ -180,47 +240,44 @@ func TestWriteFS(t *testing.T) {
 		// (paths of the os are not pasted)
 		fsNode2(ft, "new").pasteMimeData(mimedata.NewText(t.TempDir()))
 	})
-	require.NotNil(t, m.MapFS["new/c.txt"], "pasted")
-	assert.Equal(t, "a\n", string(m.MapFS["new/c.txt"].Data))
-	assert.Len(t, m.within("new"), 2, "only that")
-	assert.Equal(t, "a\n", string(m.MapFS["c.txt"].Data), "copied")
-}
-
-// fsNode2 is [fsNode] under the lock.
-func fsNode2(ft *Tree, p string) *Node {
-	n, ok := ft.FindFile(p)
-	if !ok || string(n.Filepath) != p {
-		return nil
+	assert.Equal(t, "a\n", read("new/c.txt"), "pasted")
+	ents, _ := fs.ReadDir(fsys, "new")
+	assert.Len(t, ents, 1, "only that")
+	assert.Equal(t, "a\n", read("c.txt"), "copied")
+	if m, ok := fsys.(*memFS); ok {
+		assert.Equal(t, 3, m.copies, "with CopyPath")
 	}
-	return n
 }
 
-// TestReadOnlyFS tests that the files of a tree of an [fs.FS] that is
-// not a [WriteFS] are not changed, and that a drop from the files of the
-// os into the tree of an FS is not done.
+// TestReadOnlyFS tests that the files of a tree of an [fs.FS] without the
+// interfaces of the operations are not changed, and that a drop from the
+// files of the os into the tree of an FS is not done.
 func TestReadOnlyFS(t *testing.T) {
-	ft, m := newFSTree(t, false)
+	ft, fsys := newFSTree(t, readOnly)
+	m := fsys.(fstest.MapFS)
 	ft.AsyncLock()
 	defer ft.AsyncUnlock()
 	n := fsNode2(ft, "a.txt")
 	require.NotNil(t, n)
-	assert.False(t, n.canWrite())
-	assert.ErrorIs(t, n.RenameFile("c.txt"), errReadOnly)
-	assert.ErrorIs(t, n.DeleteFile(), errReadOnly)
+	assert.False(t, n.canRename() || n.canRemove() || n.canMkdir() || n.canCreate() || n.canCopy())
+	assert.ErrorIs(t, n.RenameFile("c.txt"), errUnsupported)
+	assert.ErrorIs(t, n.DeleteFile(), errUnsupported)
+	assert.ErrorIs(t, n.copyPath("d.txt", "a.txt"), errUnsupported)
 	AsNode(ft.This).newFolder("new")
-	assert.Nil(t, m.MapFS["new"])
-	assert.NotNil(t, m.MapFS["a.txt"])
+	assert.Nil(t, m["new"])
+	assert.NotNil(t, m["a.txt"])
 
 	de := &events.DragDrop{DropMod: events.DropCopy, Data: mimedata.Mimes{mimedata.NewTextData(t.TempDir())}}
 	de.Typ = events.Drop
 	fsNode2(ft, "sub").DragDrop(de)
-	assert.Len(t, m.MapFS, 4, "nothing dropped")
+	assert.Len(t, m, 4, "nothing dropped")
 }
 
 // TestFSSort tests the sort order of the directories of a [Tree.FS]: the
 // [Tree.FSSort], and that set for a directory with Sort by.
 func TestFSSort(t *testing.T) {
-	ft, m := newFSTree(t, true)
+	ft, fsys := newFSTree(t, copyFS)
+	m := fsys.(*memFS)
 	ft.AsyncLock()
 	defer ft.AsyncUnlock()
 	m.MapFS["sub/a.txt"] = &fstest.MapFile{Data: []byte("aaaa\n"), ModTime: time.Now().Add(time.Hour)}
@@ -248,7 +305,7 @@ func TestFSSort(t *testing.T) {
 // TestFSSubdirRoot tests finding the files of a tree of an FS opened at
 // one of its directories, whose paths start with it, rather than ".".
 func TestFSSubdirRoot(t *testing.T) {
-	m := &memFS{fstest.MapFS{
+	m := &memFS{MapFS: fstest.MapFS{
 		"top/sub/b.txt": {Data: []byte("b\n")},
 	}}
 	b := core.NewBody()
@@ -265,10 +322,11 @@ func TestFSSubdirRoot(t *testing.T) {
 }
 
 // TestFSMenu tests that the items of the context menu that change files
-// are enabled for a [WriteFS], and disabled for a read-only FS.
+// are enabled for the operations that the FS has, and disabled for a
+// read-only FS.
 func TestFSMenu(t *testing.T) {
-	for _, writable := range []bool{true, false} {
-		ft, _ := newFSTree(t, writable)
+	for _, kind := range []testFSKind{hackpadMem, copyFS, readOnly} {
+		ft, _ := newFSTree(t, kind)
 		ft.AsyncLock()
 		n := fsNode2(ft, "sub")
 		n.Select()
@@ -282,9 +340,9 @@ func TestFSMenu(t *testing.T) {
 		}
 		ft.AsyncUnlock()
 		for _, item := range []string{"Duplicate", "Delete", "Rename", "New folder", "Paste"} {
-			assert.Equal(t, writable, enabled[item], "%s, writable: %v", item, writable)
+			assert.Equal(t, kind != readOnly, enabled[item], "%s, kind: %d", item, kind)
 		}
-		assert.False(t, enabled["New file"], "not in an FS")
+		assert.Equal(t, kind == hackpadMem, enabled["New file"], "with OpenFile, kind: %d", kind)
 		_, ok := enabled["Remove from externs"]
 		assert.False(t, ok, "not in an FS")
 	}

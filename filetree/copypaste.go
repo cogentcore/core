@@ -67,8 +67,8 @@ func (fn *Node) Cut() { //types:add
 // Paste copies the files on the clipboard, from [Node.Copy] or as
 // absolute paths in text, into this directory, or the directory of this file.
 func (fn *Node) Paste() { //types:add
-	if !fn.canWrite() {
-		core.ErrorSnackbar(fn, errReadOnly)
+	if !fn.canCopy() {
+		core.ErrorSnackbar(fn, errUnsupported)
 		return
 	}
 	fn.pasteMimeData(fn.Clipboard().Read([]string{fileinfo.TextPlain}))
@@ -113,8 +113,8 @@ func (fn *Node) DragDrop(e events.Event) {
 		case src == nil || src.FileRoot() != fn.FileRoot():
 			core.MessageSnackbar(fn, "Files can only be moved or copied within the same filesystem")
 			return
-		case !fn.canWrite():
-			core.ErrorSnackbar(fn, errReadOnly)
+		case !fn.canCopy() || (de.DropMod == events.DropMove && !src.canRemove()):
+			core.ErrorSnackbar(fn, errUnsupported)
 			return
 		}
 	}
