@@ -284,27 +284,46 @@ func CopyFields(dest, src any, fields ...string) error {
 // SetFieldsFromMap sets given map[string]any values to fields of given object,
 // where the map keys are field paths (with . delimiters for sub-field paths).
 // The value can be any appropriate type that applies to the given field.
-// It prints a message if a parameter fails to be set, and returns an error.
+// A value that is itself a map[string]any, for a field of struct type
+// (or pointer to struct, which is allocated if nil), is applied recursively
+// to the fields of that struct, so nested tables as decoded from TOML or JSON
+// (e.g., PartialRange = {Min = 0.2, Max = 1}) work the same as
+// dotted paths ("PartialRange.Min" = 0.2).
+// It logs a message for each value that fails to be set, including
+// field names that are not found, and returns an error joining all of them.
 func SetFieldsFromMap(obj any, vals map[string]any) error {
 	objv := reflect.ValueOf(obj)
 	npv := NonPointerValue(objv)
 	if npv.Kind() == reflect.Map {
-		err := CopyMapRobust(obj, vals)
-		if errors.Log(err) != nil {
-			return err
-		}
+		return errors.Log(CopyMapRobust(obj, vals))
 	}
+	return setFieldsFromMap(objv, vals, "")
+}
+
+// setFieldsFromMap is the recursive implementation of [SetFieldsFromMap],
+// where prefix is the path of objv within the top-level object, for messages.
+// It logs each error at the point of failure.
+func setFieldsFromMap(objv reflect.Value, vals map[string]any, prefix string) error {
 	var errs []error
 	for k, v := range vals {
+		path := prefix + k
 		fld, err := FieldByPath(objv, k)
 		if err != nil {
-			errs = append(errs, err)
+			errs = append(errs, errors.Log(fmt.Errorf("SetFieldsFromMap: field: %s: %w", path, err)))
+			continue
+		}
+		if sub, ok := v.(map[string]any); ok && NonPointerType(fld.Type()).Kind() == reflect.Struct {
+			if fld.Kind() == reflect.Pointer && fld.IsNil() {
+				fld.Set(reflect.New(fld.Type().Elem()))
+			}
+			if err := setFieldsFromMap(fld, sub, path+"."); err != nil {
+				errs = append(errs, err)
+			}
 			continue
 		}
 		err = SetRobust(PointerValue(fld).Interface(), v)
 		if err != nil {
-			err = errors.Log(fmt.Errorf("SetFieldsFromMap: was not able to apply value: %v to field: %s", v, k))
-			errs = append(errs, err)
+			errs = append(errs, errors.Log(fmt.Errorf("SetFieldsFromMap: was not able to apply value: %v to field: %s: %w", v, path, err)))
 		}
 	}
 	return errors.Join(errs...)

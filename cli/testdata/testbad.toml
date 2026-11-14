@@ -1,0 +1,3 @@
+GUI = true
+[Params]
+	LRate = .2

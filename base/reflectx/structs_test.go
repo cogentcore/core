@@ -118,3 +118,47 @@ func TestFieldByPath(t *testing.T) {
 	assert.Equal(t, 8, sp.Pet.Age)
 	assert.Equal(t, "ddd", sp.Data)
 }
+
+func TestSetFieldsFromMapNested(t *testing.T) {
+	sp := &person{Pet: pet{Name: "Pet Gopher", Age: 7}}
+
+	// nested map for a struct field, as decoded from a TOML inline table
+	err := SetFieldsFromMap(sp, map[string]any{
+		"Pet":  map[string]any{"Age": 9, "Type": "Cat"},
+		"Name": "Nested",
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, 9, sp.Pet.Age)
+	assert.Equal(t, "Cat", sp.Pet.Type)
+	assert.Equal(t, "Pet Gopher", sp.Pet.Name) // unspecified fields are kept
+	assert.Equal(t, "Nested", sp.Name)
+
+	// nil pointer to struct is allocated
+	assert.Nil(t, sp.OtherPet)
+	err = SetFieldsFromMap(sp, map[string]any{"OtherPet": map[string]any{"Name": "Other"}})
+	assert.NoError(t, err)
+	if assert.NotNil(t, sp.OtherPet) {
+		assert.Equal(t, "Other", sp.OtherPet.Name)
+	}
+
+	// errors for unknown fields, including nested ones, report the full path
+	err = SetFieldsFromMap(sp, map[string]any{"Pet": map[string]any{"Ages": 3}})
+	if assert.Error(t, err) {
+		assert.Contains(t, err.Error(), "Pet.Ages")
+	}
+	err = SetFieldsFromMap(sp, map[string]any{"Pets.Age": 3})
+	assert.Error(t, err)
+
+	// bad values report an error
+	err = SetFieldsFromMap(sp, map[string]any{"Pet": map[string]any{"Age": "old"}})
+	if assert.Error(t, err) {
+		assert.Contains(t, err.Error(), "Pet.Age")
+	}
+}
+
+func TestSetFieldsFromMapMap(t *testing.T) {
+	m := map[string]int{"a": 1}
+	err := SetFieldsFromMap(&m, map[string]any{"b": 2})
+	assert.NoError(t, err)
+	assert.Equal(t, 2, m["b"])
+}
