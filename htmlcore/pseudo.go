@@ -164,7 +164,9 @@ func (c *Context) pseudoBoxNode(el *html.Node, kind string) *html.Node {
 		}
 	}
 	c.styles[pn] = decls
-	c.varMemo = nil
+	if hasCustomDecls(decls) {
+		c.varMemo = nil
+	}
 	if c.hinted == nil {
 		c.hinted = map[*html.Node]bool{}
 	}
