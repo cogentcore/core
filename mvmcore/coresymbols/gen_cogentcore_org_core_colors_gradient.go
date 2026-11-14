@@ -18,6 +18,7 @@ var _ = register(func() {
 			"Base":              reflect.ValueOf((*p_cogentcore_org_core_colors_gradient.Base)(nil)),
 			"Cache":             reflect.ValueOf(&p_cogentcore_org_core_colors_gradient.Cache),
 			"ClearCache":        reflect.ValueOf(p_cogentcore_org_core_colors_gradient.ClearCache),
+			"Copier":            reflect.ValueOf((*p_cogentcore_org_core_colors_gradient.Copier)(nil)),
 			"CopyFrom":          reflect.ValueOf(p_cogentcore_org_core_colors_gradient.CopyFrom),
 			"CopyOf":            reflect.ValueOf(p_cogentcore_org_core_colors_gradient.CopyOf),
 			"FromAny":           reflect.ValueOf(p_cogentcore_org_core_colors_gradient.FromAny),

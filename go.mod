@@ -25,7 +25,6 @@ require (
 	github.com/go-fonts/latin-modern v0.3.3
 	github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.1.0.20260628091122-0bd588dc30cf
 	github.com/godbus/dbus/v5 v5.1.0
-	github.com/gomarkdown/markdown v0.0.0-20260724235538-61af6e1e6971
 	github.com/gorilla/websocket v1.5.3
 	github.com/grokify/html-strip-tags-go v0.1.0
 	github.com/h2non/filetype v1.1.3
@@ -40,6 +39,7 @@ require (
 	github.com/sgtdi/fswatcher v1.3.0
 	github.com/stretchr/testify v1.11.1
 	github.com/tdewolff/parse/v2 v2.8.5
+	github.com/yuin/goldmark/v2 v2.1.16
 	golang.org/x/crypto v0.58.0
 	golang.org/x/exp v0.0.0-20260112195511-716be5621a96
 	golang.org/x/image v0.44.0

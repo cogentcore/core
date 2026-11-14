@@ -5,6 +5,7 @@
 package htmlcore
 
 import (
+	"bytes"
 	"log/slog"
 	"strings"
 	"unicode"
@@ -12,8 +13,9 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/system"
 
-	"github.com/gomarkdown/markdown/ast"
-	"github.com/gomarkdown/markdown/parser"
+	"github.com/yuin/goldmark/v2/ast"
+	"github.com/yuin/goldmark/v2/parser"
+	"github.com/yuin/goldmark/v2/text"
 )
 
 // WikilinkHandler is a function that converts wikilink text to
@@ -67,38 +69,45 @@ func reportInvalidWikilinks() bool {
 
 // note: this is from: https://github.com/kensanata/oddmu/blob/main/parser.go
 
-// wikilink returns an inline parser function. This indirection is
-// required because we want to call the previous definition in case
-// this is not a wikilink.
-func wikilink(ctx *Context, fn func(p *parser.Parser, data []byte, offset int) (int, ast.Node)) func(p *parser.Parser, data []byte, offset int) (int, ast.Node) {
-	return func(p *parser.Parser, original []byte, offset int) (int, ast.Node) {
-		data := original[offset:]
-		// minimum: [[X]]
-		if len(data) < 5 || data[1] != '[' {
-			return fn(p, original, offset)
-		}
-		inside, after := getWikilinkText(data)
-		url, label := runWikilinkHandlers(ctx, inside)
+// wikilinkParser is a goldmark inline parser for [[wikilinks]], which
+// runs before the link parser and leaves other text starting with [ to it.
+type wikilinkParser struct {
+	ctx *Context
+}
 
-		var node ast.Node
-		if len(url) == 0 && len(label) == 0 {
-			if reportInvalidWikilinks() {
-				slog.Error("invalid wikilink", "link", string(inside))
-			}
-			// TODO: we just treat broken wikilinks like plaintext for now, but we should
-			// make red links instead at some point
-			node = &ast.Text{Leaf: ast.Leaf{Literal: append(inside, after...)}}
-		} else {
-			node = &ast.Link{Destination: url}
-			ast.AppendChild(node, &ast.Text{Leaf: ast.Leaf{Literal: append(label, after...)}})
-		}
-		return len(inside) + len(after) + 4, node
+func (wp wikilinkParser) Trigger() []byte { return []byte{'['} }
+
+func (wp wikilinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Context) ast.Node {
+	data, _ := block.PeekLine()
+	// minimum: [[X]]
+	if len(data) < 5 || data[1] != '[' || !bytes.Contains(data[2:], []byte("]]")) {
+		return nil
 	}
+	inside, after := getWikilinkText(data)
+	url, label := runWikilinkHandlers(wp.ctx, inside)
+	block.Advance(len(inside) + len(after) + 4)
+
+	if len(url) == 0 && len(label) == 0 {
+		if reportInvalidWikilinks() {
+			slog.Error("invalid wikilink", "link", string(inside))
+		}
+		// TODO: we just treat broken wikilinks like plaintext for now, but we should
+		// make red links instead at some point
+		return newString(string(inside) + string(after))
+	}
+	link := ast.NewLink(text.NewSingleLineValueFromString(string(url), text.IdentityDecoder))
+	link.AppendChild(newString(string(label) + string(after)))
+	return link
 }
 
 // getWikilinkText gets the wikilink text from the given raw text data starting with [[.
 // Inside contains the text inside the [[]], and after contains all of the text
 // after the ]] until there is a space or punctuation.
+// newString returns a text node with the given literal text.
+func newString(s string) *ast.Text {
+	return ast.NewText(text.NewSingleLineValueFromString(s, text.IdentityDecoder))
+}
+
 func getWikilinkText(data []byte) (inside, after []byte) {
 	i := 2
 	for ; i < len(data); i++ {

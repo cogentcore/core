@@ -5,14 +5,15 @@
 package web
 
 import (
+	"bytes"
 	"errors"
 	"io/fs"
 	"os"
 
 	"cogentcore.org/core/content/bcontent"
-	"github.com/gomarkdown/markdown"
-	"github.com/gomarkdown/markdown/html"
-	"github.com/gomarkdown/markdown/parser"
+	"github.com/yuin/goldmark/v2/extension"
+	"github.com/yuin/goldmark/v2/parser"
+	"github.com/yuin/goldmark/v2/renderer/html"
 )
 
 // readIndexPage returns the HTML for the optional custom index page of the app,
@@ -49,9 +50,9 @@ func readIndexPage() (string, error) {
 // conversion without support for Cogent Core extensions such as wikilinks,
 // since those require the GUI packages, which the build tool can not import.
 func mdToHTML(md []byte) []byte {
-	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock | parser.Attributes | parser.Mmark
-	p := parser.NewWithExtensions(extensions)
-	doc := p.Parse(md)
-	opts := html.RendererOptions{Flags: html.CommonFlags | html.HrefTargetBlank}
-	return markdown.Render(doc, html.NewRenderer(opts))
+	var buf bytes.Buffer
+	p := parser.New(parser.WithExtensions(extension.NewGFMParser()), parser.WithAutoHeadingID(), parser.WithAttribute())
+	r := html.New(html.WithUnsafe(), html.WithExtensions(extension.NewGFMHTMLRenderer()))
+	r.Render(&buf, md, p.Parse(md))
+	return buf.Bytes()
 }

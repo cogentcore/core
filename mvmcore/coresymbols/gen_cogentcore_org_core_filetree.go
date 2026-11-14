@@ -10,11 +10,13 @@ import (
 var _ = register(func() {
 	add(map[string]map[string]reflect.Value{
 		"cogentcore.org/core/filetree": {
+			"AppBundles":        reflect.ValueOf(&p_cogentcore_org_core_filetree.AppBundles),
 			"AsNode":            reflect.ValueOf(p_cogentcore_org_core_filetree.AsNode),
 			"AsTree":            reflect.ValueOf(p_cogentcore_org_core_filetree.AsTree),
 			"DirFlagMap":        reflect.ValueOf((*p_cogentcore_org_core_filetree.DirFlagMap)(nil)),
 			"FileChange":        reflect.ValueOf((*p_cogentcore_org_core_filetree.FileChange)(nil)),
 			"Filer":             reflect.ValueOf((*p_cogentcore_org_core_filetree.Filer)(nil)),
+			"IsAppBundle":       reflect.ValueOf(p_cogentcore_org_core_filetree.IsAppBundle),
 			"NewNode":           reflect.ValueOf(p_cogentcore_org_core_filetree.NewNode),
 			"NewTree":           reflect.ValueOf(p_cogentcore_org_core_filetree.NewTree),
 			"NewVCSLog":         reflect.ValueOf(p_cogentcore_org_core_filetree.NewVCSLog),

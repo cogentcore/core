@@ -33,7 +33,8 @@ import (
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textcore"
 	"cogentcore.org/core/tree"
-	"github.com/gomarkdown/markdown/ast"
+	"github.com/yuin/goldmark/v2/ast"
+	east "github.com/yuin/goldmark/v2/extension/ast"
 )
 
 // BindTextEditor is a function set to [cogentcore.org/core/mvmcore.BindTextEditor]
@@ -50,8 +51,7 @@ func (ct *Content) htmlIDAttributeHandler(ctx *htmlcore.Context, w io.Writer, no
 	if lbl == "" {
 		return false
 	}
-	ch := node.GetChildren()
-	if len(ch) == 2 { // image or table
+	if _, ok := node.FirstChild().(*ast.Image); ok || node.Kind() == east.KindTable { // own label
 		return false
 	}
 	if entering {

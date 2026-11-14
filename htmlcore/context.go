@@ -23,7 +23,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
-	"github.com/gomarkdown/markdown/ast"
+	"github.com/yuin/goldmark/v2/ast"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
@@ -184,6 +184,11 @@ type Context struct {
 	// If the handler function returns true, then the default HTML code
 	// will not be generated.
 	AttributeHandlers map[string]func(ctx *Context, w io.Writer, node ast.Node, entering bool, tag, value string) bool
+
+	// markdown is the goldmark converter of markdown for this context,
+	// made once on first use by [MDToHTML].
+	markdown     *Markdown
+	markdownOnce sync.Once
 
 	// OnTransition, if set, is called with the transitions of the
 	// properties of elements that a restyle (as for a change of a class by
