@@ -379,6 +379,19 @@ func TestConfigOpen(t *testing.T) {
 	}
 }
 
+func TestConfigOpenBadFile(t *testing.T) {
+	opts := DefaultOptions("Test")
+	opts.IncludePaths = []string{".", "testdata"}
+	// a missing default file is fine, but an existing file with a syntax
+	// error must be reported, not silently skipped
+	opts.DefaultFiles = []string{"aldfkj.toml", "testbad.toml"}
+	cfg := &TestConfig{}
+	_, err := config(opts, cfg)
+	if assert.Error(t, err) {
+		assert.Contains(t, err.Error(), "testbad.toml")
+	}
+}
+
 type testRootConfig struct {
 	Run testRunConfig
 }
