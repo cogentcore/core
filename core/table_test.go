@@ -276,6 +276,8 @@ func TestTableEmptyHeader(t *testing.T) {
 		return AsWidget(tb.header.Child(2 * fli)).Geom.Size.Actual.Total.X
 	}
 	b.AssertRender(t, "table/empty-header", func() {
+		b.AsyncLock() // (it is rendered meanwhile)
+		defer b.AsyncUnlock()
 		for fli := range 2 {
 			assert.Greater(t, headWidth(fli), float32(40), "the name of the field")
 		}

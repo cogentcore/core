@@ -165,6 +165,8 @@ func TestTabsMoveTabSameName(t *testing.T) {
 	_, tab := other.TabAtIndex(2)
 	assert.Equal(t, "B", tab.Text, "its text is kept")
 	b2.AssertRender(t, "tabs/move-same-name", func() {
+		b2.AsyncLock() // (it is rendered meanwhile)
+		defer b2.AsyncUnlock()
 		other.SelectTabIndex(0)
 		tab.Send(events.Click)
 		sel, one := selectedTab(other)

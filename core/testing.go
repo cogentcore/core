@@ -104,11 +104,13 @@ func (w *renderWindow) waitRenderDone() {
 
 // waitNoEvents waits until the event loop has handled an event and there
 // are no events left, which includes any rendering of the body necessary,
-// as rendering is done in response to the periodic paint events.
+// as rendering is done in response to the periodic paint events, which
+// the window is woken for, as they are paused while it is idle.
 func (b *Body) waitNoEvents(rw *renderWindow) {
 	ch := make(chan struct{})
 	rw.noEventsMu.Lock()
 	rw.noEventsChan = ch
 	rw.noEventsMu.Unlock()
+	rw.wake()
 	<-ch
 }

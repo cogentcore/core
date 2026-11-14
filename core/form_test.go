@@ -124,6 +124,8 @@ func TestFormTree(t *testing.T) {
 	child := NewTree(tr).SetText("Child")
 	fm := NewForm(b).SetStruct(tr)
 	b.RenderImage(func() {
+		b.AsyncLock() // (it is rendered meanwhile)
+		defer b.AsyncUnlock()
 		fm.SetStruct(child).Update()
 	})
 }
