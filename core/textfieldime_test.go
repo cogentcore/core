@@ -23,6 +23,8 @@ func TestTextFieldCompose(t *testing.T) {
 		tf.HandleEvent(events.NewTextComposition(text, start, end))
 	}
 	b.AssertRender(t, "text-field/compose", func() {
+		b.AsyncLock() // (it is rendered meanwhile)
+		defer b.AsyncUnlock()
 		tf.SetFocus()
 		tf.cursorPos = 6
 		compose("にほん", 3, 3)
@@ -33,6 +35,8 @@ func TestTextFieldCompose(t *testing.T) {
 		assert.Equal(t, 8, tf.cursorPos)
 		assert.Equal(t, 0, inputs)
 	}, func() {
+		b.AsyncLock() // (it is rendered meanwhile)
+		defer b.AsyncUnlock()
 		// commit
 		compose("", 0, 0)
 		assert.Equal(t, "hello world", string(tf.editText))

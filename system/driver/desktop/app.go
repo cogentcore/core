@@ -135,6 +135,9 @@ func (a *App) MainLoop() {
 			}
 		default:
 			glfw.WaitEventsTimeout(0.1) // timeout is essential on linux
+			// (here, not with the paint events of the windows, which are
+			// paused while they are idle; and glfw is used on the main thread)
+			a.PollScreenChanges()
 		}
 	}
 }

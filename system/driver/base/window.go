@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"image"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"cogentcore.org/core/base/fileinfo/mimedata"
@@ -51,6 +52,10 @@ type Window[A system.App] struct {
 	// Titl is the title of the window
 	Titl string `label:"Title"`
 
+	// titleMu protects [Window.Titl], which is set by the event loops
+	// of the stages of windows (see [Window.SetTitle]).
+	titleMu sync.Mutex
+
 	// Flgs contains the flags associated with the window
 	Flgs system.WindowFlags `label:"Flags" table:"-"`
 
@@ -62,6 +67,54 @@ type Window[A system.App] struct {
 
 	// CursorEnabled is whether the cursor is currently enabled
 	CursorEnabled bool
+
+	// Paint is the state of the paint events of the window: whether
+	// they are paused while it is idle (see [system.Window.PaintIdle]).
+	Paint *PaintState `display:"-"`
+}
+
+// PaintState is the state of the paint events of a window, which are
+// paused while it is idle (see [system.Window.PaintIdle]), until it is
+// woken (see [system.Window.PaintWake]).
+type PaintState struct {
+
+	// idle is whether the paint events are paused.
+	idle atomic.Bool
+
+	// wake receives a value when the window is woken while idle.
+	wake chan struct{}
+}
+
+// NewPaintState returns a new [PaintState].
+func NewPaintState() *PaintState {
+	return &PaintState{wake: make(chan struct{}, 1)}
+}
+
+// SetIdle pauses the paint events.
+func (ps *PaintState) SetIdle() {
+	ps.idle.Store(true)
+}
+
+// Wake resumes the paint events, if paused. It can be called from any
+// goroutine, and does not block.
+func (ps *PaintState) Wake() {
+	if ps.idle.Swap(false) {
+		select {
+		case ps.wake <- struct{}{}:
+		default:
+		}
+	}
+}
+
+// IsIdle returns whether the paint events are paused.
+func (ps *PaintState) IsIdle() bool {
+	return ps.idle.Load()
+}
+
+// Woken returns the channel that receives a value when the window is
+// woken while idle.
+func (ps *PaintState) Woken() <-chan struct{} {
+	return ps.wake
 }
 
 // NewWindow makes a new [Window] for the given app with the given options.
@@ -72,10 +125,13 @@ func NewWindow[A system.App](a A, opts *system.NewWindowOptions) Window[A] {
 		Titl:          opts.GetTitle(),
 		Flgs:          opts.Flags,
 		CursorEnabled: true,
+		Paint:         NewPaintState(),
 	}
 }
 
-// WinLoop runs the window's own locked processing loop.
+// WinLoop runs the window's own locked processing loop, which sends it
+// paint events at the refresh rate of its screen, except while it is idle
+// (see [system.Window.PaintIdle]).
 func (w *Window[A]) WinLoop() {
 	defer func() { system.HandleRecover(recover()) }()
 
@@ -85,21 +141,49 @@ func (w *Window[A]) WinLoop() {
 	}
 	dur := time.Second / time.Duration(fps)
 	winPaint := time.NewTicker(dur)
-outer:
+	defer winPaint.Stop()
 	for {
+		// While idle, the ticker is stopped, so that an idle app does not
+		// use the CPU (as on mobile, in the background), until woken.
+		if w.Paint.IsIdle() {
+			winPaint.Stop()
+			select {
+			case <-w.WinClose:
+				return
+			case <-w.Paint.Woken():
+			}
+			winPaint.Reset(dur)
+			w.This.SendPaintEvent() // right away
+			continue
+		}
 		select {
 		case <-w.WinClose:
-			winPaint.Stop()
-			break outer
+			return
+		case <-w.Paint.Woken(): // (woken before it was idle)
 		case <-winPaint.C:
 			if w.This.IsClosed() {
-				winPaint.Stop()
 				fmt.Println("win IsClosed in paint:", w.Name())
-				break outer
+				return
 			}
 			w.This.SendPaintEvent()
 		}
 	}
+}
+
+// PaintIdle pauses the paint events of the window until [Window.PaintWake].
+func (w *Window[A]) PaintIdle() {
+	w.Paint.SetIdle()
+}
+
+// PaintWake resumes the paint events of the window, if paused.
+func (w *Window[A]) PaintWake() {
+	w.Paint.Wake()
+}
+
+// PaintIsIdle returns whether the paint events of the window are paused
+// (see [Window.PaintIdle]).
+func (w *Window[A]) PaintIsIdle() bool {
+	return w.Paint.IsIdle()
 }
 
 func (w *Window[A]) SendPaintEvent() {
@@ -127,6 +211,8 @@ func (w *Window[A]) SetName(name string) {
 }
 
 func (w *Window[A]) Title() string {
+	w.titleMu.Lock()
+	defer w.titleMu.Unlock()
 	return w.Titl
 }
 
@@ -134,7 +220,9 @@ func (w *Window[A]) SetTitle(title string) {
 	if w.This.IsClosed() {
 		return
 	}
+	w.titleMu.Lock()
 	w.Titl = title
+	w.titleMu.Unlock()
 }
 
 func (w *Window[A]) SetIcon(images []image.Image) {

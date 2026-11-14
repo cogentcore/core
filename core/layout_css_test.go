@@ -14,9 +14,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// layoutGeom lays out the body and calls fun with the layout done.
+// layoutGeom lays out the body and calls fun with the layout done,
+// holding the lock of its window, as it is still being rendered.
 func layoutGeom(b *Body, fun func()) {
-	b.RenderImage(fun)
+	b.RenderImage(func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		fun()
+	})
 }
 
 // fixedFrame returns a new frame of the given size in dp.

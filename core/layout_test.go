@@ -493,6 +493,8 @@ func TestLayoutPartsNotNarrowed(t *testing.T) {
 	tr := NewTree(col).SetText("A tree node with a long label")
 	var label *Text
 	b.RenderImage(func() {
+		b.AsyncLock() // (it is rendered meanwhile)
+		defer b.AsyncUnlock()
 		// the label of the tree node wraps
 		label = tr.Parts.ChildByName("text", 1).(*Text)
 		label.Styler(func(s *styles.Style) { s.SetTextWrap(true) })

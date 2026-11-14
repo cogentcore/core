@@ -38,6 +38,7 @@ func TextCursor(on bool, w *WidgetBase, lastW *tree.Node, name string, width, he
 		sp.Properties["turnOn"] = true
 		sp.Properties["on"] = true
 		sp.Properties["lastSwitch"] = time.Now()
+		ms.Sprites.SetModifiedNoLock()
 	}
 
 	if !on || *lastW == w.This {
@@ -46,6 +47,7 @@ func TextCursor(on bool, w *WidgetBase, lastW *tree.Node, name string, width, he
 				activate(sp)
 			} else {
 				sp.Active = false
+				ms.Sprites.SetModifiedNoLock()
 			}
 			return
 		}

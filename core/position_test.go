@@ -167,6 +167,8 @@ func TestPositionSticky(t *testing.T) {
 	fixedFrame(section, 100, 500)
 	fixedFrame(scroller, 100, 1000) // after the section
 	b.RenderImage(func() {
+		b.AsyncLock() // (it is rendered meanwhile)
+		defer b.AsyncUnlock()
 		dp := scroller.Styles.UnitContext.Dots(units.UnitDp)
 		top := scroller.Geom.Pos.Content.Y
 		assert.InDelta(t, top+5*dp, sticky.Geom.Pos.Total.Y, 1.5, "at its inset, below its place in the layout")

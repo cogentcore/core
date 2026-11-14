@@ -44,21 +44,50 @@ func SetSchemes(primary color.RGBA) {
 // SetSchemes sets [Schemes], [Scheme], and [Palette] based on the
 // given [matcolor.Key]. It should be used instead of [SetSchemes]
 // if you want more specific control over the color scheme.
+// The schemes are kept if [Palette] is already from the same key
+// colors, so that setting them again (as when settings are applied)
+// does not change them while they are used in other goroutines.
 func SetSchemesFromKey(key *matcolor.Key) {
-	Palette = matcolor.NewPalette(key)
-	Schemes = matcolor.NewSchemes(Palette)
+	if !paletteFromKey(Palette, key) {
+		Palette = matcolor.NewPalette(key)
+		Schemes = matcolor.NewSchemes(Palette)
+	}
 	SetScheme(matcolor.SchemeIsDark)
+}
+
+// paletteFromKey returns whether the given palette is from the
+// given key colors.
+func paletteFromKey(p *matcolor.Palette, key *matcolor.Key) bool {
+	if p == nil || len(p.Custom) != len(key.Custom) {
+		return false
+	}
+	same := p.Primary.Key == key.Primary && p.Secondary.Key == key.Secondary &&
+		p.Tertiary.Key == key.Tertiary && p.Select.Key == key.Select &&
+		p.Error.Key == key.Error && p.Success.Key == key.Success &&
+		p.Warn.Key == key.Warn && p.Neutral.Key == key.Neutral &&
+		p.NeutralVariant.Key == key.NeutralVariant
+	for name, c := range key.Custom {
+		if t, ok := p.Custom[name]; !ok || t.Key != c {
+			return false
+		}
+	}
+	return same
 }
 
 // SetScheme sets the value of [Scheme] to either [Schemes.Dark]
 // or [Schemes.Light], based on the given value of whether the
 // color scheme should be dark. It also sets the value of
-// [matcolor.SchemeIsDark].
+// [matcolor.SchemeIsDark]. Values that are already set are not
+// written again, as they may be read in other goroutines.
 func SetScheme(isDark bool) {
-	matcolor.SchemeIsDark = isDark
+	if matcolor.SchemeIsDark != isDark {
+		matcolor.SchemeIsDark = isDark
+	}
+	sc := &Schemes.Light
 	if isDark {
-		Scheme = &Schemes.Dark
-	} else {
-		Scheme = &Schemes.Light
+		sc = &Schemes.Dark
+	}
+	if Scheme != sc {
+		Scheme = sc
 	}
 }

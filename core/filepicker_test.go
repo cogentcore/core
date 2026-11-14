@@ -52,6 +52,8 @@ func TestFilePickerSort(t *testing.T) {
 		return ns
 	}
 	b.RenderImage(func() {}, func() {
+		b.AsyncLock() // (it is rendered meanwhile)
+		defer b.AsyncUnlock()
 		tb := fp.filesTable
 		assert.Equal(t, "Size:down", tb.SortFieldName())
 		assert.Equal(t, []string{"c.txt", "B.txt", "a.txt"}, names(), "equal sizes by name, down")
