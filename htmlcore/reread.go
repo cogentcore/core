@@ -1149,14 +1149,14 @@ func (rc *reconciler) placeKept() {
 // match the style rules as they did: those whose place in their parents
 // has not changed in a way that the selectors of the rules select the
 // elements in them by (as .item:first-child a, or .tab + .panel p; see
-// [Context.placeUses]), as browsers match only the elements that the
+// [Context.deepPlaces]), as browsers match only the elements that the
 // changes may affect again (a script that added an element to the body of
 // npr.org matched all of its 8000 elements again, for 1s).
 func (c *Context) shallowKept(keep map[*html.Node]core.Widget) map[*html.Node]bool {
 	if len(keep) == 0 || c.snaps == nil {
 		return nil
 	}
-	_, deep := c.placeUses()
+	places, siblingPlaces := c.deepPlaces()
 	_, inSiblings := c.siblingCombinators()
 	parents := map[*html.Node]bool{}
 	for k := range keep {
@@ -1167,7 +1167,7 @@ func (c *Context) shallowKept(keep map[*html.Node]core.Widget) map[*html.Node]bo
 		newBefore := false // an element before it that is new (inserted)
 		snapChildren(p, func(k *html.Node, s nodeSnap) {
 			o, ok := c.snaps[k]
-			if keep[k] != nil && ok && !deep.differ(o, s) && !(inSiblings && (newBefore || o.index != s.index)) {
+			if keep[k] != nil && ok && !placeChangedDeep(k, o, s, places, siblingPlaces) && !(inSiblings && (newBefore || o.index != s.index)) {
 				shallow[k] = true
 			}
 			newBefore = newBefore || !ok
