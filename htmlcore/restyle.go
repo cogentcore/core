@@ -233,18 +233,34 @@ type nodeStyles struct {
 // or a table), or one of an element that has no widget of its own (as an
 // inline element in a run of text).
 func (c *Context) Restyle(changed []*html.Node) bool {
+	apply := c.PrepareRestyle(changed)
+	if apply == nil {
+		return false
+	}
+	apply()
+	return true
+}
+
+// PrepareRestyle finds the declarations of the given changed elements as
+// [Context.Restyle] does, with the styles of the context locked (see
+// [Context.LockStyles]), and without the lock of the widgets of the page
+// (as it takes time), and returns the function that styles the widgets
+// again, with the lock of the widgets held, or nil if they can not be (see
+// [Context.Fallback]).
+func (c *Context) PrepareRestyle(changed []*html.Node) func() {
+	c.styleMu.Lock()
+	defer c.styleMu.Unlock()
 	c.containersChanged() // (declarations may change)
 	defer c.containersChanged()
 	c.fallback = ""
 	if len(changed) == 0 {
-		return true
+		return func() {}
 	}
 	u, ok := c.updateDecls(changed, nil, nil)
 	if !ok {
-		return false
+		return nil
 	}
-	u.apply(c)
-	return true
+	return func() { u.apply(c) }
 }
 
 // declUpdate is an update of the declarations of the elements of a page

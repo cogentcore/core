@@ -24,7 +24,8 @@ func treeDump(w core.Widget) string {
 			fmt.Fprintf(&sb, " %q", tx.Text)
 		}
 		props := maps.Clone(n.AsTree().Properties)
-		delete(props, "node") // the html node, which differs in each read
+		delete(props, "node")                 // the html node, which differs in each read
+		delete(props, core.StyleLockProperty) // that of the context of each read
 		fmt.Fprintf(&sb, " %v\n", props)
 		return tree.Continue
 	})

@@ -92,6 +92,8 @@ func (c *Context) handleFormWidget(n *html.Node, w core.Widget) {
 			if !sw.IsChecked() {
 				return
 			}
+			c.styleMu.Lock() // (for the widgets of the elements; see Context.LockStyles)
+			defer c.styleMu.Unlock()
 			for on, ow := range c.nodeWidgets {
 				osw, ok := ow.(*core.Switch)
 				if !ok || on == n || !strings.EqualFold(GetAttr(on, "type"), "radio") ||
@@ -131,6 +133,8 @@ func (c *Context) handleFormWidget(n *html.Node, w core.Widget) {
 // its action with the values of its controls in the query, and with the
 // POST method, by [Context.PostURL] with them in the body.
 func (c *Context) submitForm(form, submitter *html.Node, e events.Event) {
+	c.styleMu.Lock() // (for the widgets of the elements; see Context.LockStyles)
+	defer c.styleMu.Unlock()
 	// the method, action and encoding, which the submit button can override
 	attr := func(name string) string {
 		if submitter != nil && HasAttr(submitter, "form"+name) {

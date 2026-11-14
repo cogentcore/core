@@ -309,6 +309,12 @@ type pageState struct {
 	keptContainers   map[*html.Node]containerSizes
 	containerMu      sync.Mutex
 
+	// styleMu guards the styles of the elements (their declarations and
+	// the state of reading them), which the stylers of the widgets of the
+	// context read (see [core.StyleLockProperty]) while they are found
+	// again without the lock of the widgets (see [Context.PrepareReread]).
+	styleMu sync.Mutex
+
 	// containerQueries are the matches of the queries of @container rules
 	// for the widths of their containers (see
 	// [Context.containerQueryMatches]), guarded by containerQueryMu.
@@ -452,6 +458,11 @@ func (c *Context) ReadRest() (core.Widget, int, error) {
 	c.reading = true
 	defer func() { c.reading = false }()
 	err := readHTMLNode(c, parent, n)
+	for _, k := range parent.AsTree().Children[start:] {
+		if w, ok := k.(core.Widget); ok {
+			c.lockStylesOf(w)
+		}
+	}
 	return parent, start, err
 }
 
@@ -889,4 +900,23 @@ func (c *Context) openLink(link *html.Node, url string, e events.Event) {
 		return
 	}
 	c.OpenURL(url, e)
+}
+
+// LockStyles locks the styles of the elements of the context (see
+// [Context.PrepareReread]), as for reading them without the lock of the
+// widgets of the page, as the stylers of its widgets do (see
+// [core.StyleLockProperty]); they must not be locked while the lock of the
+// widgets is taken.
+func (c *Context) LockStyles() { c.styleMu.Lock() }
+
+// UnlockStyles unlocks the styles of the elements (see [Context.LockStyles]).
+func (c *Context) UnlockStyles() { c.styleMu.Unlock() }
+
+// lockStylesOf makes the given widget and those in it hold the lock of the
+// styles of the context as they are styled (see [core.StyleLockProperty]).
+func (c *Context) lockStylesOf(root core.Widget) {
+	root.AsWidget().WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		cwb.SetProperty(core.StyleLockProperty, &c.styleMu)
+		return tree.Continue
+	})
 }

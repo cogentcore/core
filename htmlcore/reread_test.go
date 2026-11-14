@@ -429,3 +429,65 @@ func TestRereadAddedRules(t *testing.T) {
 		return nil, []*html.Node{st}
 	}, "a", "b", "p")
 }
+
+// TestPrepareRereadConcurrent tests that elements are read again (see
+// [Context.PrepareReread]) and restyled without the lock of the widgets of
+// the page, while the widgets are styled with it (as they are rendered),
+// whose stylers hold the lock of the styles of the context (see
+// [core.StyleLockProperty]), so that there are no data races (run with
+// -race), and the page is as read anew.
+func TestPrepareRereadConcurrent(t *testing.T) {
+	var b strings.Builder
+	b.WriteString(`<html><head><style>.item { height: 10px; color: var(--c, black) } .on .item { background: blue }
+.x { --c: red }</style></head><body><div id="wrap" style="width: 400px">`)
+	for i := range 200 {
+		fmt.Fprintf(&b, `<div id="d%d" class="item"><span>item %d</span></div>`, i, i)
+	}
+	b.WriteString(`</div></body></html>`)
+	ctx := NewContext()
+	doc, err := ParseHTML(ctx, strings.NewReader(b.String()))
+	require.NoError(t, err)
+	bd := core.NewBody()
+	require.NoError(t, ReadDocument(ctx, bd, doc))
+	var got map[string]string
+	bd.RenderImage(func() {
+		wrap := elementByID(doc, "wrap")
+		for i := range 20 {
+			done := make(chan func())
+			go func() {
+				// (as the scripts change the page, without the lock)
+				appendHTML(t, wrap, fmt.Sprintf(`<div class="item x">new %d</div>`, i))
+				setAttr(wrap, "class", []string{"on", ""}[i%2])
+				apply := ctx.PrepareRestyle([]*html.Node{wrap})
+				applyReread := ctx.PrepareReread(nil, []*html.Node{wrap})
+				done <- func() {
+					if apply != nil {
+						apply()
+					}
+					if applyReread != nil {
+						applyReread()
+					}
+				}
+			}()
+			// (as the page is rendered meanwhile)
+			for range 3 {
+				bd.AsyncLock()
+				bd.StyleTree()
+				bd.AsyncUnlock()
+			}
+			apply := <-done
+			bd.AsyncLock()
+			apply()
+			bd.AsyncUnlock()
+		}
+	}, func() {
+		bd.AsyncLock()
+		got = widgetStates(bd)
+		bd.AsyncUnlock()
+	})
+	var want map[string]string
+	fresh := core.NewBody()
+	require.NoError(t, ReadDocument(NewContext(), fresh, doc))
+	fresh.RenderImage(func() {}, func() { want = widgetStates(fresh) })
+	assert.Equal(t, want, got)
+}
