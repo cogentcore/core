@@ -232,6 +232,7 @@ func handleBox(ctx *Context, tag, display string) core.Widget {
 				ctx.containers = map[*html.Node]*containerFrame{}
 			}
 			ctx.containers[ctx.Node] = w
+			ctx.containersChanged()
 			ctx.NewParent = w
 			return w
 		}

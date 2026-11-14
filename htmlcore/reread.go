@@ -162,6 +162,8 @@ func (c *Context) headChanged(head *html.Node) bool {
 // for the page to be read again: for a new style sheet, a change of the
 // html element itself, or more elements to read than [Context.rereadLimit].
 func (c *Context) Reread(self, children []*html.Node) bool {
+	c.containersChanged() // (declarations may change)
+	defer c.containersChanged()
 	if len(self) == 0 && len(children) == 0 {
 		return true
 	}
