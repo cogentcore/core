@@ -251,6 +251,9 @@ func (st *Stage) runWindow() *Stage {
 	// The current window is read once, as the event loop of a window that
 	// is closed sets it to another window.
 	cw := getCurrentRenderWindow()
+	if cw != nil && cw.mains.top() == nil { // (closed, as when its last stage was closed)
+		cw = nil
+	}
 	if cw == nil || newWindow {
 		// If we have no current render window, we need to be in a new window,
 		// and we need a *temporary* Mains to get initial pref size.
