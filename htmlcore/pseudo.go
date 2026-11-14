@@ -65,6 +65,7 @@ func (c *Context) addPseudoRule(root *html.Node, sel, kind string, decls []*css.
 		for _, d := range decls {
 			p := strings.ToLower(strings.TrimSpace(d.Property))
 			c.cssOrder++
+			c.noteVars(d.Value)
 			c.pseudoStyles[key] = append(c.pseudoStyles[key], &cssDecl{Property: p, Value: c.absoluteURLs(strings.TrimSpace(d.Value)),
 				Important: d.Important, origin: origin, specificity: spec, order: c.cssOrder})
 		}

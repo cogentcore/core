@@ -299,6 +299,10 @@ type pageState struct {
 	// for the widths of their containers (see
 	// [Context.containerQueryMatches]), guarded by containerQueryMu.
 	containerQueries map[containerQueryKey]bool
+
+	// varsUsed are the custom properties that the declarations of the
+	// page use (with var()), for [Context.unusedCustomProps].
+	varsUsed         map[string]bool
 	containerQueryMu sync.Mutex
 
 	// queried are the declarations of the elements with @container rules
