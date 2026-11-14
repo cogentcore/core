@@ -7,6 +7,7 @@
 package web
 
 import (
+	"sync"
 	"syscall/js"
 
 	"cogentcore.org/core/base/errors"
@@ -61,6 +62,21 @@ func (cl *Clipboard) Write(data mimedata.Mimes) error {
 	if clip.IsUndefined() {
 		return errors.Log(errors.New("web.Clipboard.Write: navigator.clipboard unsupported"))
 	}
-	clip.Call("writeText", str)
+	clip.Call("writeText", str).Call("catch", clipboardWriteFailed())
 	return nil
 }
+
+// clipboardWriteFailed returns the function that logs a write of the
+// clipboard that the browser refuses (as without the focus of the page, or
+// the permission), rather than leaving it an unhandled rejection. It is
+// made once, as it is used for every write.
+var clipboardWriteFailed = sync.OnceValue(func() js.Func {
+	return js.FuncOf(func(this js.Value, args []js.Value) any {
+		msg := "unable to write clipboard text"
+		if len(args) > 0 && args[0].Truthy() {
+			msg += ": " + args[0].Call("toString").String()
+		}
+		errors.Log(errors.New("web.Clipboard.Write: " + msg))
+		return nil
+	})
+})
