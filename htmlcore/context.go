@@ -226,6 +226,20 @@ type Context struct {
 	// reading is whether HTML is being read, so that HTML read by an
 	// element handler meanwhile is read within that read (see [ReadHTML]).
 	reading bool
+
+	// keepRead has the elements that are kept as they are, with their old
+	// widgets, as elements are read again (see [Context.keptElements]).
+	keepRead map[*html.Node]core.Widget
+
+	// matchKept has the elements that may be kept as they are as elements
+	// are read again, whose declarations are found again only for
+	// themselves, not those in them (see [Context.shallowKept]).
+	matchKept map[*html.Node]bool
+
+	// matchAll is whether all of the elements in those whose declarations
+	// are found again are matched again (see [Context.invalidation]), as
+	// for rules added to the style sheets.
+	matchAll bool
 }
 
 // pageState is the state of the pages read with a [Context], which

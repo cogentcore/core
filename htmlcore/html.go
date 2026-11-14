@@ -103,6 +103,10 @@ func readHTMLNode(ctx *Context, parent core.Widget, n *html.Node) error {
 			n = last
 			continue
 		}
+		if ctx.keepRead[n] != nil {
+			keptPlaceholder(parent, n) // kept as it is (see Context.keptElements)
+			continue
+		}
 		readOneNode(ctx, parent, n)
 	}
 	return nil

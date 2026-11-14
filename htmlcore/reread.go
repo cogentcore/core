@@ -6,6 +6,7 @@ package htmlcore
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -177,7 +178,8 @@ func (c *Context) Reread(self, children []*html.Node) bool {
 	selfDirty, childDirty := map[*html.Node]bool{}, map[*html.Node]bool{}
 	var changed []*html.Node // for the declarations of the elements after them
 	var roots []*html.Node
-	restyleAll := false // for rules added to style sheets (see addedStyle)
+	restyleAll := false         // for rules added to style sheets (see addedStyle)
+	var htmlChildren *html.Node // the html element, if its children changed
 	addChanged := func(n *html.Node, own bool) bool {
 		if n != nil && n.Type == html.CommentNode || !own && n != nil && n.Type == html.ElementNode && unshown(n) {
 			return true // (not rendered)
@@ -234,6 +236,24 @@ func (c *Context) Reread(self, children []*html.Node) bool {
 			return true
 		}
 		r := c.rereadRoot(from)
+		if r == nil && own && (n.DataAtom == atom.Html || n.DataAtom == atom.Body) {
+			// a change of the attributes of the html or body element (as
+			// the classes that scripts add to them, for the page as it
+			// loads, as on npr.org): it is styled again, with the elements
+			// that the change may select differently (see
+			// Context.invalidation), unless it needs to be read again (as
+			// for its display; see Context.updateDecls)
+			changed = append(changed, n)
+			return true
+		}
+		if r == nil && !own && n.DataAtom == atom.Html {
+			// a change of the children of the html element, as an element
+			// added after the body (as scripts measure things with, as on
+			// npr.org): its children are read again, but the body, which
+			// is kept (see Context.rereadHTML)
+			htmlChildren = n
+			return true
+		}
 		if r == nil {
 			return c.noChange("no element of " + describeNode(from) + " can be read again alone")
 		}
@@ -265,7 +285,10 @@ func (c *Context) Reread(self, children []*html.Node) bool {
 		}
 		return false
 	}
-	if len(roots) == 0 && !restyleAll && len(changed) == 0 {
+	if htmlChildren != nil && !c.htmlRereadable(htmlChildren, roots, selfDirty) {
+		return c.noChange("a change of the children of the html element")
+	}
+	if len(roots) == 0 && !restyleAll && len(changed) == 0 && htmlChildren == nil {
 		return true // (only elements that are not rendered changed)
 	}
 	if restyleAll {
@@ -275,13 +298,18 @@ func (c *Context) Reread(self, children []*html.Node) bool {
 			changed = append(changed, html)
 		}
 	}
-	// the elements to read are not too many, have no new style sheets,
-	// and their widgets are all in their frames, which have only theirs
+	// the elements to read are not too many (not counting those that are
+	// kept without being read; see Context.keptElements), have no new
+	// style sheets, and their widgets are all in their frames, which have
+	// only theirs
 	size, limit := 0, c.rereadLimit(root)
+	prelim := c.keptElements(roots, touchedBy(selfDirty, childDirty), selfDirty)
 	for _, r := range roots {
 		ok := true
 		walkElements(r, func(n *html.Node) {
-			size++
+			if !inKept(prelim, n) {
+				size++
+			}
 			if (n.Data == "style" || n.Data == "link") && !c.sheets[n] {
 				ok = false
 			}
@@ -307,22 +335,18 @@ func (c *Context) Reread(self, children []*html.Node) bool {
 			return c.noChange("widgets of other elements in those of " + describeNode(r))
 		}
 	}
+	c.matchKept = c.shallowKept(prelim)
+	c.matchAll = restyleAll
 	u, ok := c.updateDecls(changed, roots, inRoots)
+	c.matchKept, c.matchAll = nil, false
 	if !ok {
 		return false // (with the fallback of updateDecls)
 	}
 	for n := range u.freeChanged {
 		selfDirty[n] = true
 	}
-	// the elements that have changed or are in elements that have
-	touched := map[*html.Node]bool{}
-	for _, set := range []map[*html.Node]bool{selfDirty, childDirty} {
-		for n := range set {
-			for p := n; p != nil && !touched[p]; p = p.Parent {
-				touched[p] = true
-			}
-		}
-	}
+	touched := touchedBy(selfDirty, childDirty)
+	keep := c.keptElements(roots, touched, selfDirty)
 
 	c.reading = true
 	defer func() { c.reading = false }()
@@ -330,19 +354,81 @@ func (c *Context) Reread(self, children []*html.Node) bool {
 	c.StageSize = 0
 	defer func() { c.StageSize = stage }()
 	c.rereads++
+	c.keepRead = keep
+	defer func() { c.keepRead = nil }()
 	for _, r := range roots {
 		old := c.elementWidgets[r][0]
 		pw := old.AsTree().Parent.(core.Widget)
-		c.forgetRead(r)
+		c.forgetRead(r, keep)
 		tmp := core.NewFrame()
 		c.inlineParent = nil
 		readOneNode(c, tmp, r)
-		rc := &reconciler{c: c, touched: touched, selfDirty: selfDirty, pairs: map[core.Widget]core.Widget{}}
+		rc := &reconciler{c: c, touched: touched, selfDirty: selfDirty, kept: keep, pairs: map[core.Widget]core.Widget{}}
 		rc.replaceIn(pw, old, tmp.Children)
+		rc.placeKept()
 		rc.remap(r)
+	}
+	if htmlChildren != nil {
+		c.rereadHTML(htmlChildren, touched, selfDirty)
 	}
 	u.apply(c)
 	return true
+}
+
+// htmlRereadable returns whether the children of the given html element
+// can be read again with its body kept as it is (see [Context.rereadHTML]):
+// its body has a frame of its own in the widget that the page is read
+// into, and nothing in it changes.
+func (c *Context) htmlRereadable(h *html.Node, roots []*html.Node, selfDirty map[*html.Node]bool) bool {
+	var body *html.Node
+	for k := h.FirstChild; k != nil; k = k.NextSibling {
+		if k.DataAtom == atom.Body {
+			body = k
+		}
+	}
+	if body == nil || !c.rereadable(body) || selfDirty[body] {
+		return false
+	}
+	for _, r := range roots {
+		if contains(body, r) {
+			return false
+		}
+	}
+	return true
+}
+
+// rereadHTML reads the children of the given html element again, but its
+// body, whose widgets are kept as they are (see [Context.keptElements]),
+// in the widget that the page is read into.
+func (c *Context) rereadHTML(h *html.Node, touched, selfDirty map[*html.Node]bool) {
+	var body *html.Node
+	for k := h.FirstChild; k != nil; k = k.NextSibling {
+		if k.DataAtom == atom.Body {
+			body = k
+		}
+	}
+	bw := c.elementWidgets[body][0]
+	content := bw.AsTree().Parent.(core.Widget)
+	keep := map[*html.Node]core.Widget{body: bw}
+	for k := h.FirstChild; k != nil; k = k.NextSibling {
+		if k.Type == html.ElementNode && k != body && k.DataAtom != atom.Head {
+			c.forgetRead(k, keep)
+		}
+	}
+	c.keepRead = keep
+	defer func() { c.keepRead = nil }()
+	tmp := core.NewFrame()
+	c.inlineParent = nil
+	c.Node = h
+	readHTMLNode(c, tmp, h.FirstChild)
+	rc := &reconciler{c: c, touched: touched, selfDirty: selfDirty, kept: keep, pairs: map[core.Widget]core.Widget{}}
+	p := &tree.Plan{EnforceEmpty: true}
+	rc.planChildren(p, content.AsTree().Children, tmp.Children, childNames(content))
+	p.Update(content)
+	rc.updateAdded()
+	rc.placeKept()
+	rc.remap(h)
+	content.AsWidget().NeedsLayout()
 }
 
 // unshown returns whether the given element is never shown, nor its
@@ -442,8 +528,8 @@ func (c *Context) arrangedChildren(n *html.Node) bool {
 // those in it, which are read again: their widgets (which are added again
 // as they are read), and the state of their tables and floats. Their
 // containers start with the sizes that they have.
-func (c *Context) forgetRead(r *html.Node) {
-	walkElements(r, func(n *html.Node) {
+func (c *Context) forgetRead(r *html.Node, keep map[*html.Node]core.Widget) {
+	walkElementsSkipping(r, keep, func(n *html.Node) {
 		delete(c.elementWidgets, n)
 		delete(c.tables, n)
 		delete(c.tableRowState, n)
@@ -472,6 +558,13 @@ type reconciler struct {
 
 	// pairs has the old widget that is kept for each new widget.
 	pairs map[core.Widget]core.Widget
+
+	// kept has the old widgets of the elements that are kept without
+	// being read again (see [Context.keptElements]), which are in the new
+	// widgets as placeholders (see [keptPlaceholder]), and placed has
+	// those that have been put in their places.
+	kept   map[*html.Node]core.Widget
+	placed map[*html.Node]bool
 
 	// added has the new widgets that are added in place of old ones,
 	// and removed the old widgets that are removed.
@@ -539,6 +632,15 @@ func (rc *reconciler) planChildren(p *tree.Plan, olds, news []tree.Node, names m
 	kept := map[tree.Node]bool{}
 	counts = map[key]int{}
 	for _, nk := range news {
+		if kn := keptPlaceholderNode(nk); kn != nil {
+			// an element kept as it is, without being read again
+			if old := rc.kept[kn]; old != nil && slices.Contains(olds, tree.Node(old)) {
+				kept[old] = true
+				rc.keep(p, old)
+				rc.markPlaced(kn)
+				continue
+			}
+		}
 		kk := keyOf(nk, counts)
 		ok := oldBy[kk]
 		if ok != nil && rc.reconcile(ok.(core.Widget), nk.(core.Widget)) {
@@ -759,4 +861,225 @@ func hasNewSheet(c *Context, n *html.Node) bool {
 		}
 	})
 	return found
+}
+
+// touchedBy returns the elements that have changed (in the given sets),
+// and those that they are in.
+func touchedBy(sets ...map[*html.Node]bool) map[*html.Node]bool {
+	touched := map[*html.Node]bool{}
+	for _, set := range sets {
+		for n := range set {
+			for p := n; p != nil && !touched[p]; p = p.Parent {
+				touched[p] = true
+			}
+		}
+	}
+	return touched
+}
+
+// keptElements returns the elements in the given elements to read again
+// (see [Context.Reread]) that are kept as they are, with their widgets,
+// without being read again: as browsers lay out again only the boxes
+// that have changed, or have changed boxes in them. They are those that
+// have not changed, nor any element in them, in an element whose children
+// have changed (only), whose frame is kept (see [reconciler.reconcile]),
+// as the old widgets of those elements are kept anyway: a script that
+// added an element to the body of npr.org read all of its 5000 elements
+// again, many times as it loaded. The widgets of each must be its frame
+// alone in that of its parent (see [Context.rereadable]), and not an item
+// of a list (whose markers are numbered as they are read).
+func (c *Context) keptElements(roots []*html.Node, touched, selfDirty map[*html.Node]bool) map[*html.Node]core.Widget {
+	keep := map[*html.Node]core.Widget{}
+	var find func(e *html.Node)
+	find = func(e *html.Node) {
+		if !touched[e] || selfDirty[e] || len(c.elementWidgets[e]) != 1 || frameOf(c.elementWidgets[e][0]) == nil || c.arrangedChildren(e) {
+			return
+		}
+		switch e.DataAtom {
+		case atom.Ol, atom.Ul, atom.Menu, atom.Dl:
+			return
+		}
+		var kids []*html.Node
+		for k := e.FirstChild; k != nil; k = k.NextSibling {
+			if k.Type == html.ElementNode {
+				kids = append(kids, k)
+			}
+		}
+		// new elements (not read yet), whose neighbors are read again
+		isNew := func(i int) bool { return i >= 0 && i < len(kids) && len(c.elementWidgets[kids[i]]) == 0 }
+		for i, k := range kids {
+			if touched[k] {
+				find(k)
+				continue
+			}
+			// the first and last elements, and those next to new ones,
+			// are read again if they have vertical margins, which may
+			// collapse with those of their parent or their new siblings
+			top, bottom := c.verticalMargins(k)
+			if (i == 0 || isNew(i-1)) && top || (i == len(kids)-1 || isNew(i+1)) && bottom {
+				if len(c.elementWidgets[k]) > 0 {
+					// (with new widgets, not the old ones that the
+					// reconciler would keep for them otherwise)
+					touched[k], selfDirty[k] = true, true
+				}
+				continue
+			}
+			if k.DataAtom != atom.Li && c.rereadable(k) {
+				keep[k] = c.elementWidgets[k][0]
+			}
+		}
+	}
+	for _, r := range roots {
+		find(r)
+	}
+	return keep
+}
+
+// inKept returns whether the given element is one of the given kept ones
+// or in one.
+func inKept(keep map[*html.Node]core.Widget, n *html.Node) bool {
+	for p := n; p != nil; p = p.Parent {
+		if keep[p] != nil {
+			return true
+		}
+	}
+	return false
+}
+
+// walkElementsSkipping calls the given function for the given element and
+// the elements in it, except the given ones and those in them.
+func walkElementsSkipping(n *html.Node, skip map[*html.Node]core.Widget, f func(n *html.Node)) {
+	if skip[n] != nil {
+		return
+	}
+	if n.Type == html.ElementNode {
+		f(n)
+	}
+	for k := n.FirstChild; k != nil; k = k.NextSibling {
+		walkElementsSkipping(k, skip, f)
+	}
+}
+
+// keptPlaceholder adds a placeholder to the given parent for the given
+// element, which is kept as it is (see [Context.keptElements]): its old
+// widget takes its place (see [reconciler.planChildren]).
+func keptPlaceholder(parent core.Widget, n *html.Node) {
+	ph := core.NewFrame(parent)
+	ph.SetProperty("keptNode", n)
+}
+
+// keptPlaceholderNode returns the element of the given widget if it is a
+// placeholder (see [keptPlaceholder]), or nil.
+func keptPlaceholderNode(k tree.Node) *html.Node {
+	n, _ := k.AsTree().Property("keptNode").(*html.Node)
+	return n
+}
+
+// markPlaced records that the old widget of the given kept element has
+// been put in its place.
+func (rc *reconciler) markPlaced(n *html.Node) {
+	if rc.placed == nil {
+		rc.placed = map[*html.Node]bool{}
+	}
+	rc.placed[n] = true
+}
+
+// placeKept puts the old widgets of the kept elements that are not in
+// their places yet (in new widgets, which are not reconciled with old
+// ones) in the places of their placeholders.
+func (rc *reconciler) placeKept() {
+	if len(rc.placed) == len(rc.kept) {
+		return
+	}
+	for n, old := range rc.kept {
+		if rc.placed[n] {
+			continue
+		}
+		// the placeholder, in the new widgets of the element that n is in
+		var ph core.Widget
+		for p := n.Parent; p != nil && ph == nil; p = p.Parent {
+			for _, w := range rc.c.elementWidgets[p] {
+				w.AsWidget().WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+					if keptPlaceholderNode(cw) == n {
+						ph = cw
+						return tree.Break
+					}
+					return tree.Continue
+				})
+				if ph != nil {
+					break
+				}
+			}
+		}
+		if ph == nil {
+			continue // not read, as in an element that is not displayed
+		}
+		np := ph.AsTree().Parent
+		i := tree.IndexOf(np.AsTree().Children, tree.Node(ph))
+		if op := old.AsTree().Parent; op != nil {
+			if j := tree.IndexOf(op.AsTree().Children, tree.Node(old)); j >= 0 {
+				op.AsTree().Children = slices.Delete(op.AsTree().Children, j, j+1)
+			}
+		}
+		np.AsTree().Children[i] = old
+		tree.SetParent(old, np)
+		rc.markPlaced(n)
+	}
+}
+
+// shallowKept returns those of the given elements that may be kept as they
+// are (see [Context.keptElements]) whose declarations are found again only
+// for themselves (see [Context.updateDecls]), not for those in them, which
+// match the style rules as they did: those whose place in their parents
+// has not changed in a way that the selectors of the rules select the
+// elements in them by (as .item:first-child a, or .tab + .panel p; see
+// [Context.placeUses]), as browsers match only the elements that the
+// changes may affect again (a script that added an element to the body of
+// npr.org matched all of its 8000 elements again, for 1s).
+func (c *Context) shallowKept(keep map[*html.Node]core.Widget) map[*html.Node]bool {
+	if len(keep) == 0 || c.snaps == nil {
+		return nil
+	}
+	_, deep := c.placeUses()
+	_, inSiblings := c.siblingCombinators()
+	parents := map[*html.Node]bool{}
+	for k := range keep {
+		parents[k.Parent] = true
+	}
+	shallow := map[*html.Node]bool{}
+	for p := range parents {
+		newBefore := false // an element before it that is new (inserted)
+		snapChildren(p, func(k *html.Node, s nodeSnap) {
+			o, ok := c.snaps[k]
+			if keep[k] != nil && ok && !deep.differ(o, s) && !(inSiblings && (newBefore || o.index != s.index)) {
+				shallow[k] = true
+			}
+			newBefore = newBefore || !ok
+		})
+	}
+	return shallow
+}
+
+// verticalMargins returns whether the given element has a top and a bottom
+// margin that is not zero (which may collapse with others).
+func (c *Context) verticalMargins(n *html.Node) (top, bottom bool) {
+	nonZero := func(v string) bool {
+		v = strings.TrimSpace(v)
+		if v == "" || v == "auto" {
+			return false
+		}
+		f, err := strconv.ParseFloat(strings.TrimRight(v, "abcdefghijklmnopqrstuvwxyz%"), 64)
+		return err != nil || f != 0
+	}
+	if m := strings.Fields(c.declaration(n, "margin")); len(m) > 0 {
+		top = nonZero(m[0])
+		bottom = len(m) >= 3 && nonZero(m[2]) || len(m) < 3 && nonZero(m[0])
+	}
+	if m := strings.Fields(c.declaration(n, "margin-block")); len(m) > 0 {
+		top = top || nonZero(m[0])
+		bottom = bottom || nonZero(m[len(m)-1])
+	}
+	top = top || nonZero(c.declaration(n, "margin-top")) || nonZero(c.declaration(n, "margin-block-start"))
+	bottom = bottom || nonZero(c.declaration(n, "margin-bottom")) || nonZero(c.declaration(n, "margin-block-end"))
+	return
 }

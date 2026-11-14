@@ -56,6 +56,7 @@ type styleRule struct {
 type pseudoRule struct {
 	root   *html.Node
 	sel    *compiledSelector
+	text   string // of its selector
 	kind   string
 	decls  []*css.Declaration
 	origin cssOrigin
@@ -166,6 +167,7 @@ func (c *Context) matchDecls(n *html.Node) []*cssDecl {
 				continue
 			}
 			c.cssOrder++
+			c.noteVars(value)
 			ds = append(ds, &cssDecl{Property: prop, Value: c.absoluteURLs(value), Important: d.Important,
 				origin: r.origin, specificity: r.spec, order: c.cssOrder, container: r.container, rule: i + 1})
 		}
@@ -183,6 +185,7 @@ func (c *Context) matchPseudo(n *html.Node, kind string) []*cssDecl {
 		}
 		for _, d := range r.decls {
 			c.cssOrder++
+			c.noteVars(d.Value)
 			ds = append(ds, &cssDecl{Property: strings.ToLower(strings.TrimSpace(d.Property)), Value: c.absoluteURLs(strings.TrimSpace(d.Value)),
 				Important: d.Important, origin: r.origin, specificity: r.spec, order: c.cssOrder})
 		}
@@ -318,6 +321,11 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 		}
 		affected[n] = true
 		order = append(order, n)
+		if c.matchKept[n] {
+			// kept with its widgets (see Context.keptElements): the
+			// elements in it match as they did (see Context.shallowKept)
+			return true
+		}
 		for k := n.FirstChild; k != nil; k = k.NextSibling {
 			if !add(k) {
 				return false
@@ -338,6 +346,47 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 		if (n.Namespace != "" || inForeign(n)) && !isFree(n) {
 			// svg and math, which are read differently
 			return nil, c.noChange("a change in svg or math: " + describeNode(n))
+		}
+		selects, siblings, ok := c.invalidation(n)
+		if ok {
+			// only the elements that the rules of its changed classes
+			// and id may select, as the invalidation sets of browsers (a
+			// class of the html or body element of npr.org matched all of
+			// its 8000 elements again)
+			var walk func(k *html.Node) bool
+			walk = func(k *html.Node) bool {
+				for ; k != nil; k = k.NextSibling {
+					if k.Type != html.ElementNode {
+						continue
+					}
+					if selects(k) && !affected[k] {
+						if len(order) >= maxRestyled {
+							return false
+						}
+						affected[k] = true
+						order = append(order, k)
+					}
+					if !walk(k.FirstChild) {
+						return false
+					}
+				}
+				return true
+			}
+			if !affected[n] {
+				affected[n] = true
+				order = append(order, n)
+			}
+			if !walk(n.FirstChild) {
+				return nil, c.noChange(tooMany)
+			}
+			if siblings {
+				for s := n.NextSibling; s != nil; s = s.NextSibling {
+					if !add(s) {
+						return nil, c.noChange(tooMany)
+					}
+				}
+			}
+			continue
 		}
 		for s := n; s != nil; s = s.NextSibling {
 			if !add(s) {
@@ -1093,4 +1142,245 @@ func (c *Context) noteVars(value string) {
 		}
 		value = value[j:]
 	}
+}
+
+// invalidation returns, for the given element whose attributes have
+// changed, whether the elements in it are selected by a rule that may
+// select them differently for the change, and whether its siblings after
+// it may be, if only its class and id changed (and its style, which
+// applies to it alone): the invalidation sets of browsers, as for a class
+// added to the body element, which only the rules that have the class
+// before their last compound selectors (as .modal-open .modal) select the
+// elements in it differently for. It returns ok false, for all of the
+// elements in it and after it to be matched again, if it can not tell.
+func (c *Context) invalidation(n *html.Node) (selects func(k *html.Node) bool, siblings, ok bool) {
+	old, has := c.snaps[n]
+	if !has || c.matchAll {
+		// (as for rules added to the style sheets)
+		return nil, false, false
+	}
+	var tokens []string
+	if old.attrs == attrsHash(n) {
+		// not a change of its attributes: of its states (as :hover and
+		// :checked), or an attribute set to the value that it had
+		tokens = statePseudoClasses
+	}
+	if strings.Contains(old.style, "--") || strings.Contains(GetAttr(n, "style"), "--") {
+		return nil, false, false // custom properties, which the elements in it inherit
+	}
+	oldClasses, newClasses := strings.Fields(old.class), strings.Fields(GetAttr(n, "class"))
+	for _, cl := range oldClasses {
+		if !slices.Contains(newClasses, cl) {
+			tokens = append(tokens, "."+cl)
+		}
+	}
+	for _, cl := range newClasses {
+		if !slices.Contains(oldClasses, cl) {
+			tokens = append(tokens, "."+cl)
+		}
+	}
+	if id := GetAttr(n, "id"); id != old.id {
+		for _, v := range []string{old.id, id} {
+			if v != "" {
+				tokens = append(tokens, "#"+v)
+			}
+		}
+	}
+	// the other attributes, as [data-state] or [aria-expanded=true]
+	var attrTokens []string
+	if others := otherAttrs(n); others != old.others {
+		ov, nv := attrValues(old.others), attrValues(others)
+		for k, v := range ov {
+			if w, ok := nv[k]; !ok || w != v {
+				attrTokens = append(attrTokens, k)
+			}
+		}
+		for k := range nv {
+			if _, ok := ov[k]; !ok {
+				attrTokens = append(attrTokens, k)
+			}
+		}
+		for _, a := range attrTokens {
+			if a == hoverAttr {
+				// (the attribute of :hover, while the states are set)
+				tokens = append(tokens, ":hover")
+			}
+			tokens = append(tokens, attrPseudoClasses[a]...)
+		}
+	}
+	var keys []*compiledSelector
+	all := false
+	check := func(text string, cs *compiledSelector, decls []*css.Declaration) bool {
+		prefix, sib, last := splitLastCompound(text)
+		if (len(tokens) > 0 && !sameStates(tokens)) && (strings.Contains(prefix, "[class") || strings.Contains(prefix, "[id")) {
+			// (selected by its class or id other than by the names of
+			// them, as [class*=icon-])
+			if sib {
+				siblings = true
+			}
+			if cs == nil || cs.keyKind == 0 {
+				all = true
+			} else {
+				keys = append(keys, cs)
+			}
+		}
+		for _, a := range attrTokens {
+			// (the selectors of attributes, of [name, as with a value)
+			inLast, inPrefix := hasAttrSelector(last, a), hasAttrSelector(prefix, a)
+			if inLast && hasCustomProps(decls) {
+				return false
+			}
+			if inPrefix {
+				if sib {
+					siblings = true
+				}
+				if cs == nil || cs.keyKind == 0 {
+					all = true
+				} else {
+					keys = append(keys, cs)
+				}
+			}
+		}
+		for _, t := range tokens {
+			if hasToken(last, t) {
+				// a rule that may select it differently: if it has custom
+				// properties, the elements in it inherit them
+				for _, d := range decls {
+					if strings.HasPrefix(strings.TrimSpace(d.Property), "--") {
+						return false
+					}
+				}
+			}
+			if !hasToken(prefix, t) {
+				continue
+			}
+			if sib {
+				siblings = true
+			}
+			if cs == nil || cs.keyKind == 0 {
+				all = true
+			} else {
+				keys = append(keys, cs)
+			}
+		}
+		return true
+	}
+	for _, r := range c.rules {
+		if !check(r.text, r.sel, r.decls) {
+			return nil, false, false
+		}
+	}
+	for _, r := range c.pseudoRules {
+		if !check(r.text, r.sel, nil) {
+			return nil, false, false
+		}
+	}
+	selects = func(k *html.Node) bool {
+		if all {
+			return true
+		}
+		for _, cs := range keys {
+			if cs.keyIn(k) {
+				return true
+			}
+		}
+		return false
+	}
+	return selects, siblings, true
+}
+
+// splitLastCompound returns the given selector before its last compound
+// selector, whether it has a combinator of siblings (+ or ~) there, and
+// the last compound selector.
+func splitLastCompound(sel string) (prefix string, siblings bool, last string) {
+	depth, at := 0, -1
+	for i := 0; i < len(sel); i++ {
+		switch sel[i] {
+		case '(', '[':
+			depth++
+		case ')', ']':
+			depth--
+		case ' ', '>', '+', '~':
+			if depth == 0 {
+				at = i
+			}
+		}
+	}
+	if at < 0 {
+		return "", false, sel
+	}
+	prefix = sel[:at+1]
+	return prefix, strings.ContainsAny(prefix, "+~"), sel[at+1:]
+}
+
+// hasToken returns whether the given selector text has the given class
+// (.name) or id (#name), not as the start of a longer name.
+func hasToken(text, token string) bool {
+	for i := 0; ; {
+		j := strings.Index(text[i:], token)
+		if j < 0 {
+			return false
+		}
+		end := i + j + len(token)
+		if end >= len(text) || !isNameChar(text[end]) {
+			return true
+		}
+		i = end
+	}
+}
+
+// hasAttrSelector returns whether the given selector text selects elements
+// by the given attribute ([name, [name=, [name~= and so on).
+func hasAttrSelector(text, name string) bool {
+	for i := 0; ; {
+		j := strings.Index(text[i:], "[")
+		if j < 0 {
+			return false
+		}
+		rest := strings.TrimLeft(text[i+j+1:], " ")
+		if strings.HasPrefix(rest, name) && (len(rest) == len(name) || !isNameChar(rest[len(name)])) {
+			return true
+		}
+		i += j + 1
+	}
+}
+
+// hasCustomProps returns whether the given declarations have custom
+// properties (--name).
+func hasCustomProps(decls []*css.Declaration) bool {
+	for _, d := range decls {
+		if strings.HasPrefix(strings.TrimSpace(d.Property), "--") {
+			return true
+		}
+	}
+	return false
+}
+
+// attrPseudoClasses are the pseudo-classes that select elements by the
+// given attributes (see [Context.invalidation]).
+var attrPseudoClasses = map[string][]string{
+	"disabled":        {":disabled", ":enabled"},
+	"checked":         {":checked", ":indeterminate", ":default"},
+	"selected":        {":checked", ":default"},
+	"required":        {":required", ":optional"},
+	"readonly":        {":read-only", ":read-write"},
+	"open":            {":open", ":closed"},
+	"lang":            {":lang"},
+	"dir":             {":dir"},
+	"href":            {":link", ":any-link", ":visited"},
+	"placeholder":     {":placeholder-shown"},
+	"value":           {":placeholder-shown", ":valid", ":invalid"},
+	"type":            {":checked", ":valid", ":invalid", ":read-only", ":read-write"},
+	"contenteditable": {":read-only", ":read-write"},
+	"hidden":          {},
+}
+
+// statePseudoClasses are the pseudo-classes of the states of elements,
+// which a change of them may select others by (see [Context.invalidation]).
+var statePseudoClasses = []string{":hover", ":checked", ":focus", ":focus-within", ":focus-visible", ":active", ":target", ":default", ":indeterminate", ":open"}
+
+// sameStates returns whether the given tokens are those of the states
+// (see [statePseudoClasses]).
+func sameStates(tokens []string) bool {
+	return len(tokens) > 0 && &tokens[0] == &statePseudoClasses[0]
 }
