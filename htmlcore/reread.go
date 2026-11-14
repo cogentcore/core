@@ -12,6 +12,7 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/tree"
+	"github.com/aymerick/douceur/css"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
@@ -291,10 +292,19 @@ func (c *Context) Reread(self, children []*html.Node) bool {
 	if len(roots) == 0 && !restyleAll && len(changed) == 0 && htmlChildren == nil {
 		return true // (only elements that are not rendered changed)
 	}
+	targeted := false
 	if restyleAll {
-		// the declarations of all of the elements are found again, with
-		// the rules added to the style sheets, as for a restyle
-		if html := documentElement(root); html != nil {
+		html := documentElement(root)
+		if shallow, deep, ok := c.addedRuleTargets(html); ok {
+			// only the elements that the added rules select (as for those
+			// that the CSS-in-JS of nytimes.com adds as it loads, each
+			// time matching its 10000 elements again, for 1s)
+			c.addedShallow, c.addedDeep = shallow, deep
+			targeted, restyleAll = true, false
+			defer func() { c.addedShallow, c.addedDeep = nil, nil }()
+		} else if html != nil {
+			// the declarations of all of the elements are found again,
+			// with the rules added to the style sheets, as for a restyle
 			changed = append(changed, html)
 		}
 	}
@@ -341,6 +351,10 @@ func (c *Context) Reread(self, children []*html.Node) bool {
 	c.matchKept, c.matchAll = nil, false
 	if !ok {
 		return false // (with the fallback of updateDecls)
+	}
+	if targeted {
+		// (the other elements do not match the added rules)
+		c.matchedRules, c.matchedPseudo = len(c.rules), len(c.pseudoRules)
 	}
 	for n := range u.freeChanged {
 		selfDirty[n] = true
@@ -1082,4 +1096,83 @@ func (c *Context) verticalMargins(n *html.Node) (top, bottom bool) {
 	top = top || nonZero(c.declaration(n, "margin-top")) || nonZero(c.declaration(n, "margin-block-start"))
 	bottom = bottom || nonZero(c.declaration(n, "margin-bottom")) || nonZero(c.declaration(n, "margin-block-end"))
 	return
+}
+
+// addedRuleTargets returns the elements in the given root element that the
+// rules added to the style sheets since the elements were matched select
+// (see [Context.addedStyle]): those whose declarations of the rules have
+// custom properties are deep (the elements in them inherit them), and the
+// others are shallow, as browsers find the elements that new style sheets
+// may select by the keys of their selectors (or, for those without one, as
+// *, by matching them alone). It returns ok false, for all of the elements
+// to be matched again, for a rule with :has().
+func (c *Context) addedRuleTargets(root *html.Node) (shallow, deep []*html.Node, ok bool) {
+	if root == nil || c.matchedRules > len(c.rules) || c.matchedPseudo > len(c.pseudoRules) {
+		return nil, nil, false
+	}
+	type added struct {
+		cs   *compiledSelector
+		vars bool
+	}
+	byKey := map[string][]added{} // by "#id", ".class", or "tag"
+	var keyless []added           // matched against all of the elements
+	addRule := func(cs *compiledSelector, text string, decls []*css.Declaration) bool {
+		if cs == nil || strings.Contains(text, ":has(") {
+			return false
+		}
+		if cs.keyKind == 0 {
+			keyless = append(keyless, added{cs, hasCustomProps(decls)})
+			return true
+		}
+		key := cs.key
+		if cs.keyKind != 't' {
+			key = string(cs.keyKind) + key
+		}
+		byKey[key] = append(byKey[key], added{cs, hasCustomProps(decls)})
+		return true
+	}
+	for _, r := range c.rules[c.matchedRules:] {
+		if !addRule(r.sel, r.text, r.decls) {
+			return nil, nil, false
+		}
+	}
+	for _, r := range c.pseudoRules[c.matchedPseudo:] {
+		if !addRule(r.sel, r.text, nil) {
+			return nil, nil, false
+		}
+	}
+	if len(byKey) == 0 && len(keyless) == 0 {
+		return nil, nil, true
+	}
+	walkElements(root, func(n *html.Node) {
+		match, vars := false, false
+		check := func(key string) {
+			for _, a := range byKey[key] {
+				if a.cs.sel.Match(n) {
+					match = true
+					vars = vars || a.vars
+				}
+			}
+		}
+		for _, a := range keyless {
+			if a.cs.sel.Match(n) {
+				match = true
+				vars = vars || a.vars
+			}
+		}
+		check(n.Data)
+		if id := GetAttr(n, "id"); id != "" {
+			check("#" + id)
+		}
+		for _, cl := range strings.Fields(GetAttr(n, "class")) {
+			check("." + cl)
+		}
+		switch {
+		case vars:
+			deep = append(deep, n)
+		case match:
+			shallow = append(shallow, n)
+		}
+	})
+	return shallow, deep, true
 }

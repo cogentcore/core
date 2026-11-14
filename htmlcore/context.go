@@ -356,6 +356,16 @@ type pageState struct {
 	// added to style sheets, whose elements were not matched again).
 	matchedRules int
 
+	// matchedPseudo is the number of the rules of pseudo-elements that the
+	// declarations of the elements have been matched with, as matchedRules.
+	matchedPseudo int
+
+	// addedShallow and addedDeep are the elements that the rules added to
+	// the style sheets select (see [Context.addedRuleTargets]), whose
+	// declarations are found again, with those in the deep ones (for the
+	// custom properties of the rules, which they inherit).
+	addedShallow, addedDeep []*html.Node
+
 	// rules are the style rules that have been added, in order, by which
 	// the declarations of elements are found again when they change (see
 	// [Context.Restyle]), with ruleIndex, and pseudoRules those of the

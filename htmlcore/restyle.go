@@ -303,6 +303,10 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 		root = rootNode(changed[0])
 	} else if len(whole) > 0 {
 		root = rootNode(whole[0])
+	} else if len(c.addedShallow) > 0 {
+		root = rootNode(c.addedShallow[0])
+	} else if len(c.addedDeep) > 0 {
+		root = rootNode(c.addedDeep[0])
 	} else {
 		return &declUpdate{undo: func() {}}, true
 	}
@@ -334,6 +338,17 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 		return true
 	}
 	tooMany := fmt.Sprintf("more than %d elements to style again", maxRestyled)
+	for _, n := range c.addedShallow {
+		if !affected[n] {
+			affected[n] = true
+			order = append(order, n)
+		}
+	}
+	for _, n := range c.addedDeep {
+		if !add(n) {
+			return nil, c.noChange(tooMany)
+		}
+	}
 	for _, n := range whole {
 		if !add(n) {
 			return nil, c.noChange(tooMany)
@@ -562,6 +577,7 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 		// all of the elements have been matched with all of the rules (as
 		// with those added to style sheets; see Context.ReuseStyles)
 		c.matchedRules = len(c.rules)
+		c.matchedPseudo = len(c.pseudoRules)
 	}
 	return u, true
 }
@@ -1242,14 +1258,10 @@ func (c *Context) invalidation(n *html.Node) (selects func(k *html.Node) bool, s
 			}
 		}
 		for _, t := range tokens {
-			if hasToken(last, t) {
-				// a rule that may select it differently: if it has custom
-				// properties, the elements in it inherit them
-				for _, d := range decls {
-					if strings.HasPrefix(strings.TrimSpace(d.Property), "--") {
-						return false
-					}
-				}
+			if hasToken(last, t) && hasCustomProps(decls) && (sameStates(tokens) || len(attrTokens) > 0 || cs == nil || c.matchChanged(n, old, cs)) {
+				// a rule that selects it differently, with custom
+				// properties, which the elements in it inherit
+				return false
 			}
 			if !hasToken(prefix, t) {
 				continue
@@ -1383,4 +1395,29 @@ var statePseudoClasses = []string{":hover", ":checked", ":focus", ":focus-within
 // (see [statePseudoClasses]).
 func sameStates(tokens []string) bool {
 	return len(tokens) > 0 && &tokens[0] == &statePseudoClasses[0]
+}
+
+// matchChanged returns whether the given selector matches the given
+// element differently with its class and id now and with those of the
+// given state of it (as before they changed).
+func (c *Context) matchChanged(n *html.Node, old nodeSnap, cs *compiledSelector) bool {
+	now := cs.sel.Match(n)
+	saved := n.Attr
+	attrs := make([]html.Attribute, 0, len(saved)+2)
+	for _, a := range saved {
+		if a.Namespace == "" && (a.Key == "class" || a.Key == "id") {
+			continue
+		}
+		attrs = append(attrs, a)
+	}
+	if old.class != "" {
+		attrs = append(attrs, html.Attribute{Key: "class", Val: old.class})
+	}
+	if old.id != "" {
+		attrs = append(attrs, html.Attribute{Key: "id", Val: old.id})
+	}
+	n.Attr = attrs
+	before := cs.sel.Match(n)
+	n.Attr = saved
+	return now != before
 }
