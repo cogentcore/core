@@ -53,7 +53,7 @@ func (c *Context) addPseudoRule(root *html.Node, sel, kind string, decls []*css.
 	if c.pseudoStyles == nil {
 		c.pseudoStyles = map[pseudoKey][]*cssDecl{}
 	}
-	c.pseudoRules = append(c.pseudoRules, &pseudoRule{root: root, sel: compileSelector(sel), kind: kind, decls: decls, origin: origin, spec: spec})
+	c.pseudoRules = append(c.pseudoRules, &pseudoRule{root: root, sel: compileSelector(sel), text: sel, kind: kind, decls: decls, origin: origin, spec: spec})
 	if strings.Contains(sel, ":has(") {
 		c.relational = true
 	}

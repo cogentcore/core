@@ -5,6 +5,7 @@
 package htmlcore
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 )
 
 // widgetsByElement returns the widgets of the elements with ids in the
@@ -145,7 +147,7 @@ func TestReread(t *testing.T) {
 			return nil, []*html.Node{l}
 		}, "main", "i2", "para")
 	})
-	t.Run("remove", func(t *testing.T) {
+	t.Run("remove from body", func(t *testing.T) {
 		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
 			l := elementByID(doc, "list")
 			l.RemoveChild(elementByID(doc, "i1"))
@@ -204,7 +206,9 @@ func TestReread(t *testing.T) {
 		})
 	})
 	t.Run("html", func(t *testing.T) {
-		testReread(t, page, false, func(doc *html.Node) (self, children []*html.Node) {
+		// styled again, with all of the elements, as the selectors of the
+		// rules may select elements by its attributes (as :lang)
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
 			h := elementByID(doc, "top").Parent.Parent.Parent
 			setAttr(h, "lang", "fr")
 			return []*html.Node{h}, nil
@@ -305,5 +309,107 @@ func TestRereadFallback(t *testing.T) {
 		setAttr(a, "class", "")
 		assert.True(t, ctx.Restyle([]*html.Node{a}))
 		assert.Equal(t, "", ctx.Fallback())
+	})
+}
+
+// TestRereadBodyClass tests that a class added to the body element styles
+// it again, and the elements that the rules of the class select by it (as
+// .modal-open .dialog), without reading the page again, as the scripts of
+// npr.org do as it loads, which read all of it again each time.
+func TestRereadBodyClass(t *testing.T) {
+	const page = `<html><head><style>
+.box { width: 100px; height: 20px; background: blue }
+.dark { background: black; color: white }
+.dark .box { background: green }
+.other .box { background: red }
+</style></head><body><div style="width: 400px">
+<div id="a" class="box">a</div><div id="b"><div id="c" class="box">c</div></div><p id="p">text</p>
+</div></body></html>`
+	testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+		body := elementByID(doc, "a").Parent.Parent
+		setAttr(body, "class", "dark")
+		return []*html.Node{body}, nil
+	}, "p")
+}
+
+// TestRereadHTMLChildren tests that an element added to the html element
+// after the body, as scripts add to measure things (as on npr.org), and
+// removed, reads only the children of the html element again, with the
+// body kept as it is.
+func TestRereadHTMLChildren(t *testing.T) {
+	const page = `<html><head><style>.box { width: 100px; height: 20px; background: blue }</style></head>` +
+		`<body><div id="a" class="box">a</div><p id="p">text</p></body></html>`
+	htmlOf := func(doc *html.Node) *html.Node { return elementByID(doc, "a").Parent.Parent }
+	t.Run("add", func(t *testing.T) {
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+			h := htmlOf(doc)
+			// (made here: a fragment parsed in the html element is in a
+			// body of its own)
+			h.AppendChild(&html.Node{Type: html.ElementNode, Data: "div", DataAtom: atom.Div,
+				Attr: []html.Attribute{{Key: "id", Val: "probe"}, {Key: "style", Val: "position: absolute; width: 50px; height: 50px"}}})
+			return nil, []*html.Node{h}
+		}, "a", "p")
+	})
+	t.Run("remove", func(t *testing.T) {
+		// (in the body, where the parser puts it, which is read again,
+		// but for its first element; p, which is last now, is read again
+		// for its margins)
+		probe := strings.Replace(page, `</body>`, `</body><div id="probe" style="width: 50px; height: 50px"></div>`, 1)
+		testReread(t, probe, true, func(doc *html.Node) (self, children []*html.Node) {
+			pr := elementByID(doc, "probe")
+			h := pr.Parent
+			h.RemoveChild(pr)
+			return nil, []*html.Node{h}
+		}, "a")
+	})
+}
+
+// TestRereadKeepsUnchanged tests that the elements that have not changed,
+// in an element whose children have changed, are kept as they are without
+// being read again (see [Context.keptElements]), so that elements added to
+// a large body (as the scripts of npr.org add, many times as it loads) do
+// not read all of it again (here in a div, as the body of a page that
+// scrolls has a scrollbar only once it is laid out again), and that the
+// result is as the page read anew,
+// also for the rules of siblings that the change affects.
+func TestRereadKeepsUnchanged(t *testing.T) {
+	var b strings.Builder
+	b.WriteString(`<html><head><style>.item { height: 1px; background: blue }
+.item + .item { margin-top: 1px }
+.first:first-child { height: 3px }
+.added { height: 2px }</style></head><body><div id="wrap" style="width: 400px">`)
+	for i := range 1500 {
+		fmt.Fprintf(&b, `<div id="d%d" class="item"><span>x</span></div>`, i)
+	}
+	b.WriteString(`</div></body></html>`)
+	page := b.String()
+	t.Run("append to body", func(t *testing.T) {
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+			wrap := elementByID(doc, "wrap")
+			// (not of the class item: the rule for an item after an item
+			// does not apply to one added at the end, as read again, also
+			// when all of the items are read again)
+			appendHTML(t, wrap, `<div id="new" class="added"><span>x</span></div>`)
+			return nil, []*html.Node{wrap}
+		}, "d0", "d700", "d1499")
+	})
+	t.Run("insert before the first", func(t *testing.T) {
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+			d0 := elementByID(doc, "d0")
+			ns, err := html.ParseFragment(strings.NewReader(`<div id="new" class="item first"><span>x</span></div>`), d0.Parent)
+			require.NoError(t, err)
+			for _, n := range ns {
+				d0.Parent.InsertBefore(n, d0)
+			}
+			return nil, []*html.Node{d0.Parent}
+		}, "d700", "d1499")
+	})
+	t.Run("remove one", func(t *testing.T) {
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+			d := elementByID(doc, "d5")
+			p := d.Parent
+			p.RemoveChild(d)
+			return nil, []*html.Node{p}
+		}, "d0", "d700", "d1499")
 	})
 }

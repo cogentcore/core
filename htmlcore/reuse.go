@@ -44,6 +44,11 @@ type nodeSnap struct {
 	parent *html.Node
 	attrs  uint64
 
+	// class, id, and style are its class, id, and style attributes, and
+	// others its other attributes (as name=value lines), for the elements
+	// that a change of them may select (see [Context.invalidation]).
+	class, id, style, others string
+
 	// index and typeIndex are its index in the elements of its parent,
 	// and in those of the same name, as :nth-child selects it.
 	index, typeIndex int32
@@ -74,6 +79,39 @@ func attrsHash(n *html.Node) uint64 {
 	return h.Sum64()
 }
 
+// otherAttrs returns the attributes of the given element but its class,
+// id, and style, as name=value lines (with the namespaces of those that
+// have one), or "" for none.
+func otherAttrs(n *html.Node) string {
+	var sb strings.Builder
+	for _, a := range n.Attr {
+		if a.Namespace == "" && (a.Key == "class" || a.Key == "id" || a.Key == "style") {
+			continue
+		}
+		if a.Namespace != "" {
+			sb.WriteString(a.Namespace)
+			sb.WriteByte(':')
+		}
+		sb.WriteString(a.Key)
+		sb.WriteByte('=')
+		sb.WriteString(a.Val)
+		sb.WriteByte('\n')
+	}
+	return sb.String()
+}
+
+// attrNames returns the names of the attributes in the given lines of
+// [otherAttrs] with their values.
+func attrValues(lines string) map[string]string {
+	m := map[string]string{}
+	for _, l := range strings.Split(lines, "\n") {
+		if k, v, ok := strings.Cut(l, "="); ok {
+			m[k] = v
+		}
+	}
+	return m
+}
+
 // snapChildren calls the given function with the state of each of the
 // elements of the given parent (see [nodeSnap]).
 func snapChildren(p *html.Node, f func(k *html.Node, s nodeSnap)) {
@@ -97,7 +135,8 @@ func snapChildren(p *html.Node, f func(k *html.Node, s nodeSnap)) {
 		for g := k.FirstChild; g != nil && empty; g = g.NextSibling {
 			empty = g.Type != html.ElementNode && (g.Type != html.TextNode || g.Data == "")
 		}
-		snaps[i] = nodeSnap{parent: p, attrs: attrsHash(k), index: int32(i), typeIndex: counts[j],
+		snaps[i] = nodeSnap{parent: p, attrs: attrsHash(k), class: GetAttr(k, "class"), id: GetAttr(k, "id"), style: GetAttr(k, "style"), others: otherAttrs(k),
+			index: int32(i), typeIndex: counts[j],
 			last: i == len(kids)-1, empty: empty, count: int32(len(kids))}
 		counts[j]++
 	}
