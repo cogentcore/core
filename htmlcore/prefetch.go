@@ -78,6 +78,9 @@ func (c *Context) PrefetchURLs(doc *html.Node) []string {
 				}
 			case "img":
 				src, _ := c.imageSource(n)
+				if src == "" {
+					src, _ = c.noscriptImage(n) // (shown until its scripts set its source)
+				}
 				add(&images, src, c.PageURL)
 			}
 		}

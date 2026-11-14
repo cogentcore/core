@@ -115,14 +115,9 @@ func (c *Context) imageChange(n *html.Node, srcRules *int) (*imageSwap, bool) {
 // load gets the image of the swap, and records the state of its element,
 // as it has been styled for it.
 func (sw *imageSwap) load(c *Context) {
-	if w := sw.w; w.Image != nil {
-		if s, _ := w.Property("src").(string); s == sw.src && w.Density == sw.density {
-			sw.im = w.Image // (another attribute changed)
-		}
-	}
-	if sw.im == nil {
-		sw.im, _ = readImage(c, sw.src) // (none if it can not be gotten, as for an error)
-	}
+	// (from the image cache, if it has been gotten, as for the image of
+	// its noscript; the widget is not read here, without its lock)
+	sw.im, _ = readImage(c, sw.src) // (none if it can not be gotten, as for an error)
 	if !sw.restyle {
 		c.resnap(sw.n) // (as updateDecls does for those that it styles again)
 	}

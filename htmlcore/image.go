@@ -218,6 +218,38 @@ func handleImage(ctx *Context, tag string) core.Widget {
 		img.Styler(func(s *styles.Style) { s.ObjectFit = styles.FitFill })
 		img.NaturalDp = true
 		img.SetTooltip(GetAttr(n, "alt"))
+		if fsrc, fdensity := ctx.noscriptImage(n); fsrc != "" {
+			// the image of its noscript, until its scripts set its source
+			// (as the many lazy images of nytimes.com, which were gray
+			// boxes until its scripts set them, 20-50s later), gotten in
+			// the background if it can be (see Context.AsyncImages), as it
+			// is gotten before the page is read (see Context.PrefetchURLs)
+			img.Density = fdensity
+			img.SetProperty("src", fsrc)
+			if ctx.AsyncImages == nil {
+				if im, err := readImage(ctx, fsrc); err == nil {
+					img.SetImage(im)
+				}
+				return img
+			}
+			async := ctx.AsyncImages
+			go func() {
+				im, err := readImage(ctx, fsrc)
+				if err != nil || im == nil {
+					return
+				}
+				async(func() {
+					if img.Scene == nil || img.Parent == nil || img.Image != nil {
+						return // (not in the page, or its scripts set its image)
+					}
+					if s, _ := img.Property("src").(string); s != fsrc {
+						return // (its scripts set its source)
+					}
+					img.SetImage(im)
+					img.NeedsLayout()
+				})
+			}()
+		}
 		return img
 	}
 	alt := GetAttr(n, "alt")

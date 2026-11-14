@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+	"time"
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/tree"
@@ -746,4 +747,76 @@ func noKeyMatch(f func() bool) bool {
 		keySeed = maphash.MakeSeed()
 	}
 	return false
+}
+
+// TestNoscriptImages tests that a lazy img without a source shows the image
+// of the noscript after it (with scripts, whose contents are then text),
+// as nytimes.com has, until its scripts set its source, that it is gotten
+// before the page is read, and that without scripts (whose noscripts are
+// read) it is not.
+func TestNoscriptImages(t *testing.T) {
+	const png = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+	page := func(src string) string {
+		return `<html><body><div style="width: 400px"><picture><source media="(min-width: 1px)"><img id="i" class="lazy" loading="lazy" style="width: 50px; height: 40px"><noscript><img src="` + src + `&amp;x=1"></noscript></picture></div></body></html>`
+	}
+	ctx := NewContext()
+	ctx.Scripting = true
+	doc, err := ParseHTML(ctx, strings.NewReader(page(png)))
+	require.NoError(t, err)
+	src, _ := ctx.noscriptImage(elementByID(doc, "i"))
+	assert.Equal(t, png+"&x=1", src)
+	pdoc, err := ParseHTML(ctx, strings.NewReader(page("https://example.com/a.jpg?q=1")))
+	require.NoError(t, err)
+	assert.Contains(t, ctx.PrefetchURLs(pdoc), "https://example.com/a.jpg?q=1&x=1")
+
+	ctx = NewContext() // (without scripts: the noscript is read)
+	doc, err = ParseHTML(ctx, strings.NewReader(page(png)))
+	require.NoError(t, err)
+	src, _ = ctx.noscriptImage(elementByID(doc, "i"))
+	assert.Equal(t, "", src)
+
+	// the image is shown (as the page is read, without AsyncImages)
+	ctx = NewContext()
+	ctx.Scripting = true
+	doc, err = ParseHTML(ctx, strings.NewReader(strings.Replace(page(png), "&amp;x=1", "", 1)))
+	require.NoError(t, err)
+	bd := core.NewBody()
+	require.NoError(t, ReadDocument(ctx, bd, doc))
+	var im *core.Image
+	bd.WalkDown(func(k tree.Node) bool {
+		if w, ok := k.(*core.Image); ok && ownNode(w) == elementByID(doc, "i") {
+			im = w
+		}
+		return tree.Continue
+	})
+	require.NotNil(t, im)
+	assert.NotNil(t, im.Image)
+
+	// and in the background, with AsyncImages
+	ctx = NewContext()
+	ctx.Scripting = true
+	doc, err = ParseHTML(ctx, strings.NewReader(strings.Replace(page(png), "&amp;x=1", "", 1)))
+	require.NoError(t, err)
+	bd = core.NewBody()
+	ctx.AsyncImages = func(f func()) {
+		bd.AsyncLock()
+		defer bd.AsyncUnlock()
+		f()
+	}
+	require.NoError(t, ReadDocument(ctx, bd, doc))
+	im = nil
+	bd.WalkDown(func(k tree.Node) bool {
+		if w, ok := k.(*core.Image); ok && ownNode(w) == elementByID(doc, "i") {
+			im = w
+		}
+		return tree.Continue
+	})
+	require.NotNil(t, im)
+	bd.RenderImage(func() {
+		assert.Eventually(t, func() bool {
+			bd.AsyncLock()
+			defer bd.AsyncUnlock()
+			return im.Image != nil
+		}, 5*time.Second, 10*time.Millisecond)
+	})
 }

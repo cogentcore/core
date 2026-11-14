@@ -11,6 +11,7 @@ import (
 
 	"cogentcore.org/core/system"
 	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 )
 
 // The responsive images of HTML: the source of an img is chosen from the
@@ -200,4 +201,63 @@ func devicePixelRatio() float32 {
 		}
 	}
 	return 1
+}
+
+// noscriptImage returns the source (and its density) of the image of the
+// noscript element after the given img, which has no source, if the
+// noscript is not read (with scripts, whose contents are its text): the
+// image for pages without scripts of lazy images, whose scripts set their
+// sources as they are shown (as <img loading="lazy"><noscript><img
+// src="..."></noscript> on nytimes.com), or "" if there is none.
+func (c *Context) noscriptImage(n *html.Node) (string, float32) {
+	ns := nextElement(n)
+	if ns == nil && n.Parent != nil && n.Parent.DataAtom == atom.Picture {
+		ns = nextElement(n.Parent)
+	}
+	if ns == nil || ns.DataAtom != atom.Noscript || ns.FirstChild == nil || ns.FirstChild.Type != html.TextNode {
+		return "", 0
+	}
+	text := nodeText(ns)
+	if !strings.Contains(text, "<img") {
+		return "", 0
+	}
+	kids, err := html.ParseFragment(strings.NewReader(text), &html.Node{Type: html.ElementNode, Data: "div", DataAtom: atom.Div})
+	if err != nil {
+		return "", 0
+	}
+	var img *html.Node
+	var find func(k *html.Node)
+	find = func(k *html.Node) {
+		for ; k != nil && img == nil; k = k.NextSibling {
+			if k.Type == html.ElementNode && k.DataAtom == atom.Img {
+				img = k
+				return
+			}
+			find(k.FirstChild)
+		}
+	}
+	for _, k := range kids {
+		find(k)
+	}
+	if img == nil {
+		return "", 0
+	}
+	src, density := c.imageSource(img)
+	if strings.HasSuffix(src, ".svg") || strings.HasPrefix(src, "data:image/svg") {
+		return "", 0 // (an svg, which has another widget)
+	}
+	return src, density
+}
+
+// nextElement returns the element after the given node, or nil.
+func nextElement(n *html.Node) *html.Node {
+	for k := n.NextSibling; k != nil; k = k.NextSibling {
+		if k.Type == html.ElementNode {
+			return k
+		}
+		if k.Type == html.TextNode && strings.TrimSpace(k.Data) != "" {
+			return nil
+		}
+	}
+	return nil
 }

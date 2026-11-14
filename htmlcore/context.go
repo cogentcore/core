@@ -214,6 +214,13 @@ type Context struct {
 	// by default; see [NewImageCache].
 	ImageCache *ImageCache
 
+	// AsyncImages, if set, is how the images of the noscripts of lazy
+	// images (see Context.noscriptImage) are set as they are gotten in the
+	// background: it calls the given function, which sets them, with the
+	// lock of the widgets of the page held (or not, if the page is gone).
+	// If it is nil, they are gotten as the page is read.
+	AsyncImages func(f func())
+
 	// StageSize, if positive, is the size of the content of the body (in
 	// runes of text, with estimates for other elements) after which
 	// [ReadHTML] stops adding the widgets of its top-level elements,
@@ -686,6 +693,7 @@ func (c *Context) NewPage() *Context {
 	n.WidgetHandlers = c.WidgetHandlers
 	n.DelayedImageLoad = c.DelayedImageLoad
 	n.ImageCache = c.ImageCache
+	n.AsyncImages = c.AsyncImages
 	n.StageSize = c.StageSize
 	n.Style = c.Style
 	return n
