@@ -875,6 +875,16 @@ func (wb *WidgetBase) RenderStandardBox() {
 		wb.Styles.ActualBackground, wb.Styles.FillMargin = abg, fm
 		return
 	}
+	if wb.Styles.FillMargin && wb.inTransparentOutOfFlow() {
+		// A widget with a background of its own in such an absolute or
+		// fixed widget does not fill its margin with the background of its
+		// parent either, which is not painted there (as the center line of
+		// the bars of the election results of nytimes.com, in an absolute
+		// marker over the bars, which painted the gray of the bars in its
+		// wide margin).
+		wb.Styles.FillMargin = false
+		defer func() { wb.Styles.FillMargin = true }()
+	}
 	if wb.inRoundedCorners() {
 		// A widget in the rounded corners of a parent that does not clip
 		// (whose radius is not in the bounds of the painter, as for a
@@ -995,6 +1005,21 @@ func (wb *WidgetBase) inTransparentOverlap() bool {
 		}
 		if w != wb && w.Styles.Background != nil {
 			return false
+		}
+	}
+	return false
+}
+
+// inTransparentOutOfFlow returns whether the widget is in an out of flow
+// widget (see [WidgetBase.outOfFlow]) with no background between them
+// (that one included), which paints nothing of its parent under it.
+func (wb *WidgetBase) inTransparentOutOfFlow() bool {
+	for w := wb.parentWidget(); w != nil; w = w.parentWidget() {
+		if w.Styles.Background != nil && !transparentBackground(w.Styles.Background) {
+			return false
+		}
+		if w.outOfFlow() {
+			return true
 		}
 	}
 	return false

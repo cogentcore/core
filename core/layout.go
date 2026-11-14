@@ -1756,6 +1756,18 @@ func (fr *Frame) ManageOverflow(iter int, updateSize bool) bool {
 // sizeDownGrow grows the element sizes based on total extra and Grow
 func (fr *Frame) sizeDownGrow(iter int, extra math32.Vector2) bool {
 	redo := false
+	// The Max of a child relative to the size of this frame (a percentage
+	// or a calc of one), which its SizeUp could not know, is of the size
+	// allocated to this frame before its children grow, so that the width
+	// that one of them cannot take goes to the others (as the bars of the
+	// parties of the election results of nytimes.com, of 55% and 44%, which
+	// were halves of the width up to the 44%).
+	fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		if relativeMax(&cwb.Styles) {
+			cwb.updateParentRelSizes()
+		}
+		return tree.Continue
+	})
 	if fr.Styles.Display == styles.Stacked {
 		redo = fr.sizeDownGrowStacked(iter, extra)
 	} else {
@@ -3365,4 +3377,16 @@ func (wb *WidgetBase) DirectRenderDrawBBoxes(srcFullBBox image.Rectangle) (destB
 		empty = true
 	}
 	return
+}
+
+// relativeMax returns whether the Max size of the given style is relative
+// to the size of the parent (a percentage of it, or a calc of one).
+func relativeMax(s *styles.Style) bool {
+	for d := math32.X; d <= math32.Y; d++ {
+		mx := s.Max.Dim(d)
+		if mx.Custom != nil || mx.Unit == units.UnitPw || mx.Unit == units.UnitPh {
+			return true
+		}
+	}
+	return false
 }

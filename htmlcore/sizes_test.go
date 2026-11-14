@@ -1532,3 +1532,41 @@ func TestFlexFlowColumnNowrap(t *testing.T) {
 			assert.True(t, ws["reset"].Styles.Wrap, "flex-flow of wrap wraps")
 		})
 }
+
+// TestPercentBars tests bars of percentage widths in a flex row (as the
+// bars of the parties of the election results of nytimes.com): a width of
+// 0% is no width, the bars are their percentages of the row, whatever the
+// others can take, and the margin of the line of a marker over them (an
+// absolute element with no background) is not painted with the gray of the
+// row, which is not under it.
+func TestPercentBars(t *testing.T) {
+	src := `<style>
+.bars { display: flex; position: relative; justify-content: space-between; background: #808080; height: 12px }
+.bar { height: 100% }
+.marker { position: absolute; left: 50%; top: 0; height: 200%; width: 100px; transform: translate(-50%) }
+.marker:before { display: block; content: ""; width: 1px; height: 75%; background: black; margin-left: 49px }
+</style><div style="width: 400px; background: white"><div class="bars"><div id="marker" class="marker"></div>` +
+		`<span id="dem" class="bar" style="width: 55%; background: blue"></span><span id="oth" class="bar" style="width: 0%; background: yellow"></span>` +
+		`<span id="gop" class="bar" style="width: 44%; background: red"></span></div></div>`
+	bd := core.NewBody()
+	require.NoError(t, ReadHTMLString(NewContext(), bd, src))
+	ws := map[string]*core.WidgetBase{}
+	bd.WalkDown(func(k tree.Node) bool {
+		if wb := core.AsWidget(k); wb != nil {
+			if id, ok := wb.Property("id").(string); ok {
+				ws[id] = wb
+			}
+		}
+		return tree.Continue
+	})
+	img := bd.RenderImage()
+	dp := bd.Styles.UnitContext.Dots(units.UnitDp)
+	assert.InDelta(t, 220*dp, ws["dem"].Geom.Size.Actual.Total.X, 2, "55%")
+	assert.InDelta(t, 0, ws["oth"].Geom.Size.Actual.Total.X, 0.5, "0%")
+	assert.InDelta(t, 176*dp, ws["gop"].Geom.Size.Actual.Total.X, 2, "44%")
+	// under the row, in the left half of the marker, where its line has its margin
+	mk := ws["marker"].Geom.TotalBBox
+	x, y := mk.Min.X+mk.Dx()/4, mk.Min.Y+mk.Dy()*5/8
+	r, g, b, _ := img.At(x, y).RGBA()
+	assert.Equal(t, [3]uint32{0xffff, 0xffff, 0xffff}, [3]uint32{r, g, b}, "white under the marker, below the row")
+}

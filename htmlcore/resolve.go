@@ -882,7 +882,12 @@ func (r *resolver) sizes() {
 		s.Grow.X = 0
 		_, isImage := wb.This.(*core.Image)
 		isImage = isImage || r.isIframe() // (replaced elements)
-		if st.width.Unit == units.UnitPw && !isImage {
+		if st.width.Unit == units.UnitPw && st.width.Value == 0 {
+			// A width of 0% is no width, not a Max of 0, which is no Max
+			// (as the bar of the other parties of the election results of
+			// nytimes.com, which took a share of the width of the bars).
+			s.Min.X, s.Max.X = units.Dot(0), units.Dot(0)
+		} else if st.width.Unit == units.UnitPw && !isImage {
 			// A percentage of the width of the parent fills that much
 			// of it, which as a minimum would make a parent that is as
 			// wide as its content grow without end.
