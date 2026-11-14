@@ -631,7 +631,7 @@ func (c *Context) ruleDecls(n *html.Node, ids []int) []*cssDecl {
 		r := c.rules[i]
 		c.cssBase = r.cssBase // for its URLs
 		for _, d := range r.decls {
-			prop, value := strings.ToLower(strings.TrimSpace(d.Property)), strings.TrimSpace(d.Value)
+			prop, value := propertyName(d.Property), strings.TrimSpace(d.Value)
 			if !validDeclaration(prop, value) {
 				continue
 			}

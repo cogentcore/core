@@ -156,11 +156,30 @@ func (c *Context) addRuleList(root *html.Node, rules []*css.Rule, origin cssOrig
 	}
 }
 
+// propertyName returns the name of the property of a declaration with the
+// given name: in lower case, and the standard one of a legacy alias of it
+// (see [legacyAliases]).
+func propertyName(p string) string {
+	p = strings.ToLower(strings.TrimSpace(p))
+	if a, ok := legacyAliases[p]; ok {
+		return a
+	}
+	return p
+}
+
+// legacyAliases are the old names of properties that browsers still
+// support as aliases of the standard ones, by their standard names (as the
+// grid-column-gap of the grids of nytimes.com, without which their columns
+// had no gaps between them).
+var legacyAliases = map[string]string{
+	"grid-gap": "gap", "grid-row-gap": "row-gap", "grid-column-gap": "column-gap",
+}
+
 // addDecls adds the given declarations to the given node.
 func (c *Context) addDecls(n *html.Node, decls []*css.Declaration, origin cssOrigin, spec int) {
 	custom := false
 	for _, d := range decls {
-		prop, value := strings.ToLower(strings.TrimSpace(d.Property)), strings.TrimSpace(d.Value)
+		prop, value := propertyName(d.Property), strings.TrimSpace(d.Value)
 		if !validDeclaration(prop, value) {
 			continue // dropped, so that the declaration before it applies
 		}

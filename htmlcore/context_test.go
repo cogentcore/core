@@ -1367,6 +1367,44 @@ func TestGridMinmaxFrMin(t *testing.T) {
 		})
 }
 
+// TestGridFrNoAutoMin tests that the content of a child of a grid without
+// an automatic minimum width (min-width: 0, or overflow: hidden) does not
+// widen the fr tracks that it spans, which share the width by their fr (as
+// the top stories of nytimes.com, in 14 and 6 of 20 tracks of 1fr, whose
+// carousel made the first wider, over the second), and that the content
+// of one with it does.
+func TestGridFrNoAutoMin(t *testing.T) {
+	for _, cell := range []string{"min-width: 0", "overflow: hidden"} {
+		widgetsByID(t, `<div id="g" style="display: grid; grid-template-columns: repeat(20, 1fr); column-gap: 33px; width: 1000px">`+
+			`<div id="a" style="grid-column: span 14; `+cell+`"><div style="width: 900px; height: 10px"></div></div>`+
+			`<div id="b" style="grid-column: span 6; `+cell+`">right</div></div>`,
+			func(ws map[string]*core.WidgetBase, dp float32) {
+				track := float32(1000-19*33) / 20
+				assert.InDelta(t, (14*track+13*33)*dp, ws["a"].Geom.Size.Actual.Total.X, float64(3*dp), cell)
+				assert.InDelta(t, (6*track+5*33)*dp, ws["b"].Geom.Size.Actual.Total.X, float64(3*dp), cell)
+			})
+	}
+	widgetsByID(t, `<div id="g" style="display: grid; grid-template-columns: repeat(20, 1fr); column-gap: 33px; width: 1000px">`+
+		`<div id="a" style="grid-column: span 14"><div style="width: 900px; height: 10px"></div></div>`+
+		`<div id="b" style="grid-column: span 6">right</div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.GreaterOrEqual(t, ws["a"].Geom.Size.Actual.Total.X, 900*dp-1, "the content widens it")
+		})
+}
+
+// TestGridLegacyGap tests that the legacy names of the gaps of grids
+// (grid-column-gap, grid-row-gap and grid-gap) are those of the standard
+// ones (as the grids of nytimes.com, whose columns had no gaps).
+func TestGridLegacyGap(t *testing.T) {
+	for _, gap := range []string{"grid-column-gap: 30px", "grid-gap: 10px 30px", "--x: initial; grid-column-gap: var(--x, 30px)"} {
+		widgetsByID(t, `<div style="display: grid; grid-template-columns: repeat(4, 1fr); width: 400px; `+gap+`"><div id="a">a</div><div id="b">b</div></div>`,
+			func(ws map[string]*core.WidgetBase, dp float32) {
+				a, b := ws["a"].Geom, ws["b"].Geom
+				assert.InDelta(t, 30*dp, b.Pos.Total.X-a.Pos.Total.X-a.Size.Actual.Total.X, float64(dp), gap)
+			})
+	}
+}
+
 // TestGridRowAfterFixedHeight tests that a row of a grid is after the
 // height of the row before it, when its last cell has a smaller fixed
 // height (as the actions of the height of a line of the page headers of

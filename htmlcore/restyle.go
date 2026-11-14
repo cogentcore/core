@@ -162,7 +162,7 @@ func (c *Context) matchDecls(n *html.Node) []*cssDecl {
 		}
 		c.cssBase = r.cssBase // for its URLs
 		for _, d := range r.decls {
-			prop, value := strings.ToLower(strings.TrimSpace(d.Property)), strings.TrimSpace(d.Value)
+			prop, value := propertyName(d.Property), strings.TrimSpace(d.Value)
 			if !validDeclaration(prop, value) {
 				continue
 			}
@@ -186,7 +186,7 @@ func (c *Context) matchPseudo(n *html.Node, kind string) []*cssDecl {
 		for _, d := range r.decls {
 			c.cssOrder++
 			c.noteVars(d.Value)
-			ds = append(ds, &cssDecl{Property: strings.ToLower(strings.TrimSpace(d.Property)), Value: c.absoluteURLs(strings.TrimSpace(d.Value)),
+			ds = append(ds, &cssDecl{Property: propertyName(d.Property), Value: c.absoluteURLs(strings.TrimSpace(d.Value)),
 				Important: d.Important, origin: r.origin, specificity: r.spec, order: c.cssOrder})
 		}
 	}
