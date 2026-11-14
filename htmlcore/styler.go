@@ -328,6 +328,15 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 			case "flex", "inline-flex", "grid", "inline-grid":
 				s.Justify.Content = styles.Start
 			default:
+				if s.Direction == styles.Column {
+					// the content of a button that is a block is in the
+					// middle of its height, as in browsers, and its text is
+					// aligned by its text-align (as the listen buttons of
+					// npr.org, of text-align: left, whose labels were at
+					// their tops)
+					s.Justify.Content = styles.Center
+					break
+				}
 				switch s.Text.Align {
 				case text.Center:
 					s.Justify.Content = styles.Center

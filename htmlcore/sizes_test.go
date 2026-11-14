@@ -1590,3 +1590,16 @@ func TestFlexColumnMaxHeightShrink(t *testing.T) {
 			})
 	}
 }
+
+// TestButtonContentCentered tests that the content of a button that is a
+// block is centered in its height, whatever its text-align, as in browsers
+// (as the listen buttons of npr.org, of text-align: left, whose labels were
+// at their tops).
+func TestButtonContentCentered(t *testing.T) {
+	widgetsByID(t, `<button id="b" style="display: inline-block; text-align: left; min-height: 40px"><b id="t" style="display: inline-block">3:41</b></button>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			b, tx := ws["b"].Geom, ws["t"].Geom
+			mid := b.Pos.Content.Y + b.Size.Actual.Content.Y/2
+			assert.InDelta(t, mid, tx.Pos.Total.Y+tx.Size.Actual.Total.Y/2, float64(dp), "centered")
+		})
+}
