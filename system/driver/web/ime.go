@@ -21,9 +21,26 @@ import (
 // is moved to the caret of the text widget, so that the browser shows
 // the candidate window of the input method there.
 
-// textField returns the hidden app-text-field input.
+// textField returns the hidden app-text-field input, which is in the HTML
+// of the app, making it if there is none, as in a page of the tests.
 func textField() js.Value {
-	return js.Global().Get("document").Call("getElementById", "app-text-field")
+	document := js.Global().Get("document")
+	tf := document.Call("getElementById", "app-text-field")
+	if !tf.IsNull() {
+		return tf
+	}
+	tf = document.Call("createElement", "input")
+	tf.Set("id", "app-text-field")
+	tf.Set("type", "text")
+	style := tf.Get("style") // (as in app.css)
+	style.Set("position", "absolute")
+	style.Set("opacity", "0")
+	style.Set("top", "-10px")
+	style.Set("left", "-10px")
+	style.Set("width", "0")
+	style.Set("height", "0")
+	document.Get("body").Call("appendChild", tf)
+	return tf
 }
 
 // addCompositionListeners adds the listeners for input method compositions.

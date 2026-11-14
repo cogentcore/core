@@ -11,13 +11,7 @@ import (
 
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/system/composer"
 )
-
-// getImager is implemented by offscreen.Drawer for [Body.AssertRender].
-type getImager interface {
-	GetImage() *image.RGBA
-}
 
 // AssertRender makes a new window from the body, waits until it is shown
 // and all events have been handled, does any necessary re-rendering,
@@ -28,14 +22,15 @@ type getImager interface {
 // window is shown, and all system events are handled before proessing continues.
 // A testdata directory and png file extension are automatically added to
 // the the filename, and forward slashes are automatically replaced with
-// backslashes on Windows.
+// backslashes on Windows. On the web, the images are in testdata/js, as
+// the browser renders text and paths differently (see [testImageName]).
 func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
 	img := b.RenderImage(fun...)
 	if img == nil {
 		t.Errorf("AssertRender: the window of %s was closed", filename)
 		return
 	}
-	imagex.Assert(t, img, filename)
+	imagex.Assert(t, img, testImageName(filename))
 }
 
 // RenderImage makes a new window from the body, waits until it is shown
@@ -71,14 +66,10 @@ func (b *Body) RenderImage(fun ...func()) *image.RGBA {
 	}
 	rw.waitRenderDone()
 
-	// The image is copied under the window lock, which is held while it is
-	// composed, as paint events can still make the event loop render.
-	dw := rw.SystemWindow.Composer().(*composer.ComposerDrawer).Drawer
-	if !rw.SystemWindow.Lock() {
+	img := windowImage(rw)
+	if img == nil {
 		return nil
 	}
-	img := imagex.CloneAsRGBA(dw.(getImager).GetImage())
-	rw.SystemWindow.Unlock()
 
 	// When closing the scene, our access to the render context stops working,
 	// so using normal AsyncLock and AsyncUnlock will lead to AsyncLock failing.
@@ -91,8 +82,10 @@ func (b *Body) RenderImage(fun ...func()) *image.RGBA {
 	return img
 }
 
-// runAndShowNewWindow runs a new window and waits for it to be shown.
+// runAndShowNewWindow runs a new window and waits for it to be shown,
+// in an empty window on the web (see [clearTestWindow]).
 func (b *Body) runAndShowNewWindow() {
+	clearTestWindow()
 	showed := make(chan struct{})
 	b.OnFinal(events.Show, func(e events.Event) {
 		showed <- struct{}{}

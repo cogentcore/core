@@ -10,6 +10,8 @@ import (
 	"fmt"
 	"image"
 	"reflect"
+	"strconv"
+	"strings"
 	"syscall/js"
 )
 
@@ -250,4 +252,62 @@ func (cw *ComposerWeb) SetElementClip(elem js.Value, rect, visible image.Rectang
 	top, right := px(visible.Min.Y-rect.Min.Y), px(rect.Max.X-visible.Max.X)
 	bottom, left := px(rect.Max.Y-visible.Max.Y), px(visible.Min.X-rect.Min.X)
 	style.Set("clipPath", "inset("+top+" "+right+" "+bottom+" "+left+")")
+}
+
+// Image returns an image of the given size of the composition, as for the
+// tests, with the canvases, images, and colored divs of its elements drawn
+// in their order (those under the canvases first) to an offscreen canvas.
+// The elements are as shown in the document, other than their clips, and
+// other elements, such as iframes, are not drawn.
+func (cw *ComposerWeb) Image(size image.Point) *image.RGBA {
+	img := image.NewRGBA(image.Rectangle{Max: size})
+	if size.X <= 0 || size.Y <= 0 {
+		return img
+	}
+	document := js.Global().Get("document")
+	c := document.Call("createElement", "canvas")
+	c.Set("width", size.X)
+	c.Set("height", size.Y)
+	ctx := c.Call("getContext", "2d")
+	px := func(style js.Value, name string) float64 {
+		v, _ := strconv.ParseFloat(strings.TrimSuffix(style.Get(name).String(), "px"), 64)
+		return v * float64(cw.DPR)
+	}
+	draw := func(elem js.Value) {
+		style := elem.Get("style")
+		x, y, w, h := px(style, "left"), px(style, "top"), px(style, "width"), px(style, "height")
+		switch elem.Get("tagName").String() {
+		case "CANVAS", "IMG", "VIDEO":
+			if w > 0 && h > 0 {
+				ctx.Call("drawImage", elem, x, y, w, h)
+			}
+		case "DIV":
+			if bg := style.Get("backgroundColor").String(); bg != "" {
+				ctx.Set("fillStyle", bg)
+				ctx.Call("fillRect", x, y, w, h)
+			}
+		}
+	}
+	for _, below := range []bool{true, false} {
+		for _, s := range cw.Sources {
+			ptr := cw.Pointers[s]
+			if _, ok := cw.below[ptr]; ok != below {
+				continue
+			}
+			if elem, ok := cw.Elements[ptr]; ok && !elem.IsUndefined() {
+				draw(elem)
+			}
+		}
+	}
+	data := ctx.Call("getImageData", 0, 0, size.X, size.Y).Get("data")
+	nrgba := image.NewNRGBA(img.Rect)
+	js.CopyBytesToGo(nrgba.Pix, js.Global().Get("Uint8Array").New(data.Get("buffer")))
+	for i := 0; i < len(nrgba.Pix); i += 4 { // (premultiplied, as RGBA)
+		a := uint32(nrgba.Pix[i+3])
+		img.Pix[i] = uint8(uint32(nrgba.Pix[i]) * a / 255)
+		img.Pix[i+1] = uint8(uint32(nrgba.Pix[i+1]) * a / 255)
+		img.Pix[i+2] = uint8(uint32(nrgba.Pix[i+2]) * a / 255)
+		img.Pix[i+3] = uint8(a)
+	}
+	return img
 }

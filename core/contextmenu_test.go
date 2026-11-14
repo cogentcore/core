@@ -94,6 +94,7 @@ func TestContextMenuKey(t *testing.T) {
 // [NewWindowFunc], and that the New key, sent to the window, makes a new
 // window with it, from the scene of the window.
 func TestNewWindow(t *testing.T) {
+	skipOnWeb(t, "there is one window")
 	b := NewBody() // (loads the settings, with the key map, the first time)
 	NewText(b).SetText("Main")
 	prevMap := keymap.ActiveMapName

@@ -326,6 +326,7 @@ func TestTextFieldWidths(t *testing.T) {
 	})
 	t.Run("form", func(t *testing.T) {
 		// as in the settings window, which is sized to its content
+		skipOnWeb(t, "the window is the size of the page, not of its content")
 		b := NewBody()
 		st := &struct{ UserAgent string }{long}
 		NewForm(b).SetStruct(st)

@@ -8,6 +8,7 @@ package web
 
 import (
 	"image"
+	"sync/atomic"
 	"syscall/js"
 
 	"cogentcore.org/core/system"
@@ -19,12 +20,24 @@ type Window struct {
 	base.WindowSingle[*App]
 }
 
-// WinLoop is a web-specific implementation using requestAnimationFrame.
+// WinLoop is a web-specific implementation using requestAnimationFrame,
+// which stops when the window is closed (see [base.Window.Close]), as for a
+// window of the tests, after which another window is made: its paint events
+// stop, and the close does not wait forever on WinClose.
 func (w *Window) WinLoop() {
 	defer func() { system.HandleRecover(recover()) }()
 
+	var closed atomic.Bool
+	go func() {
+		<-w.WinClose
+		closed.Store(true)
+	}()
 	var f js.Func
 	f = js.FuncOf(func(this js.Value, args []js.Value) any {
+		if closed.Load() {
+			f.Release()
+			return nil
+		}
 		w.SendPaintEvent()
 		js.Global().Call("requestAnimationFrame", f)
 		return nil

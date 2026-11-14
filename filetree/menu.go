@@ -76,18 +76,18 @@ func (fn *Node) contextMenu(m *core.Scene, pos image.Point) {
 	if fn.HasSelection() && !fn.IsDir() && !fn.isFS() {
 		core.OpenWithMenuItems(m, string(fn.Filepath))
 	}
-	write := fn.HasSelection() && fn.canWrite()
+	sel := fn.HasSelection()
 
 	core.NewSeparator(m)
 
 	core.NewFuncButton(m).SetFunc(fn.duplicateFiles).SetText("Duplicate").
-		SetIcon(icons.Copy).SetKey(keymap.Duplicate).SetEnabled(write)
+		SetIcon(icons.Copy).SetKey(keymap.Duplicate).SetEnabled(sel && fn.canCopy())
 
 	core.NewFuncButton(m).SetFunc(fn.This.(Filer).DeleteFiles).SetText("Delete").
-		SetIcon(icons.Delete).SetKey(keymap.Delete).SetEnabled(write)
+		SetIcon(icons.Delete).SetKey(keymap.Delete).SetEnabled(sel && fn.canRemove())
 
 	core.NewFuncButton(m).SetFunc(fn.This.(Filer).RenameFiles).SetText("Rename").
-		SetIcon(icons.NewLabel).SetEnabled(write)
+		SetIcon(icons.NewLabel).SetEnabled(sel && fn.canRename())
 
 	core.NewSeparator(m)
 
@@ -108,11 +108,11 @@ func (fn *Node) contextMenu(m *core.Scene, pos image.Point) {
 	core.NewSeparator(m)
 
 	fb := core.NewFuncButton(m).SetFunc(fn.newFiles)
-	fb.SetText("New file").SetIcon(icons.OpenInNew).SetEnabled(fn.HasSelection() && !fn.isFS())
+	fb.SetText("New file").SetIcon(icons.OpenInNew).SetEnabled(sel && fn.canCreate())
 	fb.Args[1].SetValue(true) // todo: not working
 
 	core.NewFuncButton(m).SetFunc(fn.newFolders).SetText("New folder").
-		SetIcon(icons.CreateNewFolder).SetEnabled(write)
+		SetIcon(icons.CreateNewFolder).SetEnabled(sel && fn.canMkdir())
 
 	core.NewSeparator(m)
 
@@ -129,13 +129,13 @@ func (fn *Node) contextMenu(m *core.Scene, pos image.Point) {
 		SetKey(keymap.Copy).SetEnabled(fn.HasSelection())
 
 	core.NewFuncButton(m).SetFunc(fn.Cut).SetIcon(icons.Cut).
-		SetKey(keymap.Cut).SetEnabled(write)
+		SetKey(keymap.Cut).SetEnabled(sel && fn.canCopy())
 
 	paste := core.NewFuncButton(m).SetFunc(fn.Paste).
-		SetIcon(icons.Paste).SetKey(keymap.Paste).SetEnabled(write)
+		SetIcon(icons.Paste).SetKey(keymap.Paste).SetEnabled(sel && fn.canCopy())
 
 	cb := fn.Events().Clipboard()
-	if cb != nil && write {
+	if cb != nil && sel && fn.canCopy() {
 		paste.SetState(cb.IsEmpty(), states.Disabled)
 	}
 }

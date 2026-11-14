@@ -143,6 +143,7 @@ func StandardChooserArgs() map[string]map[string]string {
 			"log " + argsField:          "Git branch",
 			"diff " + argsField:         "Git changed file",
 			"tag --delete":              "Git tag",
+			"show " + argsField:         "Git tag",
 			"worktree add " + argsField: "Git branch",
 		},
 		"go": {

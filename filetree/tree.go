@@ -70,7 +70,8 @@ type Tree struct {
 	AppsAsDirs bool
 
 	// FS is the file system we are browsing, if it is an FS (nil = os filesystem).
-	// Its files can be changed, as those of the os, if it is a [WriteFS],
+	// Its files can be changed, as those of the os, with the operations
+	// that it has, with the interfaces of hackpadfs (see [CopyFS]),
 	// and otherwise it is read-only.
 	FS fs.FS
 

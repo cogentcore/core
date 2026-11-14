@@ -41,6 +41,7 @@ type callFuncItems []callFuncItem
 // instead of locking it from the event loop of the button, which could
 // deadlock. This test is also for the race detector.
 func TestCallFuncArgOtherWindow(t *testing.T) {
+	skipOnWeb(t, "there is one window")
 	a := NewBody()
 	fb := NewFuncButton(a)
 	a.runAndShowNewWindow()

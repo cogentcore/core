@@ -34,6 +34,7 @@ type testFileDragger struct {
 func (fd *testFileDragger) DragFiles() []string { return fd.files }
 
 func TestDroppedFiles(t *testing.T) {
+	skipOnWeb(t, "drops files of the operating system")
 	dir := t.TempDir()
 	f := filepath.Join(dir, "f.txt")
 	writeTestFile(t, f, "f\n")
@@ -54,6 +55,7 @@ func TestDroppedFiles(t *testing.T) {
 }
 
 func TestFilePickerDrop(t *testing.T) {
+	skipOnWeb(t, "drops files of the operating system")
 	dir := t.TempDir()
 	other := t.TempDir()
 	writeTestFile(t, filepath.Join(dir, "a.txt"), "a\n")
@@ -103,6 +105,7 @@ func TestFilePickerDrop(t *testing.T) {
 }
 
 func TestMovePath(t *testing.T) {
+	skipOnWeb(t, "moves files of the operating system")
 	dir := t.TempDir()
 	writeTestFile(t, filepath.Join(dir, "d", "x.txt"), "x\n")
 	require.NoError(t, movePath(filepath.Join(dir, "e"), filepath.Join(dir, "d")))

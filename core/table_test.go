@@ -282,6 +282,11 @@ func TestTableEmptyHeader(t *testing.T) {
 		sl = append(sl, language{Name: "Go", Rating: 10})
 		tb.Update()
 	}, func() {
+		// (laid out with the row, which can be after the window has
+		// handled its events, as on a slower machine)
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		b.Scene.LayoutScene()
 		gap := tb.ListGrid.Styles.Gap.X.Dots
 		for fli := range 2 {
 			col := AsWidget(tb.ListGrid.Child(fli)).Geom.Size.Alloc.Total.X + gap

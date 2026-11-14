@@ -1171,6 +1171,23 @@ func (tt *TreeTable) makeTreeCell(p *tree.Plan, i int) {
 			tt.dropDeleteItems()
 		})
 		w.On(events.ContextMenu, tt.rowContextMenu(i))
+		w.OnClick(func(e events.Event) {
+			// a click on the cell outside of its value (as past the end of
+			// a short text) selects its row, as a click on the value does
+			// (see ListBase.MakeValue), with Shift or Command too
+			mode := e.SelectMode()
+			if tt.SelectMode && mode == events.SelectOne {
+				mode = events.ExtendOne
+			}
+			e.SetHandled()
+			if mode == events.ExtendOne || mode == events.ExtendContinuous {
+				tt.clickSelectRow(i, mode)
+				return
+			}
+			tt.focusReadOnly()
+			tt.updateSelectRow(i, mode)
+			tt.lastClick = i + tt.StartIndex
+		})
 		w.Updater(func() {
 			_, _, invis := tt.SliceIndex(i)
 			w.SetState(invis, states.Invisible)

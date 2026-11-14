@@ -20,6 +20,7 @@ import (
 // stacks change, and raises a stage of another window in the event loop
 // of that window. This test is also for the race detector.
 func TestMenuSearchOtherWindow(t *testing.T) {
+	skipOnWeb(t, "there is one window")
 	a := NewBody("Window A")
 	a.runAndShowNewWindow()
 	b := NewBody("Window B")

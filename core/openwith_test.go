@@ -36,6 +36,7 @@ func menuTexts(menus ...func(m *Scene, pos image.Point)) []string {
 // open a file, and the chooser of the apps, when the system has apps for
 // text files, and that the [FilePicker] has them for files only.
 func TestOpenWith(t *testing.T) {
+	skipOnWeb(t, "opens files of the operating system with its apps")
 	dir := t.TempDir()
 	file := filepath.Join(dir, "b.txt")
 	require.NoError(t, os.WriteFile(file, []byte("b"), 0644))

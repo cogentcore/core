@@ -8,13 +8,13 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/tree"
+	"github.com/hack-pad/hackpadfs"
 )
 
 // Filer is an interface for file tree file actions that all [Node]s satisfy.
@@ -145,14 +145,13 @@ func (fn *Node) DeleteFile() error {
 	if pari != nil {
 		parent = AsNode(pari)
 	}
-	wfs, err := fn.writeFS()
-	if err != nil {
-		return err
-	}
 	repo, _ := fn.Repo()
+	var err error
 	switch {
-	case wfs != nil:
-		err = wfs.RemoveAll(string(fn.Filepath))
+	case fn.isFS() && !fn.canRemove():
+		return errUnsupported
+	case fn.isFS():
+		err = fn.removeAll(string(fn.Filepath))
 	case !fn.Info.IsDir() && repo != nil && fn.Info.VCS >= vcs.Stored:
 		err = repo.Delete(string(fn.Filepath))
 		if err != nil && fsx.Exists(string(fn.Filepath)) { // not in the repository (status not yet known)
@@ -186,12 +185,13 @@ func (fn *Node) RenameFile(newpath string) error { //types:add
 		return nil
 	}
 	root := fn.FileRoot()
-	wfs, err := fn.writeFS()
-	if err != nil {
-		return err
+	isFS := fn.isFS()
+	if isFS && !fn.canRename() {
+		return errUnsupported
 	}
+	var err error
 	orgpath := fn.Filepath
-	if wfs != nil {
+	if isFS {
 		newpath, err = fn.fsRenamePath(newpath)
 	} else {
 		newpath, err = fn.Info.RenamePath(newpath) // the rename is done below
@@ -206,8 +206,8 @@ func (fn *Node) RenameFile(newpath string) error { //types:add
 	}
 	repo, _ := fn.Repo()
 	switch {
-	case wfs != nil:
-		err = wfs.Rename(string(orgpath), newpath)
+	case isFS:
+		err = fn.rename(string(orgpath), newpath)
 	case repo != nil && (fn.IsDir() || fn.Info.VCS >= vcs.Stored):
 		err = repo.Move(string(orgpath), newpath)
 		if err != nil && fsx.Exists(string(orgpath)) { // not in the repository (status not yet known)
@@ -216,7 +216,7 @@ func (fn *Node) RenameFile(newpath string) error { //types:add
 	default:
 		err = os.Rename(string(orgpath), newpath)
 	}
-	if err == nil && wfs != nil {
+	if err == nil && isFS {
 		fn.Filepath = core.Filename(newpath)
 		err = fn.This.(Filer).GetFileInfo()
 	} else if err == nil {
@@ -281,12 +281,23 @@ func (fn *Node) newFile(filename string, addToVCS bool) { //types:add
 	}
 	ppath := string(fn.Filepath)
 	if !fn.IsDir() {
-		ppath, _ = filepath.Split(ppath)
+		ppath = fn.dirOf(ppath)
 	}
-	np := filepath.Join(ppath, filename)
-	f, err := os.OpenFile(np, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0666) // not truncating an existing file
-	if err == nil {
-		err = f.Close()
+	np := fn.joinPath(ppath, filename)
+	var err error
+	switch {
+	case fn.isFS() && !fn.canCreate():
+		err = errUnsupported
+	case fn.isFS() && fn.pathExists(np): // not truncating an existing file
+		err = fmt.Errorf("cannot make %s: it already exists", np)
+	case fn.isFS():
+		err = fsErr(hackpadfs.WriteFullFile(fn.FileRoot().FS, np, nil, 0o666))
+	default:
+		var f *os.File
+		f, err = os.OpenFile(np, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0666) // not truncating an existing file
+		if err == nil {
+			err = f.Close()
+		}
 	}
 	if err != nil {
 		core.ErrorSnackbar(fn, err, "Error creating file")
@@ -324,11 +335,13 @@ func (fn *Node) newFolder(foldername string) { //types:add
 		ppath = fn.dirOf(ppath)
 	}
 	np := fn.joinPath(ppath, foldername)
-	wfs, err := fn.writeFS()
+	var err error
 	switch {
-	case wfs != nil:
-		err = wfs.MkdirAll(np)
-	case err == nil:
+	case fn.isFS() && !fn.canMkdir():
+		err = errUnsupported
+	case fn.isFS():
+		err = fn.mkdirAll(np)
+	default:
 		err = os.MkdirAll(np, 0775)
 	}
 	if err != nil {

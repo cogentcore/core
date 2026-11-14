@@ -305,9 +305,18 @@ func (st *Stage) runWindow() *Stage {
 		st.setMains(ms)
 	} else {
 		ms := &cw.mains
-		msc := ms.top().Scene
-		sc.SceneGeom.Size = sz
-		sc.fitInWindow(msc.SceneGeom) // does resize
+		if ms.top() == nil {
+			// a window without stages fills the window, as on mobile and
+			// the web, where the window stays when its last stage is closed
+			// (as in the tests, which then run a window again), with its
+			// title, as a new window
+			sc.Resize(math32.Geom2DInt{Size: cw.SystemWindow.Size()})
+			cw.setTitle(st.Title)
+		} else {
+			msc := ms.top().Scene
+			sc.SceneGeom.Size = sz
+			sc.fitInWindow(msc.SceneGeom) // does resize
+		}
 		ms.push(st)
 		st.setMains(ms)
 	}
