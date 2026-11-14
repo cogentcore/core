@@ -157,7 +157,7 @@ func (c *Context) matchDecls(n *html.Node) []*cssDecl {
 	defer func() { c.cssBase, c.curContainer = base, container }()
 	for _, i := range c.index().candidates(n) {
 		r := c.rules[i]
-		if !contains(r.root, n) || !r.sel.sel.Match(n) {
+		if !contains(r.root, n) || !c.selMatch(r.sel, n) {
 			continue
 		}
 		c.cssBase = r.cssBase // for its URLs
@@ -180,7 +180,7 @@ func (c *Context) matchDecls(n *html.Node) []*cssDecl {
 func (c *Context) matchPseudo(n *html.Node, kind string) []*cssDecl {
 	var ds []*cssDecl
 	for _, r := range c.pseudoRules {
-		if r.kind != kind || r.sel == nil || !contains(r.root, n) || !r.sel.sel.Match(n) {
+		if r.kind != kind || r.sel == nil || !contains(r.root, n) || !c.selMatch(r.sel, n) {
 			continue
 		}
 		for _, d := range r.decls {
@@ -410,6 +410,7 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 		}
 	}
 	restore := c.setCheckedAttrs(root) // for :checked and :hover
+	defer c.keepAncestorMasks()()
 	defer restore()
 	if c.relational {
 		// the elements that :has() selectors select, which may be any,
@@ -517,8 +518,12 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 	}
 	u := &declUpdate{undo: undo, freeChanged: pseudoChanged}
 	for _, n := range order {
-		if inHead(n) {
-			continue // (not rendered, as a style element that is added)
+		if inHead(n) || neverRendered(n) {
+			// not rendered (as a style element that is added, or the
+			// source elements of a picture, whose display the slideshows
+			// of npr.org changed many times a second, each reading the
+			// page again)
+			continue
 		}
 		nw := effectiveDecls(c.declarations(n))
 		props := changedProps(old[n], nw)
@@ -662,7 +667,7 @@ func (c *Context) relationalChanges(root *html.Node, changed []*html.Node, add f
 			r := c.rules[i]
 			// (the key of its selector first, which most elements do not
 			// have, then its scope, after a match, as it walks up)
-			if had(i) != (r.sel.keyIn(n) && r.sel.sel.Match(n) && contains(r.root, n)) {
+			if had(i) != (r.sel.keyIn(n) && c.selMatch(r.sel, n) && contains(r.root, n)) {
 				return add(n)
 			}
 		}
@@ -1420,4 +1425,15 @@ func (c *Context) matchChanged(n *html.Node, old nodeSnap, cs *compiledSelector)
 	before := cs.sel.Match(n)
 	n.Attr = saved
 	return now != before
+}
+
+// neverRendered returns whether the given element never has a box of its
+// own, whatever its styles: the sources and tracks of media, and the
+// elements of scripts and of the head.
+func neverRendered(n *html.Node) bool {
+	switch n.DataAtom {
+	case atom.Source, atom.Track, atom.Script, atom.Noscript, atom.Template, atom.Style, atom.Link, atom.Meta, atom.Base, atom.Param:
+		return true
+	}
+	return false
 }

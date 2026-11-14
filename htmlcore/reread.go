@@ -1144,18 +1144,19 @@ func (c *Context) addedRuleTargets(root *html.Node) (shallow, deep []*html.Node,
 	if len(byKey) == 0 && len(keyless) == 0 {
 		return nil, nil, true
 	}
+	defer c.keepAncestorMasks()()
 	walkElements(root, func(n *html.Node) {
 		match, vars := false, false
 		check := func(key string) {
 			for _, a := range byKey[key] {
-				if a.cs.sel.Match(n) {
+				if c.selMatch(a.cs, n) {
 					match = true
 					vars = vars || a.vars
 				}
 			}
 		}
 		for _, a := range keyless {
-			if a.cs.sel.Match(n) {
+			if c.selMatch(a.cs, n) {
 				match = true
 				vars = vars || a.vars
 			}

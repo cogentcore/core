@@ -360,6 +360,10 @@ type pageState struct {
 	// declarations of the elements have been matched with, as matchedRules.
 	matchedPseudo int
 
+	// ancestorMasks are the masks of the keys of the ancestors of the
+	// elements, while they are kept (see [Context.keepAncestorMasks]).
+	ancestorMasks map[*html.Node]keyMask
+
 	// addedShallow and addedDeep are the elements that the rules added to
 	// the style sheets select (see [Context.addedRuleTargets]), whose
 	// declarations are found again, with those in the deep ones (for the
