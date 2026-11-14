@@ -220,29 +220,115 @@ func (k placeKinds) differ(o, s nodeSnap) bool {
 		k.empty && o.empty != s.empty
 }
 
+// deepPlace is a compound selector of a style rule before its subject
+// that selects elements by their places, followed by a combinator of
+// descendants or children (as li:first-child in li:first-child a): the
+// elements in an element that it may select may have other matches as the
+// place of that element changes.
+type deepPlace struct {
+	kinds placeKinds
+	keys  keyMask // of the compound selector (see compoundKeys)
+}
+
+// deepPlaces returns the compound selectors of the style rules of the
+// context before their subjects that select elements by their places,
+// that are followed by combinators of descendants or children (see
+// [deepPlace]), and the kinds of places that those followed by combinators
+// of siblings select by (as p:last-of-type + div), for which the elements
+// after an element whose place changes, and those in them, may have other
+// matches. It refines the deep kinds of [Context.placeUses], with which
+// the change of the place of an element made all of the elements in it
+// match again: on nytimes.com, the scripts that added and removed a div at
+// the end of the body changed whether its #app was the last of its type,
+// which a rule selected another element by, matching its 6500 elements
+// again, for 1s, each time.
+func (c *Context) deepPlaces() (places []deepPlace, siblings placeKinds) {
+	seen := map[deepPlace]bool{}
+	for _, r := range c.rules {
+		t := r.text
+		if !strings.Contains(t, ":") || !hasPlaceClass(t) {
+			continue
+		}
+		from := 0
+		for _, cb := range combinators(t) {
+			comp := t[from:cb.start]
+			from = cb.at + 1
+			var k placeKinds
+			for pc, pk := range placeClasses {
+				if strings.Contains(comp, pc) {
+					k = k.or(pk)
+				}
+			}
+			if k == (placeKinds{}) {
+				continue
+			}
+			if cb.sibling {
+				siblings = siblings.or(k)
+				continue
+			}
+			var keys keyMask // (none: it may select any element)
+			if !strings.ContainsAny(comp, "\\|") {
+				keys = compoundKeys(comp)
+			}
+			dp := deepPlace{k, keys}
+			if !seen[dp] {
+				seen[dp] = true
+				places = append(places, dp)
+			}
+		}
+	}
+	return
+}
+
+// hasPlaceClass returns whether the given selector has a pseudo-class of
+// places (see [placeClasses]).
+func hasPlaceClass(sel string) bool {
+	for pc := range placeClasses {
+		if strings.Contains(sel, pc) {
+			return true
+		}
+	}
+	return false
+}
+
+// placeChangedDeep returns whether the given states of the given element
+// differ in a way that may change the matches of the elements in it or
+// after it, for the given compound selectors and kinds of places of
+// siblings (see [Context.deepPlaces]): those that may select it (by its
+// keys; see [ancestorKeys]) and select by a kind of place in which its
+// states differ.
+func placeChangedDeep(n *html.Node, o, s nodeSnap, places []deepPlace, siblings placeKinds) bool {
+	if siblings.differ(o, s) {
+		return true
+	}
+	var own keyMask
+	gotOwn := false
+	for _, p := range places {
+		if !p.kinds.differ(o, s) {
+			continue
+		}
+		if !gotOwn {
+			own, gotOwn = ownKeys(n), true
+		}
+		if own.has(p.keys) {
+			return true
+		}
+	}
+	return false
+}
+
 // placeUses returns the kinds of places that the style rules of the
-// context select elements by, and those that they select by in compound
-// selectors before their subjects (as li:first-child a, or
-// p:last-of-type + div), for which the elements in and after an element
-// whose place changes may have other matches.
-func (c *Context) placeUses() (uses, deep placeKinds) {
+// context select elements by (see [Context.deepPlaces] for those that they
+// select the elements in or after them by).
+func (c *Context) placeUses() (uses placeKinds) {
 	for _, r := range c.rules {
 		t := r.text
 		if !strings.Contains(t, ":") {
 			continue
 		}
-		start := -1
 		for pc, k := range placeClasses {
-			i := strings.Index(t, pc)
-			if i < 0 {
-				continue
-			}
-			uses = uses.or(k)
-			if start < 0 {
-				start = subjectStart(t)
-			}
-			if i < start {
-				deep = deep.or(k)
+			if strings.Contains(t, pc) {
+				uses = uses.or(k)
 			}
 		}
 	}
@@ -332,7 +418,8 @@ func (c *Context) reuseMatches(root *html.Node, prev *Context) bool {
 		return true
 	}
 	siblings, inSiblings := c.siblingCombinators()
-	uses, deep := c.placeUses()
+	uses := c.placeUses()
+	deepPlaces, siblingPlaces := c.deepPlaces()
 	// later adds the elements after the given one (from it, if first), for
 	// the combinators of siblings
 	later := func(k *html.Node) {
@@ -359,7 +446,7 @@ func (c *Context) reuseMatches(root *html.Node, prev *Context) bool {
 	for n, s := range c.snaps {
 		o, ok := prev.snaps[n]
 		switch {
-		case !ok || o.parent != s.parent || o.attrs != s.attrs || deep.differ(o, s):
+		case !ok || o.parent != s.parent || o.attrs != s.attrs || placeChangedDeep(n, o, s, deepPlaces, siblingPlaces):
 			// (and those of a place that selectors select those in or after
 			// it by)
 			changed = append(changed, n)

@@ -573,3 +573,42 @@ func TestRereadAddsRoots(t *testing.T) {
 		return []*html.Node{body}, nil
 	}, "p")
 }
+
+// TestRereadPlaceOfKept tests that the elements in a kept element whose
+// place changes are matched again when a rule may select them by its place
+// (as div:last-of-type > .y), as the page read anew.
+func TestRereadPlaceOfKept(t *testing.T) {
+	const page = `<html><head><style>.side:last-of-type .x { color: red }
+div:last-of-type > .y { height: 5px }
+.y { height: 2px; background: blue }</style></head><body>
+<div id="app" style="width: 400px"><p id="x" class="x">x</p><div id="y" class="y"></div></div></body></html>`
+	testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+		body := elementByID(doc, "app").Parent
+		// (scripts add and remove elements at the end of the body)
+		appendHTML(t, body, `<div id="new"></div>`)
+		return nil, []*html.Node{body}
+	})
+}
+
+// TestDeepPlaces tests that the changes of the places of elements may
+// change the matches of the elements in them only for the rules that may
+// select them by their places (see [Context.deepPlaces]).
+func TestDeepPlaces(t *testing.T) {
+	ctx := NewContext()
+	doc, err := ParseHTML(ctx, strings.NewReader(`<html><head><style>.side:last-of-type .x { color: red }
+li:first-child > a { color: blue }
+p:nth-last-of-type(2) + div span { color: green }
+.y:last-child { color: gray }</style></head><body><div id="app" class="main"></div><div id="side" class="side"></div><ul><li id="li"></li></ul></body></html>`))
+	require.NoError(t, err)
+	require.NoError(t, ReadDocument(ctx, core.NewBody(), doc))
+	places, siblings := ctx.deepPlaces()
+	assert.Len(t, places, 2)
+	assert.Equal(t, placeKinds{typeCount: true}, siblings)
+	last, notLast := nodeSnap{lastType: true}, nodeSnap{lastType: false}
+	first, notFirst := nodeSnap{index: 0}, nodeSnap{index: 1}
+	assert.False(t, placeChangedDeep(elementByID(doc, "app"), last, notLast, places, siblings), "app is not .side")
+	assert.True(t, placeChangedDeep(elementByID(doc, "side"), last, notLast, places, siblings))
+	assert.True(t, placeChangedDeep(elementByID(doc, "li"), first, notFirst, places, siblings))
+	assert.False(t, placeChangedDeep(elementByID(doc, "side"), first, notFirst, places, siblings), "side is not li")
+	assert.True(t, placeChangedDeep(elementByID(doc, "app"), nodeSnap{count: 2}, nodeSnap{count: 3}, places, siblings), "nth-last-of-type before a sibling")
+}
