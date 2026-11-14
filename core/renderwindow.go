@@ -131,6 +131,14 @@ type renderWindow struct {
 
 	lastSpriteDraw time.Time
 
+	// paintWanted is whether the window has been woken (see
+	// [renderWindow.wake]) since the start of the last render pass.
+	paintWanted atomic.Bool
+
+	// blinkTimer wakes the window for the next blink of its active
+	// sprites while it is idle (see [renderWindow.idleUntilBlink]).
+	blinkTimer *time.Timer
+
 	// winRenderCounter is maintained under atomic locking to coordinate
 	// the launching of renderAsync functions and when those functions
 	// actually complete. Each time one is launched, the counter is incremented
@@ -504,6 +512,9 @@ func (w *renderWindow) handleEvent(e events.Event) {
 	if DebugSettings.EventTrace && et != events.WindowPaint && et != events.MouseMove {
 		log.Println("Window got event", e)
 	}
+	if et != events.WindowPaint {
+		w.wake() // events can change anything (see idle.go)
+	}
 	if et >= events.Window && et <= events.WindowPaint {
 		w.handleWindowEvents(e)
 		rc.Unlock()
@@ -730,6 +741,10 @@ func (w *renderWindow) renderContext() *renderContext {
 // there is a moment for other goroutines to acquire the lock and get necessary
 // updates through (such as in offscreen testing).
 func (w *renderWindow) renderWindow() {
+	// anything that needs an update from now on wakes the window again,
+	// if it goes idle in this pass (see idle.go)
+	w.paintWanted.Store(false)
+
 	if atomic.LoadInt32(&w.winRenderCounter) > 0 { // still working
 		w.flags.SetFlag(true, winRenderSkipped)
 		if DebugSettings.WindowRenderTrace {
@@ -761,6 +776,7 @@ func (w *renderWindow) renderWindow() {
 	stageMods, sceneMods := w.mains.updateAll() // handles all Scene / Widget updates!
 	top := w.mains.top()
 	if top == nil || w.mains.stack.Len() == 0 {
+		w.goIdle()
 		return
 	}
 	spriteMods := top.Sprites.IsModified()
@@ -769,7 +785,10 @@ func (w *renderWindow) renderWindow() {
 	if spriteUpdateTime == 0 {
 		spriteUpdateTime = 500 * time.Millisecond
 	}
-	if w.flags.HasFlag(winGotFocus) && time.Since(w.lastSpriteDraw) > spriteUpdateTime {
+	// active sprites, such as the blinking text cursor, are drawn again
+	// periodically while the window has focus, but there is nothing to
+	// draw again when there are none (an idle window does nothing).
+	if w.flags.HasFlag(winGotFocus) && time.Since(w.lastSpriteDraw) > spriteUpdateTime && top.Sprites.hasActive() {
 		spriteMods = true
 	}
 
@@ -777,6 +796,11 @@ func (w *renderWindow) renderWindow() {
 		if w.flags.HasFlag(winRenderSkipped) {
 			w.flags.SetFlag(false, winRenderSkipped)
 		} else {
+			// animations run at every paint event; otherwise, the paint
+			// events are paused until something needs an update
+			if !w.mains.hasAnimations() {
+				w.idleUntilBlink(top, spriteUpdateTime)
+			}
 			return
 		}
 	}
@@ -784,6 +808,8 @@ func (w *renderWindow) renderWindow() {
 		if DebugSettings.WindowRenderTrace {
 			log.Printf("RenderWindow: skipping update on inactive / minimized window: %v\n", w.name)
 		}
+		// it is woken by the events of being shown again
+		w.goIdle()
 		return
 	}
 
@@ -808,6 +834,7 @@ func (w *renderWindow) renderWindow() {
 	// rendered again when it is shown.
 	if reflectx.IsNil(reflect.ValueOf(cp)) {
 		w.SystemWindow.Unlock()
+		w.goIdle() // (woken by the events of being shown again)
 		return
 	}
 	cp.Start()

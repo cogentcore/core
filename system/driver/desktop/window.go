@@ -42,7 +42,6 @@ func (w *Window) IsVisible() bool {
 }
 
 func (w *Window) SendPaintEvent() {
-	TheApp.PollScreenChanges()
 	w.This.Events().WindowPaint()
 }
 
@@ -219,7 +218,7 @@ func (w *Window) SetTitle(title string) {
 	if w.IsClosed() {
 		return
 	}
-	w.Titl = title
+	w.WindowMulti.SetTitle(title)
 	w.App.RunOnMain(func() {
 		if w.Glw == nil { // by time we got to main, could be diff
 			return

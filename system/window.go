@@ -221,6 +221,17 @@ type Window interface {
 	// Other updates / polling may be done at this point too.
 	SendPaintEvent()
 
+	// PaintIdle pauses the paint events of the window, which are otherwise
+	// sent at the refresh rate of its screen, until [Window.PaintWake], as
+	// there is nothing to update in it, so that an idle app does not use
+	// the CPU.
+	PaintIdle()
+
+	// PaintWake resumes the paint events of the window, if paused by
+	// [Window.PaintIdle], as something in it needs to be updated. It can
+	// be called from any goroutine, and does not block.
+	PaintWake()
+
 	// StartDrag starts an operating system drag-and-drop of the given data
 	// from this window, so that it can be dropped in other windows and apps.
 	// It is used when a drag within the window leaves the window, while the

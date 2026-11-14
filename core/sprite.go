@@ -153,6 +153,10 @@ type Sprites struct {
 	// set to true if sprites have been modified since last config
 	modified bool
 
+	// stage is the main stage that has these sprites, whose window is
+	// woken when they are modified (see idle.go).
+	stage *Stage
+
 	sync.Mutex
 }
 
@@ -161,7 +165,7 @@ type Sprites struct {
 // This version locks the sprites: see also [Sprites.SetModifiedNoLock].
 func (ss *Sprites) SetModified() {
 	ss.Lock()
-	ss.modified = true
+	ss.setModifiedNoLock()
 	ss.Unlock()
 }
 
@@ -170,7 +174,7 @@ func (ss *Sprites) SetModified() {
 // This version assumes Sprites are already locked, which is better for
 // doing multiple coordinated updates at the same time.
 func (ss *Sprites) SetModifiedNoLock() {
-	ss.modified = true
+	ss.setModifiedNoLock()
 }
 
 // IsModified returns whether the sprites have been modified, under lock.
@@ -178,6 +182,22 @@ func (ss *Sprites) IsModified() bool {
 	ss.Lock()
 	defer ss.Unlock()
 	return ss.modified
+}
+
+// hasActive returns whether any sprite is active, under lock.
+func (ss *Sprites) hasActive() bool {
+	ss.Lock()
+	defer ss.Unlock()
+	active := false
+	ss.Do(func(sl *SpriteList) {
+		for _, sp := range sl.Values {
+			if sp.Active {
+				active = true
+				return
+			}
+		}
+	})
+	return active
 }
 
 // Add adds sprite to the Normal list of sprites, updating if already there.
@@ -193,7 +213,7 @@ func (ss *Sprites) Add(sp *Sprite) {
 // doing multiple coordinated updates at the same time.
 func (ss *Sprites) AddNoLock(sp *Sprite) {
 	ss.Normal.Set(sp.Name, sp)
-	ss.modified = true
+	ss.setModifiedNoLock()
 }
 
 // Delete deletes given sprite by name, returning true if found and deleted.
@@ -216,7 +236,7 @@ func (ss *Sprites) DeleteNoLock(name string) bool {
 		}
 	})
 	if got {
-		ss.modified = true
+		ss.setModifiedNoLock()
 	}
 	return got
 }
@@ -251,7 +271,7 @@ func (ss *Sprites) reset() {
 	ss.Do(func(sl *SpriteList) {
 		sl.Reset()
 	})
-	ss.modified = true
+	ss.setModifiedNoLock()
 	ss.Unlock()
 }
 
@@ -272,7 +292,7 @@ func (ss *Sprites) ActivateSpriteNoLock(name ...string) {
 		sp, ok := ss.SpriteByNameNoLock(nm)
 		if ok && !sp.Active {
 			sp.Active = true
-			ss.modified = true
+			ss.setModifiedNoLock()
 		}
 	}
 }
@@ -295,7 +315,7 @@ func (ss *Sprites) InactivateSpriteNoLock(name ...string) {
 		sp, ok := ss.SpriteByNameNoLock(nm)
 		if ok && sp.Active {
 			sp.Active = false
-			ss.modified = true
+			ss.setModifiedNoLock()
 		}
 	}
 }

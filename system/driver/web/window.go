@@ -23,7 +23,8 @@ type Window struct {
 // WinLoop is a web-specific implementation using requestAnimationFrame,
 // which stops when the window is closed (see [base.Window.Close]), as for a
 // window of the tests, after which another window is made: its paint events
-// stop, and the close does not wait forever on WinClose.
+// stop, and the close does not wait forever on WinClose. It is paused while
+// the window is idle (see [base.Window.PaintIdle]).
 func (w *Window) WinLoop() {
 	defer func() { system.HandleRecover(recover()) }()
 
@@ -36,6 +37,18 @@ func (w *Window) WinLoop() {
 	f = js.FuncOf(func(this js.Value, args []js.Value) any {
 		if closed.Load() {
 			f.Release()
+			return nil
+		}
+		// While idle, no frames are requested, so that an idle app does
+		// not use the CPU, until it is woken (see [base.Window.PaintIdle]).
+		if w.Paint.IsIdle() {
+			go func() {
+				select {
+				case <-w.WinClose:
+				case <-w.Paint.Woken():
+					js.Global().Call("requestAnimationFrame", f)
+				}
+			}()
 			return nil
 		}
 		w.SendPaintEvent()

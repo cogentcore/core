@@ -47,6 +47,7 @@ func (wb *WidgetBase) Animate(f func(a *Animation)) {
 		Widget: wb,
 	}
 	wb.Scene.Animations = append(wb.Scene.Animations, a)
+	wb.Scene.wake() // (they run at every paint event)
 }
 
 // runAnimations runs the [Scene.Animations].

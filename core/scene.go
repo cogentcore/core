@@ -185,8 +185,12 @@ func (sc *Scene) hasFlag(f sceneFlags) bool {
 }
 
 // setFlag sets the given flags to the given value.
+// Setting the flags that drive updates wakes the window (see idle.go).
 func (sc *Scene) setFlag(on bool, f ...enums.BitFlag) {
 	sc.flags.SetFlag(on, f...)
+	if on && wakeFlags(f) {
+		sc.wake()
+	}
 }
 
 // newBodyScene creates a new Scene for use with an associated Body that

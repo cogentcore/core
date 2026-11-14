@@ -348,7 +348,10 @@ func TestTextFieldWidths(t *testing.T) {
 				m.ToDots(&tf.Styles.UnitContext)
 				// (as wide as the measure, within which its text wraps, not as
 				// wide as the screen, as it is offered)
+				// (under the lock, as the window is updated by its event loop)
+				b.AsyncLock()
 				csz := float32(b.Scene.contentSize(image.Pt(4000, 4000)).X)
+				b.AsyncUnlock()
 				assert.Greater(t, csz, m.Dots, "as wide as a readable measure")
 				assert.Less(t, csz, m.Dots+200, "within a readable measure")
 			}
