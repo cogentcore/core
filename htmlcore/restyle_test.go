@@ -424,7 +424,11 @@ func TestCompoundMaySelect(t *testing.T) {
 		if !strings.HasPrefix(tc.token, ":") {
 			has = func(comp string) bool { return hasAttrSelector(comp, tc.token) }
 		}
-		assert.Equal(t, tc.may, compoundMaySelect(tc.prefix, tc.n, has), tc.prefix)
+		if tc.may {
+			assert.True(t, compoundMaySelect(tc.prefix, tc.n, has), tc.prefix)
+		} else {
+			assert.True(t, noKeyMatch(func() bool { return compoundMaySelect(tc.prefix, tc.n, has) }), tc.prefix)
+		}
 	}
 	_, sib, _ := splitLastCompound("[class~=a]:hover .b>*")
 	assert.False(t, sib, "~= is not a combinator")
@@ -452,16 +456,18 @@ div:lang(fr) .y { color: blue }</style></head><body><div id="y" class="y">y</div
 		}
 	}
 	setAttr("lang", "en-US")
-	selects, _, ok := ctx.invalidation(root)
-	require.True(t, ok)
-	assert.False(t, selects(y), "lang")
+	assert.True(t, noKeyMatch(func() bool {
+		selects, _, ok := ctx.invalidation(root)
+		return !ok || selects(y)
+	}), "lang")
 	setAttr("lang", "en")
 	setAttr("class", "a  a ")
-	selects, _, ok = ctx.invalidation(root)
-	require.True(t, ok)
-	assert.False(t, selects(y), "the same classes")
+	assert.True(t, noKeyMatch(func() bool {
+		selects, _, ok := ctx.invalidation(root)
+		return !ok || selects(y)
+	}), "the same classes")
 	setAttr("class", "a x")
-	selects, _, ok = ctx.invalidation(root)
+	selects, _, ok := ctx.invalidation(root)
 	require.True(t, ok)
 	assert.True(t, selects(y), "class x")
 }

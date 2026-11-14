@@ -6,6 +6,7 @@ package htmlcore
 
 import (
 	"fmt"
+	"hash/maphash"
 	"io"
 	"net/http"
 	"strings"
@@ -606,10 +607,16 @@ p:nth-last-of-type(2) + div span { color: green }
 	assert.Equal(t, placeKinds{typeCount: true}, siblings)
 	last, notLast := nodeSnap{lastType: true}, nodeSnap{lastType: false}
 	first, notFirst := nodeSnap{index: 0}, nodeSnap{index: 1}
-	assert.False(t, placeChangedDeep(elementByID(doc, "app"), last, notLast, places, siblings), "app is not .side")
+	assert.True(t, noKeyMatch(func() bool {
+		places, siblings := ctx.deepPlaces()
+		return placeChangedDeep(elementByID(doc, "app"), last, notLast, places, siblings)
+	}), "app is not .side")
 	assert.True(t, placeChangedDeep(elementByID(doc, "side"), last, notLast, places, siblings))
 	assert.True(t, placeChangedDeep(elementByID(doc, "li"), first, notFirst, places, siblings))
-	assert.False(t, placeChangedDeep(elementByID(doc, "side"), first, notFirst, places, siblings), "side is not li")
+	assert.True(t, noKeyMatch(func() bool {
+		places, siblings := ctx.deepPlaces()
+		return placeChangedDeep(elementByID(doc, "side"), first, notFirst, places, siblings)
+	}), "side is not li")
 	assert.True(t, placeChangedDeep(elementByID(doc, "app"), nodeSnap{count: 2}, nodeSnap{count: 3}, places, siblings), "nth-last-of-type before a sibling")
 }
 
@@ -699,7 +706,7 @@ func TestRereadInsertBeforeKept(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, ReadDocument(ctx, core.NewBody(), doc))
 	subjects := ctx.siblingSubjects()
-	assert.False(t, siblingSelects(elementByID(doc, "app"), subjects))
+	assert.True(t, noKeyMatch(func() bool { return siblingSelects(elementByID(doc, "app"), ctx.siblingSubjects()) }))
 	assert.True(t, siblingSelects(elementByID(doc, "side"), subjects))
 	assert.True(t, siblingSelects(elementByID(doc, "r"), subjects))
 }
@@ -722,4 +729,21 @@ func TestRereadInertAttrs(t *testing.T) {
 			return []*html.Node{v}, nil
 		}, kept...)
 	}
+}
+
+// noKeyMatch returns whether f returns false with one of a few seeds of the
+// hashes of the keys of elements (see [keyBit]): the masks of keys are
+// Bloom filters, in which keys that differ may collide (with the random
+// seed of a run), which only matches more elements, so the tests of keys
+// that do not match try other seeds.
+func noKeyMatch(f func() bool) bool {
+	old := keySeed
+	defer func() { keySeed = old }()
+	for range 5 {
+		if !f() {
+			return true
+		}
+		keySeed = maphash.MakeSeed()
+	}
+	return false
 }
