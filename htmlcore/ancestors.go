@@ -171,7 +171,12 @@ func compoundKeys(cs string) keyMask {
 	depth := 0
 	for i := 0; i < len(cs); i++ {
 		switch ch := cs[i]; ch {
-		case '(', '[':
+		case '[':
+			if depth == 0 {
+				m = m.or(attrKeys(cs[i:]))
+			}
+			depth++
+		case '(':
 			depth++
 		case ')', ']':
 			depth--
@@ -184,6 +189,33 @@ func compoundKeys(cs string) keyMask {
 		}
 	}
 	return m
+}
+
+// attrKeys returns the mask of the key that an element that the given
+// attribute selector (at the start of the text) selects has, as for
+// [class~=name] (as .name) and [id=name] (as #name), or none.
+func attrKeys(text string) keyMask {
+	end := strings.IndexByte(text, ']')
+	if end < 0 {
+		return keyMask{}
+	}
+	in := strings.TrimSpace(text[1:end])
+	var prefix, value string
+	if v, ok := strings.CutPrefix(in, "class~="); ok {
+		prefix, value = ".", v
+	} else if v, ok := strings.CutPrefix(in, "id="); ok {
+		prefix, value = "#", v
+	} else {
+		return keyMask{}
+	}
+	value = strings.TrimSpace(value)
+	if len(value) >= 2 && (value[0] == '"' || value[0] == '\'') && value[len(value)-1] == value[0] {
+		value = value[1 : len(value)-1]
+	}
+	if value == "" || strings.ContainsAny(value, " \t\"'\\") {
+		return keyMask{} // (as with a flag, as i)
+	}
+	return keyBit(prefix + value)
 }
 
 // selMatch returns whether the given selector selects the given element,

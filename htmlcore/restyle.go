@@ -435,6 +435,7 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 			return nil, c.noChange("the elements that :has() selects")
 		}
 	}
+
 	// the declarations as they were (all of them first, as those of an
 	// element depend on those of the elements that it is in, for var())
 	saved := map[*html.Node]*nodeStyles{}
@@ -1233,8 +1234,12 @@ func (c *Context) invalidation(n *html.Node) (selects func(k *html.Node) bool, s
 		// :checked), or an attribute set to the value that it had
 		tokens = statePseudoClasses
 	}
-	if strings.Contains(old.style, "--") || strings.Contains(GetAttr(n, "style"), "--") {
-		return nil, false, false // custom properties, which the elements in it inherit
+	if style := GetAttr(n, "style"); style != old.style && (strings.Contains(old.style, "--") || strings.Contains(style, "--")) {
+		// custom properties, which the elements in it inherit (only if its
+		// style changed: the html element of nytimes.com has them, and
+		// the changes of its lang and class matched its 7000 elements
+		// again, for 1s each)
+		return nil, false, false
 	}
 	oldClasses, newClasses := strings.Fields(old.class), strings.Fields(GetAttr(n, "class"))
 	for _, cl := range oldClasses {
@@ -1276,6 +1281,10 @@ func (c *Context) invalidation(n *html.Node) (selects func(k *html.Node) bool, s
 			tokens = append(tokens, attrPseudoClasses[a]...)
 		}
 	}
+	// whether its keys (classes and id) are as they were, so that the
+	// compound selectors that it may be selected by are known (see
+	// compoundMaySelect)
+	sameKeys := old.class == GetAttr(n, "class") && old.id == GetAttr(n, "id")
 	var keys []*compiledSelector
 	all := false
 	check := func(text string, cs *compiledSelector, decls []*css.Declaration) bool {
@@ -1295,6 +1304,9 @@ func (c *Context) invalidation(n *html.Node) (selects func(k *html.Node) bool, s
 		for _, a := range attrTokens {
 			// (the selectors of attributes, of [name, as with a value)
 			inLast, inPrefix := hasAttrSelector(last, a), hasAttrSelector(prefix, a)
+			if inPrefix && sameKeys && !compoundMaySelect(prefix, n, func(comp string) bool { return hasAttrSelector(comp, a) }) {
+				inPrefix = false
+			}
 			if inLast && hasCustomProps(decls) {
 				return false
 			}
@@ -1309,13 +1321,25 @@ func (c *Context) invalidation(n *html.Node) (selects func(k *html.Node) bool, s
 				}
 			}
 		}
+		// whether the rule may select it differently: for its states, if
+		// it may select it at all, by its key (its classes, id, and name
+		// are as they were; a rule of the :hover of a class with custom
+		// properties matched the 7000 elements of nytimes.com again as
+		// its scripts set the attributes of its html element to the
+		// values that they had)
+		mayChange := func() bool {
+			if sameStates(tokens) {
+				return cs == nil || cs.keyIn(n)
+			}
+			return len(attrTokens) > 0 || cs == nil || c.matchChanged(n, old, cs)
+		}
 		for _, t := range tokens {
-			if hasToken(last, t) && hasCustomProps(decls) && (sameStates(tokens) || len(attrTokens) > 0 || cs == nil || c.matchChanged(n, old, cs)) {
+			if hasToken(last, t) && hasCustomProps(decls) && mayChange() {
 				// a rule that selects it differently, with custom
 				// properties, which the elements in it inherit
 				return false
 			}
-			if !hasToken(prefix, t) {
+			if !hasToken(prefix, t) || sameKeys && !compoundMaySelect(prefix, n, func(comp string) bool { return hasToken(comp, t) }) {
 				continue
 			}
 			if sib {
@@ -1353,6 +1377,30 @@ func (c *Context) invalidation(n *html.Node) (selects func(k *html.Node) bool, s
 	return selects, siblings, true
 }
 
+// compoundMaySelect returns whether a compound selector of the given part
+// of a selector before its subject for which has returns true (one that has
+// the pseudo-class of a state or the attribute that changed) may select the
+// given element (by its keys; see [compoundKeys]), whose change those of
+// the elements in it and after it are selected by (as .menu:hover .item,
+// or [lang=en] .x, for an element that is not a .menu, or has no lang).
+func compoundMaySelect(prefix string, n *html.Node, has func(comp string) bool) bool {
+	if strings.ContainsAny(prefix, "\\|") {
+		return true
+	}
+	own := ownKeys(n)
+	from := 0
+	check := func(comp string) bool {
+		return has(comp) && own.has(compoundKeys(comp))
+	}
+	for _, cb := range combinators(prefix) {
+		if check(prefix[from:cb.start]) {
+			return true
+		}
+		from = cb.at + 1
+	}
+	return check(prefix[from:])
+}
+
 // splitLastCompound returns the given selector before its last compound
 // selector, whether it has a combinator of siblings (+ or ~) there, and
 // the last compound selector.
@@ -1374,7 +1422,12 @@ func splitLastCompound(sel string) (prefix string, siblings bool, last string) {
 		return "", false, sel
 	}
 	prefix = sel[:at+1]
-	return prefix, strings.ContainsAny(prefix, "+~"), sel[at+1:]
+	sib := false
+	for _, cb := range combinators(prefix) {
+		// (not as in [class~=a])
+		sib = sib || cb.sibling
+	}
+	return prefix, sib, sel[at+1:]
 }
 
 // hasToken returns whether the given selector text has the given class

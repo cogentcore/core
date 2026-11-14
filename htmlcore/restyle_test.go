@@ -326,3 +326,101 @@ func TestRestyleSourceDisplay(t *testing.T) {
 	})
 	assert.True(t, ok, ctx.Fallback())
 }
+
+// TestRestyleCustomPropsUnchanged tests that a change of an attribute of
+// an element with custom properties in its style that does not change them
+// (as the lang and class of the html element of nytimes.com) restyles only
+// the elements that the change may select differently, and that a change of
+// its custom properties restyles those in it.
+func TestRestyleCustomPropsUnchanged(t *testing.T) {
+	const page = `<html lang="en" style="--w: 50px"><head><style>.v { width: var(--w, 10px); height: 10px }
+.dark .v { background: red }</style></head><body><div id="v" class="v">v</div></body></html>`
+	t.Run("invalidation", func(t *testing.T) {
+		ctx := NewContext()
+		doc, err := ParseHTML(ctx, strings.NewReader(page))
+		require.NoError(t, err)
+		require.NoError(t, ReadDocument(ctx, core.NewBody(), doc))
+		root := documentElement(doc)
+		for i, a := range root.Attr {
+			if a.Key == "lang" {
+				root.Attr[i].Val = "en-US"
+			}
+		}
+		_, _, ok := ctx.invalidation(root)
+		assert.True(t, ok, "only the elements selected by lang")
+		for i, a := range root.Attr {
+			if a.Key == "style" {
+				root.Attr[i].Val = "--w: 60px"
+			}
+		}
+		_, _, ok = ctx.invalidation(root)
+		assert.False(t, ok, "custom properties changed")
+	})
+	t.Run("class", func(t *testing.T) {
+		testRestyle(t, page, true, func(doc *html.Node) []*html.Node {
+			root := documentElement(doc)
+			root.Attr = append(root.Attr, html.Attribute{Key: "class", Val: "dark"})
+			return []*html.Node{root}
+		})
+	})
+}
+
+// TestRestyleStatesOfOthers tests that a change of the states of an
+// element (or its attributes set to the values that they had) restyles
+// only the elements that the rules of states may select differently, not
+// all of those in it for a rule of the state of another element with
+// custom properties (as on nytimes.com).
+func TestRestyleStatesOfOthers(t *testing.T) {
+	const page = `<html lang="en"><head><style>.btn:hover { --c: red }
+.v { color: var(--c, black); height: 10px }</style></head><body><div id="v" class="v">v</div><button class="btn">b</button></body></html>`
+	ctx := NewContext()
+	doc, err := ParseHTML(ctx, strings.NewReader(page))
+	require.NoError(t, err)
+	require.NoError(t, ReadDocument(ctx, core.NewBody(), doc))
+	_, _, ok := ctx.invalidation(documentElement(doc))
+	assert.True(t, ok, "the html element is not a .btn")
+	btn := documentElement(doc).LastChild.LastChild // (body > button)
+	require.Equal(t, "button", btn.Data)
+	_, _, ok = ctx.invalidation(btn)
+	assert.False(t, ok, "the elements in a .btn inherit its --c")
+}
+
+// TestCompoundMaySelect tests whether the compound selectors before the
+// subjects of selectors that have changed states or attributes may select
+// elements.
+func TestCompoundMaySelect(t *testing.T) {
+	doc, err := html.Parse(strings.NewReader(`<html><body><div id="m" class="menu open"></div></body></html>`))
+	require.NoError(t, err)
+	m := elementByID(doc, "m")
+	root := documentElement(doc)
+	for _, tc := range []struct {
+		prefix, token string
+		n             *html.Node
+		may           bool
+	}{
+		{".menu:hover ", ":hover", m, true},
+		{".menu:hover ", ":hover", root, false},
+		{"div.open:focus-within > ", ":focus-within", m, true},
+		{"nav:hover > ", ":hover", m, false},
+		{":hover > ", ":hover", root, true},
+		{".x .menu:hover + ", ":hover", m, true},
+		{".x:hover .menu ", ":hover", m, false},
+		{"[class~=package]:hover .x>", ":hover", root, false},
+		{"[class~=menu]:hover .x>", ":hover", m, true},
+		{"[id=m]:hover ", ":hover", m, true},
+		{"[id=other]:hover ", ":hover", m, false},
+		{"[class~=menu i]:hover ", ":hover", root, true},
+		{"[lang=en] ", "lang", root, true},
+		{"div[lang=en] ", "lang", root, false},
+	} {
+		has := func(comp string) bool { return hasToken(comp, tc.token) }
+		if !strings.HasPrefix(tc.token, ":") {
+			has = func(comp string) bool { return hasAttrSelector(comp, tc.token) }
+		}
+		assert.Equal(t, tc.may, compoundMaySelect(tc.prefix, tc.n, has), tc.prefix)
+	}
+	_, sib, _ := splitLastCompound("[class~=a]:hover .b>*")
+	assert.False(t, sib, "~= is not a combinator")
+	_, sib, _ = splitLastCompound(".a ~ .b")
+	assert.True(t, sib)
+}
