@@ -240,6 +240,12 @@ type Context struct {
 	// are found again are matched again (see [Context.invalidation]), as
 	// for rules added to the style sheets.
 	matchAll bool
+
+	// addRoot, if set (as elements are read again; see Context.Reread),
+	// adds the element that the given element is in that is read again
+	// for a change of it that its widgets can not be styled again for (as
+	// of its display or pseudo-elements), returning whether it can be.
+	addRoot func(n *html.Node) bool
 }
 
 // pageState is the state of the pages read with a [Context], which

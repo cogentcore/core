@@ -6,6 +6,8 @@ package htmlcore
 
 import (
 	"fmt"
+	"io"
+	"net/http"
 	"strings"
 	"testing"
 
@@ -274,7 +276,9 @@ func TestReread(t *testing.T) {
 		})
 	})
 	t.Run("style sheet", func(t *testing.T) {
-		testReread(t, page, false, func(doc *html.Node) (self, children []*html.Node) {
+		// (its rules are added, as those added to the style sheets, and
+		// the elements that they select restyled)
+		testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
 			m := elementByID(doc, "main")
 			appendHTML(t, m, `<style>.item { color: red }</style>`)
 			return nil, []*html.Node{m}
@@ -490,4 +494,82 @@ func TestPrepareRereadConcurrent(t *testing.T) {
 	require.NoError(t, ReadDocument(NewContext(), fresh, doc))
 	fresh.RenderImage(func() {}, func() { want = widgetStates(fresh) })
 	assert.Equal(t, want, got)
+}
+
+// TestRereadTitle tests that a change of the title of the page (as scripts
+// set it) changes the title of the context, without reading the page again.
+func TestRereadTitle(t *testing.T) {
+	const page = `<html><head><title>Old</title></head><body><p id="p">text</p></body></html>`
+	testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+		title := elementByID(doc, "p").Parent.Parent.FirstChild.FirstChild
+		title.FirstChild.Data = " New   title "
+		return nil, []*html.Node{title}
+	}, "p")
+	ctx := NewContext()
+	doc, err := ParseHTML(ctx, strings.NewReader(page))
+	require.NoError(t, err)
+	bd := core.NewBody()
+	require.NoError(t, ReadDocument(ctx, bd, doc))
+	title := elementByID(doc, "p").Parent.Parent.FirstChild.FirstChild
+	title.FirstChild.Data = "New"
+	require.True(t, ctx.Reread(nil, []*html.Node{title}), ctx.Fallback())
+	assert.Equal(t, "New", ctx.Title)
+}
+
+// TestRereadLinkedSheet tests that a link to a style sheet that scripts add
+// to the head adds its rules, restyling the elements that they select,
+// without reading the page again whole, as the page read anew.
+func TestRereadLinkedSheet(t *testing.T) {
+	const page = `<html><head><title>t</title></head><body><div style="width: 400px"><div id="a" class="box">a</div><p id="p">text</p></div></body></html>`
+	get := func(u string) (*http.Response, error) {
+		return &http.Response{StatusCode: 200, Header: http.Header{"Content-Type": {"text/css"}},
+			Body: io.NopCloser(strings.NewReader(".box { height: 40px; background: blue }"))}, nil
+	}
+	newCtx := func() *Context {
+		ctx := NewContext()
+		ctx.PageURL = "https://example.com/"
+		ctx.GetURL = get
+		return ctx
+	}
+	ctx := newCtx()
+	doc, err := ParseHTML(ctx, strings.NewReader(page))
+	require.NoError(t, err)
+	bd := core.NewBody()
+	require.NoError(t, ReadDocument(ctx, bd, doc))
+	var got, want map[string]string
+	var ok bool
+	bd.RenderImage(func() {
+		bd.AsyncLock()
+		head := elementByID(doc, "a").Parent.Parent.Parent.FirstChild
+		head.AppendChild(&html.Node{Type: html.ElementNode, Data: "link", DataAtom: atom.Link,
+			Attr: []html.Attribute{{Key: "rel", Val: "stylesheet"}, {Key: "href", Val: "/new.css"}}})
+		ok = ctx.Reread(nil, []*html.Node{head})
+		bd.AsyncUnlock()
+	}, func() {
+		bd.AsyncLock()
+		got = widgetStates(bd)
+		bd.AsyncUnlock()
+	})
+	require.True(t, ok, ctx.Fallback())
+	fresh := core.NewBody()
+	require.NoError(t, ReadDocument(newCtx(), fresh, doc))
+	fresh.RenderImage(func() {}, func() { want = widgetStates(fresh) })
+	assert.Equal(t, want, got)
+	assert.Contains(t, got["a"], "bg #0000FF")
+}
+
+// TestRereadAddsRoots tests that the elements whose changes as they are
+// styled again their widgets can not be styled for (as of their
+// pseudo-elements or display), as for a class added to the body, are read
+// again with the elements that they are in, not the page whole (as on
+// nytimes.com), as the page read anew.
+func TestRereadAddsRoots(t *testing.T) {
+	const page = `<html><head><style>.dark .icon::before { content: "x" } .dark .menu { display: none }</style></head>` +
+		`<body><div style="width: 400px"><div id="w"><span id="icon" class="icon">i</span></div>` +
+		`<div id="m"><div class="menu">menu</div><div id="other">other</div></div><p id="p">text</p></div></body></html>`
+	testReread(t, page, true, func(doc *html.Node) (self, children []*html.Node) {
+		body := elementByID(doc, "p").Parent.Parent
+		setAttr(body, "class", "dark")
+		return []*html.Node{body}, nil
+	}, "p")
 }
