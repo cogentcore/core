@@ -513,14 +513,18 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		wrap := lval == "wrap" || lval == "wrap-reverse"
 		return op(func(st *cssState, s, ps *styles.Style) { s.Wrap = wrap })
 	case "flex-flow":
-		var ops []styleOp
+		// a direction and a wrap, in any order, each initial when omitted
+		// (the wrap is not a direction: a flex-flow of column nowrap, as
+		// the election results of nytimes.com, is a column)
+		dir, wrap := "row", "nowrap"
 		for _, f := range strings.Fields(lval) {
-			ops = append(ops, c.compileCSS("flex-direction", f)...)
 			if strings.Contains(f, "wrap") {
-				ops = append(ops, c.compileCSS("flex-wrap", f)...)
+				wrap = f
+			} else {
+				dir = f
 			}
 		}
-		return ops
+		return append(c.compileCSS("flex-direction", dir), c.compileCSS("flex-wrap", wrap)...)
 	case "flex-grow", "flex-shrink":
 		f, err := strconv.ParseFloat(lval, 32)
 		if err != nil {

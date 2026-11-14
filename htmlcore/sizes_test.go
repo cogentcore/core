@@ -1509,3 +1509,26 @@ ul{list-style:none;margin:0;padding:0}
 		assert.False(t, fr.HasScroll[math32.X], "no horizontal scrolling")
 	})
 }
+
+// TestFlexFlowColumnNowrap tests that a flex-flow with a direction and a
+// wrap keeps the direction (as the election results of nytimes.com, a
+// column nowrap of sections that are containers, which were laid out in
+// a row with no width, drawn over each other), and that the parts that
+// are omitted are initial.
+func TestFlexFlowColumnNowrap(t *testing.T) {
+	widgetsByID(t, `<div style="width: 600px"><div id="wrap" style="display: flex; flex-flow: column nowrap">`+
+		`<section id="first" style="container-type: inline-size"><div style="display: flex; flex-flow: row nowrap; gap: 30px">`+
+		`<a id="senate" style="flex: 1">Senate 55 44</a><a id="house" style="flex: 1">House 256 169</a></div></section>`+
+		`<section id="last" style="container-type: inline-size">Key races</section></div>`+
+		`<div id="reset" style="display: flex; flex-direction: column; flex-flow: wrap"><span>a</span><span>b</span></div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			first, last := ws["first"].Geom, ws["last"].Geom
+			assert.InDelta(t, 600*dp, first.Size.Actual.Total.X, 1, "first section as wide as the column")
+			assert.InDelta(t, 600*dp, last.Size.Actual.Total.X, 1, "last section as wide as the column")
+			assert.GreaterOrEqual(t, last.Pos.Total.Y, first.Pos.Total.Y+first.Size.Actual.Total.Y-1, "sections in a column")
+			senate, house := ws["senate"].Geom, ws["house"].Geom
+			assert.GreaterOrEqual(t, house.Pos.Total.X, senate.Pos.Total.X+senate.Size.Actual.Total.X, "chambers side by side")
+			assert.Equal(t, styles.Row, ws["reset"].Styles.Direction, "flex-flow of only a wrap is a row")
+			assert.True(t, ws["reset"].Styles.Wrap, "flex-flow of wrap wraps")
+		})
+}
