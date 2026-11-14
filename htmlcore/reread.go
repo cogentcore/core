@@ -778,6 +778,25 @@ func childNames(n tree.Node) map[string]bool {
 	return names
 }
 
+// newWidgetName returns the given name of a new widget, or, if it is in the
+// given names, a new one of it with the given number of the reread, and a
+// count after it if that is in them too (as the new widgets of the same
+// name in a reread, or a widget of that name from an earlier one, as the
+// count of rereads starts again when the page is read whole: the names of
+// the children of a parent must be unique, as for the frames of github.com
+// as it loaded, which panicked).
+func newWidgetName(names map[string]bool, name string, reread int) string {
+	if !names[name] {
+		return name
+	}
+	base := name + "~" + strconv.Itoa(reread)
+	name = base
+	for i := 2; names[name]; i++ {
+		name = base + "-" + strconv.Itoa(i)
+	}
+	return name
+}
+
 // planChildren adds to the given plan the given new children, each as
 // the old one of the same element and type (among the given old ones)
 // where it can be kept, reconciling the children of those kept for
@@ -827,10 +846,7 @@ func (rc *reconciler) planChildren(p *tree.Plan, olds, news []tree.Node, names m
 		}
 		// a new widget, with a name that no old one has (so that it is
 		// not taken for one of them)
-		name := nk.AsTree().Name
-		if names[name] {
-			name += "~" + strconv.Itoa(rc.c.rereads)
-		}
+		name := newWidgetName(names, nk.AsTree().Name, rc.c.rereads)
 		names[name] = true
 		nw := nk
 		p.Add(name, func() tree.Node { return nw }, func(tree.Node) {})

@@ -863,3 +863,16 @@ func TestRereadHTMLChildScripts(t *testing.T) {
 		}
 	}
 }
+
+// TestNewWidgetName tests that the names of new widgets in rereads are unique
+// among the names of the children of their parent (two new frames of the
+// same name, and one left of an earlier reread, panicked on github.com).
+func TestNewWidgetName(t *testing.T) {
+	names := map[string]bool{"frame-0": true, "frame-0~1": true}
+	assert.Equal(t, "text", newWidgetName(names, "text", 1))
+	a := newWidgetName(names, "frame-0", 1)
+	names[a] = true
+	b := newWidgetName(names, "frame-0", 1)
+	assert.Equal(t, "frame-0~1-2", a)
+	assert.Equal(t, "frame-0~1-3", b)
+}
