@@ -1511,3 +1511,34 @@ func TestInvalidVarUnset(t *testing.T) {
 			assert.Zero(t, ws["h"].Styles.Margin.Top.Dots)
 		})
 }
+
+// TestLineHeightHalfLeading tests that the text of a line that is taller
+// than its font is in the middle of it, with half of the extra height above
+// it, as the half-leading of CSS, in the first line too (as the labels of
+// the buttons of reddit.com, of a line height of their height, which were
+// at their tops).
+func TestLineHeightHalfLeading(t *testing.T) {
+	rows := func(lh string) (top, bottom int) {
+		b := core.NewBody()
+		b.Scene.Styler(func(s *styles.Style) { s.Padding.Zero() })
+		require.NoError(t, ReadHTMLString(NewContext(), b, `<body style="margin: 0"><div style="font: 14px sans-serif; line-height: `+lh+`">Sign Up</div></body>`))
+		img := b.RenderImage()
+		top, bottom = -1, -1
+		for y := range img.Bounds().Dy() {
+			for x := range img.Bounds().Dx() {
+				if c := img.RGBAAt(x, y); c.A > 200 && c.R < 100 && c.G < 100 && c.B < 100 {
+					if top < 0 {
+						top = y
+					}
+					bottom = y
+					break
+				}
+			}
+		}
+		return
+	}
+	t20, b20 := rows("20px")
+	t40, b40 := rows("40px")
+	assert.InDelta(t, t20+10, t40, 1.5, "half of the extra 20px is above the text")
+	assert.InDelta(t, b20+10, b40, 1.5)
+}
