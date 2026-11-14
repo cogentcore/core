@@ -1240,19 +1240,12 @@ func (r *resolver) margins() {
 	s.Margin.Bottom = units.Dot(bottom / spc)
 	// The spacing of the page is that of its CSS, not scaled by the
 	// Spacing setting, which applies to the spacing of Cogent Core widgets
-	// (see core.WidgetBase.styleSettings, which multiplies by it).
-	if frameOf(wb.This) != nil || isTextWidget(wb) {
-		for _, v := range []*units.Value{&s.Margin.Left, &s.Margin.Right, &s.Padding.Top, &s.Padding.Right,
-			&s.Padding.Bottom, &s.Padding.Left, &s.Gap.X, &s.Gap.Y} {
-			v.Value /= spc
-		}
+	// (see core.WidgetBase.styleSettings, which multiplies by it), for all
+	// of the widgets of the page: its images, svgs and form controls too.
+	for _, v := range []*units.Value{&s.Margin.Left, &s.Margin.Right, &s.Padding.Top, &s.Padding.Right,
+		&s.Padding.Bottom, &s.Padding.Left, &s.Gap.X, &s.Gap.Y} {
+		v.Value /= spc
 	}
-}
-
-// isTextWidget returns whether the widget is a [core.Text].
-func isTextWidget(wb *core.WidgetBase) bool {
-	_, ok := wb.This.(*core.Text)
-	return ok
 }
 
 // sideDots returns the given sides in dots, using the given function.
