@@ -656,7 +656,9 @@ func (c *Context) applyRules() {
 	for i, r := range c.rules {
 		c.cssBase, c.curContainer, c.curRule = r.cssBase, r.container, i+1
 		for _, n := range c.selectNodes(r.root, r.text) {
-			c.addDecls(n, r.decls, r.origin, r.spec)
+			if c.inScope(n, r.scope, r.scopeKind) {
+				c.addDecls(n, r.decls, r.origin, r.spec)
+			}
 		}
 	}
 }

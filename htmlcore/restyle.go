@@ -19,12 +19,18 @@ import (
 // selector, by which the declarations of elements are found again when
 // they change (see [Context.Restyle]).
 type styleRule struct {
-	root   *html.Node
-	sel    *compiledSelector
-	text   string // of its selector
-	decls  []*css.Declaration
-	origin cssOrigin
-	spec   int
+	root *html.Node
+
+	// scope is the host of the shadow root of its style sheet, if it is
+	// in a shadow tree, and scopeKind is the elements that it selects there
+	// (see [Context.inScope]).
+	scope     *html.Node
+	scopeKind scopeKind
+	sel       *compiledSelector
+	text      string // of its selector
+	decls     []*css.Declaration
+	origin    cssOrigin
+	spec      int
 
 	// container is the condition of the @container rule that it is in.
 	container *containerCond
@@ -85,7 +91,7 @@ type ruleIndex struct {
 func (c *Context) recordRule(root *html.Node, sel string, cs *compiledSelector, decls []*css.Declaration, origin cssOrigin, spec int) {
 	has := strings.Contains(sel, ":has(")
 	subject := has && strings.Index(sel, ":has(") >= subjectStart(sel)
-	r := &styleRule{root: root, sel: cs, text: sel, decls: decls, origin: origin, spec: spec, container: c.curContainer, cssBase: c.cssBase, relational: has, subjectHas: subject}
+	r := &styleRule{root: root, scope: c.curScope, scopeKind: c.curScopeKind, sel: cs, text: sel, decls: decls, origin: origin, spec: spec, container: c.curContainer, cssBase: c.cssBase, relational: has, subjectHas: subject}
 	if has && !subject {
 		r.hasCompound, r.hasSiblings = hasCompound(sel)
 	}
@@ -157,7 +163,7 @@ func (c *Context) matchDecls(n *html.Node) []*cssDecl {
 	defer func() { c.cssBase, c.curContainer = base, container }()
 	for _, i := range c.index().candidates(n) {
 		r := c.rules[i]
-		if !contains(r.root, n) || !c.selMatch(r.sel, n) {
+		if !contains(r.root, n) || !c.inScope(n, r.scope, r.scopeKind) || !c.selMatch(r.sel, n) {
 			continue
 		}
 		c.cssBase = r.cssBase // for its URLs
@@ -718,7 +724,7 @@ func (c *Context) relationalChanges(root *html.Node, changed []*html.Node, add f
 			r := c.rules[i]
 			// (the key of its selector first, which most elements do not
 			// have, then its scope, after a match, as it walks up)
-			if had(i) != (r.sel.keyIn(n) && c.selMatch(r.sel, n) && contains(r.root, n)) {
+			if had(i) != (r.sel.keyIn(n) && c.selMatch(r.sel, n) && contains(r.root, n) && c.inScope(n, r.scope, r.scopeKind)) {
 				return add(n)
 			}
 		}

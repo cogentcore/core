@@ -89,6 +89,7 @@ dialog:modal {
     z-index: 2147483647;
 }
 svg:not(:root) { overflow: hidden; }
+slot { display: contents; }
 input[type=hidden] { display: none; }
 audio:not([controls]) { display: none !important; }
 textarea { font-family: monospace; padding: 2px; white-space: pre-wrap; }

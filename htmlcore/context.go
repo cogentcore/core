@@ -98,6 +98,19 @@ type Context struct {
 	// root shows (in a slot) only when they are open.
 	Unrendered func(n *html.Node) bool
 
+	// ShadowScope, if set, returns the host of the shadow root whose tree
+	// the given node is in, or nil if it is in the document, for a page that
+	// is read as its composed tree, with the content of the shadow roots of
+	// elements in their place (see shadow.go). The rules of the style sheets
+	// of a shadow tree apply only to it, and those of the document not to it.
+	ShadowScope func(n *html.Node) *html.Node
+
+	// ComposedParent, if set, returns the parent of the given node in the
+	// composed tree of the page (see ShadowScope), as it was read, which is
+	// not its parent in the document for the content of shadow roots and
+	// the nodes in slots.
+	ComposedParent func(n *html.Node) *html.Node
+
 	// ToggleDetails, if set, toggles the given details element open or
 	// closed in the document that the page is read from (its open
 	// attribute), on a click of its summary, as for an app that runs
@@ -324,9 +337,15 @@ type pageState struct {
 	// and containerMu guards the sizes of the containers in containers.
 	curContainer     *containerCond
 	containerQueried map[*html.Node]bool
-	containers       map[*html.Node]*containerFrame
-	keptContainers   map[*html.Node]containerSizes
-	containerMu      sync.Mutex
+
+	// curScope is the host of the shadow root of the style sheet whose
+	// rules are being added, if it is in a shadow tree (see shadowScope).
+	curScope     *html.Node
+	curScopeKind scopeKind
+
+	containers     map[*html.Node]*containerFrame
+	keptContainers map[*html.Node]containerSizes
+	containerMu    sync.Mutex
 
 	// styleMu guards the styles of the elements (their declarations and
 	// the state of reading them), which the stylers of the widgets of the
@@ -602,7 +621,11 @@ func (c *Context) addStyle(style string) {
 
 // addStyleOrigin adds the given CSS style string with the given origin.
 func (c *Context) addStyleOrigin(style string, origin cssOrigin) {
-	c.addRules(rootNode(c.Node), parseCSS(style), origin)
+	root := rootNode(c.Node)
+	if c.curScope != nil { // (of a style sheet of a shadow tree, see shadow.go)
+		root = c.curScope
+	}
+	c.addRules(root, parseCSS(style), origin)
 }
 
 // LinkButton is a helper function that makes the given button

@@ -117,7 +117,12 @@ func (c *Context) addedStyle(n *html.Node) bool {
 	base := c.cssBase
 	c.cssBase = ""
 	c.recordOnly = true
-	c.addRules(rootNode(n), parseCSS(added), originAuthor)
+	defer c.enterScope(n)() // (of a shadow tree, see shadow.go)
+	root := rootNode(n)
+	if c.curScope != nil {
+		root = c.curScope
+	}
+	c.addRules(root, parseCSS(added), originAuthor)
 	c.recordOnly = false
 	c.cssBase = base
 	return true
@@ -142,6 +147,7 @@ func (c *Context) addedSheet(n *html.Node) bool {
 	base, node := c.cssBase, c.Node
 	c.cssBase, c.Node = "", n
 	c.recordOnly = true
+	defer c.enterScope(n)() // (of a shadow tree, see shadow.go)
 	c.addLinkedStyle(GetAttr(n, "href"))
 	c.recordOnly = false
 	c.cssBase, c.Node = base, node

@@ -133,6 +133,18 @@ func (c *Context) addRuleList(root *html.Node, rules []*css.Rule, origin cssOrig
 		}
 		for _, sel := range selectors {
 			sel = strings.TrimSpace(sel)
+			kind := scopeAll
+			if c.curScope != nil {
+				var ok bool
+				if sel, kind, ok = scopedSelector(sel); !ok {
+					continue
+				}
+			} else if strings.Contains(sel, ":host") || strings.Contains(sel, "::slotted") {
+				continue // (of shadow trees only)
+			} else if origin == originUserAgent {
+				kind = scopeAny // (the styles of the user agent apply to all)
+			}
+			c.curScopeKind = kind
 			if strings.Contains(sel, ":hover") {
 				c.addHoverTrigger(sel)
 			}
@@ -147,10 +159,19 @@ func (c *Context) addRuleList(root *html.Node, rules []*css.Rule, origin cssOrig
 				c.recordRule(root, sel, cs, rule.Declarations, origin, spec)
 			}
 			if !c.recordOnly && !c.deferMatch { // (see Context.addedStyle and Context.ReuseStyles)
-				for _, n := range c.selectNodes(root, sel) {
-					c.addDecls(n, rule.Declarations, origin, spec)
+				if kind == scopeHost {
+					if cs != nil && c.selMatch(cs, c.curScope) {
+						c.addDecls(c.curScope, rule.Declarations, origin, spec)
+					}
+				} else {
+					for _, n := range c.selectNodes(root, sel) {
+						if c.inScope(n, c.curScope, kind) {
+							c.addDecls(n, rule.Declarations, origin, spec)
+						}
+					}
 				}
 			}
+			c.curScopeKind = scopeAll
 			c.curRule = 0
 		}
 	}
@@ -945,7 +966,11 @@ func (c *Context) displayOf(n *html.Node) string {
 		return "none" // as a child of a shadow host that is in no slot
 	}
 	d := c.declaration(n, "display")
-	if n == nil || n.Type != html.ElementNode || n.Parent == nil || n.Parent.Type != html.ElementNode {
+	if n == nil || n.Type != html.ElementNode {
+		return d
+	}
+	parent := c.parentOf(n) // (in the composed tree, see shadow.go)
+	if parent == nil || parent.Type != html.ElementNode {
 		return d
 	}
 	// absolutely positioned and floating elements are blockified too
@@ -962,7 +987,15 @@ func (c *Context) displayOf(n *html.Node) string {
 			return "flex"
 		}
 	}
-	switch c.declaration(n.Parent, "display") {
+	// (the parent of an element whose own box is none, as a slot, is that of
+	// the box that its children are in)
+	for i := 0; i < 8 && parent != nil && parent.Type == html.ElementNode && c.declaration(parent, "display") == "contents"; i++ {
+		parent = c.parentOf(parent)
+	}
+	if parent == nil || parent.Type != html.ElementNode {
+		return d
+	}
+	switch c.declaration(parent, "display") {
 	case "flex", "inline-flex", "grid", "inline-grid":
 		switch d {
 		case "", "inline", "inline-block", "list-item", "flow-root":
@@ -1052,12 +1085,14 @@ func (c *Context) addStyleSheets(root *html.Node) {
 			case "style":
 				c.recordSheet(n)
 				if c.mediaMatches(GetAttr(n, "media")) {
+					defer c.enterScope(n)()
 					c.addStyleOrigin(nodeText(n), originAuthor)
 				}
 				return
 			case "link":
 				c.recordSheet(n)
 				if strings.EqualFold(GetAttr(n, "rel"), "stylesheet") && c.mediaMatches(GetAttr(n, "media")) {
+					defer c.enterScope(n)()
 					c.addLinkedStyle(GetAttr(n, "href"))
 				}
 				return
