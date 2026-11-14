@@ -5,6 +5,7 @@
 package htmlcore
 
 import (
+	"bytes"
 	"container/list"
 	"image"
 	"sync"
@@ -54,6 +55,11 @@ type ImageCache struct {
 	// failed has the URLs of the images that could not be gotten or
 	// decoded.
 	failed map[string]bool
+
+	// decoding has the URLs of the images that are being decoded (see
+	// [ImageCache.Decode]), with a channel that is closed when they have
+	// been.
+	decoding map[string]chan struct{}
 }
 
 // imageCacheEntry is an entry of [ImageCache.lru].
@@ -166,4 +172,52 @@ func imageBytes(img image.Image) int {
 		bpp = 8
 	}
 	return sz.X * sz.Y * bpp
+}
+
+// Decode decodes the given data of the image at the given (absolute) URL
+// and adds it to the cache, or records that it failed, unless it is
+// cached or being decoded already, as for the images of a page that are
+// gotten before it is read, in parallel (as browsers do), so that reading
+// the page, which decodes its images one at a time, finds them decoded
+// (the large photos of bbc.com took most of the 2s of its first read). A
+// page that reads it meanwhile waits for it (see [ImageCache.waitDecoding]).
+// SVG images are not decoded (they are rendered as they are read).
+func (ic *ImageCache) Decode(url string, data []byte) {
+	if looksLikeSVG(data) {
+		return
+	}
+	ic.mu.Lock()
+	if ic.images[url] != nil || ic.failed[url] || ic.decoding[url] != nil {
+		ic.mu.Unlock()
+		return
+	}
+	if ic.decoding == nil {
+		ic.decoding = map[string]chan struct{}{}
+	}
+	done := make(chan struct{})
+	ic.decoding[url] = done
+	ic.mu.Unlock()
+	defer func() {
+		ic.mu.Lock()
+		delete(ic.decoding, url)
+		ic.mu.Unlock()
+		close(done)
+	}()
+	im, err := decodeImage(bytes.NewReader(data))
+	if err != nil || im == nil {
+		ic.AddFailed(url)
+		return
+	}
+	ic.Add(url, im)
+}
+
+// waitDecoding waits for the image at the given URL to be decoded, if it
+// is being decoded (see [ImageCache.Decode]).
+func (ic *ImageCache) waitDecoding(url string) {
+	ic.mu.Lock()
+	done := ic.decoding[url]
+	ic.mu.Unlock()
+	if done != nil {
+		<-done
+	}
 }
