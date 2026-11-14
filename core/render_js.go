@@ -66,3 +66,20 @@ func (ss *scrimSource) Draw(c composer.Composer) {
 func (w *renderWindow) fillInsets(c composer.Composer) {
 	// no-op
 }
+
+// windowImage returns an image of the given window, for the tests (see
+// [Body.RenderImage]), composited from the elements of its composer.
+func windowImage(rw *renderWindow) *image.RGBA {
+	cw, ok := rw.SystemWindow.Composer().(*composer.ComposerWeb)
+	if !ok {
+		return nil
+	}
+	return cw.Image(rw.SystemWindow.Size())
+}
+
+// testImageName returns the name of the test image of the given name in
+// testdata (see [Body.AssertRender]): in testdata/js on the web, as the
+// browser renders text and paths differently than on other platforms.
+func testImageName(name string) string {
+	return "js/" + name
+}

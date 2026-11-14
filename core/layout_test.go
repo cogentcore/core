@@ -636,6 +636,7 @@ func TestLayoutGridGrowShrinkable(t *testing.T) {
 // with a long text: it is limited to a readable measure, within which the
 // text wraps, instead of being as wide as the text on one line.
 func TestLayoutContentSizingMeasure(t *testing.T) {
+	skipOnWeb(t, "the window is the size of the page, not of its content")
 	b := NewBody()
 	tx := NewText(b).SetText(wrapText)
 	b.RenderImage(func() {
