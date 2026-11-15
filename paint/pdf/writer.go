@@ -347,7 +347,7 @@ func (w *pdfWriter) Close() error {
 		firstRef := w.writeOutlines()
 		first := w.outlines[0]
 		cdict := w.writeObject(pdfDict{
-			"Type:": pdfName("Outlines"),
+			"Type":  pdfName("Outlines"),
 			"First": firstRef,
 			"Last":  firstRef + pdfRef(first.last),
 			"Count": len(w.outlines),
@@ -417,7 +417,7 @@ func (w *pdfWriter) Close() error {
 		info["Creator"] = encode(w.creator)
 	}
 	if w.lang != "" {
-		catalog["Lang"] = encode(w.creator)
+		catalog["Lang"] = encode(w.lang)
 	}
 
 	// document catalog
