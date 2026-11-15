@@ -5,9 +5,11 @@
 package core
 
 import (
+	"cmp"
 	"fmt"
 	"image"
 	"slices"
+	"strings"
 	"time"
 
 	"cogentcore.org/core/base/iox/imagex"
@@ -269,11 +271,17 @@ func TypeText(w Widget, text string) {
 }
 
 // SendKeyFunction sends to the given widget the [events.KeyChord] event
-// for the first key chord of the given key function in the active
-// [keymap.Map], so that tests do not depend on the platform keymap.
-// It panics if the key function has no chord.
+// for the simplest key chord of the given key function in the active
+// [keymap.Map] (with the fewest modifiers, as DownArrow rather than
+// Control+Meta+N for MoveDown, whose modifiers can change what it does,
+// as Meta extending a selection), so that tests do not depend on the
+// platform keymap. It panics if the key function has no chord.
 func SendKeyFunction(w Widget, kf keymap.Functions) {
-	rn, code, mods, err := kf.Chord().Decode()
+	chords := strings.Split(string(kf.Chord()), "\n")
+	slices.SortStableFunc(chords, func(a, b string) int {
+		return cmp.Or(cmp.Compare(strings.Count(a, "+"), strings.Count(b, "+")), cmp.Compare(len(a), len(b)))
+	})
+	rn, code, mods, err := key.Chord(chords[0]).Decode()
 	if err != nil {
 		panic(fmt.Errorf("core.SendKeyFunction: %v has no usable key chord: %w", kf, err))
 	}

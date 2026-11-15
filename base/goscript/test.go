@@ -180,9 +180,14 @@ func RunTests(dir string, o Options, out io.Writer) error {
 	cmd.Stdout = io.MultiWriter(out, &buf)
 	cmd.Stderr = cmd.Stdout
 	if err := cmd.Run(); err != nil {
+		// (goscript test can print the output twice)
 		var failed []string
+		seen := map[string]bool{}
 		for _, m := range failRegexp.FindAllStringSubmatch(buf.String(), -1) {
-			failed = append(failed, m[1])
+			if !seen[m[1]] {
+				seen[m[1]] = true
+				failed = append(failed, m[1])
+			}
 		}
 		if len(failed) > 0 {
 			return fmt.Errorf("goscript tests failed: %s (%w)", strings.Join(failed, ", "), err)

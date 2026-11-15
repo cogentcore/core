@@ -68,6 +68,7 @@ func TestSettingsSaveLoadReset(t *testing.T) {
 // TestUpdateSettings tests applying and saving settings in a window, and
 // adding app settings.
 func TestUpdateSettings(t *testing.T) {
+	skipOnWeb(t, "it saves the settings in a file of a temporary directory")
 	ts := newTestSettings(t, ".toml")
 	b := NewBody()
 	tx := NewText(b).SetText("settings")

@@ -50,6 +50,7 @@ func TestInspectorTreeWidth(t *testing.T) {
 // inspector for a selected widget (for a part, its widget, not the root),
 // toggling the selection mode, and saving and opening the tree.
 func TestInspectorTreeNodeSaveOpen(t *testing.T) {
+	skipOnWeb(t, "it saves the tree in a file of a temporary directory")
 	inspected := NewBody()
 	tr := NewTree(inspected).SetText("inspected tree") // a tree has parts
 	NewText(inspected).SetText("text")

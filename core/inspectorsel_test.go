@@ -22,6 +22,7 @@ import (
 // which the boxes of the widgets are rendered, and the toolbar and the
 // window of an inspector.
 func TestInspectorSelectElement(t *testing.T) {
+	skipOnWeb(t, "it inspects a window from the window of an inspector")
 	b := NewBody()
 	target := NewButton(b).SetText("Target")
 	b.runAndShowNewWindow()
@@ -71,6 +72,7 @@ func TestInspectorSelectElement(t *testing.T) {
 // TestInspectorWindowProfile tests opening an inspector window, which is
 // recycled for the same tree, and toggling profiling.
 func TestInspectorWindowProfile(t *testing.T) {
+	skipOnWeb(t, "it opens an inspector window, and profiles in files")
 	defer TrackWindows()()
 	b := NewBody("inspected")
 	NewText(b).SetText("Inspect me")
@@ -119,7 +121,7 @@ func TestAsyncLockBeforeShown(t *testing.T) {
 		tx.AsyncUnlock()
 	}()
 	time.Sleep(50 * time.Millisecond)
-	assert.Empty(t, locked, "not shown yet")
+	assert.Zero(t, len(locked), "not shown yet") // (goscript has no reflect Len of a channel)
 	RenderImage(b, func() {
 		select {
 		case <-locked:

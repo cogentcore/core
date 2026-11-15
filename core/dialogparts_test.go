@@ -54,7 +54,9 @@ func TestDialogMoveResize(t *testing.T) {
 		assert.Greater(t, st.Scene.SceneGeom.Size.Y, size0.Y, "taller")
 	}), func() {
 		from := handle("move")
-		DragMouse(b, from, from.Add(image.Pt(-100, -60))) // beyond the left edge, quickly
+		// beyond the left edge, quickly (from where it is, as the window is
+		// larger on the web)
+		DragMouse(b, from, from.Add(image.Pt(-pos1.X-50, -60)))
 	}, Locked(b, func() {
 		pos := st.Scene.SceneGeom.Pos
 		assert.Equal(t, 0, pos.X, "kept in the window")
