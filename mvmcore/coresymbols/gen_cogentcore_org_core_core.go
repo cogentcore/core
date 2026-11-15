@@ -363,6 +363,7 @@ func RecycleTabWidget[T tree.NodeValue](ts *Tabs, name string) *T {
 			"TextBodyMedium":                reflect.ValueOf(p_cogentcore_org_core_core.TextBodyMedium),
 			"TextBodySmall":                 reflect.ValueOf(p_cogentcore_org_core_core.TextBodySmall),
 			"TextCursor":                    reflect.ValueOf(p_cogentcore_org_core_core.TextCursor),
+			"TextCursorOwner":               reflect.ValueOf(p_cogentcore_org_core_core.TextCursorOwner),
 			"TextDisplayLarge":              reflect.ValueOf(p_cogentcore_org_core_core.TextDisplayLarge),
 			"TextDisplayMedium":             reflect.ValueOf(p_cogentcore_org_core_core.TextDisplayMedium),
 			"TextDisplaySmall":              reflect.ValueOf(p_cogentcore_org_core_core.TextDisplaySmall),

@@ -50,7 +50,12 @@ func TestEditorVirtualIME(t *testing.T) {
 	core.AssertRender(t, b, "virtual/ime", core.Locked(b, func() {
 		ed.SetCursorShow(pos)
 		ed.SetVirtualText("ime", lines.VirtualText{Pos: pos, Text: rich.NewText(ed.CompositionStyle(), []rune("compose"))})
-	}), core.Locked(b, func() {
+	}), func() {
+		// a rebuild (as by a change of the settings), which removes the
+		// sprites, keeps the cursor of the editor (not focused), whose
+		// cursor is shown
+		core.UpdateAll()
+	}, core.Locked(b, func() {
 		cw := ed.charSize.X
 		p6 := ed.CharStartPos(pos)
 		p7 := ed.CharStartPos(textpos.Pos{Line: 0, Char: 7})

@@ -1248,9 +1248,6 @@ func (tf *TextField) charRenderPos(charidx int) math32.Vector2 {
 var (
 	// textFieldSpriteName is the name of the window sprite used for the cursor.
 	textFieldSpriteName = "TextField.Cursor"
-
-	// textFieldCursor is the TextField that last created a new cursor sprite.
-	textFieldCursor tree.Node
 )
 
 // startCursor starts the cursor blinking and renders it
@@ -1271,7 +1268,7 @@ func (tf *TextField) stopCursor() {
 
 // toggleSprite turns on or off the cursor sprite.
 func (tf *TextField) toggleCursor(on bool) {
-	TextCursor(on, tf.AsWidget(), &textFieldCursor, textFieldSpriteName, tf.CursorWidth.Dots, tf.lineHeight, tf.CursorColor, func() image.Point {
+	TextCursor(on, tf.AsWidget(), textFieldSpriteName, tf.CursorWidth.Dots, tf.lineHeight, tf.CursorColor, func() image.Point {
 		return tf.charRenderPos(tf.cursorPos).ToPointFloor()
 	})
 }

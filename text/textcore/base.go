@@ -82,6 +82,12 @@ type Base struct { //core:embedder
 	// viewID is the unique id of the Lines view.
 	viewID int
 
+	// cursorOn is whether the cursor of this editor is on: started and not
+	// stopped (see [Base.toggleCursor]), so that it is started again when
+	// the sprites are removed, even if the editor is not focused (as when
+	// its cursor is shown with [Base.SetCursorShow]).
+	cursorOn bool
+
 	// charSize is the render size of one character (rune).
 	// Y = line height, X = total glyph advance.
 	charSize math32.Vector2

@@ -6,7 +6,6 @@ package core
 
 import (
 	"image"
-	"sync"
 	"time"
 
 	"cogentcore.org/core/math32"
@@ -15,27 +14,38 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// textCursorMu guards the last widgets of [TextCursor], which are shared by
-// the widgets of a type in all windows, whose event loops are separate.
-var textCursorMu sync.Mutex
+// TextCursorOwner returns the widget whose cursor of [TextCursor] with
+// the given name is in the window of the given widget, or nil.
+func TextCursorOwner(w *WidgetBase, name string) tree.Node {
+	sc := w.Scene
+	if sc == nil || sc.Stage == nil || sc.Stage.Main == nil {
+		return nil
+	}
+	ms := sc.Stage.Main
+	ms.Sprites.Lock()
+	defer ms.Sprites.Unlock()
+	if sp, ok := ms.Sprites.SpriteByNameNoLock(name); ok {
+		owner, _ := sp.Properties["owner"].(tree.Node)
+		return owner
+	}
+	return nil
+}
 
-// TextCursor implements a blinking text cursor using a [Sprite].
+// TextCursor implements a blinking text cursor using a [Sprite], which
+// is shared by the text widgets of a type in a window, and owned by the
+// one that last turned it on.
 //   - on determines whether the cursor should be turned on or off,
 //   - w is the text widget the cursor belongs to
-//   - lastW is a pointer to a [tree.Node] holding the last text object to create
-//     a sprite.
 //   - name is the unique name of the cursor (shared among all of same type)
 //   - width, height are size of cursor line to render
 //   - color is the color to render.
 //   - pos is a function that returns the current top-left position of cursor
-func TextCursor(on bool, w *WidgetBase, lastW *tree.Node, name string, width, height float32, color image.Image, pos func() image.Point) {
+func TextCursor(on bool, w *WidgetBase, name string, width, height float32, color image.Image, pos func() image.Point) {
 	sc := w.Scene
 	if sc == nil || sc.Stage == nil || sc.Stage.Main == nil {
 		return
 	}
 	ms := sc.Stage.Main
-	textCursorMu.Lock()
-	defer textCursorMu.Unlock()
 	ms.Sprites.Lock()
 	defer ms.Sprites.Unlock()
 
@@ -48,20 +58,19 @@ func TextCursor(on bool, w *WidgetBase, lastW *tree.Node, name string, width, he
 		ms.Sprites.SetModifiedNoLock()
 	}
 
-	if !on || *lastW == w.This {
-		if sp, ok := ms.Sprites.SpriteByNameNoLock(name); ok {
-			if on {
-				activate(sp)
-			} else {
-				sp.Active = false
-				ms.Sprites.SetModifiedNoLock()
-			}
-			return
+	// The sprite of the cursor is turned on or off if it is owned by the
+	// widget; a widget only turns off its own cursor.
+	if sp, ok := ms.Sprites.SpriteByNameNoLock(name); ok && sp.Properties["owner"] == w.This {
+		if on {
+			activate(sp)
+		} else {
+			sp.Active = false
+			ms.Sprites.SetModifiedNoLock()
 		}
-		if !on {
-			*lastW = nil
-			return
-		}
+		return
+	}
+	if !on {
+		return
 	}
 	var sp *Sprite
 	sp = NewSprite(name, func(pc *paint.Painter) {
@@ -97,7 +106,7 @@ func TextCursor(on bool, w *WidgetBase, lastW *tree.Node, name string, width, he
 		pc.Draw()
 	})
 	sp.InitProperties()
+	sp.Properties["owner"] = w.This
 	activate(sp)
 	ms.Sprites.AddNoLock(sp)
-	*lastW = w.This
 }
