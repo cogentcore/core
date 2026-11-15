@@ -312,3 +312,55 @@ func TestGradientStroke(t *testing.T) {
 	assert.Equal(t, 2, strings.Count(s, "/Pattern cs"), "the gradient fill, for each path")
 	assert.Contains(t, s, "/P2", "three patterns: one stroke and two fills of different bounds")
 }
+
+// TestGradientTransparency tests that a gradient with transparent stops
+// has a soft mask of its alphas, which is removed after the path, and
+// that an opaque gradient has none.
+func TestGradientTransparency(t *testing.T) {
+	s := renderPDF(t, func(pd *PDF, sty *styles.Paint) {
+		g := gradient.NewLinear().AddStop(colors.Blue, 0).AddStop(colors.Blue, 1, 0)
+		sty.Stroke.Color = nil
+		sty.Fill.Color = g
+		pd.Path(*ppath.New().Rectangle(0, 0, 50, 50), sty, math32.Identity2())
+		sty.Fill.Color = colors.Uniform(colors.Red)
+		pd.Path(*ppath.New().Rectangle(50, 50, 10, 10), sty, math32.Identity2())
+	})
+	assert.Contains(t, s, "/S/Luminosity")
+	assert.Contains(t, s, "/Subtype/Form")
+	assert.Contains(t, s, "/Sh0 sh", "the shading of the alphas")
+	assert.Contains(t, s, "/ColorSpace/DeviceGray")
+	assert.Contains(t, s, "/C0[1]/C1[0]", "from opaque to transparent")
+	assert.Contains(t, s, "/SMask/None", "removed after the path")
+	fill := strings.Index(s, " f")
+	none := strings.Index(s, "/MN")
+	assert.Greater(t, none, fill, "the mask is removed after the fill")
+
+	s = renderPDF(t, func(pd *PDF, sty *styles.Paint) {
+		g := gradient.NewLinear().AddStop(colors.Blue, 0).AddStop(colors.Red, 1)
+		sty.Stroke.Color = nil
+		sty.Fill.Color = g
+		pd.Path(*ppath.New().Rectangle(0, 0, 50, 50), sty, math32.Identity2())
+	})
+	assert.NotContains(t, s, "/SMask", "an opaque gradient has no mask")
+
+	s = renderPDF(t, func(pd *PDF, sty *styles.Paint) {
+		g := gradient.NewLinear().AddStop(colors.Blue, 0).AddStop(colors.Red, 1)
+		sty.Stroke.Color = nil
+		sty.Fill.Color = g
+		sty.Fill.Opacity = 0.5
+		pd.Path(*ppath.New().Rectangle(0, 0, 50, 50), sty, math32.Identity2())
+	})
+	assert.Contains(t, s, "/C0[.5]/C1[.5]", "the fill opacity is in the mask")
+}
+
+// TestGradientStopBounds tests the bounds of the functions of a gradient
+// with more than three stops.
+func TestGradientStopBounds(t *testing.T) {
+	s := renderPDF(t, func(pd *PDF, sty *styles.Paint) {
+		g := gradient.NewLinear().AddStop(colors.White, 0).AddStop(colors.Red, 0.25).AddStop(colors.Green, 0.75).AddStop(colors.Blue, 1)
+		sty.Stroke.Color = nil
+		sty.Fill.Color = g
+		pd.Path(*ppath.New().Rectangle(0, 0, 30, 20), sty, math32.Identity2())
+	})
+	assert.Contains(t, s, "/Bounds[.25 .75]")
+}

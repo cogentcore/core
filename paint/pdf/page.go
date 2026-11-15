@@ -30,6 +30,10 @@ type pdfPage struct {
 	textPosition   math32.Vector2
 	textCharSpace  float32
 	textRenderMode int
+
+	// maskSet is whether the soft mask of a transparent gradient is set,
+	// which is removed after the path is painted (see endMask).
+	maskSet bool
 }
 
 func (w *pdfPage) writePage(parent pdfRef) pdfRef {

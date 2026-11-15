@@ -101,6 +101,7 @@ func (r *PDF) Path(path ppath.Path, style *styles.Paint, tr math32.Matrix2) {
 		if style.Fill.Rule == ppath.EvenOdd {
 			r.w.Write([]byte("*"))
 		}
+		r.w.endMask()
 	} else if !style.HasFill() && style.HasStroke() {
 		r.w.SetStroke(&stk, bounds, tr)
 		r.w.Write([]byte(" "))
@@ -110,6 +111,7 @@ func (r *PDF) Path(path ppath.Path, style *styles.Paint, tr math32.Matrix2) {
 		} else {
 			r.w.Write([]byte(" S"))
 		}
+		r.w.endMask()
 	} else if style.HasFill() && style.HasStroke() {
 		r.w.SetFill(&style.Fill, bounds, tr)
 		r.w.Write([]byte(" "))
@@ -118,6 +120,7 @@ func (r *PDF) Path(path ppath.Path, style *styles.Paint, tr math32.Matrix2) {
 		if style.Fill.Rule == ppath.EvenOdd {
 			r.w.Write([]byte("*"))
 		}
+		r.w.endMask()
 
 		r.w.SetStroke(&stk, bounds, tr)
 		r.w.Write([]byte(" "))
@@ -127,6 +130,7 @@ func (r *PDF) Path(path ppath.Path, style *styles.Paint, tr math32.Matrix2) {
 		} else {
 			r.w.Write([]byte(" S"))
 		}
+		r.w.endMask()
 	}
 }
 
@@ -168,11 +172,10 @@ func alphaNormColor(c color.RGBA, a float32) [3]dec {
 func (w *pdfPage) SetFillColor(fill *styles.Fill, bounds math32.Box2, m math32.Matrix2) {
 	switch x := fill.Color.(type) {
 	// todo: image
-	case *gradient.Linear:
-		fmt.Fprintf(w, " /Pattern cs /%v scn", w.gradientPattern(x, bounds, m))
-	case *gradient.Radial:
-		fmt.Fprintf(w, " /Pattern cs /%v scn", w.gradientPattern(x, bounds, m))
+	case gradient.Gradient:
+		w.setGradient(x, fill.Opacity, bounds, m, "cs", "scn")
 	case *image.Uniform:
+		w.endMask()
 		var clr color.RGBA
 		if x != nil {
 			clr = colors.ApplyOpacity(colors.AsRGBA(x), fill.Opacity)
@@ -223,11 +226,10 @@ func (w *pdfPage) SetStroke(stroke *styles.Stroke, bounds math32.Box2, m math32.
 // are required for gradient strokes.
 func (w *pdfPage) SetStrokeColor(stroke *styles.Stroke, bounds math32.Box2, m math32.Matrix2) {
 	switch x := stroke.Color.(type) {
-	case *gradient.Linear:
-		fmt.Fprintf(w, " /Pattern CS /%v SCN", w.gradientPattern(x, bounds, m))
-	case *gradient.Radial:
-		fmt.Fprintf(w, " /Pattern CS /%v SCN", w.gradientPattern(x, bounds, m))
+	case gradient.Gradient:
+		w.setGradient(x, stroke.Opacity, bounds, m, "CS", "SCN")
 	case *image.Uniform:
+		w.endMask()
 		clr := colors.ApplyOpacity(colors.AsRGBA(x), stroke.Opacity)
 		a := float32(clr.A) / 255.0
 		if clr.R == clr.G && clr.R == clr.B {
@@ -327,72 +329,178 @@ func (w *pdfPage) getOpacityGS(a float32) pdfName {
 	return name
 }
 
-func (w *pdfPage) gradientPattern(gr gradient.Gradient, bounds math32.Box2, m math32.Matrix2) pdfName {
-	cum := w.Cumulative().Mul(m)
-	gr.Update(1, bounds, cum)
-	// TODO: support patterns/gradients with alpha channel
-	shading := pdfDict{
-		"ColorSpace": pdfName("DeviceRGB"),
+// setGradient sets the given gradient as the fill (cs, scn) or stroke
+// (CS, SCN) color, with the given opacity. A gradient with transparent
+// stops also sets a soft mask of its alphas, which [pdfPage.endMask]
+// removes after the path is painted.
+func (w *pdfPage) setGradient(gr gradient.Gradient, opacity float32, bounds math32.Box2, m math32.Matrix2, cs, scn string) {
+	w.endMask()
+	pat, mask := w.gradientPattern(gr, opacity, bounds, m)
+	w.SetAlpha(1) // the transparency is in the mask
+	if mask != "" {
+		fmt.Fprintf(w, " /%v gs", mask)
+		w.maskSet = true
 	}
+	fmt.Fprintf(w, " /Pattern %s /%v %s", cs, pat, scn)
+}
+
+// endMask removes the soft mask of a transparent gradient, if set.
+func (w *pdfPage) endMask() {
+	if !w.maskSet {
+		return
+	}
+	fmt.Fprintf(w, " /%v gs", w.extGState("MN", pdfDict{"SMask": pdfName("None")}))
+	w.maskSet = false
+}
+
+// extGState returns the name of an ExtGState with the given values,
+// with names starting with the given prefix.
+func (w *pdfPage) extGState(prefix string, gs pdfDict) pdfName {
+	if _, ok := w.resources["ExtGState"]; !ok {
+		w.resources["ExtGState"] = pdfDict{}
+	}
+	egs := w.resources["ExtGState"].(pdfDict)
+	for name, g := range egs {
+		if reflect.DeepEqual(g, gs) {
+			return name
+		}
+	}
+	name := pdfName(fmt.Sprintf("%s%d", prefix, len(egs)))
+	egs[name] = gs
+	return name
+}
+
+// gradientPattern returns the name of the pattern of the given gradient,
+// and of the ExtGState of its soft mask if any of its stops are
+// transparent (with the given opacity), or "".
+func (w *pdfPage) gradientPattern(gr gradient.Gradient, opacity float32, bounds math32.Box2, m math32.Matrix2) (pdfName, pdfName) {
+	cum := w.Cumulative().Mul(m)
+	gr.Update(opacity, bounds, cum)
+	base := gr.AsBase()
+	// the geometry of the shading, the same for its colors and alphas
+	geom := pdfDict{"Extend": pdfArray{true, true}}
 	switch g := gr.(type) {
 	case *gradient.Linear:
 		s, e := g.TransformedAxis()
-		shading["ShadingType"] = 2
-		shading["Coords"] = pdfArray{s.X, s.Y, e.X, e.Y}
-		shading["Function"] = patternStopsFunction(g.Stops)
-		shading["Extend"] = pdfArray{true, true}
+		geom["ShadingType"] = 2
+		geom["Coords"] = pdfArray{s.X, s.Y, e.X, e.Y}
 	case *gradient.Radial:
 		c, f, rad := g.TransformedCoords()
-		// r := 0.5 * (math32.Abs(rad.X) + math32.Abs(rad.Y))
 		r := max(math32.Abs(rad.X), math32.Abs(rad.Y))
-		// fmt.Println("c:", c, "ctr:", g.Center)
-		shading["ShadingType"] = 3
-		shading["Coords"] = pdfArray{f.X, f.Y, 0, c.X, c.Y, r}
-		shading["Function"] = patternStopsFunction(g.Stops)
-		shading["Extend"] = pdfArray{true, true}
+		geom["ShadingType"] = 3
+		geom["Coords"] = pdfArray{f.X, f.Y, 0, c.X, c.Y, r}
 	}
+	shading := pdfDict{"ColorSpace": pdfName("DeviceRGB")}
+	for k, v := range geom {
+		shading[k] = v
+	}
+	shading["Function"] = patternStopsFunction(base.Stops, stopColor)
 	pattern := pdfDict{
 		"Type":        pdfName("Pattern"),
 		"PatternType": 2,
 		"Shading":     shading,
 	}
-
 	if _, ok := w.resources["Pattern"]; !ok {
 		w.resources["Pattern"] = pdfDict{}
 	}
-	for name, pat := range w.resources["Pattern"].(pdfDict) {
+	pats := w.resources["Pattern"].(pdfDict)
+	var name pdfName
+	for pn, pat := range pats {
 		if reflect.DeepEqual(pat, pattern) {
-			return name
+			name = pn
+			break
 		}
 	}
-	name := pdfName(fmt.Sprintf("P%d", len(w.resources["Pattern"].(pdfDict))))
-	w.resources["Pattern"].(pdfDict)[name] = pattern
-	return name
+	if name == "" {
+		name = pdfName(fmt.Sprintf("P%d", len(pats)))
+		pats[name] = pattern
+	}
+
+	opaque := true
+	for i := range base.Stops {
+		if stopAlpha(&base.Stops[i], opacity) < 1 {
+			opaque = false
+			break
+		}
+	}
+	if opaque {
+		return name, ""
+	}
+	// the mask is a luminosity transparency group of a gray shading of the
+	// alphas, in the default space of the page, as the pattern is.
+	alphas := pdfDict{"ColorSpace": pdfName("DeviceGray")}
+	for k, v := range geom {
+		alphas[k] = v
+	}
+	alphas["Function"] = patternStopsFunction(base.Stops, func(st *gradient.Stop) pdfArray {
+		return pdfArray{dec(stopAlpha(st, opacity))}
+	})
+	inv := w.Cumulative().Inverse()
+	form := w.pdf.writeObject(pdfStream{
+		dict: pdfDict{
+			"Type":    pdfName("XObject"),
+			"Subtype": pdfName("Form"),
+			"BBox":    pdfArray{0, 0, w.width, w.height},
+			"Matrix":  pdfArray{dec(inv.XX), dec(inv.XY), dec(inv.YX), dec(inv.YY), dec(inv.X0), dec(inv.Y0)}, // as mat2
+			"Group": pdfDict{
+				"Type": pdfName("Group"),
+				"S":    pdfName("Transparency"),
+				"CS":   pdfName("DeviceGray"),
+			},
+			"Resources": pdfDict{"Shading": pdfDict{"Sh0": alphas}},
+		},
+		stream: []byte("/Sh0 sh"),
+	})
+	mask := w.extGState("M", pdfDict{
+		"SMask": pdfDict{
+			"Type": pdfName("Mask"),
+			"S":    pdfName("Luminosity"),
+			"G":    form,
+		},
+	})
+	return name, mask
 }
 
-func patternStopsFunction(stops []gradient.Stop) pdfDict {
+// stopAlpha returns the alpha of the given stop, with the given opacity.
+func stopAlpha(st *gradient.Stop, opacity float32) float32 {
+	return float32(st.Color.A) / 255 * st.Opacity * opacity
+}
+
+// stopColor returns the (not premultiplied) RGB color of the given stop.
+func stopColor(st *gradient.Stop) pdfArray {
+	c := alphaNormColor(st.Color, float32(st.Color.A)/255)
+	return pdfArray{c[0], c[1], c[2]}
+}
+
+// patternStopsFunction returns the function of the values of the given
+// stops (as their colors or alphas), stitching the functions between
+// each pair of stops.
+func patternStopsFunction(stops []gradient.Stop, value func(st *gradient.Stop) pdfArray) pdfDict {
 	n := len(stops)
-	if len(stops) < 2 {
+	if n == 0 {
 		return pdfDict{}
+	}
+	if n == 1 {
+		return patternStopFunction(value(&stops[0]), value(&stops[0]))
 	}
 
 	fs := pdfArray{}
 	encode := pdfArray{}
 	bounds := pdfArray{}
 	if !ppath.Equal(stops[0].Pos, 0.0) {
-		fs = append(fs, patternStopFunction(stops[0], stops[0]))
+		fs = append(fs, patternStopFunction(value(&stops[0]), value(&stops[0])))
 		encode = append(encode, 0, 1)
 		bounds = append(bounds, stops[0].Pos)
 	}
 	for i := range n - 1 {
-		fs = append(fs, patternStopFunction(stops[i], stops[i+1]))
+		fs = append(fs, patternStopFunction(value(&stops[i]), value(&stops[i+1])))
 		encode = append(encode, 0, 1)
 		if i != 0 {
-			bounds = append(bounds, stops[1].Pos)
+			bounds = append(bounds, stops[i].Pos) // the start of this function
 		}
 	}
 	if !ppath.Equal(stops[n-1].Pos, 1.0) {
-		fs = append(fs, patternStopFunction(stops[n-1], stops[n-1]))
+		fs = append(fs, patternStopFunction(value(&stops[n-1]), value(&stops[n-1])))
 		encode = append(encode, 0, 1)
 		bounds = append(bounds, stops[n-1].Pos)
 	}
@@ -408,16 +516,14 @@ func patternStopsFunction(stops []gradient.Stop) pdfDict {
 	}
 }
 
-func patternStopFunction(s0, s1 gradient.Stop) pdfDict {
-	a0 := float32(s0.Color.A) / 255.0
-	a1 := float32(s1.Color.A) / 255.0
-	c0 := alphaNormColor(s0.Color, a0)
-	c1 := alphaNormColor(s1.Color, a1)
+// patternStopFunction returns the function interpolating between the
+// given values of two stops.
+func patternStopFunction(v0, v1 pdfArray) pdfDict {
 	return pdfDict{
 		"FunctionType": 2,
 		"Domain":       pdfArray{0, 1},
 		"N":            1,
-		"C0":           pdfArray{c0[0], c0[1], c0[2]},
-		"C1":           pdfArray{c1[0], c1[1], c1[2]},
+		"C0":           v0,
+		"C1":           v1,
 	}
 }
