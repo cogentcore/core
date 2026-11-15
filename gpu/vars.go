@@ -154,7 +154,9 @@ func (vs *Vars) SetCurrentValue(group int, name string, valueIndex int) (*Var, e
 	if err != nil {
 		return nil, err
 	}
-	vr.Values.SetCurrentValue(valueIndex)
+	if _, err := vr.Values.SetCurrentValue(valueIndex); err != nil {
+		return nil, err
+	}
 	return vr, nil
 }
 

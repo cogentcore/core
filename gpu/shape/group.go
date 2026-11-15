@@ -15,8 +15,10 @@ type ShapeGroup struct { //types:add -setters
 	Shapes []Mesh
 }
 
-// Size returns number of vertex, index points in this shape element.
-func (sb *ShapeGroup) Size() (numVertex, numIndex int, hasColor bool) {
+var _ Mesh = (*ShapeGroup)(nil)
+
+// MeshSize returns number of vertex, index points in this shape element.
+func (sb *ShapeGroup) MeshSize() (numVertex, numIndex int, hasColor bool) {
 	numVertex = 0
 	numIndex = 0
 	hasColor = false

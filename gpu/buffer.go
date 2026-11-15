@@ -69,7 +69,7 @@ func ValueReadSync(device *Device, values ...*Value) error {
 type ValueGroups map[string][]*Value
 
 func (vg *ValueGroups) init() {
-	if vg == nil {
+	if *vg == nil {
 		*vg = make(map[string][]*Value)
 	}
 }

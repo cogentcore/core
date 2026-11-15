@@ -41,7 +41,7 @@ func (sc *Scene) AddFromLibrary(nm string, parent tree.Node) (*Group, error) {
 	nwgp := gp.Clone().(*Group)
 	parent.AsTree().AddChild(nwgp)
 	tree.SetUniqueName(nwgp)
-	sc.SetScene(parent)
+	sc.SetScene(nwgp) // not parent, which can be the scene (not a Node)
 	return nwgp, nil
 }
 

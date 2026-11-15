@@ -82,6 +82,7 @@ func (ph *Phong) UseMesh(name string) error {
 		if gpu.Debug {
 			log.Println(err)
 		}
+		return err
 	}
 	return ph.useMeshIndex(idx)
 }

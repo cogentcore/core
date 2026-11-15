@@ -93,11 +93,15 @@ func (dec *Decoder) HasScene() bool {
 func (dec *Decoder) SetFileFS(fsys fs.FS, fname string) ([]string, error) {
 	dec.FS = fsys
 	exists, err := fsx.FileExistsFS(dec.FS, fname)
-	if !exists {
+	if err != nil {
 		return nil, errors.New("xyz obj.Decoder: " + err.Error())
 	}
+	if !exists {
+		return nil, errors.New("xyz obj.Decoder: file not found: " + fname)
+	}
+	// the materials are used if there is a .mtl file of the same name
 	mtlf := strings.TrimSuffix(fname, ".obj") + ".mtl"
-	exists, _ = fsx.FileExistsFS(dec.FS, fname)
+	exists, _ = fsx.FileExistsFS(dec.FS, mtlf)
 	if exists {
 		return []string{fname, mtlf}, nil
 	}
@@ -248,11 +252,13 @@ func (dec *Decoder) SetObject(sc *xyz.Scene, objgp *xyz.Group, ob *Object) {
 		idxs[1] = dec.copyVertex(ms, face, 1)
 		idxs[2] = dec.copyVertex(ms, face, 2)
 		dec.addNorms(ms, 0, 1, 2, idxs)
-		for idx := 2; idx < len(face.Vertices); idx++ {
+		// copyVertex has indexed the first triangle, and each further
+		// vertex makes a triangle of the fan with the first and previous ones.
+		for idx := 3; idx < len(face.Vertices); idx++ {
 			dec.setIndex(ms, face, 0, &idxs)
 			dec.setIndex(ms, face, idx-1, &idxs)
 			dec.setIndex(ms, face, idx, &idxs)
-			dec.addNorms(ms, idx-3, idx-1, idx, idxs)
+			dec.addNorms(ms, 0, idx-1, idx, idxs)
 		}
 	}
 }

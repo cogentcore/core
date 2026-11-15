@@ -26,7 +26,7 @@ func SRGBFromLinearComp(lin float32) float32 {
 	if lin <= 0.0031308 {
 		return 12.92 * lin
 	}
-	return (1.055*math32.Pow(lin, 1/2.4) + 0.055)
+	return 1.055*math32.Pow(lin, 1/2.4) - 0.055
 }
 
 // SRGBToLinear converts set of sRGB components to linear values,
@@ -47,11 +47,11 @@ func SRGBFromLinear(rl, gl, bl float32) (r, g, b float32) {
 	return
 }
 
+// ImgCompToUint8 converts a color component in the 0-1 range to a uint8,
+// clamped to that range, and rounded.
 func ImgCompToUint8(val float32) uint8 {
-	if val > 1.0 {
-		val = 1.0
-	}
-	return uint8(val * float32(0xff))
+	val = math32.Clamp(val, 0, 1)
+	return uint8(val*float32(0xff) + 0.5)
 }
 
 // TextureSRGBFromLinear returns a sRGB colorspace version of given linear

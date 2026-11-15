@@ -138,7 +138,9 @@ func (vg *VarGroup) SetCurrentValue(name string, valueIndex int) (*Var, error) {
 	if err != nil {
 		return nil, err
 	}
-	vr.Values.SetCurrentValue(valueIndex)
+	if _, err := vr.Values.SetCurrentValue(valueIndex); err != nil {
+		return nil, err
+	}
 	return vr, nil
 }
 

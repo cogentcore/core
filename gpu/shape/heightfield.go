@@ -83,11 +83,14 @@ func (hf *Heightfield) MeshSize() (numVertex, nIndex int, hasColor bool) {
 // Set sets points in given allocated arrays.
 func (hf *Heightfield) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
 	waxis, haxis, wdir, hdir := NormPlaneAxes(hf.NormalAxis, hf.NormalNeg)
+	vo, io := hf.VertexOffset, hf.IndexOffset
 	if hf.Bars {
-		SetHeightfieldBars(vertex, normal, texcoord, index, 0, 0, int(hf.Size.X), int(hf.Size.Y), hf.Data, waxis, haxis, wdir, hdir, hf.VisSize.X, hf.VisSize.Y, 0, 0, hf.Offset, hf.VisSize.Z, hf.BarPct, math32.Vector3{})
+		SetHeightfieldBars(vertex, normal, texcoord, index, vo, io, int(hf.Size.X), int(hf.Size.Y), hf.Data, waxis, haxis, wdir, hdir, hf.VisSize.X, hf.VisSize.Y, 0, 0, hf.Offset, hf.VisSize.Z, hf.BarPct, hf.Pos)
 	} else {
-		SetHeightfield(vertex, normal, texcoord, index, 0, 0, int(hf.Size.X), int(hf.Size.Y), hf.Data, waxis, haxis, wdir, hdir, hf.VisSize.X, hf.VisSize.Y, 0, 0, hf.Offset, hf.VisSize.Z, math32.Vector3{})
+		SetHeightfield(vertex, normal, texcoord, index, vo, io, int(hf.Size.X), int(hf.Size.Y), hf.Data, waxis, haxis, wdir, hdir, hf.VisSize.X, hf.VisSize.Y, 0, 0, hf.Offset, hf.VisSize.Z, hf.Pos)
 	}
+	nv, _, _ := hf.MeshSize()
+	hf.CBBox = BBoxFromVtxs(vertex, vo, nv)
 }
 
 //////// Planar representation

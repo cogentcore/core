@@ -206,9 +206,10 @@ func (ps *Pose) WorldQuat() math32.Quat {
 	return quat
 }
 
-// WorldEulerRotation returns the current world rotation in Euler angles.
+// WorldEulerRotation returns the current world rotation in Euler angles,
+// in radians.
 func (ps *Pose) WorldEulerRotation() math32.Vector3 {
-	return ps.Quat.ToEuler()
+	return ps.WorldQuat().ToEuler()
 }
 
 // WorldScale returns he current world scale.
