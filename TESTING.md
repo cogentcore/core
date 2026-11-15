@@ -12,6 +12,8 @@ On the CI, Mesa's software GPU (lavapipe) is installed for the tests of `gpu` an
 
 The `video` tests need FFmpeg (see go-astiav), which the CI builds.
 
+The coverage report of the CI leaves out generated code: the files with the standard `// Code generated ... DO NOT EDIT.` header (as `enumgen.go` and `typegen.go`).
+
 ## Widget tests
 
 Widget tests make a body, and assert its rendered image with `core.AssertRender`, optionally after functions that interact with it, each of which is followed by the handling of all of the events that it causes:

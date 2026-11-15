@@ -95,7 +95,15 @@ jobs:
     - name: Test
       env:
         CORE_REQUIRE_GPU: "true"
-      run: xvfb-run -a -s "-screen 0 1280x1024x24" go test -short -v ./... -coverprofile cover.out -timeout 2m
+      run: xvfb-run -a -s "-screen 0 1280x1024x24" go test -short -v ./... -coverprofile cover.raw.out -timeout 2m
+
+    # generated code (files with the standard "Code generated ... DO NOT
+    # EDIT." header) is left out of the coverage report
+    - name: Filter generated code from coverage
+      run: |
+        grep -rlE --include='*.go' '^// Code generated .* DO NOT EDIT\.$' . | sed -E 's|^(\./)?|cogentcore.org/core/|; s|$|:|' > generated.txt
+        grep -v -F -f generated.txt cover.raw.out > cover.out
+        echo "left out $(wc -l < generated.txt) generated files"
 
     # the images of the snapshots of htmlcore are files of the pages, in the repository
     - name: Upload testdata
