@@ -168,7 +168,7 @@ func NonDefaultFields(v any) map[string]any {
 	for i := 0; i < nf; i++ {
 		fv := rv.Field(i)
 		ft := rt.Field(i)
-		if ft.Tag.Get("save") == "-" {
+		if !ft.IsExported() || ft.Tag.Get("save") == "-" { // (unexported fields cannot be saved)
 			continue
 		}
 		if ss, ok := UnderlyingPointer(fv).Interface().(ShouldSaver); ok {

@@ -383,3 +383,14 @@ func TestStructTags(t *testing.T) {
 func TestStringJSON(t *testing.T) {
 	assert.Equal(t, "{\n\t\"X\": 1,\n\t\"Y\": 2\n}\n", StringJSON(image.Pt(1, 2)))
 }
+
+// TestNonDefaultFieldsUnexported tests that unexported fields are not
+// among the non-default fields (and do not panic).
+func TestNonDefaultFieldsUnexported(t *testing.T) {
+	type withPrivate struct {
+		A       int `default:"1"`
+		private int
+	}
+	v := &withPrivate{A: 2, private: 5}
+	assert.Equal(t, map[string]any{"A": 2}, NonDefaultFields(v))
+}
