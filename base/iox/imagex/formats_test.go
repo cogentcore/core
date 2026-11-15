@@ -176,6 +176,11 @@ func TestCompare(t *testing.T) {
 	assert.NotEqual(t, color.RGBA{0, 0, 0, 255}, di.At(1, 1))
 
 	t.Chdir(t.TempDir())
+	// the checks of failures are not in update mode (as with
+	// CORE_UPDATE_TESTDATA, when Assert saves the images instead)
+	update := UpdateTestImages
+	UpdateTestImages = false
+	t.Cleanup(func() { UpdateTestImages = update })
 	rt := &recordT{}
 	Assert(rt, a, "cmp")
 	assert.Empty(t, rt.errs, "a new image is saved")
@@ -205,7 +210,7 @@ func TestCompare(t *testing.T) {
 		_, content, _, _, _, _ := ImagesEqual(b, got, 0)
 		assert.True(t, content, "updated")
 	})
-	assert.Equal(t, updateTestImages, UpdateTestImages, "restored")
+	assert.False(t, UpdateTestImages, "restored after the subtest")
 }
 
 // TestBase64SplitLinesExact tests splitting base64 text whose length is a
