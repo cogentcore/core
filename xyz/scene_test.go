@@ -5,6 +5,7 @@
 package xyz_test
 
 import (
+	"cogentcore.org/core/gpu"
 	"image/color"
 	"testing"
 
@@ -21,6 +22,7 @@ import (
 )
 
 func TestScene(t *testing.T) {
+	gpu.SkipIfNoGPU(t)
 	sc := NewOffscreenScene()
 
 	NewAmbient(sc, "ambient", 0.3, DirectSun)

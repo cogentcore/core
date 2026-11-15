@@ -40,6 +40,12 @@ jobs:
     - name: Install audio dependencies (video)
       run: sudo apt-get install -y libasound2-dev
 
+    # Mesa has a software GPU (lavapipe, a Vulkan driver), which the tests
+    # of gpu and xyz use with WebGPU, and Xvfb is a display for the tests of
+    # the desktop driver
+    - name: Install software GPU and display (gpu, xyz, desktop)
+      run: sudo apt-get install -y mesa-vulkan-drivers xvfb
+
     # apt does not have the FFmpeg version that go-astiav requires, so it is
     # built from source, as in the CI of go-astiav, and cached
     - name: Load FFmpeg cache
@@ -82,9 +88,14 @@ jobs:
       if: inputs.updateTestdata
       run: echo "CORE_UPDATE_TESTDATA=true" >> $GITHUB_ENV
 
-    # TODO: we can't test gpu, xyz, system, and video on the CI since there is bad Vulkan support
+    # All of the packages that build on linux are tested (the drivers of
+    # the mobile and web platforms are tested on those platforms: see
+    # TESTING.md). CORE_REQUIRE_GPU makes the tests that need a GPU fail
+    # instead of skipping when there is none.
     - name: Test
-      run: go test -short -v $(go list ./... | grep -v gpu | grep -v xyz | grep -v system | grep -v video) -coverprofile cover.out -timeout 2m
+      env:
+        CORE_REQUIRE_GPU: "true"
+      run: xvfb-run -a go test -short -v ./... -coverprofile cover.out -timeout 2m
 
     # the images of the snapshots of htmlcore are files of the pages, in the repository
     - name: Upload testdata

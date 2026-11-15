@@ -8,6 +8,7 @@ package main
 
 import (
 	"bufio"
+	"cogentcore.org/core/gpu"
 	"context"
 	"net"
 	"net/http"
@@ -28,9 +29,7 @@ import (
 const testN = 16_000_000
 
 func TestComputeNative(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping GPU tests in short mode")
-	}
+	gpu.SkipIfNoGPU(t)
 	nerr := compute(testN)
 	if nerr != 0 {
 		t.Errorf("%d items out of %d do not match", nerr, testN)
