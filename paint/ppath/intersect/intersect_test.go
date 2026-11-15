@@ -110,11 +110,11 @@ func TestPathCrossingsWindings(t *testing.T) {
 		{"L5 5L10 0L5 -5z", math32.Vector2{5.0, 5.0}, 0, 0, true},                       // top
 		{"L5 5L10 0L5 -5z", math32.Vector2{5.0, -5.0}, 0, 0, true},                      // bottom
 		{"M10 0A5 5 0 0 0 0 0A5 5 0 0 0 10 0z", math32.Vector2{5.0, 0.0}, 1, -1, false}, // mid
-		// todo: gives inconsistent results across platforms:
-		// {"M10 0A5 5 0 0 0 0 0A5 5 0 0 0 10 0z", math32.Vector2{0.0, 0.0}, 1, 0, true},   // left
-		// {"M10 0A5 5 0 0 0 0 0A5 5 0 0 0 10 0z", math32.Vector2{10.0, 0.0}, 0, 0, true},  // right
-		// {"M10 0A5 5 0 0 1 0 0A5 5 0 0 1 10 0z", math32.Vector2{5.0, 0.0}, 1, 0, false},  // mid
-		// {"M10 0A5 5 0 0 1 0 0A5 5 0 0 1 10 0z", math32.Vector2{0.0, 0.0}, 2, 0, true},  // left
+		// (these gave inconsistent results across platforms, before the fixes from canvas)
+		{"M10 0A5 5 0 0 0 0 0A5 5 0 0 0 10 0z", math32.Vector2{0.0, 0.0}, 1, 0, true},  // left
+		{"M10 0A5 5 0 0 0 0 0A5 5 0 0 0 10 0z", math32.Vector2{10.0, 0.0}, 0, 0, true}, // right
+		// {"M10 0A5 5 0 0 1 0 0A5 5 0 0 1 10 0z", math32.Vector2{5.0, 0.0}, 1, 0, false},  // mid // (fails: the ray through the joint of the arcs counts 2 crossings)
+		{"M10 0A5 5 0 0 1 0 0A5 5 0 0 1 10 0z", math32.Vector2{0.0, 0.0}, 2, 0, true},  // left
 		{"M10 0A5 5 0 0 1 0 0A5 5 0 0 1 10 0z", math32.Vector2{10.0, 0.0}, 0, 0, true}, // right
 
 		// cross twice
@@ -155,7 +155,7 @@ func TestPathCCW(t *testing.T) {
 		{"A1 1 0 0 0 2 0", false},
 
 		// parallel on right-most endpoint
-		//{"L10 0L5 0L2.5 5z", true}, // TODO: overlapping segments?
+		// {"L10 0L5 0L2.5 5z", true}, // (commented out in canvas too)
 		{"L0 5L5 5A5 5 0 0 1 0 0z", false},
 		{"Q0 5 5 5A5 5 0 0 1 0 0z", false},
 		{"M0 10L0 5L5 5A5 5 0 0 0 0 10z", true},
@@ -201,18 +201,18 @@ func TestPathFilling(t *testing.T) {
 		{"L10 10L0 20zM2 4L10 10L2 16z", []bool{true, false}, ppath.EvenOdd}, // inside
 		{"L10 10L0 20zM2 4L2 16L10 10z", []bool{true, false}, ppath.NonZero}, // inside
 		{"L10 10L0 20zM2 4L2 16L10 10z", []bool{true, false}, ppath.EvenOdd}, // inside
-		//{"L10 10L0 20zM2 2L2 18L10 10z", []bool{true, false}, NonZero},    // inside // TODO
+		// {"L10 10L0 20zM2 2L2 18L10 10z", []bool{true, false}, ppath.NonZero},    // inside // (commented out in canvas too)
 		{"L10 10L0 20zM-1 -2L-1 22L10 10z", []bool{false, true}, ppath.NonZero}, // encapsulates
-		//{"L10 10L0 20zM-2 -2L-2 22L10 10z", []bool{false, true}, NonZero}, // encapsulates // TODO
+		// {"L10 10L0 20zM-2 -2L-2 22L10 10z", []bool{false, true}, ppath.NonZero}, // encapsulates // (commented out in canvas too)
 		{"L10 10L0 20zM20 0L10 10L20 20z", []bool{true, true}, ppath.NonZero}, // outside
 		{"L10 10zM2 2L8 8z", []bool{true, true}, ppath.NonZero},               // zero-area overlap
 		{"L10 10zM10 0L5 5L20 10z", []bool{true, true}, ppath.NonZero},        // outside
 
 		// equal
 		{"L10 -10L20 0L10 10zL10 -10L20 0L10 10z", []bool{true, true}, ppath.NonZero},
-		// {"L10 -10L20 0L10 10zA10 10 0 0 1 20 0A10 10 0 0 1 0 0z", []bool{false, true}, ppath.NonZero},
-		//{"L10 -10L20 0L10 10zA10 10 0 0 0 20 0A10 10 0 0 0 0 0z", []bool{false, true}, NonZero}, // TODO
-		//{"L10 -10L20 0L10 10zQ10 0 10 10Q10 0 20 0Q10 0 10 -10Q10 0 0 0z", []bool{true, false}, NonZero}, // TODO
+		{"L10 -10L20 0L10 10zA10 10 0 0 1 20 0A10 10 0 0 1 0 0z", []bool{false, true}, ppath.NonZero},
+		// {"L10 -10L20 0L10 10zA10 10 0 0 0 20 0A10 10 0 0 0 0 0z", []bool{false, true}, ppath.NonZero}, // (commented out in canvas too)
+		// {"L10 -10L20 0L10 10zQ10 0 10 10Q10 0 20 0Q10 0 10 -10Q10 0 0 0z", []bool{true, false}, ppath.NonZero}, // (commented out in canvas too)
 
 		// open
 		{"L10 10L0 20", []bool{true}, ppath.NonZero},
@@ -297,6 +297,7 @@ func TestPathLength(t *testing.T) {
 }
 
 func TestPathSplitAt(t *testing.T) {
+	defer withArcs()() // (as canvas, which keeps arcs)
 	var tts = []struct {
 		p  string
 		d  []float32
@@ -310,9 +311,9 @@ func TestPathSplitAt(t *testing.T) {
 		{"Q10 10 20 0", []float32{11.477858}, []string{"Q5 5 10 5", "M10 5Q15 5 20 0"}},
 		{"C0 10 20 10 20 0", []float32{13.947108}, []string{"C0 5 5 7.5 10 7.5", "M10 7.5C15 7.5 20 5 20 0"}},
 		// todo:
-		// {"A10 10 0 0 1 -20 0", []float32{15.707963}, []string{"A10 10 0 0 1 -10 10", "M-10 10A10 10 0 0 1 -20 0"}},
-		// {"A10 10 0 0 0 20 0", []float32{15.707963}, []string{"A10 10 0 0 0 10 10", "M10 10A10 10 0 0 0 20 0"}},
-		// {"A10 10 0 1 0 2.9289 -7.0711", []float32{15.707963}, []string{"A10 10 0 0 0 10.024 9.9999", "M10.024 9.9999A10 10 0 1 0 2.9289 -7.0711"}},
+		{"A10 10 0 0 1 -20 0", []float32{15.707963}, []string{"A10 10 0 0 1 -10 10", "M-10 10A10 10 0 0 1 -20 0"}},
+		{"A10 10 0 0 0 20 0", []float32{15.707963}, []string{"A10 10 0 0 0 10 10", "M10 10A10 10 0 0 0 20 0"}},
+		{"A10 10 0 1 0 2.9289 -7.0711", []float32{15.707963}, []string{"A10 10 0 0 0 10.024 9.9999", "M10.024 9.9999A10 10 0 1 0 2.9289 -7.0711"}},
 	}
 	origEpsilon := ppath.Epsilon
 	for _, tt := range tts {

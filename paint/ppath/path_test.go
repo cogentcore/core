@@ -186,6 +186,7 @@ func TestPathCommands(t *testing.T) {
 }
 
 func TestPathTransform(t *testing.T) {
+	defer withArcs()() // (as canvas, which keeps arcs)
 	var tts = []struct {
 		p string
 		m math32.Matrix2
@@ -196,7 +197,7 @@ func TestPathTransform(t *testing.T) {
 		{"A10 10 0 0 0 20 0", math32.Identity2().Scale(1, -1), "A10 10 0 0 1 20 0"},
 		{"A10 5 0 0 0 20 0", math32.Identity2().Rotate(math32.DegToRad(270)), "A10 5 90 0 0 0 -20"},
 		// todo: fix:
-		// {"A10 10 0 0 0 20 0", math32.Identity2().Rotate(math32.DegToRad(120)).Scale(1, -2), "A20 10 30 0 1 -10 17.3205080757"},
+		{"A10 10 0 0 0 20 0", math32.Identity2().Rotate(math32.DegToRad(120)).Scale(1, -2), "A20 10 30 0 1 -10 17.3205080757"},
 	}
 	for _, tt := range tts {
 		t.Run(tt.p, func(t *testing.T) {
@@ -206,6 +207,7 @@ func TestPathTransform(t *testing.T) {
 }
 
 func TestPathReplace(t *testing.T) {
+	defer withArcs()() // (as canvas, which keeps arcs)
 	line := func(p0, p1 math32.Vector2) Path {
 		p := Path{}
 		p.MoveTo(p0.X, p0.Y)
@@ -243,7 +245,7 @@ func TestPathReplace(t *testing.T) {
 		{"C0 10 10 10 10 0L30 0", "L30 0", nil, quad, cube, nil},
 		{"M20 0L30 0C0 10 10 10 10 0", "M20 0L30 0L10 0", nil, quad, cube, nil},
 		// todo: fix
-		// {"M10 0L20 0Q25 10 20 10A5 5 0 0 0 30 10z", "M10 0L20 -5L20 10A5 5 0 1 0 30 10L10 -5z", line, quad, cube, arc},
+		{"M10 0L20 0Q25 10 20 10A5 5 0 0 0 30 10z", "M10 0L20 -5L20 10A5 5 0 1 0 30 10L10 -5z", line, quad, cube, arc},
 		{"L10 0L0 5z", "L10 -5L10 0L0 0L0 5L0 -5z", line, nil, nil, nil},
 	}
 	for _, tt := range tts {
@@ -288,6 +290,7 @@ func TestPathSplit(t *testing.T) {
 }
 
 func TestPathReverse(t *testing.T) {
+	defer withArcs()() // (as canvas, which keeps arcs)
 	var tts = []struct {
 		p string
 		r string
@@ -304,20 +307,20 @@ func TestPathReverse(t *testing.T) {
 		{"M5 5C5 10 10 10 10 5", "M10 5C10 10 5 10 5 5"},
 		{"M5 5C5 10 10 10 10 5z", "M5 5L10 5C10 10 5 10 5 5z"},
 		// todo: fix
-		// {"M5 5A2.5 5 0 0 0 10 5", "M10 5A5 2.5 90 0 1 5 5"}, // bottom-half of ellipse along y
-		// {"M5 5A2.5 5 0 0 1 10 5", "M10 5A5 2.5 90 0 0 5 5"},
-		// {"M5 5A2.5 5 0 1 0 10 5", "M10 5A5 2.5 90 1 1 5 5"},
-		// {"M5 5A2.5 5 0 1 1 10 5", "M10 5A5 2.5 90 1 0 5 5"},
-		// {"M5 5A5 2.5 90 0 0 10 5", "M10 5A5 2.5 90 0 1 5 5"}, // same shape
-		// {"M5 5A2.5 5 0 0 0 10 5z", "M5 5L10 5A5 2.5 90 0 1 5 5z"},
+		{"M5 5A2.5 5 0 0 0 10 5", "M10 5A5 2.5 90 0 1 5 5"}, // bottom-half of ellipse along y
+		{"M5 5A2.5 5 0 0 1 10 5", "M10 5A5 2.5 90 0 0 5 5"},
+		{"M5 5A2.5 5 0 1 0 10 5", "M10 5A5 2.5 90 1 1 5 5"},
+		{"M5 5A2.5 5 0 1 1 10 5", "M10 5A5 2.5 90 1 0 5 5"},
+		{"M5 5A5 2.5 90 0 0 10 5", "M10 5A5 2.5 90 0 1 5 5"}, // same shape
+		{"M5 5A2.5 5 0 0 0 10 5z", "M5 5L10 5A5 2.5 90 0 1 5 5z"},
 		{"L0 5L5 5", "M5 5L0 5L0 0"},
 		{"L-1 5L5 5z", "L5 5L-1 5z"},
 		{"Q0 5 5 5", "M5 5Q0 5 0 0"},
 		{"Q0 5 5 5z", "L5 5Q0 5 0 0z"},
 		{"C0 5 5 5 5 0", "M5 0C5 5 0 5 0 0"},
 		{"C0 5 5 5 5 0z", "L5 0C5 5 0 5 0 0z"},
-		// {"A2.5 5 0 0 0 5 0", "M5 0A5 2.5 90 0 1 0 0"},
-		// {"A2.5 5 0 0 0 5 0z", "L5 0A5 2.5 90 0 1 0 0z"},
+		{"A2.5 5 0 0 0 5 0", "M5 0A5 2.5 90 0 1 0 0"},
+		{"A2.5 5 0 0 0 5 0z", "L5 0A5 2.5 90 0 1 0 0z"},
 		{"M5 5L10 10zL15 10", "M15 10L5 5M5 5L10 10z"},
 		{"M5 5L10 10zM0 0L15 10", "M15 10L0 0M5 5L10 10z"},
 	}
@@ -381,6 +384,7 @@ func TestPathParseSVGPathErrors(t *testing.T) {
 }
 
 func TestPathToSVG(t *testing.T) {
+	defer withArcs()() // (as canvas, which keeps arcs)
 	var tts = []struct {
 		p   string
 		svg string
@@ -390,9 +394,9 @@ func TestPathToSVG(t *testing.T) {
 		{"L10 0M20 0L30 0", "M0 0H10M20 0H30"},
 		{"L0 0L0 10L20 20", "M0 0V10L20 20"},
 		// todo: fix
-		// {"A5 5 0 0 1 10 0", "M0 0A5 5 0 0110 0"},
-		// {"A10 5 90 0 0 10 0", "M0 0A5 10 .3555031e-5 0010 0"},
-		// {"A10 5 90 1 0 10 0", "M0 0A5 10 .3555031e-5 1010 0"},
+		{"A5 5 0 0 1 10 0", "M0 0A5 5 0 0110 0"},
+		{"A10 5 90 0 0 10 0", "M0 0A5 10 .3555031e-5 0010 0"},
+		{"A10 5 90 1 0 10 0", "M0 0A5 10 .3555031e-5 1010 0"},
 		{"M20 0L20 0", ""},
 	}
 	for _, tt := range tts {
@@ -404,6 +408,7 @@ func TestPathToSVG(t *testing.T) {
 }
 
 func TestPathToPS(t *testing.T) {
+	defer withArcs()() // (as canvas, which keeps arcs)
 	var tts = []struct {
 		p  string
 		ps string
@@ -411,9 +416,8 @@ func TestPathToPS(t *testing.T) {
 		{"", ""},
 		{"L10 0Q15 10 20 0M20 10C20 20 30 20 30 10z", "0 0 moveto 10 0 lineto 13.33333 6.666667 16.66667 6.666667 20 0 curveto 20 10 moveto 20 20 30 20 30 10 curveto closepath"},
 		{"L10 0M20 0L30 0", "0 0 moveto 10 0 lineto 20 0 moveto 30 0 lineto"},
-		// todo: fix:
-		// {"A5 5 0 0 1 10 0", "0 0 moveto 5 0 5 5 180 360 0 ellipse"},
-		// {"A10 5 90 0 0 10 0", "0 0 moveto 5 0 10 5 90 -90 90 ellipse"},
+		{"A5 5 0 0 1 10 0", "0 0 moveto 5 0 5 5 180 360 0 ellipse"},
+		{"A10 5 90 0 0 10 0", "0 0 moveto 5 0 10 5 90 -90 90 ellipsen"}, // (counter clockwise)
 	}
 	for _, tt := range tts {
 		t.Run(tt.p, func(t *testing.T) {
