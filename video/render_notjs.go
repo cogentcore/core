@@ -43,7 +43,7 @@ type videoSource struct {
 
 func (vs *videoSource) Draw(c composer.Composer) {
 	cd := c.(*composer.ComposerDrawer)
-	cd.Drawer.Copy(image.Point{}, colors.Uniform(color.Black), vs.box, draw.Src, composer.Unchanged) // (a fill of the box)
+	cd.Drawer.Copy(vs.box.Min, colors.Uniform(color.Black), vs.box, draw.Src, composer.Unchanged) // (a fill of the box, at its place)
 	if !vs.destBBox.Empty() {
 		cd.Drawer.Scale(vs.destBBox, vs.frame, vs.srcBBox, vs.rotation, draw.Src, vs.unchanged)
 	}

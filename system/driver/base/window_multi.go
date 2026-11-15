@@ -79,6 +79,12 @@ func NewWindowMulti[A system.App, C composer.Composer](a A, opts *system.NewWind
 }
 
 func (w *WindowMulti[A, D]) Composer() composer.Composer {
+	// a nil composer pointer, set when the window is closed, is a nil
+	// Composer, so that the window is closed (see [Window.IsClosed])
+	var none D
+	if any(w.Compose) == any(none) {
+		return nil
+	}
 	return w.Compose
 }
 
