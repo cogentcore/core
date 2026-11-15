@@ -556,15 +556,20 @@ func (dec *Decoder) parseFace(fields []string) error {
 		}
 
 		// Positive index is an absolute vertex index
+		nv := len(dec.Vertices) / 3
 		if val > 0 {
 			face.Vertices[pos] = int(val - 1)
 			// Negative vertex index is relative to the last parsed vertex
 		} else if val < 0 {
-			current := (len(dec.Vertices) / 3) - 1
+			current := nv - 1
 			face.Vertices[pos] = current + int(val) + 1
 			// Vertex index could never be 0
 		} else {
 			return dec.formatError("Face vertex index value equal to 0")
+		}
+		// the vertexes of a face must be defined before it
+		if vi := face.Vertices[pos]; vi < 0 || vi >= nv {
+			return dec.formatError(fmt.Sprintf("Face vertex index %d of %d vertexes", val, nv))
 		}
 
 		// Get the index of this vertex UV coordinate (optional)
@@ -644,7 +649,7 @@ func (dec *Decoder) parseUsemtl(fields []string) error {
 }
 
 // parseSmooth parses a "s" decription line:
-// s <0|1>
+// s <off|on|0|group number>
 func (dec *Decoder) parseSmooth(fields []string) error {
 	if len(fields) < 1 {
 		return dec.formatError("'s' with no fields")
@@ -654,7 +659,12 @@ func (dec *Decoder) parseSmooth(fields []string) error {
 		dec.smoothCurrent = false
 		return nil
 	}
-	if fields[0] == "1" || fields[0] == "on" {
+	if fields[0] == "on" {
+		dec.smoothCurrent = true
+		return nil
+	}
+	// a smoothing group number, of which 0 is off (above)
+	if n, err := strconv.ParseUint(fields[0], 10, 32); err == nil && n > 0 {
 		dec.smoothCurrent = true
 		return nil
 	}
@@ -676,6 +686,12 @@ func (dec *Decoder) parseMtlLine(line string) error {
 	ltype := fields[0]
 	if strings.HasPrefix(ltype, "#") {
 		return nil
+	}
+	if ltype != "newmtl" && dec.matCurrent == nil {
+		switch ltype {
+		case "d", "Ka", "Kd", "Ke", "Ks", "Ni", "Ns", "illum", "map_Kd":
+			return dec.formatError("'" + ltype + "' before any material (newmtl)")
+		}
 	}
 	switch ltype {
 	case "newmtl":
@@ -817,7 +833,7 @@ func (dec *Decoder) parseNi(fields []string) error {
 	}
 	val, err := strconv.ParseFloat(fields[0], 32)
 	if err != nil {
-		return dec.formatError("'d' parse float error")
+		return dec.formatError("'Ni' parse float error")
 	}
 	dec.matCurrent.Refraction = float32(val)
 	return nil
@@ -831,7 +847,7 @@ func (dec *Decoder) parseNs(fields []string) error {
 	}
 	val, err := strconv.ParseFloat(fields[0], 32)
 	if err != nil {
-		return dec.formatError("'d' parse float error")
+		return dec.formatError("'Ns' parse float error")
 	}
 	dec.matCurrent.Shininess = float32(val)
 	return nil
@@ -845,7 +861,7 @@ func (dec *Decoder) parseIllum(fields []string) error {
 	}
 	val, err := strconv.ParseUint(fields[0], 10, 32)
 	if err != nil {
-		return dec.formatError("'d' parse int error")
+		return dec.formatError("'illum' parse int error")
 	}
 	dec.matCurrent.Illum = int(val)
 	return nil
@@ -857,35 +873,45 @@ func (dec *Decoder) parseMapKd(fields []string) error {
 	if len(fields) < 1 {
 		return dec.formatError("No fields")
 	}
+	// values reads the one or two values of the option at index i, which
+	// are the same with one, and returns the index of the last one.
+	values := func(i int) (float32, float32, int, error) {
+		if i+1 >= len(fields) {
+			return 0, 0, i, dec.formatError("map_Kd option " + fields[i] + " with no value")
+		}
+		r1, err := strconv.ParseFloat(fields[i+1], 32)
+		if err != nil {
+			return 0, 0, i, dec.formatError("map_Kd option " + fields[i] + " parse float error")
+		}
+		i++
+		r2 := r1
+		if i+1 < len(fields) {
+			if rt, err := strconv.ParseFloat(fields[i+1], 32); err == nil {
+				r2 = rt
+				i++
+			}
+		}
+		return float32(r1), float32(r2), i, nil
+	}
 	nf := len(fields)
 	for i := 0; i < nf; i++ {
 		f := fields[i]
 		if f[0] == '-' {
 			switch f {
 			case "-s":
-				r1, _ := strconv.ParseFloat(fields[i+1], 32)
-				r2 := r1
-				i++
-				if len(fields) > i+2 {
-					rt, err := strconv.ParseFloat(fields[i+2], 32)
-					if err == nil {
-						r2 = rt
-						i++
-					}
+				r1, r2, last, err := values(i)
+				if err != nil {
+					return err
 				}
-				dec.matCurrent.Tiling.Repeat.Set(float32(r1), float32(r2))
+				i = last
+				dec.matCurrent.Tiling.Repeat.Set(r1, r2)
 			case "-o":
-				r1, _ := strconv.ParseFloat(fields[i+1], 32)
-				r2 := r1
-				i++
-				if len(fields) > i+2 {
-					rt, err := strconv.ParseFloat(fields[i+2], 32)
-					if err == nil {
-						r2 = rt
-						i++
-					}
+				r1, r2, last, err := values(i)
+				if err != nil {
+					return err
 				}
-				dec.matCurrent.Tiling.Offset.Set(float32(r1), float32(r2))
+				i = last
+				dec.matCurrent.Tiling.Offset.Set(r1, r2)
 			}
 		} else {
 			dec.matCurrent.MapKd = f
