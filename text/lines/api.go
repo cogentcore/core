@@ -870,13 +870,12 @@ func (ls *Lines) IsWordEnd(pos textpos.Pos) bool {
 	if sz == 0 {
 		return false
 	}
-	if pos.Char >= len(txt) { // end of line
+	if pos.Char >= len(txt) { // end of line: after its last letter
 		r := txt[len(txt)-1]
-		return textpos.IsWordBreak(r, -1)
-	}
-	if pos.Char == 0 { // start of line
-		r := txt[0]
 		return !textpos.IsWordBreak(r, -1)
+	}
+	if pos.Char == 0 { // start of line: not after any letter
+		return false
 	}
 	r1 := txt[pos.Char-1]
 	r2 := txt[pos.Char]

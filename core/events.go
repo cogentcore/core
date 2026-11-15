@@ -350,6 +350,17 @@ func (em *Events) handlePosEvent(e events.Event) {
 				return
 			}
 		}
+	case events.MouseUp:
+		// a slide of a sprite stops wherever the mouse is released
+		if sp := em.spriteSlide; sp != nil && !e.WindowPos().In(sp.EventBBox) {
+			em.spriteSlide = nil
+			em.spritePress = nil
+			sp.handleEvent(e)
+			sp.send(events.SlideStop, e)
+			e.SetHandled()
+			em.setCursorFromStyle()
+			return
+		}
 	case events.Scroll:
 		if !tree.IsNil(em.scroll) {
 			scInTime := time.Since(em.lastScrollTime) < TimingSettings.ScrollFocusTime
@@ -372,6 +383,8 @@ func (em *Events) handlePosEvent(e events.Event) {
 			em.setCursorFromStyle()
 			return
 		}
+	} else if len(em.spriteHovers) > 0 { // the mouse left them
+		em.spriteHovers = em.updateSpriteHovers(nil, em.spriteHovers, e, events.MouseEnter, events.MouseLeave)
 	}
 
 	em.mouseInBBox = nil

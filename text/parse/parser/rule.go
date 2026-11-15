@@ -285,7 +285,9 @@ func (pr *Rule) Compile(ps *State) bool {
 		if rn == "!" { // exclusionary rule
 			nr = ri
 			pr.Rules = pr.Rules[:ri]
-			pr.CompileExcl(ps, rs, ri+1)
+			if !pr.CompileExcl(ps, rs, ri+1) {
+				valid = false
+			}
 			break
 		}
 		if rn[0] == ':' {
@@ -449,7 +451,7 @@ func (pr *Rule) CompileExcl(ps *State, rs []string, rist int) bool {
 	var ktok token.KeyToken
 
 	ktoki := -1
-	for ri := 0; ri < rist; ri++ {
+	for ri := 0; ri < rist && ri < len(pr.Rules); ri++ { // (the rules are cut at the !)
 		rr := &pr.Rules[ri]
 		if !rr.IsToken() {
 			continue

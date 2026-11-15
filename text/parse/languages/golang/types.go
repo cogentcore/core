@@ -33,6 +33,20 @@ func QualifyType(pkgnm, tnm string) string {
 	if pkgnm == "" || IsQualifiedType(tnm) {
 		return tnm
 	}
+	// the element type of a composite type is qualified, with the package
+	// outside (as by [PrefixType]): pkg.[]T and pkg.*T, but []byte
+	for _, pfx := range []string{"[]", "*", "chan ", "<-chan ", "chan<- "} {
+		if strings.HasPrefix(tnm, pfx) {
+			epkg, etnm := SplitType(QualifyType(pkgnm, tnm[len(pfx):]))
+			if epkg == "" { // a builtin element type
+				return pfx + etnm
+			}
+			return epkg + "." + pfx + etnm
+		}
+	}
+	if strings.HasPrefix(tnm, "map[") || strings.HasPrefix(tnm, "func") {
+		return tnm // (its parts are not parsed here)
+	}
 	if _, btyp := BuiltinTypes[tnm]; btyp {
 		return tnm
 	}
@@ -177,7 +191,10 @@ var TypeToKindMap = map[string]syms.Kinds{
 	"StructType":    syms.Composite,
 	"InterfaceType": syms.Composite,
 	"FuncType":      syms.Composite,
-	"StringDbl":     syms.KindsN, // note: Lit is removed by ASTTypeName
+	"SRChanType":    syms.Composite, // chan T
+	"SendChanType":  syms.Composite, // <-chan T (the grammar names it by its arrow)
+	"RecvChanType":  syms.Composite, // chan<- T
+	"StringDbl":     syms.KindsN,    // note: Lit is removed by ASTTypeName
 	"StringTicks":   syms.KindsN,
 	"Rune":          syms.KindsN,
 	"NumInteger":    syms.KindsN,
@@ -371,9 +388,19 @@ func (gl *GoLang) TypeFromASTComp(fs *parse.FileState, pkg *syms.Symbol, ty *sym
 						ty.Els.Add(nm, SymTypeNameForPkg(fldty, pkg))
 					}
 				}
-			case "AnonQualField":
-				ty.Els.Add(fsrc, fsrc) // anon two are same
-				gl.StructInheritEls(fs, pkg, ty, fsrc)
+			case "AnonQualField", "AnonPtrField": // embedded pkg.Type or *Type
+				flds := strings.Fields(strings.TrimPrefix(fsrc, "*")) // (without any tag)
+				if len(flds) == 0 {
+					continue
+				}
+				tnm := flds[0]
+				_, fnm := SplitType(tnm) // the field is named by the type, without its package
+				if fld.Name == "AnonPtrField" {
+					ty.Els.Add(fnm, "*"+tnm)
+				} else {
+					ty.Els.Add(fnm, tnm)
+				}
+				gl.StructInheritEls(fs, pkg, ty, tnm)
 			}
 		}
 		if newTy {
@@ -413,6 +440,17 @@ func (gl *GoLang) TypeFromASTComp(fs *parse.FileState, pkg *syms.Symbol, ty *sym
 			} else {
 				ty.Name = fs.NextAnonName(pkg.Name + "_interface")
 			}
+		}
+	case "SRChanType", "SendChanType", "RecvChanType":
+		ty.Kind = syms.Chan
+		valty, ok := gl.SubTypeFromAST(fs, pkg, tyast, 0)
+		if !ok {
+			return nil, false
+		}
+		vnm := SymTypeNameForPkg(valty, pkg)
+		ty.Els.Add("val", vnm)
+		if newTy {
+			ty.Name = map[string]string{"SRChanType": "chan ", "SendChanType": "<-chan ", "RecvChanType": "chan<- "}[tnm] + vnm
 		}
 	case "FuncType":
 		ty.Kind = syms.Func
@@ -503,7 +541,9 @@ func (gl *GoLang) StructInheritEls(fs *parse.FileState, pkg *syms.Symbol, ty *sy
 		}
 		nmt := len(ety.Meths)
 		if nmt > 0 {
-			ty.Meths = make(syms.TypeMap, nmt)
+			if ty.Meths == nil { // (adding to those of other embedded types)
+				ty.Meths = make(syms.TypeMap, nmt)
+			}
 			for mn, mt := range ety.Meths {
 				nmt := mt.Clone()
 				for i := range nmt.Els {

@@ -198,12 +198,14 @@ func (ls *State) Next(inc int) bool {
 	return true
 }
 
-// NextRune reads the next rune into Ch and returns false if at end of line
+// NextRune reads the next rune into Rune and returns false if at end of
+// line, where Rune is -1
 func (ls *State) NextRune() bool {
 	sz := len(ls.Src)
 	ls.Pos++
 	if ls.Pos >= sz {
 		ls.Pos = sz
+		ls.Rune = -1 // (not the last rune again, as for an escape at the end)
 		return false
 	}
 	ls.Rune = ls.Src[ls.Pos]
@@ -215,6 +217,7 @@ func (ls *State) CurRuneAt() bool {
 	sz := len(ls.Src)
 	if ls.Pos >= sz {
 		ls.Pos = sz
+		ls.Rune = -1
 		return false
 	}
 	ls.Rune = ls.Src[ls.Pos]

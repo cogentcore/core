@@ -336,6 +336,12 @@ func (gl *GoLang) InferForRangeSymbolType(sy *syms.Symbol, fs *parse.FileState, 
 		} else {
 			sy.Type = "rune"
 		}
+	case syms.Chan: // the values received
+		if len(vty.Els) > 0 {
+			sy.Type = vty.Els[0].Type
+		} else {
+			sy.Type = TypeErr
+		}
 	default:
 		sy.Type = TypeErr
 		if TraceTypes {
