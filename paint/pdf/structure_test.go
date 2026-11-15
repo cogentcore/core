@@ -206,6 +206,16 @@ func TestLayerPane(t *testing.T) {
 	assert.Equal(t, 2, strings.Count(s, " BDC"))
 	assert.Equal(t, 2, strings.Count(s, " EMC"))
 	assert.Contains(t, s, "/OFF[")
+
+	s = renderPDF(t, func(pd *PDF, sty *styles.Paint) {
+		vis := pd.AddLayer("visible", true)
+		strokeStyle(sty, 1)
+		pd.BeginLayer(vis)
+		pd.Path(*ppath.New().Line(0, 0, 10, 10), sty, math32.Identity2())
+		pd.EndLayer()
+	})
+	assert.Contains(t, s, "/OCProperties")
+	assert.NotContains(t, s, "/PageMode/UseOC", "the layer pane is only opened with OpenLayerPane")
 }
 
 // TestOutlineDict tests that the outline dictionary has the right type.
@@ -283,4 +293,22 @@ func TestEncoding(t *testing.T) {
 	assert.Equal(t, "a\\(b\\)\\\\", escape(`a(b)\`))
 	assert.Equal(t, "1.5", dec(1.5).String())
 	assert.Equal(t, "3000000000.0", dec(3e9).String())
+}
+
+// TestGradientStroke tests a gradient stroke, and that a gradient used
+// for paths with different bounds is set for the bounds of each.
+func TestGradientStroke(t *testing.T) {
+	s := renderPDF(t, func(pd *PDF, sty *styles.Paint) {
+		g := gradient.NewLinear().AddStop(colors.Red, 0).AddStop(colors.Blue, 1)
+		strokeStyle(sty, 2)
+		sty.Stroke.Color = g
+		pd.Path(*ppath.New().Line(0, 0, 50, 0), sty, math32.Identity2())
+		sty.Stroke.Color = colors.Uniform(colors.Green)
+		sty.Fill.Color = g
+		pd.Path(*ppath.New().Rectangle(0, 10, 20, 20), sty, math32.Identity2())
+		pd.Path(*ppath.New().Rectangle(30, 10, 60, 40), sty, math32.Identity2())
+	})
+	assert.Contains(t, s, "/Pattern CS", "the gradient stroke")
+	assert.Equal(t, 2, strings.Count(s, "/Pattern cs"), "the gradient fill, for each path")
+	assert.Contains(t, s, "/P2", "three patterns: one stroke and two fills of different bounds")
 }

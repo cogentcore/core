@@ -199,7 +199,7 @@ func (r *PDF) setTextStrokeColor(clr image.Image) bool {
 		}
 	}
 	sc.Color = clr
-	r.w.SetStroke(&sc)
+	r.w.SetStroke(&sc, math32.Box2{}, math32.Identity2())
 	return true
 }
 

@@ -62,7 +62,7 @@ func TestRenderer(t *testing.T) {
 	r = append(r, pimage.NewDraw(image.Rect(30, 30, 34, 34), img, nil, image.Point{}, draw.Over))
 	r = append(r, pimage.NewDraw(image.Rect(40, 40, 44, 44), img, big, image.Point{}, draw.Over))
 	r = append(r, pimage.NewTransform(math32.Rotate2D(0.3), math32.Identity2(), image.Rect(50, 50, 54, 54), img, nil, draw.Over))
-	r = append(r, pimage.NewDraw(image.Rect(0, 0, 4, 4), gradient.NewLinear(), nil, image.Point{}, draw.Over))
+	r = append(r, pimage.NewDraw(image.Rect(0, 0, 4, 4), gradient.NewLinear().AddStop(colors.Red, 0).AddStop(colors.Blue, 1), nil, image.Point{}, draw.Over))
 	rs.Render(r)
 
 	src := string(rs.Source())
@@ -75,6 +75,7 @@ func TestRenderer(t *testing.T) {
 	assert.Contains(t, src, "/Dests", "the anchor")
 	assert.Equal(t, 2, strings.Count(src, "/Subtype/Image"), "the image, and the larger original for the scaled one")
 	assert.Contains(t, src, "/Width 8", "the original, as it is larger")
+	assert.Contains(t, src, "/Pattern cs", "the gradient image fills its rectangle")
 
 	rs.SetSize(units.UnitPt, math32.Vec2(50, 50))
 	un, sz = rs.Size()

@@ -168,9 +168,9 @@ func (rs *Renderer) RenderImage(pr *pimage.Params) {
 		return
 	}
 
+	// a gradient fills the rectangle, as a pattern
 	if gr, ok := usrc.(gradient.Gradient); ok {
-		_ = gr
-		// todo: handle:
+		rs.PDF.FillBox(math32.Identity2(), math32.B2FromRect(pr.Rect), gr)
 		return
 	}
 	m := math32.Translate2D(float32(pr.Rect.Min.X+pr.SourcePos.X), float32(pr.Rect.Min.Y+pr.SourcePos.Y))

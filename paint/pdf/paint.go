@@ -57,13 +57,14 @@ func (r *PDF) Path(path ppath.Path, style *styles.Paint, tr math32.Matrix2) {
 		closed = true
 	}
 
+	// the bounds of the path, for a gradient fill or stroke
 	var bounds math32.Box2
-	if style.HasFill() {
-		if _, ok := style.Fill.Color.(gradient.Gradient); ok {
-			fbox := trpath.FastBounds()
-			cum := r.Cumulative()
-			bounds = fbox.MulMatrix2(cum)
-		}
+	_, fillGrad := style.Fill.Color.(gradient.Gradient)
+	_, strokeGrad := style.Stroke.Color.(gradient.Gradient)
+	if (style.HasFill() && fillGrad) || (style.HasStroke() && strokeGrad) {
+		fbox := trpath.FastBounds()
+		cum := r.Cumulative()
+		bounds = fbox.MulMatrix2(cum)
 	}
 
 	if style.HasStroke() && strokeUnsupported {
@@ -101,7 +102,7 @@ func (r *PDF) Path(path ppath.Path, style *styles.Paint, tr math32.Matrix2) {
 			r.w.Write([]byte("*"))
 		}
 	} else if !style.HasFill() && style.HasStroke() {
-		r.w.SetStroke(&stk)
+		r.w.SetStroke(&stk, bounds, tr)
 		r.w.Write([]byte(" "))
 		r.w.Write([]byte(data))
 		if closed {
@@ -118,7 +119,7 @@ func (r *PDF) Path(path ppath.Path, style *styles.Paint, tr math32.Matrix2) {
 			r.w.Write([]byte("*"))
 		}
 
-		r.w.SetStroke(&stk)
+		r.w.SetStroke(&stk, bounds, tr)
 		r.w.Write([]byte(" "))
 		r.w.Write([]byte(data))
 		if closed {
@@ -134,7 +135,9 @@ func (r *PDF) Path(path ppath.Path, style *styles.Paint, tr math32.Matrix2) {
 // if not available.
 func (w *pdfPage) SetFill(fill *styles.Fill, bounds math32.Box2, m math32.Matrix2) {
 	csty := w.style()
-	if csty.Fill.Color != fill.Color || csty.Fill.Opacity != fill.Opacity {
+	_, grad := fill.Color.(gradient.Gradient)
+	// a gradient is set again for the bounds of each path
+	if grad || csty.Fill.Color != fill.Color || csty.Fill.Opacity != fill.Opacity {
 		w.SetFillColor(fill, bounds, m)
 	}
 	csty.Fill = *fill
@@ -188,10 +191,14 @@ func (w *pdfPage) SetFillColor(fill *styles.Fill, bounds math32.Box2, m math32.M
 }
 
 // SetStroke sets the stroke style values where different from current.
-func (w *pdfPage) SetStroke(stroke *styles.Stroke) {
+// The bounds and matrix are required for gradient strokes: pass identity
+// if not available.
+func (w *pdfPage) SetStroke(stroke *styles.Stroke, bounds math32.Box2, m math32.Matrix2) {
 	csty := w.style()
-	if csty.Stroke.Color != stroke.Color || csty.Stroke.Opacity != stroke.Opacity {
-		w.SetStrokeColor(stroke)
+	_, grad := stroke.Color.(gradient.Gradient)
+	// a gradient is set again for the bounds of each path
+	if grad || csty.Stroke.Color != stroke.Color || csty.Stroke.Opacity != stroke.Opacity {
+		w.SetStrokeColor(stroke, bounds, m)
 	}
 	if csty.Stroke.Width.Dots != stroke.Width.Dots {
 		w.SetStrokeWidth(stroke.Width.Dots)
@@ -212,13 +219,14 @@ func (w *pdfPage) SetStroke(stroke *styles.Stroke) {
 	csty.Stroke = *stroke
 }
 
-// SetStrokeColor sets the stroking color (image).
-func (w *pdfPage) SetStrokeColor(stroke *styles.Stroke) {
+// SetStrokeColor sets the stroking color (image). The bounds and matrix
+// are required for gradient strokes.
+func (w *pdfPage) SetStrokeColor(stroke *styles.Stroke, bounds math32.Box2, m math32.Matrix2) {
 	switch x := stroke.Color.(type) {
 	case *gradient.Linear:
+		fmt.Fprintf(w, " /Pattern CS /%v SCN", w.gradientPattern(x, bounds, m))
 	case *gradient.Radial:
-		// TODO: should we unset cs?
-		// fmt.Fprintf(w, " /Pattern cs /%v scn", w.gradientPattern(stroke.Gradient))
+		fmt.Fprintf(w, " /Pattern CS /%v SCN", w.gradientPattern(x, bounds, m))
 	case *image.Uniform:
 		clr := colors.ApplyOpacity(colors.AsRGBA(x), stroke.Opacity)
 		a := float32(clr.A) / 255.0
