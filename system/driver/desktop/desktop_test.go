@@ -9,6 +9,7 @@ package desktop
 import (
 	"image"
 	"os"
+	"runtime"
 	"testing"
 	"time"
 
@@ -140,7 +141,9 @@ func TestAppScreens(t *testing.T) {
 	assert.Greater(t, sc.PixelSize.Y, 0)
 	assert.Greater(t, sc.DevicePixelRatio, float32(0))
 	assert.Greater(t, sc.LogicalDPI, float32(0))
-	assert.False(t, onMainThread(), "the tests run off the main thread")
+	if runtime.GOOS == "darwin" { // (it is only known on macOS)
+		assert.False(t, onMainThread(), "the tests run off the main thread")
+	}
 	assert.NotPanics(t, func() { TheApp.IsDark() })
 }
 
@@ -168,7 +171,8 @@ func TestNewWindow(t *testing.T) {
 	w.SetSize(nsz)
 	resized := waitEvent(w, func(e events.Event) bool { return e.Type() == events.WindowResize })
 	assert.True(t, resized, "a resize event")
-	assert.Equal(t, image.Pt(400, 300), w.WinSize())
+	// (on X11, a resize event can come before the size of the window is set)
+	assert.Eventually(t, func() bool { return w.WinSize() == image.Pt(400, 300) }, 2*time.Second, 10*time.Millisecond, "the new size: %v", w.WinSize())
 	assert.Equal(t, nsz, w.Size())
 
 	assert.NoError(t, TheApp.Cursor(w).Set(cursors.Text)) // sets the context window

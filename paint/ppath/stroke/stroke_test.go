@@ -69,7 +69,7 @@ func TestPathStroke(t *testing.T) {
 		{"L10 0L10 10", 2.0, ButtCap, ArcsJoiner{BevelJoin, 1.0}, "M0 -1L10 -1L11 0L11 10L9 10L9 1L0 1z"},
 
 		// {"L10 0L10 10L0 10z", 2.0, ButtCap, MiterJoin, "M-1 -1L11 -1L11 11L-1 11zM1 1L1 9L9 9L9 1z"},
-		{"L10 0L10 10L0 10z", 2.0, ButtCap, BevelJoin, "M-1 0L0 -1L10 -1L11 0L11 10L10 11L0 11L-1 10zM1 9L9 9L9 1L1 1z"},
+		{"L10 0L10 10L0 10z", 2.0, ButtCap, BevelJoin, "M-1 0L0 -1L10 -1L11 0L11 10L10 11L0 11L-1 10zM1 1L1 9L9 9L9 1z"},
 		{"L0 10L10 10L10 0z", 2.0, ButtCap, BevelJoin, "M-1 0L0 -1L10 -1L11 0L11 10L10 11L0 11L-1 10zM1 1L1 9L9 9L9 1z"},
 		{"Q10 0 10 10", 2.0, ButtCap, BevelJoin, "M0 -1L9.5137 3.4975L11 10L9 10L7.7845 4.5025L0 1z"},
 		{"C0 10 10 10 10 0", 2.0, ButtCap, BevelJoin, "M-1 0L1 0L3.5291 6.0900L7.4502 5.2589L9 0L11 0L8.9701 6.5589L2.5234 7.8188z"},
@@ -101,7 +101,7 @@ func TestPathStroke(t *testing.T) {
 			ppath.Epsilon = origEpsilon
 			stroke := Stroke(ppath.MustParseSVGPath(tt.orig), tt.w, tt.cp, tt.jr, tolerance)
 			ppath.Epsilon = 1e-3
-			assert.InDeltaSlice(t, ppath.MustParseSVGPath(tt.stroke), stroke, 1.0e-4)
+			assertSamePath(t, ppath.MustParseSVGPath(tt.stroke), stroke, 1.0e-4)
 		})
 	}
 	ppath.Epsilon = origEpsilon
@@ -132,13 +132,13 @@ func TestPathOffset(t *testing.T) {
 		{"L10 0L10 10L0 10z", 0.0, "L10 0L10 10L0 10z"},
 		//{"L10 0L10 10L0 10", 1.0, "M0 -1L10 -1A1 1 0 0 1 11 0L11 10A1 1 0 0 1 10 11L0 11"},
 		//{"L10 0L10 10L0 10z", 1.0, "M10 -1A1 1 0 0 1 11 0L11 10A1 1 0 0 1 10 11L0 11A1 1 0 0 1 -1 10L-1 0A1 1 0 0 1 0 -1z"},
-		{"L10 0L10 10L0 10z", -1.0, "M1 9L1 1L9 1L9 9z"},
+		{"L10 0L10 10L0 10z", -1.0, "M1 1L9 1L9 9L1 9z"},
 		// {"L10 0L5 0z", -1.0, "M-0.99268263 -0.18098975L-0.99268263 0.18098975L-0.86493423 0.51967767L-0.62587738 0.79148822L-0.30627632 0.9614421L0 1L10 1L10.30627632 0.9614421L10.62587738 0.79148822L10.86493423 0.51967767L10.992682630000001 0.18098975L10.992682630000001 -0.18098975L10.86493423 -0.51967767L10.62587738 -0.79148822L10.30627632 -0.9614421L10 -1L0 -1L-0.30627632 -0.9614421L-0.62587738 -0.79148822L-0.86493423 -0.51967767z"},
 	}
 	for _, tt := range tts {
 		t.Run(fmt.Sprintf("%v/%v", tt.orig, tt.w), func(t *testing.T) {
 			offset := Offset(ppath.MustParseSVGPath(tt.orig), tt.w, tolerance)
-			assert.InDeltaSlice(t, ppath.MustParseSVGPath(tt.offset), offset, 1.0e-5)
+			assertSamePath(t, ppath.MustParseSVGPath(tt.offset), offset, 1.0e-5)
 		})
 	}
 }
@@ -289,4 +289,55 @@ func TestPathDash(t *testing.T) {
 			assert.Equal(t, ppath.MustParseSVGPath(tt.dashes), Dash(ppath.MustParseSVGPath(tt.p), tt.offset, tt.d...))
 		})
 	}
+}
+
+// assertSamePath asserts that the paths are the same within the given
+// tolerance, where a closed subpath of lines may start at any of its points,
+// in the same direction, as where it starts can depend on the rounding of
+// the floating point math of the platform.
+func assertSamePath(t *testing.T, want, got ppath.Path, delta float64) {
+	t.Helper()
+	ws, gs := want.Split(), got.Split()
+	if len(ws) != len(gs) {
+		assert.InDeltaSlice(t, want, got, delta)
+		return
+	}
+	near := func(a, b math32.Vector2) bool {
+		return math.Abs(float64(a.X-b.X)) <= delta && math.Abs(float64(a.Y-b.Y)) <= delta
+	}
+	for i := range ws {
+		w, g := ws[i], gs[i]
+		if len(w) == len(g) && w.Closed() && g.Closed() && onlyLines(w) && onlyLines(g) {
+			wc, gc := w.Coords(), g.Coords()
+			if len(wc) > 1 && wc[len(wc)-1] == wc[0] { // the close returns to the start
+				wc, gc = wc[:len(wc)-1], gc[:len(gc)-1]
+			}
+			same := false
+			for r := range gc {
+				same = true
+				for j := range wc {
+					if !near(wc[j], gc[(j+r)%len(gc)]) {
+						same = false
+						break
+					}
+				}
+				if same {
+					break
+				}
+			}
+			assert.True(t, same, "subpath %d: want %v, got %v", i, w.ToSVG(), g.ToSVG())
+			continue
+		}
+		assert.InDeltaSlice(t, w, g, delta, "subpath %d", i)
+	}
+}
+
+// onlyLines returns whether the path has only a move, lines, and a close.
+func onlyLines(p ppath.Path) bool {
+	for i := 0; i < len(p); i += ppath.CmdLen(p[i]) {
+		if c := p[i]; c != ppath.MoveTo && c != ppath.LineTo && c != ppath.Close {
+			return false
+		}
+	}
+	return true
 }
