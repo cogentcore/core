@@ -123,16 +123,15 @@ func (tr *Tree) selectedSyncNodes() []tree.Node {
 // source [tree.Node] in [Tree.SyncNode] or nil if not found.
 func (tr *Tree) FindSyncNode(n tree.Node) *Tree {
 	var res *Tree
-	tr.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+	for cw := range tr.AllWidgets() {
 		tvn := AsTree(cw)
 		if tvn != nil {
 			if tvn.SyncNode == n {
 				res = tvn
-				return tree.Break
+				break
 			}
 		}
-		return tree.Continue
-	})
+	}
 	return res
 }
 
@@ -154,7 +153,7 @@ func (tr *Tree) InsertBefore() { //types:add
 
 func (tr *Tree) addTreeNodes(rel, myidx int, typ *types.Type, n int) {
 	var stv *Tree
-	for i := 0; i < n; i++ {
+	for i := range n {
 		nn := tree.NewOfType(typ)
 		tr.InsertChild(nn, myidx+i)
 		nn.AsTree().SetName(fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i))
@@ -175,7 +174,7 @@ func (tr *Tree) addTreeNodes(rel, myidx int, typ *types.Type, n int) {
 func (tr *Tree) addSyncNodes(rel, myidx int, typ *types.Type, n int) {
 	parent := tr.SyncNode
 	var sn tree.Node
-	for i := 0; i < n; i++ {
+	for i := range n {
 		nn := tree.NewOfType(typ)
 		parent.AsTree().InsertChild(nn, myidx+i)
 		nn.AsTree().SetName(fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i))
@@ -431,14 +430,15 @@ func (tr *Tree) syncNodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []string)
 	sl := make([]tree.Node, 0, ni)
 	pl := make([]string, 0, ni)
 	for _, d := range md {
-		if d.Type == fileinfo.DataJSON {
+		switch d.Type {
+		case fileinfo.DataJSON:
 			nn, err := tree.UnmarshalRootJSON(d.Data)
 			if err == nil {
 				sl = append(sl, nn)
 			} else {
 				ErrorSnackbar(tr, err, "Error loading node")
 			}
-		} else if d.Type == fileinfo.TextPlain { // paths
+		case fileinfo.TextPlain: // paths
 			pl = append(pl, string(d.Data))
 		}
 	}
@@ -459,7 +459,7 @@ func (tr *Tree) pasteAssignSync(md mimedata.Mimes) {
 // pasteAtSync inserts object(s) from mime data at rel position to this node.
 // If another item with the same name already exists, it will
 // append _Copy on the name of the inserted objects
-func (tr *Tree) pasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int, actNm string) {
+func (tr *Tree) pasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int, _ string) {
 	sn := tr.SyncNode
 	sl, pl := tr.nodesFromMimeData(md)
 	tvparent := AsTree(tr.Parent)
@@ -497,7 +497,7 @@ func (tr *Tree) pasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int, act
 
 // pasteChildrenSync inserts object(s) from mime data at
 // end of children of this node
-func (tr *Tree) pasteChildrenSync(md mimedata.Mimes, mod events.DropMods) {
+func (tr *Tree) pasteChildrenSync(md mimedata.Mimes, _ events.DropMods) {
 	sl, _ := tr.nodesFromMimeData(md)
 	spar := tr.SyncNode
 	for _, ns := range sl {

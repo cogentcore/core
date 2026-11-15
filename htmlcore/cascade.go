@@ -325,15 +325,16 @@ func (c *Context) declaration(n *html.Node, prop string) string {
 // declarationIn returns the value of the given property in the given
 // declarations, as [Context.declaration].
 func declarationIn(ds []*cssDecl, prop string) string {
-	for i := len(ds) - 1; i >= 0; i-- {
-		if ds[i].Property == prop {
-			if ds[i].invalid {
+	for ri := len(ds) - 1; ri >= 0; ri-- {
+		d := ds[ri]
+		if d.Property == prop {
+			if d.invalid {
 				return ""
 			}
 			if prop == "display" {
-				return legacyDisplay(ds[i].Value)
+				return legacyDisplay(d.Value)
 			}
-			return ds[i].Value
+			return d.Value
 		}
 	}
 	return ""
@@ -369,12 +370,13 @@ func legacyDisplay(v string) string {
 // there is none (or it is invalid).
 func (c *Context) lastDeclaration(n *html.Node, props ...string) (prop, value string) {
 	ds := c.declarations(n)
-	for i := len(ds) - 1; i >= 0; i-- {
-		if slices.Contains(props, ds[i].Property) {
-			if ds[i].invalid {
-				return ds[i].Property, ""
+	for ri := len(ds) - 1; ri >= 0; ri-- {
+		d := ds[ri]
+		if slices.Contains(props, d.Property) {
+			if d.invalid {
+				return d.Property, ""
 			}
-			return ds[i].Property, ds[i].Value
+			return d.Property, d.Value
 		}
 	}
 	return "", ""
@@ -629,7 +631,7 @@ func newSelectorIndex(root *html.Node) *selectorIndex {
 					ix.byID[a.Val] = append(ix.byID[a.Val], c)
 				case "class":
 					seen := map[string]bool{}
-					for _, cl := range strings.Fields(a.Val) {
+					for cl := range strings.FieldsSeq(a.Val) {
 						if !seen[cl] {
 							seen[cl] = true
 							ix.byClass[cl] = append(ix.byClass[cl], c)
@@ -707,20 +709,20 @@ func specificity(sel string) int {
 	start := true // at the start of a compound selector
 	for i := 0; i < len(sel); i++ {
 		ch := sel[i]
-		switch {
-		case ch == '#':
+		switch ch {
+		case '#':
 			ids++
 			start = false
-		case ch == '.':
+		case '.':
 			classes++
 			start = false
-		case ch == '[':
+		case '[':
 			classes++
 			for i < len(sel) && sel[i] != ']' {
 				i++
 			}
 			start = false
-		case ch == ':':
+		case ':':
 			if i+1 < len(sel) && sel[i+1] == ':' {
 				types++ // pseudo-element
 				i++
@@ -728,10 +730,10 @@ func specificity(sel string) int {
 				classes++
 			}
 			start = false
-		case ch == ' ' || ch == '>' || ch == '+' || ch == '~' || ch == ',':
+		case ' ', '>', '+', '~', ',':
 			start = true
 			continue
-		case ch == '*':
+		case '*':
 			start = false
 		default:
 			if start && (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z') {
@@ -932,9 +934,10 @@ const minCustomIndex = 32
 // declarations are others (or more).
 func (c *Context) customDecl(n *html.Node, ds []*cssDecl, name string) *cssDecl {
 	if len(ds) < minCustomIndex {
-		for i := len(ds) - 1; i >= 0; i-- {
-			if ds[i].Property == name {
-				return ds[i]
+		for ri := len(ds) - 1; ri >= 0; ri-- {
+			d := ds[ri]
+			if d.Property == name {
+				return d
 			}
 		}
 		return nil
@@ -1019,11 +1022,11 @@ func (c *Context) displayOf(n *html.Node) string {
 func importURL(prelude string) (url, media string) {
 	p := strings.TrimSpace(prelude)
 	if rest, ok := strings.CutPrefix(p, "url("); ok {
-		end := strings.Index(rest, ")")
-		if end < 0 {
+		before, after, ok := strings.Cut(rest, ")")
+		if !ok {
 			return "", ""
 		}
-		url, media = rest[:end], rest[end+1:]
+		url, media = before, after
 	} else if len(p) > 0 && (p[0] == '"' || p[0] == '\'') {
 		end := strings.IndexByte(p[1:], p[0])
 		if end < 0 {
@@ -1053,9 +1056,10 @@ func splitSelectors(list string) []string {
 		ch := list[i]
 		switch {
 		case quote != 0:
-			if ch == '\\' {
+			switch ch {
+			case '\\':
 				i++
-			} else if ch == quote {
+			case quote:
 				quote = 0
 			}
 		case ch == '"' || ch == '\'':

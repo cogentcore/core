@@ -140,7 +140,7 @@ func TestFeatures(t *testing.T) {
 	}
 	assert.Greater(t, red, 20, "the red span after the text")
 	left := 640
-	for x := 0; x < 160; x++ {
+	for x := range 160 {
 		for y := 235; y < 275; y++ {
 			if at(x, y).A > 128 && x < left {
 				left = x

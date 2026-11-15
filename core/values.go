@@ -264,7 +264,7 @@ func (hb *HighlightingButton) Init() {
 	})
 }
 
-// Editor opens an editor of highlighting styles.
+// HighlightingEditor opens an editor of highlighting styles.
 func HighlightingEditor(st *highlighting.Styles) {
 	if RecycleMainWindow(st) {
 		return

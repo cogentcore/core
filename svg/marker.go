@@ -16,10 +16,10 @@ type Marker struct {
 	NodeBase
 
 	// reference position to align the vertex position with, specified in ViewBox coordinates
-	RefPos math32.Vector2 `xml:"{refX,refY}"`
+	RefPos math32.Vector2 `svg:"refX,refY"`
 
 	// size of marker to render, in Units units
-	Size math32.Vector2 `xml:"{markerWidth,markerHeight}"`
+	Size math32.Vector2 `svg:"markerWidth,markerHeight"`
 
 	// units to use
 	Units MarkerUnits `xml:"markerUnits"`
@@ -65,45 +65,45 @@ const (
 // RenderMarkerStart renders the marker as a marker-start, with the given
 // vertex position, angle (in radians), and stroke width: as
 // [Marker.RenderMarker], reversed for an orient of auto-start-reverse.
-func (mrk *Marker) RenderMarkerStart(sv *SVG, vertexPos math32.Vector2, vertexAng, strokeWidth float32) {
-	mrk.start = true
-	mrk.RenderMarker(sv, vertexPos, vertexAng, strokeWidth)
-	mrk.start = false
+func (g *Marker) RenderMarkerStart(sv *SVG, vertexPos math32.Vector2, vertexAng, strokeWidth float32) {
+	g.start = true
+	g.RenderMarker(sv, vertexPos, vertexAng, strokeWidth)
+	g.start = false
 }
 
 // RenderMarker renders the marker using given vertex position, angle (in
 // radians), and stroke width
-func (mrk *Marker) RenderMarker(sv *SVG, vertexPos math32.Vector2, vertexAng, strokeWidth float32) {
-	mrk.VertexPos = vertexPos
-	mrk.VertexAngle = vertexAng
-	mrk.StrokeWidth = strokeWidth
-	if mrk.Units == StrokeWidth {
-		mrk.EffSize = mrk.Size.MulScalar(strokeWidth)
+func (g *Marker) RenderMarker(sv *SVG, vertexPos math32.Vector2, vertexAng, strokeWidth float32) {
+	g.VertexPos = vertexPos
+	g.VertexAngle = vertexAng
+	g.StrokeWidth = strokeWidth
+	if g.Units == StrokeWidth {
+		g.EffSize = g.Size.MulScalar(strokeWidth)
 	} else {
-		mrk.EffSize = mrk.Size
+		g.EffSize = g.Size
 	}
 
 	ang := vertexAng
-	switch strings.TrimSpace(mrk.Orient) {
+	switch strings.TrimSpace(g.Orient) {
 	case "auto":
 	case "auto-start-reverse": // the start marker points backward
-		if mrk.start {
+		if g.start {
 			ang += math32.Pi
 		}
 	default:
-		ang, _ = math32.ParseAngle32(mrk.Orient)
+		ang, _ = math32.ParseAngle32(g.Orient)
 	}
-	if mrk.ViewBox.Size == (math32.Vector2{}) {
-		mrk.ViewBox.Size = math32.Vec2(3, 3)
+	if g.ViewBox.Size == (math32.Vector2{}) {
+		g.ViewBox.Size = math32.Vec2(3, 3)
 	}
-	mrk.Transform = math32.Rotate2D(ang).Scale(mrk.EffSize.X/mrk.ViewBox.Size.X, mrk.EffSize.Y/mrk.ViewBox.Size.Y).Translate(-mrk.RefPos.X, -mrk.RefPos.Y)
-	mrk.Transform.X0 += vertexPos.X
-	mrk.Transform.Y0 += vertexPos.Y
+	g.Transform = math32.Rotate2D(ang).Scale(g.EffSize.X/g.ViewBox.Size.X, g.EffSize.Y/g.ViewBox.Size.Y).Translate(-g.RefPos.X, -g.RefPos.Y)
+	g.Transform.X0 += vertexPos.X
+	g.Transform.Y0 += vertexPos.Y
 
-	mrk.Paint.Transform = mrk.Transform
+	g.Paint.Transform = g.Transform
 
 	// fmt.Println("render marker:", mrk.Name, strokeWidth, mrk.EffSize, mrk.Transform)
-	mrk.Render(sv)
+	g.Render(sv)
 }
 
 func (g *Marker) BBoxes(sv *SVG, parTransform math32.Matrix2) {

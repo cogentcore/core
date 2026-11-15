@@ -78,7 +78,7 @@ func (ms *MeshBase) SetOffsets(vtxOffset, idxOffset int) {
 	// nop
 }
 
-// todo!!
+// ComputeNorms computes the normals of the mesh (not implemented yet).
 func (ms *MeshBase) ComputeNorms(pos, norm math32.ArrayF32) {
 	// norm := math32.Normal(vtxs[0], vtxs[1], vtxs[2])
 }
@@ -105,7 +105,7 @@ func (sc *Scene) setAllMeshes() {
 	}
 }
 
-// AddMeshUniqe adds given mesh, ensuring that it has
+// AddMeshUnique adds given mesh, ensuring that it has
 // a unique name if one already exists.
 // This is used e.g., in loading external files which may not
 // obey this constraint.

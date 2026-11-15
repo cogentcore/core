@@ -295,12 +295,12 @@ func abi(goarch string) string {
 // checkNDKRoot returns nil if the NDK in `ndkRoot` supports the current configured
 // API version and all the specified Android targets.
 func checkNDKRoot(c *config.Config, ndkRoot string, targets []config.Platform) error {
-	platformsJson, err := os.Open(filepath.Join(ndkRoot, "meta", "platforms.json"))
+	platformsJSON, err := os.Open(filepath.Join(ndkRoot, "meta", "platforms.json"))
 	if err != nil {
 		return err
 	}
-	defer platformsJson.Close()
-	decoder := json.NewDecoder(platformsJson)
+	defer platformsJSON.Close()
+	decoder := json.NewDecoder(platformsJSON)
 	supportedVersions := struct {
 		Min int
 		Max int
@@ -312,12 +312,12 @@ func checkNDKRoot(c *config.Config, ndkRoot string, targets []config.Platform) e
 		supportedVersions.Max < c.Build.AndroidMinSDK {
 		return fmt.Errorf("unsupported API version %d (not in %d..%d)", c.Build.AndroidMinSDK, supportedVersions.Min, supportedVersions.Max)
 	}
-	abisJson, err := os.Open(filepath.Join(ndkRoot, "meta", "abis.json"))
+	abisJSON, err := os.Open(filepath.Join(ndkRoot, "meta", "abis.json"))
 	if err != nil {
 		return err
 	}
-	defer abisJson.Close()
-	decoder = json.NewDecoder(abisJson)
+	defer abisJSON.Close()
+	decoder = json.NewDecoder(abisJSON)
 	abis := make(map[string]struct{})
 	if err := decoder.Decode(&abis); err != nil {
 		return err
@@ -374,6 +374,9 @@ func ndkVersion(ndkRoot string) string {
 		if strings.TrimSpace(tokens[0]) == "Pkg.Revision" {
 			return strings.TrimSpace(tokens[1])
 		}
+	}
+	if err := scanner.Err(); err != nil {
+		logx.PrintlnWarn("error reading the NDK source.properties:", err)
 	}
 	return ""
 }

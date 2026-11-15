@@ -73,6 +73,10 @@ type Text struct {
 	// into the richText.Join() runes.
 	selectRange textpos.Range
 
+	// selectAnchor is the rune index where a selection by sliding started,
+	// which stays an end of the selection as the other end moves.
+	selectAnchor int
+
 	// highlights are regions that will be highlighted in the text
 	// when rendered. Indexes are into richText.Join() runes.
 	highlights []textpos.Range
@@ -257,7 +261,7 @@ func (tx *Text) Init() {
 		system.TheApp.OpenURL(tl.URL)
 	})
 	tx.OnFocusLost(func(e events.Event) {
-		if !(tx.Scene.selectedText != nil && !e.HasAnyModifier(key.Shift, key.Meta)) {
+		if tx.Scene.selectedText == nil || e.HasAnyModifier(key.Shift, key.Meta) {
 			tx.selectReset()
 		}
 	})
@@ -320,8 +324,11 @@ func (tx *Text) Init() {
 		if len(tx.Scene.selectedText) == 0 {
 			tx.SetFocusQuiet()
 		}
-		tx.selectRange.Start = tx.pixelToRune(e.Pos())
-		tx.selectRange.End = tx.selectRange.Start
+		// the selection starts where the mouse was pressed, before it moved
+		// far enough to start the slide
+		tx.selectAnchor = tx.pixelToRune(e.StartPos())
+		tx.selectRange.Start = tx.selectAnchor
+		tx.selectRange.End = tx.selectAnchor
 		if !slices.Contains(tx.Scene.selectedText, tx) {
 			tx.Scene.selectedText = append(tx.Scene.selectedText, tx)
 		}
@@ -479,13 +486,11 @@ func (tx *Text) pixelToRune(pt image.Point) int {
 	return tx.paintText.RuneAtPoint(math32.FromPoint(pt), tx.Geom.Pos.Content)
 }
 
-// selectUpdate updates selection based on rune index
+// selectUpdate updates the selection to be between the anchor where it
+// started and the given rune index, on either side of it.
 func (tx *Text) selectUpdate(ri int) {
-	if ri >= tx.selectRange.Start {
-		tx.selectRange.End = ri
-	} else {
-		tx.selectRange.Start, tx.selectRange.End = ri, tx.selectRange.Start
-	}
+	tx.selectRange.Start = min(tx.selectAnchor, ri)
+	tx.selectRange.End = max(tx.selectAnchor, ri)
 }
 
 // hasSelection returns true if there is an active selection.
@@ -510,7 +515,7 @@ func (tx *Text) selectReset() {
 
 // selectAll selects entire set of text
 func (tx *Text) selectAll() {
-	tx.selectRange.Start = 0
+	tx.selectAnchor = 0
 	txt := tx.richText.Join()
 	tx.selectUpdate(len(txt))
 	tx.NeedsRender()
@@ -654,7 +659,7 @@ func (tx *Text) minContentWidth() float32 {
 // min-content width of the text when it wraps.
 func longestWordWidth(sc *Scene, st *styles.Style, txt string) float32 {
 	longest := ""
-	for _, w := range strings.Fields(txt) {
+	for w := range strings.FieldsSeq(txt) {
 		if utf8.RuneCountInString(w) > utf8.RuneCountInString(longest) {
 			longest = w
 		}

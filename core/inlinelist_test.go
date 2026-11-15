@@ -11,7 +11,7 @@ import (
 func TestInlineList(t *testing.T) {
 	b := NewBody()
 	NewInlineList(b).SetSlice(&[]int{1, 3, 5})
-	b.AssertRender(t, "inline-list/basic")
+	AssertRender(t, b, "inline-list/basic")
 }
 
 func TestInlineListUpdate(t *testing.T) {
@@ -20,5 +20,5 @@ func TestInlineListUpdate(t *testing.T) {
 	il.Update()
 	il.SetSlice(&[]int{4, 5, 6})
 	il.Update()
-	b.AssertRender(t, "inline-list/update")
+	AssertRender(t, b, "inline-list/update")
 }

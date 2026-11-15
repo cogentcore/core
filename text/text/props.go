@@ -16,7 +16,7 @@ import (
 )
 
 // FromProperties sets style field values based on the given property list.
-func (s *Style) FromProperties(parent *Style, properties map[string]any, ctxt colors.Context) {
+func (ts *Style) FromProperties(parent *Style, properties map[string]any, ctxt colors.Context) {
 	for key, val := range properties {
 		if len(key) == 0 {
 			continue
@@ -24,17 +24,17 @@ func (s *Style) FromProperties(parent *Style, properties map[string]any, ctxt co
 		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
 			continue
 		}
-		s.FromProperty(parent, key, val, ctxt)
+		ts.FromProperty(parent, key, val, ctxt)
 	}
 }
 
 // FromProperty sets style field values based on the given property key and value.
-func (s *Style) FromProperty(parent *Style, key string, val any, cc colors.Context) {
+func (ts *Style) FromProperty(parent *Style, key string, val any, cc colors.Context) {
 	if sfunc, ok := styleFuncs[key]; ok {
 		if parent != nil {
-			sfunc(s, key, val, parent, cc)
+			sfunc(ts, key, val, parent, cc)
 		} else {
-			sfunc(s, key, val, nil, cc)
+			sfunc(ts, key, val, nil, cc)
 		}
 		return
 	}
@@ -53,7 +53,7 @@ var styleFuncs = map[string]styleprops.Func{
 		func(obj *Style) *float32 { return &obj.LineHeight }),
 	"line-spacing": styleprops.FloatProportion(float32(1.3),
 		func(obj *Style) *float32 { return &obj.LineHeight }),
-	"para-spacing": styleprops.FloatProportion(float32(1.3),
+	"para-spacing": styleprops.FloatProportion(float32(1.5),
 		func(obj *Style) *float32 { return &obj.ParaSpacing }),
 	"white-space": styleprops.Enum(WrapAsNeeded,
 		func(obj *Style) enums.EnumSetter { return &obj.WhiteSpace }),
@@ -93,14 +93,14 @@ var styleFuncs = map[string]styleprops.Func{
 
 // ToProperties sets map[string]any properties based on non-default style values.
 // properties map must be non-nil.
-func (s *Style) ToProperties(sty *rich.Style, p map[string]any) {
-	if s.FontSize.Unit != units.UnitDp || s.FontSize.Value != 16 || sty.Size != 1 {
-		sz := s.FontSize
+func (ts *Style) ToProperties(sty *rich.Style, p map[string]any) {
+	if ts.FontSize.Unit != units.UnitDp || ts.FontSize.Value != 16 || sty.Size != 1 {
+		sz := ts.FontSize
 		sz.Value *= sty.Size
 		p["font-size"] = sz.StringCSS()
 	}
-	if sty.Family == rich.Custom && s.CustomFont != "" {
-		p["font-family"] = s.CustomFont
+	if sty.Family == rich.Custom && ts.CustomFont != "" {
+		p["font-family"] = ts.CustomFont
 	}
 	if sty.Slant != rich.SlantNormal {
 		p["font-style"] = sty.Slant.String()
@@ -116,32 +116,32 @@ func (s *Style) ToProperties(sty *rich.Style, p map[string]any) {
 	} else {
 		p["text-decoration"] = "none"
 	}
-	if s.Align != Start {
-		p["text-align"] = s.Align.String()
+	if ts.Align != Start {
+		p["text-align"] = ts.Align.String()
 	}
-	if s.AlignV != Start {
-		p["text-vertical-align"] = s.AlignV.String()
+	if ts.AlignV != Start {
+		p["text-vertical-align"] = ts.AlignV.String()
 	}
-	if s.LineHeight != 1.3 {
-		p["line-height"] = reflectx.ToString(s.LineHeight)
+	if ts.LineHeight != 1.3 {
+		p["line-height"] = reflectx.ToString(ts.LineHeight)
 	}
-	if s.WhiteSpace != WrapAsNeeded {
-		p["white-space"] = s.WhiteSpace.String()
+	if ts.WhiteSpace != WrapAsNeeded {
+		p["white-space"] = ts.WhiteSpace.String()
 	}
-	if sty.Direction != rich.LTR {
-		p["direction"] = s.Direction.String()
+	if ts.Direction != rich.LTR {
+		p["direction"] = ts.Direction.String()
 	}
-	if s.TabSize != 4 {
-		p["tab-size"] = reflectx.ToString(s.TabSize)
+	if ts.TabSize != 4 {
+		p["tab-size"] = reflectx.ToString(ts.TabSize)
 	}
-	p["fill"] = colors.AsHex(s.FillColor(sty))
+	p["fill"] = colors.AsHex(ts.FillColor(sty))
 	if sc := sty.StrokeColor(); sc != nil {
 		p["stroke-color"] = colors.AsHex(sc)
 	}
-	if s.SelectColor != nil {
-		p["select-color"] = colors.AsHex(colors.ToUniform(s.SelectColor))
+	if ts.SelectColor != nil {
+		p["select-color"] = colors.AsHex(colors.ToUniform(ts.SelectColor))
 	}
-	if s.HighlightColor != nil {
-		p["highlight-color"] = colors.AsHex(colors.ToUniform(s.HighlightColor))
+	if ts.HighlightColor != nil {
+		p["highlight-color"] = colors.AsHex(colors.ToUniform(ts.HighlightColor))
 	}
 }

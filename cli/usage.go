@@ -31,14 +31,18 @@ func usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	var b strings.Builder
 	if cmd == "" {
 		if opts.AppAbout != "" {
-			b.WriteString("\n" + opts.AppAbout + "\n\n")
+			b.WriteString("\n")
+			b.WriteString(opts.AppAbout)
+			b.WriteString("\n\n")
 		}
 	} else {
 		gotCmd := false
 		for _, c := range cmds {
 			if c.Name == cmd {
 				if c.Doc != "" {
-					b.WriteString("\n" + c.Doc + "\n\n")
+					b.WriteString("\n")
+					b.WriteString(c.Doc)
+					b.WriteString("\n\n")
 				}
 				gotCmd = true
 				break
@@ -60,7 +64,8 @@ func usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 				time = set.Value
 			}
 		}
-		b.WriteString(logx.TitleColor("Version: ") + fmt.Sprintf("%s (%s)\n\n", revision, time))
+		b.WriteString(logx.TitleColor("Version: "))
+		fmt.Fprintf(&b, "%s (%s)\n\n", revision, time)
 	}
 
 	fs := &fields{}
@@ -70,12 +75,13 @@ func usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	if cmd != "" {
 		cmdName += " " + cmd
 	}
-	b.WriteString(logx.TitleColor("Usage:\n") + indent + logx.CmdColor(cmdName+" "))
+	b.WriteString(logx.TitleColor("Usage:\n"))
+	b.WriteString(indent)
+	b.WriteString(logx.CmdColor(cmdName + " "))
 
 	posArgStrs := []string{}
 
-	for _, kv := range fs.Order {
-		v := kv.Value
+	for _, v := range fs.Values {
 		f := v.Field
 
 		posArgTag, ok := f.Tag.Lookup("posarg")
@@ -112,9 +118,13 @@ func usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 
 	commandUsage(&b, cmdName, cmd, cmds...)
 
-	b.WriteString(logx.TitleColor("\nFlags:\n") + indent + logx.TitleColor("Flags are case-insensitive, can be in kebab-case, snake_case,\n"))
-	b.WriteString(indent + logx.TitleColor("or CamelCase, and can have one or two leading dashes. Use a\n"))
-	b.WriteString(indent + logx.TitleColor("\"no\" prefix to turn off a bool flag.\n\n"))
+	b.WriteString(logx.TitleColor("\nFlags:\n"))
+	b.WriteString(indent)
+	b.WriteString(logx.TitleColor("Flags are case-insensitive, can be in kebab-case, snake_case,\n"))
+	b.WriteString(indent)
+	b.WriteString(logx.TitleColor("or CamelCase, and can have one or two leading dashes. Use a\n"))
+	b.WriteString(indent)
+	b.WriteString(logx.TitleColor("\"no\" prefix to turn off a bool flag.\n\n"))
 
 	// add meta ones (help, config, verbose, etc) first
 	mcfields := &fields{}
@@ -162,12 +172,20 @@ outer:
 	}
 
 	if len(acmds) != 0 {
-		b.WriteString(indent + logx.CmdColor(cmdName+" <subcommand> ") + logx.SuccessColor("[flags]\n"))
+		b.WriteString(indent)
+		b.WriteString(logx.CmdColor(cmdName + " <subcommand> "))
+		b.WriteString(logx.SuccessColor("[flags]\n"))
 	}
 
 	if rcmd != nil {
 		b.WriteString(logx.TitleColor("\nDefault command:\n"))
-		b.WriteString(indent + logx.CmdColor(rcmd.Name) + "\n" + indent + indent + strings.ReplaceAll(rcmd.Doc, "\n", "\n"+indent+indent) + "\n") // need to put two indents on every newline for formatting
+		b.WriteString(indent)
+		b.WriteString(logx.CmdColor(rcmd.Name))
+		b.WriteString("\n")
+		b.WriteString(indent)
+		b.WriteString(indent)
+		b.WriteString(strings.ReplaceAll(rcmd.Doc, "\n", "\n"+indent+indent))
+		b.WriteString("\n") // need to put two indents on every newline for formatting
 	}
 
 	if len(acmds) == 0 && cmd != "" { // nothing to do
@@ -178,15 +196,24 @@ outer:
 
 	// if we are in root, we also add help
 	if cmd == "" {
-		b.WriteString(indent + logx.CmdColor("help") + "\n" + indent + indent + "Help shows usage information for a command\n")
+		b.WriteString(indent)
+		b.WriteString(logx.CmdColor("help"))
+		b.WriteString("\n")
+		b.WriteString(indent)
+		b.WriteString(indent)
+		b.WriteString("Help shows usage information for a command\n")
 	}
 
 	for _, c := range acmds {
-		b.WriteString(indent + logx.CmdColor(c.Name))
+		b.WriteString(indent)
+		b.WriteString(logx.CmdColor(c.Name))
 		if c.Doc != "" {
 			// we only want the first paragraph of text for subcommand usage; after that is where more specific details can go
 			doc, _, _ := strings.Cut(c.Doc, "\n\n")
-			b.WriteString("\n" + indent + indent + strings.ReplaceAll(doc, "\n", "\n"+indent+indent)) // need to put two indents on every newline for formatting
+			b.WriteString("\n")
+			b.WriteString(indent)
+			b.WriteString(indent)
+			b.WriteString(strings.ReplaceAll(doc, "\n", "\n"+indent+indent)) // need to put two indents on every newline for formatting
 		}
 		b.WriteString("\n")
 	}
@@ -195,8 +222,7 @@ outer:
 // flagUsage adds the flag usage info for the given fields
 // to the given [strings.Builder].
 func flagUsage(fields *fields, b *strings.Builder) {
-	for _, kv := range fields.Order {
-		f := kv.Value
+	for _, f := range fields.Values {
 		b.WriteString(indent)
 		for i, name := range f.Names {
 			b.WriteString(logx.CmdColor("-" + strcase.ToKebab(name)))
@@ -204,15 +230,18 @@ func flagUsage(fields *fields, b *strings.Builder) {
 				b.WriteString(", ")
 			}
 		}
-		b.WriteString(" " + logx.SuccessColor(f.Field.Type.String()))
+		b.WriteString(" ")
+		b.WriteString(logx.SuccessColor(f.Field.Type.String()))
 		b.WriteString("\n")
 		field := types.GetField(f.Struct, f.Field.Name)
 		if field != nil {
-			b.WriteString(indent + indent + strings.ReplaceAll(field.Doc, "\n", "\n"+indent+indent)) // need to put two indents on every newline for formatting
+			b.WriteString(indent)
+			b.WriteString(indent)
+			b.WriteString(strings.ReplaceAll(field.Doc, "\n", "\n"+indent+indent)) // need to put two indents on every newline for formatting
 		}
 		def, ok := f.Field.Tag.Lookup("default")
 		if ok && def != "" {
-			b.WriteString(fmt.Sprintf(" (default: %s)", def))
+			fmt.Fprintf(b, " (default: %s)", def)
 		}
 		b.WriteString("\n")
 	}

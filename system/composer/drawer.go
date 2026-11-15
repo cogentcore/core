@@ -107,7 +107,12 @@ type DrawerBase struct {
 //   - unchanged should be true if caller knows that this image is unchanged
 //     from the last time it was used -- saves re-uploading to gpu.
 func (dw *DrawerBase) Copy(dp image.Point, src image.Image, sr image.Rectangle, op draw.Op, unchanged bool) {
-	draw.Draw(dw.Image, image.Rectangle{dp, dp.Add(src.Bounds().Size())}, src, sr.Min, op)
+	// the source region (all of src if zero) is drawn at dp, as on the GPU,
+	// which is also the region filled with a Uniform (which has no bounds)
+	if sr == (image.Rectangle{}) {
+		sr = src.Bounds()
+	}
+	draw.Draw(dw.Image, image.Rectangle{dp, dp.Add(sr.Size())}, src, sr.Min, op)
 }
 
 // Scale copies the given Go source image to the render target,

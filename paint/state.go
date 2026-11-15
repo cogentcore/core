@@ -114,7 +114,7 @@ func (rs *State) RenderDone() render.Render {
 	return npr
 }
 
-// Context() returns the currently active [render.Context] state (top of Stack).
+// Context returns the currently active [render.Context] state (top of Stack).
 func (rs *State) Context() *render.Context {
 	return rs.Stack[len(rs.Stack)-1]
 }

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package imagex provides utilities for images: opening, saving, and
+// encoding them in the standard formats, wrapping them for the web, and
+// asserting them in tests.
 package imagex
 
 //go:generate core generate
@@ -123,8 +126,10 @@ func Save(im image.Image, filename string) error {
 	}
 	defer file.Close()
 	bw := bufio.NewWriter(file)
-	defer bw.Flush()
-	return Write(im, file, f)
+	if err := Write(im, bw, f); err != nil {
+		return err
+	}
+	return bw.Flush()
 }
 
 // Write writes the image to the given writer using the given foramt.

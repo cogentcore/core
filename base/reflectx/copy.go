@@ -351,8 +351,7 @@ func addDeepFields(t reflect.Type, ignored map[string]bool, names *[]string, vis
 		return
 	}
 	visited[t] = true
-	for i := range t.NumField() {
-		f := t.Field(i)
+	for f := range t.Fields() {
 		if !f.IsExported() {
 			continue
 		}

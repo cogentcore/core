@@ -79,6 +79,9 @@ func PrevLineIndent(src [][]rune, tags []Line, ln int, tabSz int) (ind, pln int,
 // indent level is in increments of tabSz for spaces, and tabs for tabs.
 // Operates on rune source with markup lex tags per line.
 func BracketIndentLine(src [][]rune, tags []Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Character) {
+	if ln == 0 { // the first line has no previous line to indent from
+		return
+	}
 	pInd, pLn, ichr = PrevLineIndent(src, tags, ln, tabSz)
 
 	curUnd, _ := LineStartEndBracket(src[ln], tags[ln])
@@ -99,7 +102,7 @@ func BracketIndentLine(src [][]rune, tags []Line, ln int, tabSz int) (pInd, delI
 	return
 }
 
-// LastTokenIgnoreComment returns the last token of the tags, ignoring
+// LastLexIgnoreComment returns the last token of the tags, ignoring
 // any final comment at end
 func LastLexIgnoreComment(tags Line) (*Lex, int) {
 	var ll *Lex

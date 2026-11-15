@@ -206,7 +206,7 @@ func brotliSize(b []byte) int {
 // acceptsGzip returns whether the given Accept-Encoding header value
 // accepts gzip.
 func acceptsGzip(accept string) bool {
-	for _, e := range strings.Split(accept, ",") {
+	for e := range strings.SplitSeq(accept, ",") {
 		name, params, _ := strings.Cut(e, ";")
 		name = strings.TrimSpace(name)
 		if name != "gzip" && name != "*" {

@@ -23,7 +23,7 @@ func TestFrame(t *testing.T) {
 	b := NewBody()
 	fr := NewFrame(b)
 	frameTestButtons(fr)
-	b.AssertRender(t, "frame/basic")
+	AssertRender(t, b, "frame/basic")
 }
 
 func TestFrameBackground(t *testing.T) {
@@ -33,7 +33,7 @@ func TestFrameBackground(t *testing.T) {
 		s.Background = colors.Scheme.Warn.Container
 	})
 	frameTestButtons(fr)
-	b.AssertRender(t, "frame/background")
+	AssertRender(t, b, "frame/background")
 }
 
 func TestFrameGradient(t *testing.T) {
@@ -43,7 +43,7 @@ func TestFrameGradient(t *testing.T) {
 		s.Background = gradient.NewLinear().AddStop(colors.Yellow, 0).AddStop(colors.Orange, 0.5).AddStop(colors.Red, 1)
 	})
 	frameTestButtons(fr)
-	b.AssertRender(t, "frame/gradient")
+	AssertRender(t, b, "frame/gradient")
 }
 
 func TestFrameBorder(t *testing.T) {
@@ -53,7 +53,7 @@ func TestFrameBorder(t *testing.T) {
 		s.Border.Width.Set(units.Dp(4))
 	})
 	frameTestButtons(fr)
-	b.AssertRender(t, "frame/border")
+	AssertRender(t, b, "frame/border")
 }
 func TestFrameBorderRadius(t *testing.T) {
 	b := NewBody()
@@ -63,7 +63,7 @@ func TestFrameBorderRadius(t *testing.T) {
 		s.Border.Width.Set(units.Dp(4))
 	})
 	frameTestButtons(fr)
-	b.AssertRender(t, "frame/border-radius")
+	AssertRender(t, b, "frame/border-radius")
 }
 
 func TestFrameNoGrow(t *testing.T) {
@@ -74,7 +74,7 @@ func TestFrameNoGrow(t *testing.T) {
 		s.Border.Width.Set(units.Dp(4))
 	})
 	frameTestButtons(fr)
-	b.AssertRender(t, "frame/no-grow")
+	AssertRender(t, b, "frame/no-grow")
 }
 
 func TestFrameScrollNoMargin(t *testing.T) {
@@ -89,7 +89,7 @@ func TestFrameScrollNoMargin(t *testing.T) {
 		s.Min.Set(units.Dp(80))
 		s.Background = colors.Scheme.Select.Container
 	})
-	b.AssertRender(t, "frame/scroll-no-margin")
+	AssertRender(t, b, "frame/scroll-no-margin")
 }
 
 func TestFrameScrollMargin(t *testing.T) {
@@ -105,7 +105,7 @@ func TestFrameScrollMargin(t *testing.T) {
 		s.Min.Set(units.Dp(80))
 		s.Background = colors.Scheme.Select.Container
 	})
-	b.AssertRender(t, "frame/scroll-margin")
+	AssertRender(t, b, "frame/scroll-margin")
 }
 
 func TestFrameScrollMarginPadding(t *testing.T) {
@@ -122,5 +122,5 @@ func TestFrameScrollMarginPadding(t *testing.T) {
 		s.Min.Set(units.Dp(80))
 		s.Background = colors.Scheme.Select.Container
 	})
-	b.AssertRender(t, "frame/scroll-margin-padding")
+	AssertRender(t, b, "frame/scroll-margin-padding")
 }

@@ -23,7 +23,7 @@ func TestTextTypes(t *testing.T) {
 	for _, typ := range TextTypesValues() {
 		b := NewBody()
 		NewText(b).SetType(typ).SetText("Hello, world!")
-		b.AssertRender(t, "text/type/"+strcase.ToKebab(typ.String()))
+		AssertRender(t, b, "text/type/"+strcase.ToKebab(typ.String()))
 	}
 }
 
@@ -32,7 +32,7 @@ func TestTextRem(t *testing.T) {
 	NewText(b).SetText("Hello, world!").Styler(func(s *styles.Style) {
 		s.Font.Size = units.Rem(2)
 	})
-	b.AssertRender(t, "text/rem")
+	AssertRender(t, b, "text/rem")
 }
 
 func TestTextDecoration(t *testing.T) {
@@ -43,7 +43,7 @@ func TestTextDecoration(t *testing.T) {
 				s.Font.SetDecoration(d)
 				s.Font.Slant = st
 			})
-			b.AssertRender(t, "text/decoration/"+d.BitIndexString()+"-"+st.String())
+			AssertRender(t, b, "text/decoration/"+d.BitIndexString()+"-"+st.String())
 		}
 	}
 }
@@ -51,7 +51,7 @@ func TestTextDecoration(t *testing.T) {
 func TestTextLink(t *testing.T) {
 	b := NewBody()
 	NewText(b).SetText(`Hello, <a href="https://example.com">world</a>!`)
-	b.AssertRender(t, "text/link")
+	AssertRender(t, b, "text/link")
 }
 
 // A restyle that changes neither the text nor its style keeps the rich
@@ -238,7 +238,7 @@ func TestTextTruncation(t *testing.T) {
 	clamped.Styler(func(s *styles.Style) {
 		s.Text.LineClamp = 2
 	})
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		w := fr.Geom.Size.Actual.Content.X

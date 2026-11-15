@@ -35,8 +35,14 @@ import (
 var demoFile embed.FS
 
 func main() {
-	highlighting.AddLexers(lexers.XML)
 	b := core.NewBody("Cogent Core Demo")
+	makeBody(b)
+	b.RunMainWindow()
+}
+
+// makeBody makes the content of the demo in the given body.
+func makeBody(b *core.Body) {
+	highlighting.AddLexers(lexers.XML)
 	ts := core.NewTabs(b)
 
 	// The content of each tab is made when the tab is first shown.
@@ -45,8 +51,6 @@ func main() {
 	ts.NewLazyTab("Collections", collections)
 	ts.NewLazyTab("Value binding", valueBinding)
 	ts.NewLazyTab("Styles", makeStyles)
-
-	b.RunMainWindow()
 }
 
 func home(tab *core.Frame) {
@@ -693,11 +697,11 @@ func makeStyles(tab *core.Frame) {
 		fr.Update()
 	})
 	frameSizes := []math32.Vector2{
-		{20, 100},
-		{80, 20},
-		{60, 80},
-		{40, 120},
-		{150, 100},
+		{X: 20, Y: 100},
+		{X: 80, Y: 20},
+		{X: 60, Y: 80},
+		{X: 40, Y: 120},
+		{X: 150, Y: 100},
 	}
 	for _, sz := range frameSizes {
 		core.NewFrame(fr).Styler(func(s *styles.Style) {

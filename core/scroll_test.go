@@ -29,7 +29,7 @@ func TestScrollNoScrollbarWidth(t *testing.T) {
 	})
 	tall := NewFrame(fr)
 	tall.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(50), units.Dp(1000)) })
-	b.RenderImage(func() {}, func() {
+	RenderImage(b, func() {}, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		sb := fr.Scrolls[math32.Y]
@@ -56,7 +56,7 @@ func TestScrollbarsMovedScene(t *testing.T) {
 	})
 	tall := NewFrame(fr)
 	tall.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(50), units.Dp(500)) })
-	b1.RenderImage(func() {
+	RenderImage(b1, func() {
 		b1.AsyncLock()
 		defer b1.AsyncUnlock()
 		require.NotNil(t, fr.Scrolls[1])

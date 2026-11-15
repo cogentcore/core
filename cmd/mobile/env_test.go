@@ -138,15 +138,15 @@ func TestNdkRoot(t *testing.T) {
 		}{
 			{15, nil, ""},
 			{16, nil, olderNDK},
-			{16, []config.Platform{{"android", "arm"}}, olderNDK},
-			{16, []config.Platform{{"android", "arm"}, {"android", "arm64"}}, olderNDK},
-			{16, []config.Platform{{"android", "x86_64"}}, ""},
+			{16, []config.Platform{{OS: "android", Arch: "arm"}}, olderNDK},
+			{16, []config.Platform{{OS: "android", Arch: "arm"}, {OS: "android", Arch: "arm64"}}, olderNDK},
+			{16, []config.Platform{{OS: "android", Arch: "x86_64"}}, ""},
 			{19, nil, newerNDK},
-			{19, []config.Platform{{"android", "arm"}}, newerNDK},
-			{19, []config.Platform{{"android", "arm"}, {"android", "arm64"}, {"android", "386"}}, olderNDK},
+			{19, []config.Platform{{OS: "android", Arch: "arm"}}, newerNDK},
+			{19, []config.Platform{{OS: "android", Arch: "arm"}, {OS: "android", Arch: "arm64"}, {OS: "android", Arch: "386"}}, olderNDK},
 			{32, nil, newerNDK},
-			{32, []config.Platform{{"android", "arm"}}, newerNDK},
-			{32, []config.Platform{{"android", "386"}}, ""},
+			{32, []config.Platform{{OS: "android", Arch: "arm"}}, newerNDK},
+			{32, []config.Platform{{OS: "android", Arch: "386"}}, ""},
 		}
 
 		for i, tc := range testCases {

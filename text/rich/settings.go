@@ -24,7 +24,7 @@ var Settings SettingsData
 // It is aliased to [core.FontName] as well.
 type FontName string
 
-// Settings holds the global settings for rich text styling,
+// SettingsData holds the global settings for rich text styling,
 // including language, script, and preferred font faces for
 // each category of font.
 type SettingsData struct {

@@ -85,7 +85,7 @@ func testRestyle(t *testing.T, src string, restyled bool, change func(doc *html.
 	require.NoError(t, ReadDocument(ctx, bd, doc))
 	var ok bool
 	var before, got, want map[string]string
-	bd.RenderImage(func() {
+	core.RenderImage(bd, func() {
 		bd.AsyncLock()
 		before = widgetStates(bd)
 		ok = ctx.Restyle(change(doc))
@@ -101,7 +101,7 @@ func testRestyle(t *testing.T, src string, restyled bool, change func(doc *html.
 	}
 	fresh := core.NewBody()
 	require.NoError(t, ReadDocument(NewContext(), fresh, doc))
-	fresh.RenderImage(func() {}, func() { want = widgetStates(fresh) })
+	core.RenderImage(fresh, func() {}, core.Locked(fresh, func() { want = widgetStates(fresh) }))
 	assert.Equal(t, want, got)
 	assert.NotEqual(t, before, got, "the change shows")
 }
@@ -189,7 +189,7 @@ func TestRestyle(t *testing.T) {
 		require.NoError(t, ReadDocument(ctx, bd, doc))
 		icon := elementByID(doc, "icon")
 		var ok bool
-		bd.RenderImage(func() {
+		core.RenderImage(bd, func() {
 			bd.AsyncLock()
 			defer bd.AsyncUnlock()
 			setAttr(icon, "class", "icon playing")
@@ -303,7 +303,7 @@ func TestRestyleUnusedCustomProps(t *testing.T) {
 		root := documentElement(doc)
 		root.Attr = append(root.Attr, html.Attribute{Key: "style", Val: tc.style})
 		var ok bool
-		bd.RenderImage(func() {
+		core.RenderImage(bd, func() {
 			bd.AsyncLock()
 			ok = ctx.Restyle([]*html.Node{root})
 			bd.AsyncUnlock()
@@ -326,7 +326,7 @@ func TestRestyleSourceDisplay(t *testing.T) {
 	s := elementByID(doc, "s")
 	setAttr(s, "style", "display: block")
 	var ok bool
-	bd.RenderImage(func() {
+	core.RenderImage(bd, func() {
 		bd.AsyncLock()
 		ok = ctx.Restyle([]*html.Node{s})
 		bd.AsyncUnlock()

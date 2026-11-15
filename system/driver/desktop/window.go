@@ -45,37 +45,6 @@ func (w *Window) SendPaintEvent() {
 	w.This.Events().WindowPaint()
 }
 
-// Activate() sets this window as the current render target for gpu rendering
-// functions, and the current context for gpu state (equivalent to
-// MakeCurrentContext on OpenGL).
-// If it returns false, then window is not visible / valid and
-// nothing further should happen.
-// Must call this on app main thread using system.TheApp.RunOnMain
-//
-//	system.TheApp.RunOnMain(func() {
-//	   if !win.Activate() {
-//	       return
-//	   }
-//	   // do GPU calls here
-//	})
-func (w *Window) Activate() bool {
-	// note: activate is only run on main thread so we don't need to check for mutex
-	if w == nil || w.Glw == nil {
-		return false
-	}
-	w.Glw.MakeContextCurrent()
-	return true
-}
-
-// DeActivate() clears the current render target and gpu rendering context.
-// Generally more efficient to NOT call this and just be sure to call
-// Activate where relevant, so that if the window is already current context
-// no switching is required.
-// Must call this on app main thread using system.TheApp.RunOnMain
-func (w *Window) DeActivate() {
-	glfw.DetachCurrentContext()
-}
-
 // newGlfwWindow makes a new glfw window for this window.
 // It must be run on main.
 func (w *Window) newGlfwWindow(opts *system.NewWindowOptions, sc *system.Screen) error {
@@ -410,10 +379,10 @@ func (w *Window) Minimize() {
 }
 
 func (w *Window) Close() {
-	if w == nil {
+	if w == nil || !w.MarkClosing() {
 		return
 	}
-	w.Window.Close()
+	w.Window.CloseBase()
 
 	w.Mu.Lock()
 	defer w.Mu.Unlock()

@@ -24,7 +24,7 @@ func TestEdit(t *testing.T) {
 	lns.SetText([]byte(src))
 	assert.Equal(t, src, lns.String())
 
-	st := textpos.Pos{1, 4}
+	st := textpos.Pos{Line: 1, Char: 4}
 	ins := []rune("var ")
 	lns.NewUndoGroup()
 	tbe := lns.InsertText(st, ins)
@@ -52,7 +52,7 @@ func TestEdit(t *testing.T) {
 	ins = []rune(` // comment
     // next line`)
 
-	st = textpos.Pos{2, 19}
+	st = textpos.Pos{Line: 2, Char: 19}
 	lns.NewUndoGroup()
 	tbe = lns.InsertText(st, ins)
 

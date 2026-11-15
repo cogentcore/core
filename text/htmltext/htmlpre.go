@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"html"
+	"regexp"
 	"strings"
 
 	"cogentcore.org/core/base/stack"
@@ -82,7 +83,7 @@ func HTMLPreToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.T
 				case "a", "q", "math", "sub", "sup": // important: any special must be ended!
 					curSp.EndSpecial()
 				}
-				if len(fstack) > 0 {
+				if len(fstack) > 1 { // (the first is the base style, not of a tag)
 					fstack.Pop()
 					fs := fstack.Peek()
 					curSp = rich.NewText(fs, nil)
@@ -106,9 +107,8 @@ func HTMLPreToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.T
 				parts := strings.Split(ftag, " ")
 				stag := strings.ToLower(strings.TrimSpace(parts[0]))
 				// fmt.Printf("%v  stag: %v\n", bidx, stag)
-				attrs := parts[1:]
-				attr := strings.Split(strings.Join(attrs, " "), "=")
-				nattr := len(attr) / 2
+				attrs := parseAttrs(strings.Join(parts[1:], " "))
+				nattr := len(attrs)
 				fs := fstack.Peek().Clone() // new style for new element
 				atStart := curSp.Len() == 0
 				if nextIsParaStart && atStart {
@@ -124,10 +124,9 @@ func HTMLPreToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.T
 						special = rich.Link
 						fs.SetLinkStyle()
 						if nattr > 0 {
-							sprop := make(map[string]any, len(parts)-1)
-							for ai := 0; ai < nattr; ai++ {
-								nm := strings.TrimSpace(attr[ai*2])
-								vl := strings.TrimSuffix(strings.TrimPrefix(strings.TrimSpace(attr[ai*2+1]), `"`), `"`)
+							sprop := make(map[string]any, nattr)
+							for _, at := range attrs {
+								nm, vl := at[0], at[1]
 								if nm == "href" {
 									linkURL = vl
 								}
@@ -164,9 +163,8 @@ func HTMLPreToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.T
 				}
 				if nattr > 0 { // attr
 					sprop := make(map[string]any, nattr)
-					for ai := 0; ai < nattr; ai++ {
-						nm := strings.TrimSpace(attr[ai*2])
-						vl := strings.TrimSuffix(strings.TrimPrefix(strings.TrimSpace(attr[ai*2+1]), `"`), `"`)
+					for _, at := range attrs {
+						nm, vl := at[0], at[1]
 						// fmt.Printf("nm: %v  val: %v\n", nm, vl)
 						switch nm {
 						case "style":
@@ -247,4 +245,17 @@ func HTMLPreToRich(str []byte, sty *rich.Style, cssProps map[string]any) (rich.T
 		}
 	}
 	return rich.Join(spstack...), errors.Join(errs...)
+}
+
+// attrRegexp matches an attribute of a start tag, with a quoted or bare value.
+var attrRegexp = regexp.MustCompile(`([\w:-]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))`)
+
+// parseAttrs returns the names and values of the attributes of a start tag
+// (the text after its name), whose values can contain spaces and equal signs.
+func parseAttrs(s string) [][2]string {
+	var attrs [][2]string
+	for _, m := range attrRegexp.FindAllStringSubmatch(s, -1) {
+		attrs = append(attrs, [2]string{m[1], m[2] + m[3] + m[4]})
+	}
+	return attrs
 }

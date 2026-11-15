@@ -4,6 +4,8 @@
 
 package token
 
+//core:js-test
+
 import (
 	"fmt"
 	"testing"

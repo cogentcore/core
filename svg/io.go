@@ -38,12 +38,7 @@ import (
 // see https://cogentcore.org/core/ki/wiki/Naming for IO naming conventions
 // using standard XML marshal / unmarshal
 
-var (
-	errParamMismatch  = errors.New("SVG Parse: Param mismatch")
-	errCommandUnknown = errors.New("SVG Parse: Unknown command")
-	errZeroLengthID   = errors.New("SVG Parse: zero length id")
-	errMissingID      = errors.New("SVG Parse: cannot find id")
-)
+var errParamMismatch = errors.New("SVG Parse: Param mismatch")
 
 // OpenXML Opens XML-formatted SVG input from given file
 func (sv *SVG) OpenXML(fname string) error {
@@ -367,9 +362,6 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					default:
 						polygon.SetProperty(attr.Name.Local, attr.Value)
 					}
-					if err != nil {
-						return err
-					}
 				}
 			case nm == "polyline":
 				polyline := NewPolyline(curPar)
@@ -396,9 +388,6 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					default:
 						polyline.SetProperty(attr.Name.Local, attr.Value)
 					}
-					if err != nil {
-						return err
-					}
 				}
 			case nm == "path":
 				path := NewPath(curPar)
@@ -418,9 +407,6 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						}
 					default:
 						path.SetProperty(attr.Name.Local, attr.Value)
-					}
-					if err != nil {
-						return err
 					}
 				}
 			case nm == "image":
@@ -457,8 +443,8 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 							} else {
 								img.SetImage(im, 0, 0)
 							}
-						} else { // url
-
+						} else { // a url, which is kept to be written
+							img.Filename = attr.Value
 						}
 					default:
 						img.SetProperty(attr.Name.Local, attr.Value)
@@ -546,9 +532,6 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						}
 					default:
 						txt.SetProperty(attr.Name.Local, attr.Value)
-					}
-					if err != nil {
-						return err
 					}
 				}
 			case nm == "linearGradient":
@@ -667,7 +650,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						szx, err = math32.ParseFloat32(attr.Value)
 					case "markerHeight":
 						szy, err = math32.ParseFloat32(attr.Value)
-					case "matrixUnits":
+					case "markerUnits", "matrixUnits": // (the latter was read before)
 						if attr.Value == "strokeWidth" {
 							mrk.Units = StrokeWidth
 						} else {
@@ -1027,6 +1010,9 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 	if n.AsTree().Name != "" {
 		XMLAddAttr(&se.Attr, "id", n.AsTree().Name)
 	}
+	if sn, ok := n.(Node); ok && sn.AsNodeBase().Class != "" {
+		XMLAddAttr(&se.Attr, "class", sn.AsNodeBase().Class)
+	}
 	text := "" // if non-empty, contains text to render
 	_, issvg := n.(Node)
 	// _, isgp := n.(*Group)
@@ -1112,13 +1098,13 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 	case *Polygon:
 		nm = "polygon"
 		for _, p := range nd.Points {
-			sb.WriteString(fmt.Sprintf("%g,%g ", p.X, p.Y))
+			fmt.Fprintf(&sb, "%g,%g ", p.X, p.Y)
 		}
 		XMLAddAttr(&se.Attr, "points", sb.String())
 	case *Polyline:
 		nm = "polyline"
 		for _, p := range nd.Points {
-			sb.WriteString(fmt.Sprintf("%g,%g ", p.X, p.Y))
+			fmt.Fprintf(&sb, "%g,%g ", p.X, p.Y)
 		}
 		XMLAddAttr(&se.Attr, "points", sb.String())
 	case *Text:
@@ -1132,7 +1118,8 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "y", fmt.Sprintf("%g", nd.Pos.Y))
 		text = nd.Text
 	case *Image:
-		if nd.Pixels == nil || nd.Pixels.Image == nil {
+		hasPixels := nd.Pixels != nil && nd.Pixels.Image != nil
+		if !hasPixels && nd.Filename == "" {
 			return ""
 		}
 		nm = "image"
@@ -1141,6 +1128,10 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "width", fmt.Sprintf("%g", nd.Size.X))
 		XMLAddAttr(&se.Attr, "height", fmt.Sprintf("%g", nd.Size.Y))
 		XMLAddAttr(&se.Attr, "preserveAspectRatio", nd.ViewBox.PreserveAspectRatio.String())
+		if !hasPixels { // a link to an image that is not loaded
+			XMLAddAttr(&se.Attr, "href", nd.Filename)
+			break
+		}
 		ib, fmt := imagex.ToBase64(nd.Pixels.Image, imagex.PNG)
 		XMLAddAttr(&se.Attr, "href", "data:"+fmt+";base64,"+string(imagex.Base64SplitLines(ib)))
 	case *MetaData:
@@ -1157,12 +1148,29 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "refX", fmt.Sprintf("%g", nd.RefPos.X))
 		XMLAddAttr(&se.Attr, "refY", fmt.Sprintf("%g", nd.RefPos.Y))
 		XMLAddAttr(&se.Attr, "orient", nd.Orient)
+		XMLAddAttr(&se.Attr, "markerWidth", fmt.Sprintf("%g", nd.Size.X))
+		XMLAddAttr(&se.Attr, "markerHeight", fmt.Sprintf("%g", nd.Size.Y))
+		if nd.Units == UserSpaceOnUse { // (strokeWidth is the default)
+			XMLAddAttr(&se.Attr, "markerUnits", "userSpaceOnUse")
+		}
+		addXMLViewBox(&se.Attr, &nd.ViewBox)
+	case *Symbol:
+		nm = "symbol"
+		addXMLViewBox(&se.Attr, &nd.ViewBox)
 	case *Filter:
 		return "" // not yet supported
 	case *StyleSheet:
 		nm = "style"
+		if nd.Sheet != nil {
+			text = nd.Sheet.String()
+		}
 	default:
-		nm = n.AsTree().NodeType().Name
+		// the element name of an svg node, which is not its Go type name
+		if sn, ok := n.(Node); ok {
+			nm = sn.SVGName()
+		} else {
+			nm = n.AsTree().NodeType().Name
+		}
 	}
 	se.Name.Local = nm
 	if setName != "" {
@@ -1174,6 +1182,15 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 		enc.EncodeToken(cd)
 	}
 	return se.Name.Local
+}
+
+// addXMLViewBox adds the viewBox attribute of the given view box,
+// if it has a size.
+func addXMLViewBox(attr *[]xml.Attr, vb *ViewBox) {
+	if vb.Size == (math32.Vector2{}) {
+		return
+	}
+	XMLAddAttr(attr, "viewBox", fmt.Sprintf("%g %g %g %g", vb.Min.X, vb.Min.Y, vb.Size.X, vb.Size.Y))
 }
 
 // MarshalXMLGradient adds the XML for the given gradient to the given encoder.
@@ -1237,8 +1254,9 @@ func MarshalXMLGradient(n *Gradient, name string, enc *XMLEncoder) {
 			se := xml.StartElement{}
 			se.Name.Local = "stop"
 			clr := gs.Color
-			hs := colors.AsHex(clr)[:7] // get rid of transparency
-			XMLAddAttr(&se.Attr, "style", fmt.Sprintf("stop-color:%s;stop-opacity:%g;", hs, float32(colors.AsRGBA(clr).A)/255))
+			hs := colors.AsHex(clr)[:7]                            // get rid of transparency
+			op := gs.Opacity * float32(colors.AsRGBA(clr).A) / 255 // with any alpha of the color
+			XMLAddAttr(&se.Attr, "style", fmt.Sprintf("stop-color:%s;stop-opacity:%g;", hs, op))
 			XMLAddAttr(&se.Attr, "offset", fmt.Sprintf("%g", gs.Pos))
 			enc.EncodeToken(se)
 			enc.WriteEnd(se.Name.Local)

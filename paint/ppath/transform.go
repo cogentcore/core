@@ -211,7 +211,7 @@ func (p Path) Reverse() Path {
 		return p
 	}
 
-	end := math32.Vector2{p[len(p)-3], p[len(p)-2]}
+	end := math32.Vec2(p[len(p)-3], p[len(p)-2])
 	q := make(Path, 0, len(p))
 	q = append(q, MoveTo, end.X, end.Y, MoveTo)
 
@@ -223,7 +223,7 @@ func (p Path) Reverse() Path {
 
 		end = math32.Vector2{}
 		if 0 < i {
-			end = math32.Vector2{p[i-3], p[i-2]}
+			end = math32.Vec2(p[i-3], p[i-2])
 		}
 
 		switch cmd {

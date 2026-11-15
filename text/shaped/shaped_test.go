@@ -86,7 +86,7 @@ func TestFontMapper(t *testing.T) {
 
 			for li := range lns.Lines {
 				ln := &lns.Lines[li]
-				d := ln.Runs[0].(*shapedgt.Run).Output.Face.Describe()
+				d := ln.Runs[0].(*shapedgt.Run).Face.Describe()
 				// fmt.Println(li, d)
 				assert.Equal(t, fname, d.Family)
 				assert.Equal(t, weights[li], d.Aspect.Weight)
@@ -121,15 +121,15 @@ func TestBasic(t *testing.T) {
 		tx.AddSpan(ul, sr[ix+8:])
 
 		lns := sh.WrapLines(tx, plain, tsty, math32.Vec2(250, 250))
-		lns.SelectRegion(textpos.Range{7, 30})
-		lns.SelectRegion(textpos.Range{34, 40})
+		lns.SelectRegion(textpos.Range{Start: 7, End: 30})
+		lns.SelectRegion(textpos.Range{Start: 34, End: 40})
 		pos := math32.Vec2(20, 60)
 		// pc.FillBox(pos, math32.Vec2(200, 50), colors.Uniform(color.RGBA{0, 128, 0, 128}))
 		pc.DrawText(lns, pos)
 
-		assert.Equal(t, len(sr), lns.RuneFromLinePos(textpos.Pos{3, 30}))
+		assert.Equal(t, len(sr), lns.RuneFromLinePos(textpos.Pos{Line: 3, Char: 30}))
 
-		for ri, _ := range sr {
+		for ri := range sr {
 			lp := lns.RuneToLinePos(ri)
 			assert.Equal(t, ri, lns.RuneFromLinePos(lp))
 
@@ -301,7 +301,7 @@ func TestEmoji(t *testing.T) {
 		pc.DrawText(lns, pos)
 
 		sr := tx.Join() // as runes
-		for ri, _ := range sr {
+		for ri := range sr {
 			lp := lns.RuneToLinePos(ri)
 			assert.Equal(t, ri, lns.RuneFromLinePos(lp))
 

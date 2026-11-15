@@ -15,12 +15,12 @@ import (
 // sibling and its parent, as browsers do. The margins of the widgets stay
 // within their parents, but the space between them is that of the
 // collapsed margins.
-func (c *Context) collapseMargins(wb *core.WidgetBase, s, ps *styles.Style, bs, pbs *blockState, pad, bw sides.Floats, top, bottom *float32) {
+func (c *Context) collapseMargins(wb *core.WidgetBase, s, _ *styles.Style, bs, pbs *blockState, pad, bw sides.Floats, top, bottom *float32) {
 	flow := s.Display == styles.Flex && s.Direction == styles.Column
 	bs.openTop = flow && pad.Top == 0 && bw.Top == 0
 	bs.openBottom = flow && pad.Bottom == 0 && bw.Bottom == 0 && s.Min.Y.Value == 0
 	bs.topBase, bs.bottomBase = *top, *bottom
-	if pbs == nil || !bs.block || !(pbs.display == "block" || pbs.display == "list-item" || pbs.display == "table-cell" || pbs.display == "inline-block") {
+	if pbs == nil || !bs.block || pbs.display != "block" && pbs.display != "list-item" && pbs.display != "table-cell" && pbs.display != "inline-block" {
 		return
 	}
 	pw := wb.Parent.(core.Widget)

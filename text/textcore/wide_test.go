@@ -19,10 +19,10 @@ func TestEditorWide(t *testing.T) {
 	b := core.NewBody()
 	ed := newWideEditor(b)
 	ed.Lines.SetString("ab中文cd\n中文中文\tx\n")
-	b.AssertRender(t, "wide", func() {
+	core.AssertRender(t, b, "wide", core.Locked(b, func() {
 		ed.SetCursorShow(textpos.Pos{Line: 1, Char: 2})
 		ed.SelectRegion = textpos.Region{Start: textpos.Pos{Line: 0, Char: 2}, End: textpos.Pos{Line: 0, Char: 4}}
-	}, func() {
+	}), core.Locked(b, func() {
 		cw := ed.charSize.X
 		x := func(ln, ch int) float32 {
 			return ed.CharStartPos(textpos.Pos{Line: ln, Char: ch}).X
@@ -52,5 +52,5 @@ func TestEditorWide(t *testing.T) {
 		assert.Equal(t, textpos.Pos{Line: 0, Char: 3}, ed.CursorPos)
 		ed.cursorDown(1)
 		assert.Equal(t, textpos.Pos{Line: 1, Char: 2}, ed.CursorPos)
-	})
+	}))
 }

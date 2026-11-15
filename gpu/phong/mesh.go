@@ -33,13 +33,13 @@ func (ph *Phong) SetMesh(name string, mesh shape.Mesh) {
 
 	vgp := ph.System.Vars().VertexGroup()
 	md := shape.NewMeshData(mesh)
-	idx, ok := ph.meshes.Map[name]
+	idx, ok := ph.meshes.IndexByKeyTry(name)
 	if !ok {
 		idx = ph.meshes.Len()
-		ph.meshes.Add(name, md)
+		ph.meshes.Set(name, md)
 		vgp.SetNValues(ph.meshes.Len())
 	} else {
-		ph.meshes.Order[idx].Value = md
+		ph.meshes.Values[idx] = md
 	}
 	ph.configMesh(md, idx)
 
@@ -82,6 +82,7 @@ func (ph *Phong) UseMesh(name string) error {
 		if gpu.Debug {
 			log.Println(err)
 		}
+		return err
 	}
 	return ph.useMeshIndex(idx)
 }
@@ -91,7 +92,7 @@ func (ph *Phong) UseMesh(name string) error {
 // and texture is turned off.  UseTexture* after this to override.
 func (ph *Phong) useMeshIndex(idx int) error {
 	sy := ph.System
-	md := ph.meshes.ValueByIndex(idx)
+	md := ph.meshes.Values[idx]
 	sy.Vars().SetCurrentValue(gpu.VertexGroup, "Pos", idx)
 	sy.Vars().SetCurrentValue(gpu.VertexGroup, "Normal", idx)
 	sy.Vars().SetCurrentValue(gpu.VertexGroup, "TexCoord", idx)

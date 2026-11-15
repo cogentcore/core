@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/text/text"
 )
 
-// FontsChanged, if non-nil, is called when web fonts have finished loading
+// FontsChanged is called, if it is non-nil, when web fonts have finished loading
 // that change the measurements of texts that were measured before (with a
 // fallback font), whose measurements the shapers have discarded, so that
 // the texts can be laid out again.

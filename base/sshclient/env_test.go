@@ -43,7 +43,7 @@ export QUOTED="it's a 'test'"
 		t.Cleanup(cl.Close)
 		return cl
 	}
-	sio := &exec.StdIOState{StdIO: exec.StdIO{Out: io.Discard, Err: io.Discard}}
+	sio := &exec.StdIOState{Out: io.Discard, Err: io.Discard}
 	cl := connect(true)
 	out, err := cl.Output(sio, "mycmd")
 	require.NoError(t, err)

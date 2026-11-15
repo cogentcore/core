@@ -5,20 +5,18 @@
 /*
 Package keylist implements an ordered list (slice) of items,
 with a map from a key (e.g., names) to indexes,
-to support fast lookup by name.
-This is a different implementation of the [ordmap] package,
-that has separate slices for Values and Keys, instead of
-using a tuple list of both. The awkwardness of value access
-through the tuple is the major problem with ordmap.
+to support fast lookup by name. It has separate slices for
+Values and Keys, for direct access to them, and [List.All]
+iterates over both.
 */
 package keylist
 
 import (
 	"fmt"
+	"iter"
 	"slices"
+	"strings"
 )
-
-// TODO: probably want to consolidate ordmap and keylist: https://github.com/cogentcore/core/issues/1224
 
 // List implements an ordered list (slice) of Values,
 // with a map from a key (e.g., names) to indexes,
@@ -148,6 +146,26 @@ func (kl *List[K, V]) IndexByKey(key K) int {
 	return idx
 }
 
+// IndexByKeyTry returns the index of the given key, and whether it is in
+// the list.
+func (kl *List[K, V]) IndexByKeyTry(key K) (int, bool) {
+	idx, ok := kl.indexes[key]
+	return idx, ok
+}
+
+// All returns an iterator over the keys and values of the list, in order:
+//
+//	for key, value := range kl.All() {
+func (kl *List[K, V]) All() iter.Seq2[K, V] {
+	return func(yield func(K, V) bool) {
+		for i, k := range kl.Keys {
+			if !yield(k, kl.Values[i]) {
+				return
+			}
+		}
+	}
+}
+
 // Len returns the number of items in the list.
 func (kl *List[K, V]) Len() int {
 	if kl == nil {
@@ -200,18 +218,22 @@ func (kl *List[K, V]) RenameIndex(i int, key K) {
 // they are overwritten.  Use [List.Reset] first to get an exact copy.
 func (kl *List[K, V]) Copy(from *List[K, V]) {
 	for i, v := range from.Values {
-		kl.Set(kl.Keys[i], v)
+		kl.Set(from.Keys[i], v)
 	}
 }
 
 // String returns a string representation of the list.
 func (kl *List[K, V]) String() string {
-	sv := "{"
+	var sv strings.Builder
+	sv.WriteString("{")
 	for i, v := range kl.Values {
-		sv += fmt.Sprintf("%v", kl.Keys[i]) + ": " + fmt.Sprintf("%v", v) + ", "
+		fmt.Fprintf(&sv, "%v", kl.Keys[i])
+		sv.WriteString(": ")
+		fmt.Fprintf(&sv, "%v", v)
+		sv.WriteString(", ")
 	}
-	sv += "}"
-	return sv
+	sv.WriteString("}")
+	return sv.String()
 }
 
 // UpdateIndexes updates the Indexes from Keys and Values.

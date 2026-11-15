@@ -59,7 +59,7 @@ func TestMacroValues(t *testing.T) {
 	assert.Equal(t, "wip", mc.Name)
 	assert.Equal(t, []string{"--message"}, mc.Prompts)
 	assert.Equal(t, "Git commit wip", mc.Label("git"))
-	assert.Equal(t, "git commit --verbose --message 'default message' -- .", sc.ArgsCommandLine(mc.withPrompted(sc, nil, nil)))
+	assert.Equal(t, "git commit --verbose --message 'default message' -- .", sc.ArgsCommandLine(mc.withPrompted(nil, nil)))
 
 	// the prompt has only the prompted arguments, with the defaults
 	keys := mc.promptKeys()
@@ -68,9 +68,9 @@ func TestMacroValues(t *testing.T) {
 	mc.Values.SetValues(sc, pv)
 	assert.Equal(t, "default message", reflect.ValueOf(pv).Elem().Field(0).String())
 	reflect.ValueOf(pv).Elem().Field(0).SetString("the fix")
-	assert.Equal(t, "git commit --verbose --message 'the fix' -- .", sc.ArgsCommandLine(mc.withPrompted(sc, sc.ArgsOf(pv), keys)))
+	assert.Equal(t, "git commit --verbose --message 'the fix' -- .", sc.ArgsCommandLine(mc.withPrompted(sc.ArgsOf(pv), keys)))
 	reflect.ValueOf(pv).Elem().Field(0).SetString("")
-	assert.Equal(t, "git commit --verbose -- .", sc.ArgsCommandLine(mc.withPrompted(sc, sc.ArgsOf(pv), keys)))
+	assert.Equal(t, "git commit --verbose -- .", sc.ArgsCommandLine(mc.withPrompted(sc.ArgsOf(pv), keys)))
 }
 
 // TestMacros tests saving and deleting macros, which are kept when their
@@ -129,10 +129,10 @@ func TestMacroDialogs(t *testing.T) {
 	sc := testCommit()
 	mc := &Macro{Name: "wip", SubCmd: "commit", Values: &SubCmdArgs{Args: "-- .", Flags: map[string]string{"--verbose": "true", "--message": "wip"}}, Prompts: []string{"--message"}}
 	d := cs.NewMacroDialog(nil, "git", sc, mc, nil, func(string) {})
-	d.AssertRender(t, "macro")
+	core.AssertRender(t, d, "macro")
 	ran := ""
 	d = cs.NewPromptDialog(nil, "git", sc, mc, func(cmdline string) { ran = cmdline })
-	d.AssertRender(t, "macro-prompt", func() {
+	core.AssertRender(t, d, "macro-prompt", func() {
 		fm := tree.ChildByType[*core.Form](d)
 		require.NotNil(t, fm)
 		reflect.ValueOf(fm.Struct).Elem().Field(0).SetString("the fix")
@@ -150,7 +150,7 @@ func TestContext(t *testing.T) {
 	cs := &Commands{Parsed: map[string]*Cmd{}, Entries: Standard()}
 	b := core.NewBody()
 	tb := cs.Bar(b, nil)
-	b.AssertRender(t, "context", func() {
+	core.AssertRender(t, b, "context", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		st := core.NewMenu(func(m *core.Scene, pos image.Point) { core.NewButton(m).SetText("Item") }, tb, image.Point{})
@@ -179,7 +179,7 @@ func TestDialogFocus(t *testing.T) {
 		{"macro", "Name", cs.NewMacroDialog(nil, "git", sc, mc, nil, func(string) {})},
 		{"form", "Arguments", cs.NewDialog(nil, sc, func(string) {})},
 	} {
-		c.d.AssertRender(t, "focus-"+c.name, func() {
+		core.AssertRender(t, c.d, "focus-"+c.name, func() {
 			focused := ""
 			for range 50 {
 				c.d.AsyncLock()
@@ -212,7 +212,7 @@ func TestFieldWidths(t *testing.T) {
 		"form":  cs.NewDialog(nil, sc, func(string) {}),
 		"macro": cs.NewMacroDialog(nil, "git", sc, mc, nil, func(string) {}),
 	} {
-		d.AssertRender(t, "field-widths-"+name, func() {
+		core.AssertRender(t, d, "field-widths-"+name, func() {
 			d.AsyncLock() // (not while it is styled)
 			defer d.AsyncUnlock()
 			n := 0
@@ -264,7 +264,7 @@ func TestStandardMacros(t *testing.T) {
 		keys := mc.promptKeys()
 		pv := gc.formStruct(keys)
 		reflect.ValueOf(pv).Elem().Field(0).SetString("the fix")
-		assert.Equal(t, "git commit --message 'the fix' --all", gc.ArgsCommandLine(mc.withPrompted(gc, gc.ArgsOf(pv), keys)))
+		assert.Equal(t, "git commit --message 'the fix' --all", gc.ArgsCommandLine(mc.withPrompted(gc.ArgsOf(pv), keys)))
 	}
 }
 
@@ -278,7 +278,7 @@ func TestMacroConfirm(t *testing.T) {
 	run := func(cmdline string) { ran = append(ran, cmdline) }
 	b := core.NewBody()
 	core.NewText(b).SetText("Main")
-	b.AssertRender(t, "macro-confirm", func() {
+	core.AssertRender(t, b, "macro-confirm", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		cs.RunMacro(b, "git", &Macro{SubCmd: "commit", Name: "now", Values: &SubCmdArgs{Flags: map[string]string{"--verbose": "true"}}}, run)

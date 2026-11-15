@@ -908,9 +908,8 @@ func (lb *ListBase) IsRowInBounds(row int) bool {
 // rowFirstWidget returns the first widget for given row (could be index or
 // not) -- false if out of range
 func (lb *ListBase) rowFirstWidget(row int) (*WidgetBase, bool) {
-	if !lb.ShowIndexes {
-		return nil, false
-	}
+	// (the first widget of a row is its value without indexes:
+	// see RowWidgetNs)
 	if !lb.IsRowInBounds(row) {
 		return nil, false
 	}
@@ -949,13 +948,7 @@ func (lb *ListBase) IndexGrabFocus(idx int) *WidgetBase {
 
 // indexPos returns center of window position of index label for idx (ContextMenuPos)
 func (lb *ListBase) indexPos(idx int) image.Point {
-	row := idx - lb.StartIndex
-	if row < 0 {
-		row = 0
-	}
-	if row > lb.VisibleRows-1 {
-		row = lb.VisibleRows - 1
-	}
+	row := min(max(idx-lb.StartIndex, 0), lb.VisibleRows-1)
 	var pos image.Point
 	w, ok := lb.rowFirstWidget(row)
 	if ok {
@@ -1025,7 +1018,7 @@ func (lb *ListBase) ScrollToIndex(idx int) bool {
 func sliceIndexByValue(slc any, fldVal any) (int, bool) {
 	svnp := reflectx.NonPointerValue(reflect.ValueOf(slc))
 	sz := svnp.Len()
-	for idx := 0; idx < sz; idx++ {
+	for idx := range sz {
 		rval := reflectx.NonPointerValue(svnp.Index(idx))
 		if rval.Interface() == fldVal {
 			return idx, true
@@ -1239,7 +1232,9 @@ func (lb *ListBase) selectFocusedRow() {
 	}
 	for n := em.focus.AsTree(); n != nil && n.This != lb.This; n = n.Parent.AsTree() {
 		if n.Parent == lb.ListGrid.This {
-			if row, ok := n.Property(ListRowProperty).(int); ok {
+			// a focused row that is selected keeps a multiple selection,
+			// for the keys that act on it, such as copy.
+			if row, ok := n.Property(ListRowProperty).(int); ok && !lb.indexIsSelected(row+lb.StartIndex) {
 				lb.selectIndexQuiet(row + lb.StartIndex)
 			}
 			return
@@ -1282,9 +1277,7 @@ func (lb *ListBase) SelectedIndexesList(descendingSort bool) []int {
 			return rws[i] > rws[j]
 		})
 	} else {
-		sort.Slice(rws, func(i, j int) bool {
-			return rws[i] < rws[j]
-		})
+		slices.Sort(rws)
 	}
 	return rws
 }
@@ -1378,6 +1371,9 @@ func (lb *ListBase) SelectIndexEvent(idx int, mode events.SelectModes) {
 					cidx = r
 				}
 			}
+			// the moves above change the selected index, which is where
+			// the selection is extended from next, so it goes back to idx.
+			lb.SelectedIndex = idx
 			lb.IndexGrabFocus(idx)
 			lb.Send(events.Select) //  sv.SelectedIndex)
 		}
@@ -1515,7 +1511,7 @@ type treeLister interface {
 }
 
 // makePasteMenu makes the menu of options for paste events
-func (lb *ListBase) makePasteMenu(m *Scene, pos image.Point, md mimedata.Mimes, idx int, mod events.DropMods, fun func()) {
+func (lb *ListBase) makePasteMenu(m *Scene, _ image.Point, md mimedata.Mimes, idx int, mod events.DropMods, fun func()) {
 	if tp, ok := lb.This.(treeLister); ok {
 		tp.makeTreePasteMenu(m, md, idx, mod, fun)
 		return
@@ -1683,7 +1679,7 @@ func (lb *ListBase) dropFinalize(de *events.DragDrop) {
 }
 
 // dropDeleteSource handles delete source event for DropMove case
-func (lb *ListBase) dropDeleteSource(e events.Event) {
+func (lb *ListBase) dropDeleteSource(_ events.Event) {
 	if tl, ok := lb.This.(treeLister); ok {
 		tl.dropDeleteItems()
 		return
@@ -2378,11 +2374,11 @@ func (lg *ListGrid) renderStripes() {
 		startIndex = ls.StartIndex
 		offset = startIndex % 2
 	}
-	for r := 0; r < rows; r++ {
+	for r := range rows {
 		si := r + startIndex
 		ht := lg.rowHeight
 		miny := st.Y
-		for c := 0; c < cols; c++ {
+		for c := range cols {
 			ki := r*cols + c
 			if ki < lg.NumChildren() {
 				kw := lg.Child(ki).(Widget).AsWidget()
@@ -2430,11 +2426,11 @@ func (lg *ListGrid) indexFromPixel(pt image.Point) (row, col int, isValid bool) 
 	st := math32.Vector2{}
 	st.Y = lg.Geom.Scroll.Y
 	got := false
-	for r := 0; r < rows; r++ {
+	for r := range rows {
 		ht := lg.rowHeight
 		miny := st.Y
 		if r > 0 {
-			for c := 0; c < cols; c++ {
+			for c := range cols {
 				kwt := lg.Child(r*cols + c)
 				if kwt == nil {
 					continue

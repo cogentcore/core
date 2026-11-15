@@ -4,6 +4,8 @@
 
 package gsbench
 
+//core:js-test
+
 import "testing"
 
 // The Baseline benchmarks use only basic types, operators and control flow,
@@ -18,7 +20,7 @@ var (
 )
 
 func BenchmarkBaselineIntArith(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		s := 0
 		for i := range 10000 {
 			s += (i * 7) ^ (s >> 3)
@@ -30,7 +32,7 @@ func BenchmarkBaselineIntArith(b *testing.B) {
 }
 
 func BenchmarkBaselineFloatArith(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		s := 0.0
 		for i := range 10000 {
 			x := float64(i)
@@ -41,7 +43,7 @@ func BenchmarkBaselineFloatArith(b *testing.B) {
 }
 
 func BenchmarkBaselineFloat32Arith(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		var s float32
 		for i := range 10000 {
 			x := float32(i)
@@ -52,7 +54,7 @@ func BenchmarkBaselineFloat32Arith(b *testing.B) {
 }
 
 func BenchmarkBaselineBranches(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		s := 0
 		for i := range 10000 {
 			if i%3 == 0 {
@@ -70,7 +72,7 @@ func BenchmarkBaselineBranches(b *testing.B) {
 }
 
 func BenchmarkBaselineSwitch(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		s := 0
 		for i := range 10000 {
 			switch i % 8 {
@@ -91,7 +93,7 @@ func BenchmarkBaselineSwitch(b *testing.B) {
 }
 
 func BenchmarkBaselineNestedLoops(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		s := 0
 		for i := range 100 {
 			for j := range 100 {
@@ -113,7 +115,7 @@ func baselineAdd(a, b int) int {
 }
 
 func BenchmarkBaselineFuncCall(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		s := 0
 		for i := range 10000 {
 			s = baselineAdd(s, i) & 0xffff
@@ -127,7 +129,7 @@ func BenchmarkBaselineFloatSlice(b *testing.B) {
 	for i := range xs {
 		xs[i] = float64(i) * 0.25
 	}
-	for range b.N {
+	for b.Loop() {
 		s := 0.0
 		for _, x := range xs {
 			s += x * x

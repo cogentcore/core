@@ -694,7 +694,7 @@ func installed(cmds []string) map[string]bool {
 	ctx, cancel := context.WithTimeout(context.Background(), HelpTimeout)
 	defer cancel()
 	out, _ := exec.CommandContext(ctx, sh, "-l", "-c", script).Output()
-	for _, c := range strings.Fields(string(out)) {
+	for c := range strings.FieldsSeq(string(out)) {
 		have[c] = true
 	}
 	return have

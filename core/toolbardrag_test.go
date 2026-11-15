@@ -52,7 +52,7 @@ func TestToolbarMoveFunc(t *testing.T) {
 		bb := AsWidget(tb.Child(i)).Geom.TotalBBox
 		return bb.Min.Add(bb.Size().Div(2))
 	}
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		b.AsyncLock()
 		from, to := center(0), center(2)
 		assert.True(t, AsWidget(tb.Child(0)).AbilityIs(abilities.Draggable))

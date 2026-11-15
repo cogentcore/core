@@ -394,7 +394,7 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 			return nil
 		}
 		ext := filepath.Ext(path)
-		if !(ext == ".md" || ext == ".html") {
+		if ext != ".md" && ext != ".html" {
 			return nil
 		}
 		pg, err := bcontent.NewPage(ct.Source, path)
@@ -474,7 +474,7 @@ func (ct *Content) OpenEvent(url string, e events.Event) *Content {
 		}
 		_, pg, heading := ct.parseURL(url)
 		_, nw, err := ct.pageURL(pg, heading)
-		if err != nil {
+		if err != nil || nw == nil { // (no URL other than on the web)
 			return ct
 		}
 		core.TheApp.OpenURL(nw.String())
@@ -516,10 +516,6 @@ func (ct *Content) reloadPage() {
 
 // loadPage loads the current page content into the given frame if it is not already loaded.
 func (ct *Content) loadPage(w *core.Frame) error {
-	if ct.rendered == ct.current { // this prevents tabs from rendering
-		// fmt.Println("repeat")
-		// return nil
-	}
 	if NewPageInitFunc != nil {
 		NewPageInitFunc()
 	}
@@ -550,7 +546,7 @@ func (ct *Content) loadPage(w *core.Frame) error {
 		})
 	}
 
-	ct.makeTableOfContents(w, ct.current.Page)
+	ct.makeTableOfContents(w)
 	// A new categories tree is styled with the table of contents; a kept one only
 	// restyles the nodes whose selection changes, in updateCategories.
 	if ct.makeCategories() {
@@ -596,7 +592,7 @@ func (ct *Content) loadRest(w *core.Frame, loads int) {
 	for _, c := range pw.Children[start:] {
 		c.(core.Widget).AsWidget().Update()
 	}
-	ct.makeTableOfContents(w, ct.current.Page)
+	ct.makeTableOfContents(w)
 	if ct.tocTree != nil {
 		ct.tocTree.Update()
 	}
@@ -628,7 +624,7 @@ func (ct *Content) RenderWidget() {
 
 // makeTableOfContents makes the table of contents and adds it to [Content.leftFrame]
 // based on the headings in the given frame.
-func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
+func (ct *Content) makeTableOfContents(w *core.Frame) {
 	ct.deleteTableOfContents()
 	ct.tocNodes = map[string]*core.Tree{}
 	// The table of contents goes before the categories tree, which is kept between pages.
@@ -646,7 +642,7 @@ func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
 	})
 	// last is the most recent tree node for each heading level, used for nesting.
 	last := map[int]*core.Tree{}
-	w.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+	for cw, cwb := range w.AllWidgets() {
 		num, text, ok := headingOf(cw)
 		if ok {
 			parent := contents
@@ -663,13 +659,14 @@ func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
 			kebab := strcase.ToKebab(tr.Text)
 			ct.tocNodes[kebab] = tr
 			tr.OnSelect(func(e events.Event) {
-				ct.saveUpdatedPos(ct.current, ct.current.Page, ct.current.Heading)
+				curPg, heading := ct.current, ct.current.Heading
+				_ = heading
+				ct.saveUpdatedPos(curPg)
 				cwb.ScrollThisToTop()
 				ct.OpenEvent(ct.current.Page.URL+"#"+kebab, e)
 			})
 		}
-		return tree.Continue
-	})
+	}
 
 	if contents.NumChildren() == 0 {
 		ct.deleteTableOfContents()
@@ -777,10 +774,9 @@ func (ct *Content) updateCategories(restyle bool) {
 func styleTreeNode(tr *core.Tree) {
 	tr.Style()
 	if tr.Parts != nil {
-		tr.Parts.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		for cw := range tr.Parts.AllWidgets() {
 			cw.Style()
-			return tree.Continue
-		})
+		}
 	}
 	tr.NeedsRender()
 }

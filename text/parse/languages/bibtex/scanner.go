@@ -17,12 +17,34 @@ import (
 	"strings"
 )
 
-var parseField bool
-
 // Scanner is a lexical scanner
 type Scanner struct {
 	r   *bufio.Reader
 	pos TokenPos
+
+	// parseField is whether a field value is being scanned (after an =),
+	// in which a brace starts a braced string.
+	parseField bool
+
+	// depth is the depth of the braces or parentheses of the current entry:
+	// the text outside of entries (at depth 0, before an @) is ignored,
+	// as comments, as in BibTeX.
+	depth int
+
+	// inEntry is whether an entry has been started with an @.
+	inEntry bool
+
+	// lastTok is the last token returned.
+	lastTok Token
+
+	// pending are tokens to return before scanning more.
+	pending []pendingToken
+}
+
+// pendingToken is a token with its literal value.
+type pendingToken struct {
+	tok Token
+	lit string
 }
 
 // NewScanner returns a new instance of Scanner.
@@ -59,7 +81,24 @@ func (s *Scanner) unread() {
 
 // Scan returns the next token and literal value.
 func (s *Scanner) Scan() (tok Token, lit string) {
+	tok, lit = s.scan()
+	s.lastTok = tok
+	return
+}
+
+// scan returns the next token and literal value (see [Scanner.Scan]).
+func (s *Scanner) scan() (tok Token, lit string) {
+	if len(s.pending) > 0 {
+		p := s.pending[0]
+		s.pending = s.pending[1:]
+		return p.tok, p.lit
+	}
 	ch := s.read()
+	if !s.inEntry { // text outside of entries is ignored, up to an @
+		for ch != '@' && ch != eof {
+			ch = s.read()
+		}
+	}
 	if isWhitespace(ch) {
 		s.ignoreWhitespace()
 		ch = s.read()
@@ -72,25 +111,46 @@ func (s *Scanner) Scan() (tok Token, lit string) {
 	case eof:
 		return 0, ""
 	case '@':
+		s.inEntry = true
 		return ATSIGN, string(ch)
 	case ':':
 		return COLON, string(ch)
 	case ',':
-		parseField = false // reset parseField if reached end of field.
+		s.parseField = false // reset parseField if reached end of field.
 		return COMMA, string(ch)
 	case '=':
-		parseField = true // set parseField if = sign outside quoted or ident.
+		s.parseField = true // set parseField if = sign outside quoted or ident.
 		return EQUAL, string(ch)
 	case '"':
 		return s.scanQuoted()
-	case '{':
-		if parseField {
+	case '{', '(':
+		if ch == '{' && s.parseField {
 			return s.scanBraced()
 		}
-		return LBRACE, string(ch)
-	case '}':
-		if parseField { // reset parseField if reached end of entry.
-			parseField = false
+		open, close := Token(LBRACE), Token(RBRACE)
+		if ch == '(' {
+			open, close = LPAREN, RPAREN
+		}
+		if s.lastTok == COMMENT { // the text of a comment, as it is
+			text := s.scanUntilClose(ch)
+			s.pending = append(s.pending, pendingToken{IDENT, text}, pendingToken{close, ""})
+			s.inEntry = false
+			return open, string(ch)
+		}
+		s.depth++
+		if s.lastTok == PREAMBLE { // its content is a value, as after an =
+			s.parseField = true
+		}
+		return open, string(ch)
+	case '}', ')':
+		s.parseField = false // reset parseField if reached end of entry.
+		s.depth--
+		if s.depth <= 0 {
+			s.depth = 0
+			s.inEntry = false
+		}
+		if ch == ')' {
+			return RPAREN, string(ch)
 		}
 		return RBRACE, string(ch)
 	case '#':
@@ -134,7 +194,7 @@ func (s *Scanner) scanBare() (Token, string) {
 		return PREAMBLE, str
 	} else if strings.ToLower(str) == "string" {
 		return STRING, str
-	} else if _, err := strconv.Atoi(str); err == nil && parseField { // Special case for numeric
+	} else if _, err := strconv.Atoi(str); err == nil && s.parseField { // Special case for numeric
 		return IDENT, str
 	}
 	return BAREIDENT, str
@@ -175,6 +235,33 @@ func (s *Scanner) scanBraced() (Token, string) {
 		}
 	}
 	return ILLEGAL, buf.String()
+}
+
+// scanUntilClose returns the text up to the given open brace or
+// parenthesis that matches it, which is read too.
+func (s *Scanner) scanUntilClose(open rune) string {
+	close := '}'
+	if open == '(' {
+		close = ')'
+	}
+	var buf bytes.Buffer
+	depth := 1
+	for {
+		ch := s.read()
+		if ch == eof {
+			break
+		}
+		if ch == open {
+			depth++
+		} else if ch == close {
+			depth--
+			if depth == 0 {
+				break
+			}
+		}
+		buf.WriteRune(ch)
+	}
+	return buf.String()
 }
 
 // scanQuoted parses a quoted string, like "this".

@@ -124,7 +124,7 @@ func (sp *spellCheck) showNow(word string, ctx core.Widget, pos image.Point) {
 		if count == 0 {
 			core.NewButton(sc).SetText("no suggestion")
 		} else {
-			for i := 0; i < count; i++ {
+			for i := range count {
 				text := sp.suggest[i]
 				core.NewButton(sc).SetText(text).OnClick(func(e events.Event) {
 					sp.cancel()

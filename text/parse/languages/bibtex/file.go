@@ -93,7 +93,7 @@ func (fl *File) Open(fname string) error {
 	defer f.Close()
 	parsed, err := Parse(f)
 	if err != nil {
-		err = fmt.Errorf("Bibtex bibliography: %s not loaded due to error(s):\n%v", fl.File, err)
+		err = fmt.Errorf("the BibTeX bibliography %s was not loaded due to error(s):\n%v", fl.File, err)
 		return err
 	}
 	fl.BibTex = parsed

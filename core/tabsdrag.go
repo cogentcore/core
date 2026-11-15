@@ -388,13 +388,12 @@ func (td *tabDrag) dropInScene(sc *Scene) {
 		return // (back in its own window)
 	}
 	var dst *Tabs
-	sc.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
-		if ts, ok := cw.(*Tabs); ok && dst == nil && ts.DragToWindow != nil && ts.Type.effective(ts) == FunctionalTabs {
+	for cw := range sc.AllWidgets() {
+		if ts, ok := cw.(*Tabs); ok && ts.DragToWindow != nil && ts.Type.effective(ts) == FunctionalTabs {
 			dst = ts
-			return tree.Break
+			break
 		}
-		return dst == nil
-	})
+	}
 	if dst != nil {
 		td.dropAt(dst, dst.NumTabs())
 	}

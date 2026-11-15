@@ -94,11 +94,12 @@ func (vw *View) Init() {
 	vw.AddContextMenu(func(m *core.Scene, pos image.Point) {
 		// those of the terminal, first
 		cms := vw.Terminal.ContextMenus
-		for i := len(cms) - 1; i >= 0; i-- {
+		for ri := len(cms) - 1; ri >= 0; ri-- {
+			cm := cms[ri]
 			if m.NumChildren() > 0 {
 				core.NewSeparator(m)
 			}
-			cms[i](m, pos)
+			cm(m, pos)
 		}
 	})
 }

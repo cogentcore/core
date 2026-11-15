@@ -322,7 +322,7 @@ func (cm *SubCmd) SetFromHelp(help string) {
 		// each item is one word, not prose with commas (as in go help build)
 		var names []string
 		prose := false
-		for _, item := range strings.Split(strings.TrimSuffix(text, ","), ",") {
+		for item := range strings.SplitSeq(strings.TrimSuffix(text, ","), ",") {
 			item = strings.TrimSpace(item)
 			if !isSubcommand(item) {
 				prose = true
@@ -371,7 +371,7 @@ func (cm *SubCmd) SetFromHelp(help string) {
 	}
 	// subcommands that are only in the usage lines, as for git stash list,
 	// with their usage as their documentation
-	for _, line := range strings.Split(cm.Usage, "\n") {
+	for line := range strings.SplitSeq(cm.Usage, "\n") {
 		rest, ok := strings.CutPrefix(line, cm.Cmd+" ")
 		f := strings.Fields(rest)
 		if !ok || len(f) == 0 || !isSubcommand(f[0]) || cmds[f[0]] || f[0] == "help" {
@@ -395,7 +395,7 @@ func usageFlags(usage string, lines []string) []*Flag {
 	var flags []*Flag
 	seen := map[string]bool{}
 	for _, m := range usageFlag.FindAllStringSubmatch(usage, -1) {
-		for _, alt := range strings.Split(m[1], "|") {
+		for alt := range strings.SplitSeq(m[1], "|") {
 			fl := parseFlag(strings.TrimSpace(alt))
 			if fl == nil || seen[fl.Name] || len(strings.Fields(alt)) > 2 {
 				continue
@@ -455,7 +455,7 @@ func isSubcommand(name string) bool {
 		return false
 	}
 	return !strings.ContainsFunc(name, func(r rune) bool {
-		return !(unicode.IsLower(r) || unicode.IsDigit(r) || r == '-' || r == '_')
+		return !unicode.IsLower(r) && !unicode.IsDigit(r) && r != '-' && r != '_'
 	})
 }
 
@@ -502,7 +502,7 @@ func helpBlocks(lines []string) []block {
 		switch {
 		case text == "" || n == 0:
 			finish()
-		case cur != nil && n > cur.indent && !(strings.HasPrefix(text, "-") && cur.docCol > 0 && n < cur.docCol):
+		case cur != nil && n > cur.indent && (!strings.HasPrefix(text, "-") || cur.docCol <= 0 || n >= cur.docCol):
 			// (a flag indented more than the one before it, but less than its
 			// documentation, is another flag, as of brew: "      --name")
 			if cur.docCol == 0 {
@@ -558,7 +558,7 @@ var flagName = regexp.MustCompile(`^--?[A-Za-z0-9][A-Za-z0-9_.-]*$`)
 func parseFlag(name string) *Flag {
 	fl := &Flag{}
 	var toks []string
-	for _, tok := range strings.Fields(strings.ReplaceAll(name, ",", " ")) {
+	for tok := range strings.FieldsSeq(strings.ReplaceAll(name, ",", " ")) {
 		if strings.HasPrefix(tok, "-") && !strings.ContainsAny(tok, "<[") { // "-S|--save", as of npm
 			toks = append(toks, strings.Split(tok, "|")...)
 			continue

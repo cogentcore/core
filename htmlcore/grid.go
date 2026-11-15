@@ -136,7 +136,7 @@ func gridLineNumbers(v string, autoCount func(track string, fit bool) int) map[s
 		if names == nil {
 			names = map[string][]int{}
 		}
-		for _, name := range strings.Fields(strings.Trim(v[m[0]:m[1]], "[]")) {
+		for name := range strings.FieldsSeq(strings.Trim(v[m[0]:m[1]], "[]")) {
 			names[name] = append(names[name], line)
 		}
 	}
@@ -228,8 +228,8 @@ func gridTracksAuto(v string, autoCount func(track string, fit bool) int) []stri
 	var tracks []string
 	v = gridLineNames.ReplaceAllString(v, " ")
 	for _, f := range splitColors(v) { // fields outside of parentheses
-		if strings.HasPrefix(f, "repeat(") {
-			inner := strings.TrimSuffix(strings.TrimPrefix(f, "repeat("), ")")
+		if after, ok := strings.CutPrefix(f, "repeat("); ok {
+			inner := strings.TrimSuffix(after, ")")
 			n, rest, _ := strings.Cut(inner, ",")
 			n = strings.TrimSpace(n)
 			count, err := strconv.Atoi(n)
@@ -376,8 +376,8 @@ func containFlexible(s *styles.Style, tracks []string, noMin bool) {
 // tracks are as wide as their content when other tracks are flexible
 // (and auto tracks share the rest of the width when none are).
 func gridTrackStyle(env *lengthEnv, s *styles.Style, track string, flexible bool) {
-	if strings.HasPrefix(track, "minmax(") {
-		inner := strings.TrimSuffix(strings.TrimPrefix(track, "minmax("), ")")
+	if after, ok := strings.CutPrefix(track, "minmax("); ok {
+		inner := strings.TrimSuffix(after, ")")
 		mn, mx, _ := strings.Cut(inner, ",")
 		mx = strings.TrimSpace(mx)
 		if strings.HasSuffix(mx, "fr") || mx == "auto" {

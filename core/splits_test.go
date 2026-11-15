@@ -33,28 +33,28 @@ func makeSplits(n, w, h int) (*Body, *Splits) {
 
 func TestSplitsRow2(t *testing.T) {
 	b, _ := makeSplits(2, 40, 20)
-	b.AssertRender(t, "splits/row-2")
+	AssertRender(t, b, "splits/row-2")
 }
 
 func TestSplitsColumn2(t *testing.T) {
 	b, _ := makeSplits(2, 20, 40)
-	b.AssertRender(t, "splits/column-2")
+	AssertRender(t, b, "splits/column-2")
 }
 
 func TestSplitsRow4(t *testing.T) {
 	b, _ := makeSplits(4, 40, 20)
-	b.AssertRender(t, "splits/row-4")
+	AssertRender(t, b, "splits/row-4")
 }
 
 func TestSplitsColumn4(t *testing.T) {
 	b, _ := makeSplits(4, 20, 40)
-	b.AssertRender(t, "splits/column-4")
+	AssertRender(t, b, "splits/column-4")
 }
 
 func TestSplitsRow2Set(t *testing.T) {
 	b, sp := makeSplits(2, 40, 20)
 	sp.SetSplits(0.2, 0.8)
-	b.AssertRender(t, "splits/row-2-set")
+	AssertRender(t, b, "splits/row-2-set")
 }
 
 func TestSplitsRow2Column(t *testing.T) {
@@ -62,7 +62,7 @@ func TestSplitsRow2Column(t *testing.T) {
 	sp.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-	b.AssertRender(t, "splits/row-2-column")
+	AssertRender(t, b, "splits/row-2-column")
 }
 
 func TestSplitsColumn2Row(t *testing.T) {
@@ -70,7 +70,7 @@ func TestSplitsColumn2Row(t *testing.T) {
 	sp.Styler(func(s *styles.Style) {
 		s.Direction = styles.Row
 	})
-	b.AssertRender(t, "splits/column-2-row")
+	AssertRender(t, b, "splits/column-2-row")
 }
 
 // For https://github.com/cogentcore/core/issues/850
@@ -85,64 +85,64 @@ func TestMixedVerticalSplits(t *testing.T) {
 	NewText(sp).SetText(txt)
 	NewText(sp).SetText(txt)
 	NewText(b).SetText(txt)
-	b.AssertRender(t, "splits/mixed-vertical")
+	AssertRender(t, b, "splits/mixed-vertical")
 }
 
 func TestSplitsTilesRowSpanFirst(t *testing.T) {
 	b, sp := makeSplits(4, 40, 20)
 	sp.SetTiles(TileSpan, TileFirstLong)
-	b.AssertRender(t, "splits/tiles-row-span-first")
+	AssertRender(t, b, "splits/tiles-row-span-first")
 }
 
 func TestSplitsTilesRowSpanSecond(t *testing.T) {
 	b, sp := makeSplits(4, 40, 20)
 	sp.SetTiles(TileSpan, TileSecondLong)
-	b.AssertRender(t, "splits/tiles-row-span-second")
+	AssertRender(t, b, "splits/tiles-row-span-second")
 }
 
 func TestSplitsTilesColumnSpanFirst(t *testing.T) {
 	b, sp := makeSplits(4, 20, 40)
 	sp.SetTiles(TileSpan, TileFirstLong)
-	b.AssertRender(t, "splits/tiles-column-span-first")
+	AssertRender(t, b, "splits/tiles-column-span-first")
 }
 
 func TestSplitsTilesColumnSpanSecond(t *testing.T) {
 	b, sp := makeSplits(4, 20, 40)
 	sp.SetTiles(TileSpan, TileSecondLong)
-	b.AssertRender(t, "splits/tiles-column-span-second")
+	AssertRender(t, b, "splits/tiles-column-span-second")
 }
 
 func TestSplitsTilesRowSplitSpanSplit(t *testing.T) {
 	b, sp := makeSplits(5, 40, 20)
 	sp.SetTiles(TileSplit, TileSpan, TileSplit)
-	b.AssertRender(t, "splits/tiles-row-split-span-split")
+	AssertRender(t, b, "splits/tiles-row-split-span-split")
 }
 
 func TestSplitsTilesRowSpanFirstSet(t *testing.T) {
 	b, sp := makeSplits(4, 40, 20)
 	sp.SetTiles(TileSpan, TileFirstLong)
 	sp.SetSplits(0.2, 0.8, 0.4, 0.6)
-	b.AssertRender(t, "splits/tiles-row-span-first-set")
+	AssertRender(t, b, "splits/tiles-row-span-first-set")
 }
 
 func TestSplitsTilesRowSpanSecondSet(t *testing.T) {
 	b, sp := makeSplits(4, 40, 20)
 	sp.SetTiles(TileSpan, TileSecondLong)
 	sp.SetSplits(0.2, 0.8, 0.2, 0.3)
-	b.AssertRender(t, "splits/tiles-row-span-second-set")
+	AssertRender(t, b, "splits/tiles-row-span-second-set")
 }
 
 func TestSplitsTilesRowSplitSpanSplitSet(t *testing.T) {
 	b, sp := makeSplits(5, 40, 20)
 	sp.SetTiles(TileSplit, TileSpan, TileSplit)
 	sp.SetSplits(0.2, 0.8, 0.6, 0.6, 0.4)
-	b.AssertRender(t, "splits/tiles-row-split-span-split-set")
+	AssertRender(t, b, "splits/tiles-row-split-span-split-set")
 }
 
 func TestSplitsTilesRowSpanPlus(t *testing.T) {
 	b, sp := makeSplits(5, 40, 20)
 	sp.SetTiles(TileSpan, TilePlus)
-	b.AssertRender(t, "splits/tiles-row-span-plus")
+	AssertRender(t, b, "splits/tiles-row-span-plus")
 }
 
 // TestSplitsPlanHandles tests that splits made by a plan, with children
@@ -160,5 +160,5 @@ func TestSplitsPlanHandles(t *testing.T) {
 	sl := fr.Child(0).(*Splits)
 	assert.Equal(t, 3, sl.NumChildren())
 	assert.Equal(t, 2, sl.Parts.NumChildren(), "the handles")
-	b.AssertRender(t, "splits/plan-handles")
+	AssertRender(t, b, "splits/plan-handles")
 }

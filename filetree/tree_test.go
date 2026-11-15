@@ -28,7 +28,7 @@ func TestTree(t *testing.T) {
 	// point (their contents matter for generated files, which are shown
 	// differently), so that the image does not change when they change.
 	NewTree(b).OpenPath("testdata/events")
-	b.AssertRender(t, "basic")
+	core.AssertRender(t, b, "basic")
 }
 
 // TestTreeReopen tests that the nodes of a tree opened at another path
@@ -41,7 +41,7 @@ func TestTreeReopen(t *testing.T) {
 	require.NoError(t, os.Mkdir(filepath.Join(b, "other"), 0o755))
 	bd := core.NewBody()
 	ft := NewTree(bd)
-	bd.AssertRender(t, "reopen", func() {
+	core.AssertRender(t, bd, "reopen", func() {
 		bd.AsyncLock()
 		defer bd.AsyncUnlock()
 		ft.OpenPath(a)
@@ -111,7 +111,7 @@ func TestTreeApp(t *testing.T) {
 	ft.NoWatch = true
 	ft.OpenPath(root)
 	var app *Node
-	b.RenderImage(func() {
+	core.RenderImage(b, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		app = AsNode(ft.Child(0))

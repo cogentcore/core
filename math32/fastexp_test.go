@@ -73,7 +73,7 @@ func TestFastExpFindNaN(t *testing.T) {
 	left := float32(-89)
 	right := float32(-87)
 	x := float32(0)
-	for cnt := 0; cnt < 100000; cnt++ {
+	for cnt := range 100000 {
 		x = (left + right) / 2
 		if cnt%10000 == 0 {
 			fmt.Printf("Trying x: %f\n", x)

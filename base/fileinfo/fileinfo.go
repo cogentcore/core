@@ -174,7 +174,7 @@ func (fi *FileInfo) MimeFromFile() error {
 	return nil
 }
 
-// SetMimeType sets file info fields from given mime type string.
+// SetMimeFromType sets file info fields from given mime type string.
 func (fi *FileInfo) SetMimeFromType(mtype string) {
 	fi.Mime = mtype
 	fi.Cat = CategoryFromMime(mtype)
@@ -225,6 +225,10 @@ func (fi *FileInfo) SetType(ftyp Known) {
 	fi.Mime = mt.Mime
 	fi.Cat = mt.Cat
 	fi.Known = mt.Known
+	if ftyp == Unknown { // (with no mime type, whose zero category is Audio)
+		fi.Cat = UnknownCategory
+		fi.Known = Unknown
+	}
 	if fi.Name == "" && len(mt.Exts) > 0 {
 		fi.Name = "_fake" + mt.Exts[0]
 		fi.Path = fi.Name
@@ -249,7 +253,7 @@ func (fi *FileInfo) IsExec() bool {
 	return ext == ".exe"
 }
 
-// IsSymLink returns true if file is a symbolic link
+// IsSymlink returns true if file is a symbolic link
 func (fi *FileInfo) IsSymlink() bool {
 	return fi.Mode&os.ModeSymlink != 0
 }

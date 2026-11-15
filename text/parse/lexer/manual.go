@@ -57,7 +57,7 @@ func FirstWordDigits(str string) string {
 func FirstWordApostrophe(str string) string {
 	rstr := ""
 	for _, s := range str {
-		if !(IsLetterNoUnderbar(s) || s == '\'') {
+		if !IsLetterNoUnderbar(s) && s != '\'' {
 			if len(rstr) == 0 {
 				continue
 			}
@@ -204,7 +204,7 @@ func MatchCase(src, trg string) string {
 	rsc := []rune(src)
 	rtg := []rune(trg)
 	mx := min(len(rsc), len(rtg))
-	for i := 0; i < mx; i++ {
+	for i := range mx {
 		t := rtg[i]
 		if unicode.IsUpper(rsc[i]) {
 			if !unicode.IsUpper(t) {

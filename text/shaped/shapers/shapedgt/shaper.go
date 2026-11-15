@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package shapedgt shapes text with the HarfBuzz shaper of go-text, and wraps
+// it into lines.
 package shapedgt
 
 import (
@@ -62,17 +64,10 @@ func NewShaper() shaped.Shaper {
 	sh.fontMap.FontMap = fontscan.NewFontMap(&nilLogger{})
 	// TODO(text): figure out cache dir situation (especially on mobile and web)
 	str, err := os.UserCacheDir()
-	if errors.Log(err) != nil {
-		// slog.Printf("failed resolving font cache dir: %v", err)
-		// shaper.logger.Printf("skipping system font load")
-	}
+	errors.Log(err) // (the system fonts are not loaded then)
 	// fmt.Println("cache dir:", str)
-	if err := sh.fontMap.UseSystemFonts(str); err != nil {
-		// note: we expect this error on js platform -- could do something exclusive here
-		// under a separate build tag file..
-		// errors.Log(err)
-		// shaper.logger.Printf("failed loading system fonts: %v", err)
-	}
+	// the error is expected on the js platform, which has no system fonts
+	_ = sh.fontMap.UseSystemFonts(str)
 	errors.Log(fonts.UseEmbeddedInMap(sh.fontMap.FontMap))
 	sh.shaper.SetFontCacheSize(32)
 	return sh
@@ -163,8 +158,7 @@ func (sh *Shaper) ShapeTextOutput(tx rich.Text, tsty *text.Style, txt []rune) []
 				o.Advance = math32.ToFixed(mt.BBox.Size().X)
 			}
 			sh.outBuff = append(sh.outBuff, o)
-			si++ // skip the end special
-			continue
+			continue // (the end special, next, has no text)
 		}
 		q := StyleToQuery(sty, tsty)
 		sh.fontMap.SetQuery(q)
@@ -208,12 +202,11 @@ func (sh *Shaper) shapeMaths(tx rich.Text, tsty *text.Style) {
 	if shaped.ShapeMath == nil {
 		return
 	}
-	for si, _ := range tx {
+	for si := range tx {
 		sty, stx := tx.Span(si)
 		if sty.IsMath() {
 			mt := sh.shapeMath(sty, tsty, stx)
 			sh.maths[si] = mt // can be nil if error
-			si++              // skip past special
 		}
 	}
 }

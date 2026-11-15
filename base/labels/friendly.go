@@ -45,22 +45,24 @@ func FriendlyTypeName(typ reflect.Type) string {
 		}
 		return bnm + "s"
 	case reflect.Func:
-		str := "Function"
+		var str strings.Builder
+		str.WriteString("Function")
 		ni := nptyp.NumIn()
 		if ni > 0 {
-			str += " of"
+			str.WriteString(" of")
 		}
-		for i := 0; i < ni; i++ {
-			str += " " + FriendlyTypeName(nptyp.In(i))
+		for i := range ni {
+			str.WriteString(" ")
+			str.WriteString(FriendlyTypeName(nptyp.In(i)))
 			if ni == 2 && i == 0 {
-				str += " and"
+				str.WriteString(" and")
 			} else if i == ni-2 {
-				str += ", and"
+				str.WriteString(", and")
 			} else if i < ni-1 {
-				str += ","
+				str.WriteString(",")
 			}
 		}
-		return str
+		return str.String()
 	}
 	if nptyp.String() == "interface {}" {
 		return "Value"
@@ -75,7 +77,7 @@ func FriendlyStructLabel(v reflect.Value) string {
 		return "None"
 	}
 	opv := reflectx.UnderlyingPointer(v)
-	if lbler, ok := opv.Interface().(Labeler); ok {
+	if lbler, ok := reflect.TypeAssert[Labeler](opv); ok {
 		return lbler.Label()
 	}
 	return FriendlyTypeName(npv.Type())

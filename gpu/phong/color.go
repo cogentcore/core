@@ -87,8 +87,8 @@ func (cl *Colors) SetColors(clr, emis color.Color, shiny, reflect, bright float3
 // UseFullTexture sets the texture parameters
 // to render the full texture: repeat = 1,1; offset = 0,0
 func (cl *Colors) UseFullTexture() *Colors {
-	cl.Tiling.Repeat = math32.Vector2{1, 1}
-	cl.Tiling.Offset = math32.Vector2{0, 0}
+	cl.Tiling.Repeat = math32.Vec2(1, 1)
+	cl.Tiling.Offset = math32.Vec2(0, 0)
 	return cl
 }
 

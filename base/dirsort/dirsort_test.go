@@ -126,6 +126,7 @@ func TestStore(t *testing.T) {
 	assert.Equal(t, s, For(dir))
 	s, ok = Saved(dir + "/sub/..") // (the same directory)
 	assert.True(t, ok)
+	assert.Equal(t, Sort{By: ModTime, Down: true}, s)
 	link := filepath.Join(t.TempDir(), "link")
 	require.NoError(t, os.Symlink(dir, link))
 	_, ok = Saved(link)

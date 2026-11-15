@@ -185,8 +185,8 @@ func SetPlane(vertex, normal, texcoord math32.ArrayF32, index math32.ArrayU32, v
 	vidx := vtxOff * 3
 	tidx := vtxOff * 2
 
-	for iy := 0; iy < hsegs1; iy++ {
-		for ix := 0; ix < wsegs1; ix++ {
+	for iy := range hsegs1 {
+		for ix := range wsegs1 {
 			vtx.SetDim(waxis, float32(ix)*fwdir+woff)
 			vtx.SetDim(haxis, float32(iy)*fhdir+hoff)
 			vtx.SetDim(zaxis, zoff)

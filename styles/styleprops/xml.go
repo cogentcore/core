@@ -14,8 +14,8 @@ import (
 // FromXMLString sets style properties from XML style string, which contains ';'
 // separated name: value pairs
 func FromXMLString(style string, properties map[string]any) {
-	st := strings.Split(style, ";")
-	for _, s := range st {
+	st := strings.SplitSeq(style, ";")
+	for s := range st {
 		kv := strings.Split(s, ":")
 		n := len(kv)
 		if n >= 2 {
@@ -37,7 +37,7 @@ func ToXMLString(properties map[string]any) string {
 		if k == "transform" {
 			continue
 		}
-		sb.WriteString(fmt.Sprintf("%s:%s;", k, reflectx.ToString(v)))
+		fmt.Fprintf(&sb, "%s:%s;", k, reflectx.ToString(v))
 	}
 	return sb.String()
 }

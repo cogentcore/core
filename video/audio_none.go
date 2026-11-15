@@ -17,7 +17,7 @@ type audio struct {
 	ended chan struct{}
 }
 
-func playAudio(samples <-chan [2]float64, paused bool, volume float32, muted bool) *audio {
+func playAudio(_ <-chan [2]float64, _ bool, _ float32, _ bool) *audio {
 	return &audio{ended: make(chan struct{})}
 }
 

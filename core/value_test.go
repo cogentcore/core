@@ -19,14 +19,14 @@ import (
 func TestBind(t *testing.T) {
 	b := NewBody()
 	Bind("Gopher", NewTextField(b))
-	b.AssertRender(t, "bind/basic")
+	AssertRender(t, b, "bind/basic")
 }
 
 func TestBindUpdate(t *testing.T) {
 	b := NewBody()
 	name := "Gopher"
 	tf := Bind(&name, NewTextField(b))
-	b.AssertRender(t, "bind/update", func() {
+	AssertRender(t, b, "bind/update", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		name = "Cogent Core"
@@ -39,7 +39,7 @@ func TestBindChange(t *testing.T) {
 	name := "Gopher"
 
 	tf := Bind(&name, NewTextField(b))
-	b.AssertRender(t, "bind/change", func() {
+	AssertRender(t, b, "bind/change", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		tf.HandleEvent(events.NewKey(events.KeyChord, 'G', 0, 0))
@@ -54,25 +54,25 @@ func TestBindChange(t *testing.T) {
 func TestBindSpinner(t *testing.T) {
 	b := NewBody()
 	Bind("1.4", NewSpinner(b))
-	b.AssertRender(t, "bind/spinner")
+	AssertRender(t, b, "bind/spinner")
 }
 
 func TestBindSlider(t *testing.T) {
 	b := NewBody()
 	Bind(0.65, NewSpinner(b))
-	b.AssertRender(t, "bind/slider")
+	AssertRender(t, b, "bind/slider")
 }
 
 func TestBindMeter(t *testing.T) {
 	b := NewBody()
 	Bind(15*time.Second, NewMeter(b)).SetMin(float32(time.Second)).SetMax(float32(time.Minute))
-	b.AssertRender(t, "bind/meter")
+	AssertRender(t, b, "bind/meter")
 }
 
 func TestBindText(t *testing.T) {
 	b := NewBody()
 	Bind("Hello", NewText(b))
-	b.AssertRender(t, "bind/text")
+	AssertRender(t, b, "bind/text")
 }
 
 type validator string
@@ -87,7 +87,7 @@ func (v validator) Validate() error {
 func TestValidatorValid(t *testing.T) {
 	b := NewBody()
 	tf := Bind(validator("my@string"), NewTextField(b))
-	b.AssertRender(t, "bind/validator-valid", func() {
+	AssertRender(t, b, "bind/validator-valid", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		tf.SendChange() // trigger validation
@@ -97,7 +97,7 @@ func TestValidatorValid(t *testing.T) {
 func TestValidatorInvalid(t *testing.T) {
 	b := NewBody()
 	v := Bind(validator("my string"), NewTextField(b))
-	b.AssertRender(t, "bind/validator-invalid", func() {
+	AssertRender(t, b, "bind/validator-invalid", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		v.SendChange() // trigger validation

@@ -16,13 +16,14 @@ import (
 	"path/filepath"
 	"reflect"
 	"sort"
+	"strings"
 
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/tree"
 )
 
-// In an ErrorList, an error is represented by an *Error.
+// Error is an error of an ErrorList, in which it is a *Error.
 // The position Pos, if valid, points to the beginning of
 // the offending token, and the error condition is described
 // by Msg.
@@ -45,7 +46,7 @@ type Error struct {
 }
 
 // Error implements the error interface -- gives the minimal version of error string
-func (e Error) Error() string {
+func (e *Error) Error() string {
 	if e.Filename != "" {
 		_, fn := filepath.Split(e.Filename)
 		return fn + ":" + e.Pos.String() + ": " + e.Msg
@@ -98,7 +99,7 @@ func (p *ErrorList) Add(pos textpos.Pos, fname, msg string, srcln string, rule t
 // Reset resets an ErrorList to no errors.
 func (p *ErrorList) Reset() { *p = (*p)[0:0] }
 
-// ErrorList implements the sort Interface.
+// Len implements the sort Interface.
 func (p ErrorList) Len() int      { return len(p) }
 func (p ErrorList) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
 
@@ -141,7 +142,7 @@ func (p *ErrorList) RemoveMultiples() {
 	(*p) = (*p)[0:i]
 }
 
-// An ErrorList implements the error interface.
+// Error implements the error interface.
 func (p ErrorList) Error() string {
 	switch len(p) {
 	case 0:
@@ -171,7 +172,7 @@ func (p ErrorList) Report(maxN int, basepath string, showSrc, showRule bool) str
 	if ne == 0 {
 		return ""
 	}
-	str := ""
+	var str strings.Builder
 	if maxN == 0 {
 		maxN = ne
 	} else {
@@ -179,22 +180,28 @@ func (p ErrorList) Report(maxN int, basepath string, showSrc, showRule bool) str
 	}
 	cnt := 0
 	lstln := -1
-	for ei := 0; ei < ne; ei++ {
+	lstfn := ""
+	rest := 0 // the number of errors after the last one reported
+	for ei := range ne {
 		er := p[ei]
-		if er.Pos.Line == lstln {
+		// only one error is reported per line of a file
+		if er.Pos.Line == lstln && er.Filename == lstfn {
 			continue
 		}
-		str += p[ei].Report(basepath, showSrc, showRule) + "<br>\n"
+		str.WriteString(p[ei].Report(basepath, showSrc, showRule))
+		str.WriteString("<br>\n")
 		lstln = er.Pos.Line
+		lstfn = er.Filename
 		cnt++
-		if cnt > maxN {
+		if cnt == maxN {
+			rest = ne - ei - 1
 			break
 		}
 	}
-	if ne > maxN {
-		str += fmt.Sprintf("... and %v more errors<br>\n", ne-maxN)
+	if rest > 0 {
+		fmt.Fprintf(&str, "... and %v more errors<br>\n", rest)
 	}
-	return str
+	return str.String()
 }
 
 // PrintError is a utility function that prints a list of errors to w,

@@ -654,9 +654,9 @@ func TestAll(t *testing.T) {
 			if generate || test != output {
 				line := fmt.Sprintf("%#v", output)
 				line = strings.TrimPrefix(line, "strcase.data")
-				line = strings.Replace(line, "\", ", "\",\n", -1)
-				line = strings.Replace(line, "{", "{\n", -1)
-				line = strings.Replace(line, "}", "\n},", -1)
+				line = strings.ReplaceAll(line, "\", ", "\",\n")
+				line = strings.ReplaceAll(line, "{", "{\n")
+				line = strings.ReplaceAll(line, "}", "\n},")
 				line = regexp.MustCompile("\"\n").ReplaceAllString(line, "\",\n")
 				fmt.Println(line)
 			}

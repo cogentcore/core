@@ -429,7 +429,8 @@ func (c *Context) nodeMarkup(n *xhtml.Node, pre bool) (start, end string) {
 		tag = "span"
 	}
 	var sb strings.Builder
-	sb.WriteString("<" + tag)
+	sb.WriteByte('<')
+	sb.WriteString(tag)
 	for _, a := range n.Attr {
 		if a.Key == "class" && (a.Val == "math inline" || a.Val == "math display") {
 			// the math of markdown, which rich text renders

@@ -200,8 +200,10 @@ func (is *Inspector) toggleSelectionMode() { //types:add
 func (is *Inspector) toggleSelectionModeOf(sc *Scene) {
 	sc.renderBBoxes = !sc.renderBBoxes
 	if sc.renderBBoxes {
-		sc.selectedWidgetChan = make(chan Widget)
-		go is.selectionMonitor()
+		ch := make(chan Widget)
+		sc.selectedWidgetChan = ch
+		sc.Stage.raise() // (here, in the window of the scene, with its lock)
+		go is.selectionMonitor(sc, ch)
 	} else {
 		if sc.selectedWidgetChan != nil {
 			close(sc.selectedWidgetChan)
@@ -211,40 +213,24 @@ func (is *Inspector) toggleSelectionModeOf(sc *Scene) {
 	sc.NeedsLayout()
 }
 
-// selectionMonitor monitors for the selected widget
-func (is *Inspector) selectionMonitor() {
-	sc, ok := is.Root.(*Scene)
-	if !ok {
-		return
-	}
-	sc.Stage.raise()
-	sw, ok := <-sc.selectedWidgetChan
+// selectionMonitor monitors for the widget of the given inspected scene
+// that is selected, sent on the given channel, in its own goroutine.
+func (is *Inspector) selectionMonitor(sc *Scene, ch chan Widget) {
+	sw, ok := <-ch
 	if !ok || sw == nil {
 		return
 	}
-	tv := is.treeWidget.FindSyncNode(sw)
+	tv := is.treeNodeOf(sw)
 	if tv == nil {
-		// if we can't be found, we are probably a part,
-		// so we keep going up until we find somebody in
-		// the tree
-		sw.AsTree().WalkUpParent(func(k tree.Node) bool {
-			tv = is.treeWidget.FindSyncNode(k)
-			if tv != nil {
-				return tree.Break
-			}
-			return tree.Continue
-		})
-		if tv == nil {
-			MessageSnackbar(is, fmt.Sprintf("Inspector: tree node missing: %v", sw))
-			return
-		}
+		MessageSnackbar(is, fmt.Sprintf("Inspector: tree node missing: %v", sw))
+		return
 	}
 	is.AsyncLock() // coming from other tree
 	tv.OpenParents()
 	tv.SelectEvent(events.SelectOne)
 	tv.ScrollToThis()
-	is.AsyncUnlock()
 	is.Scene.Stage.raise()
+	is.AsyncUnlock()
 
 	sc.AsyncLock()
 	sc.renderBBoxes = false
@@ -254,6 +240,21 @@ func (is *Inspector) selectionMonitor() {
 	sc.selectedWidgetChan = nil
 	sc.NeedsRender()
 	sc.AsyncUnlock()
+}
+
+// treeNodeOf returns the node of the tree of the inspector for the given
+// widget, or for its nearest ancestor that is in the tree, as for a part
+// of a widget, which is not in the tree; or nil.
+func (is *Inspector) treeNodeOf(w Widget) *Tree {
+	if tv := is.treeWidget.FindSyncNode(w); tv != nil {
+		return tv
+	}
+	for k := range w.AsTree().Ancestors() {
+		if tv := is.treeWidget.FindSyncNode(k); tv != nil {
+			return tv
+		}
+	}
+	return nil
 }
 
 // inspectApp displays [TheApp].

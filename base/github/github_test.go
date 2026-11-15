@@ -4,6 +4,8 @@
 
 package github_test
 
+//core:js-test run=TestResponses
+
 import (
 	"errors"
 	"net/http"

@@ -28,19 +28,18 @@ func (fn *Node) FirstVCS() (vcs.Repo, *Node) {
 	}
 	var repo vcs.Repo
 	var rnode *Node
-	fn.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+	for cw := range fn.AllWidgets() {
 		sfn := AsNode(cw)
 		if sfn == nil {
-			return tree.Continue
+			continue
 		}
 		sfn.detectVCSRepo()
 		if sfn.DirRepo != nil {
 			repo = sfn.DirRepo
 			rnode = sfn
-			return tree.Break
+			break
 		}
-		return tree.Continue
-	})
+	}
 	return repo, rnode
 }
 
@@ -87,22 +86,32 @@ func (fn *Node) Repo() (vcs.Repo, *Node) {
 	}
 	var repo vcs.Repo
 	var rnode *Node
-	fn.WalkUpParent(func(k tree.Node) bool {
+	for k := range fn.Ancestors() {
 		sfn := AsNode(k)
 		if sfn == nil {
-			return tree.Break
+			break
 		}
 		if sfn.IsIrregular() {
-			return tree.Break
+			break
 		}
 		if sfn.DirRepo != nil {
 			repo = sfn.DirRepo
 			rnode = sfn
-			return tree.Break
+			break
 		}
-		return tree.Continue
-	})
+	}
 	return repo, rnode
+}
+
+// setVCSStatus sets the VCS status of the node after a VCS operation on
+// it, and updates the files of its repository, whose cached status of the
+// file is stale until then (so the node is not updated from it now).
+func (fn *Node) setVCSStatus(status vcs.FileStatus) {
+	fn.Info.VCS = status
+	fn.NeedsRender()
+	if _, rnode := fn.Repo(); rnode != nil {
+		rnode.updateRepoFiles()
+	}
 }
 
 func (fn *Node) updateRepoFiles() {
@@ -135,8 +144,7 @@ func (fn *Node) AddToVCS() {
 		core.ErrorSnackbar(fn, err, "Error adding file to VCS")
 		return
 	}
-	fn.Info.VCS = vcs.Added
-	fn.Update()
+	fn.setVCSStatus(vcs.Added)
 }
 
 // deleteFromVCSSelected removes selected files from version control system
@@ -158,8 +166,7 @@ func (fn *Node) deleteFromVCS() {
 		core.ErrorSnackbar(fn, err, "Error deleting file from VCS")
 		return
 	}
-	fn.Info.VCS = vcs.Deleted
-	fn.Update()
+	fn.setVCSStatus(vcs.Deleted)
 }
 
 // commitToVCSSelected commits to version control system based on last selected file
@@ -186,8 +193,7 @@ func (fn *Node) commitToVCS(message string) (err error) {
 	if err != nil {
 		return err
 	}
-	fn.Info.VCS = vcs.Stored
-	fn.Update()
+	fn.setVCSStatus(vcs.Stored)
 	return err
 }
 
@@ -213,16 +219,15 @@ func (fn *Node) revertVCS() (err error) {
 	if err != nil {
 		return err
 	}
-	if fn.Info.VCS == vcs.Modified {
-		fn.Info.VCS = vcs.Stored
-	} else if fn.Info.VCS == vcs.Added {
-		// do nothing - leave in "added" state
-	}
+	status := fn.Info.VCS
+	if status == vcs.Modified {
+		status = vcs.Stored
+	} // an added file stays added
 	// todo:
 	// if fn.Lines != nil {
 	// 	fn.Lines.Revert()
 	// }
-	fn.Update()
+	fn.setVCSStatus(status)
 	return err
 }
 
@@ -230,10 +235,10 @@ func (fn *Node) revertVCS() (err error) {
 // revision specifiers -- if empty, defaults to A = current HEAD, B = current WC file.
 // -1, -2 etc also work as universal ways of specifying prior revisions.
 // Diffs are shown in a DiffEditorDialog.
-func (fn *Node) diffVCSSelected(rev_a string, rev_b string) { //types:add
+func (fn *Node) diffVCSSelected(revA string, revB string) { //types:add
 	var errs []error
 	fn.SelectedFunc(func(sn *Node) {
-		errs = append(errs, sn.diffVCS(rev_a, rev_b))
+		errs = append(errs, sn.diffVCS(revA, revB))
 	})
 	core.ErrorSnackbar(fn, errors.Join(errs...), "Error showing VCS diffs")
 }
@@ -242,7 +247,7 @@ func (fn *Node) diffVCSSelected(rev_a string, rev_b string) { //types:add
 // revision specifiers -- if empty, defaults to A = current HEAD, B = current WC file.
 // -1, -2 etc also work as universal ways of specifying prior revisions.
 // Diffs are shown in a DiffEditorDialog.
-func (fn *Node) diffVCS(rev_a, rev_b string) error {
+func (fn *Node) diffVCS(revA, revB string) error {
 	repo, _ := fn.Repo()
 	if repo == nil {
 		return errors.New("file not in vcs repo: " + string(fn.Filepath))
@@ -251,7 +256,7 @@ func (fn *Node) diffVCS(rev_a, rev_b string) error {
 		return errors.New("file not in vcs repo: " + string(fn.Filepath))
 	}
 	// todo:
-	_, err := textcore.DiffEditorDialogFromRevs(fn, repo, string(fn.Filepath) /*fn.Lines*/, nil, rev_a, rev_b)
+	_, err := textcore.DiffEditorDialogFromRevs(fn, repo, string(fn.Filepath) /*fn.Lines*/, nil, revA, revB)
 	return err
 }
 
@@ -318,7 +323,7 @@ func blameDialog(ctx core.Widget, fname string, blame, fbytes []byte) *textcore.
 	nln := min(len(lns), len(flns))
 	blns := make([][]byte, nln)
 	stidx := 0
-	for i := 0; i < nln; i++ {
+	for i := range nln {
 		fln := flns[i]
 		bln := lns[i]
 		if stidx == 0 {

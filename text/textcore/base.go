@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package textcore provides the widgets for viewing and editing text:
+// [Base], [Editor], and the diff and twin editors built on them.
 package textcore
 
 //go:generate core generate
@@ -77,8 +79,14 @@ type Base struct { //core:embedder
 	// AutoscrollOnInput scrolls the display to the end when Input events are received.
 	AutoscrollOnInput bool
 
-	// viewId is the unique id of the Lines view.
-	viewId int
+	// viewID is the unique id of the Lines view.
+	viewID int
+
+	// cursorOn is whether the cursor of this editor is on: started and not
+	// stopped (see [Base.toggleCursor]), so that it is started again when
+	// the sprites are removed, even if the editor is not focused (as when
+	// its cursor is shown with [Base.SetCursorShow]).
+	cursorOn bool
 
 	// charSize is the render size of one character (rune).
 	// Y = line height, X = total glyph advance.
@@ -278,8 +286,8 @@ func (ed *Base) Destroy() {
 	// Our view is deleted so that its listeners, which use us,
 	// are not called anymore.
 	if ed.Lines != nil {
-		ed.Lines.DeleteView(ed.viewId)
-		ed.viewId = -1
+		ed.Lines.DeleteView(ed.viewID)
+		ed.viewID = -1
 	}
 	ed.Frame.Destroy()
 }
@@ -351,8 +359,8 @@ func (ed *Base) SetLines(ln *lines.Lines) *Base {
 		return ed
 	}
 	if oldln != nil {
-		oldln.DeleteView(ed.viewId)
-		ed.viewId = -1
+		oldln.DeleteView(ed.viewID)
+		ed.viewID = -1
 	}
 	ed.Lines = ln
 	ed.resetState()
@@ -362,13 +370,13 @@ func (ed *Base) SetLines(ln *lines.Lines) *Base {
 		if wd == 0 {
 			wd = 80
 		}
-		ed.viewId = ln.NewView(wd)
-		ln.OnChange(ed.viewId, func(e events.Event) {
+		ed.viewID = ln.NewView(wd)
+		ln.OnChange(ed.viewID, func(e events.Event) {
 			ed.validateCursor() // could have changed with remarkup
 			ed.NeedsRender()
 			ed.SendChange()
 		})
-		ln.OnInput(ed.viewId, func(e events.Event) {
+		ln.OnInput(ed.viewID, func(e events.Event) {
 			if ed.AutoscrollOnInput {
 				ed.SetCursorTarget(textpos.PosErr) // special code to go to end
 			}
@@ -380,17 +388,17 @@ func (ed *Base) SetLines(ln *lines.Lines) *Base {
 		// us again, so they are skipped if our scene is not shown, so
 		// that a scene that is closing does not block the updates of the
 		// other views.
-		ln.SetAsyncRunner(ed.viewId, func(f func()) {
+		ln.SetAsyncRunner(ed.viewID, func(f func()) {
 			if !ed.AsyncLockIfShown() {
 				return
 			}
 			defer ed.AsyncUnlock()
 			f()
 		})
-		ln.OnVirtualText(ed.viewId, func(e events.Event) {
+		ln.OnVirtualText(ed.viewID, func(e events.Event) {
 			ed.NeedsRender()
 		})
-		ln.OnClose(ed.viewId, func(e events.Event) {
+		ln.OnClose(ed.viewID, func(e events.Event) {
 			ed.SetLines(nil)
 			ed.SendClose()
 		})

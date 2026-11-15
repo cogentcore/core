@@ -61,6 +61,10 @@ func ByteSplitLines(s []byte) [][]byte {
 // the list, then it is moved to the top and not re-added (unique items only). This is
 // useful for a list of recent items.
 func InsertFirstUnique(strs *[]string, str string, max int) {
+	if max <= 0 { // nothing can be kept
+		*strs = (*strs)[:0]
+		return
+	}
 	if *strs == nil {
 		*strs = make([]string, 0, max)
 	}
@@ -98,7 +102,9 @@ func UniqueList(strs []string) []string {
 		p := strs[i]
 		for j, s := range strs {
 			if p == s && i != j {
+				// deleted once only: the index i is then a different item
 				strs = slices.Delete(strs, i, i+1)
+				break
 			}
 		}
 	}

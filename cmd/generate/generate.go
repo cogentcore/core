@@ -16,7 +16,7 @@ import (
 	"text/template"
 
 	"cogentcore.org/core/base/generate"
-	"cogentcore.org/core/base/ordmap"
+	"cogentcore.org/core/base/keylist"
 	"cogentcore.org/core/cmd/config"
 	"cogentcore.org/core/enums/enumgen"
 	"cogentcore.org/core/types"
@@ -92,7 +92,7 @@ func hasNoNewDirective(typ *typegen.Type) bool {
 // given config info. It overrides the
 // [config.Config.Generate.Typegen.InterfaceConfigs] info.
 func Generate(c *config.Config) error { //types:add
-	c.Generate.Typegen.InterfaceConfigs = &ordmap.Map[string, *typegen.Config]{}
+	c.Generate.Typegen.InterfaceConfigs = &keylist.List[string, *typegen.Config]{}
 
 	c.Generate.Typegen.InterfaceConfigs.Add("cogentcore.org/core/tree.Node", &typegen.Config{
 		AddTypes:  true,

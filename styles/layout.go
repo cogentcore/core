@@ -33,7 +33,7 @@ func (s *Style) LayoutDefaults() {
 	s.ScrollbarWidth = DefaultScrollbarWidth
 }
 
-// ToDots runs ToDots on unit values, to compile down to raw pixels
+// LayoutToDots runs ToDots on unit values, to compile down to raw pixels
 func (s *Style) LayoutToDots(uc *units.Context) {
 	s.Pos.ToDots(uc)
 	s.Min.ToDots(uc)
@@ -67,7 +67,7 @@ func AlignPos(align Aligns, inner, outer float32) float32 {
 
 /////////////////////////////////////////////////////////////////
 
-// Direction specifies the way in which elements are laid out, or
+// Directions specify the way in which elements are laid out, or
 // the dimension on which an element is longer / travels in.
 type Directions int32 //enums:enum -transform kebab
 
@@ -190,7 +190,7 @@ func ItemAlign(parItems, self Aligns) Aligns {
 	return self
 }
 
-// overflow type -- determines what happens when there is too much stuff in a layout
+// Overflows are the overflow types, which determine what happens when there is too much stuff in a layout.
 type Overflows int32 //enums:enum -trim-prefix Overflow -transform kebab
 
 const (

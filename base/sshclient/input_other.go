@@ -15,11 +15,11 @@ import (
 
 // terminalInput returns nil: the input of a terminal is not sent to
 // the commands on the host on this platform.
-func terminalInput(in io.Reader) *os.File {
+func terminalInput(_ io.Reader) *os.File {
 	return nil
 }
 
 // forwardInput is not supported on this platform.
-func forwardInput(ses *ssh.Session, tty *os.File) (stop func(), err error) {
+func forwardInput(_ *ssh.Session, _ *os.File) (stop func(), err error) {
 	return func() {}, nil
 }

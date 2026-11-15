@@ -7,6 +7,7 @@
 
 //go:build js
 
+// Package htmlcanvas renders to an HTML canvas element, on the web.
 package htmlcanvas
 
 import (
@@ -76,8 +77,7 @@ func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
 	// TODO: truncate/round here? (HTML doesn't support fractional width/height)
 	rs.size = size
 
-	return // TODO(newpaint)
-
+	// TODO(newpaint):
 	// rs.ctx.Call("clearRect", 0, 0, size.X, size.Y)
 	// rs.ctx.Set("imageSmoothingQuality", "high")
 }

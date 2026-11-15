@@ -93,12 +93,12 @@ func MDToHTML(ctx *Context, md []byte) []byte {
 
 // converter returns the goldmark converter of the context, made once on
 // first use, or a new one without Cogent Core extensions for a nil context.
-func (ctx *Context) converter() *Markdown {
-	if ctx == nil {
+func (c *Context) converter() *Markdown {
+	if c == nil {
 		return NewMarkdown(nil)
 	}
-	ctx.markdownOnce.Do(func() { ctx.markdown = NewMarkdown(ctx) })
-	return ctx.markdown
+	c.markdownOnce.Do(func() { c.markdown = NewMarkdown(c) })
+	return c.markdown
 }
 
 // imageParagraph matches a paragraph with attributes that is just an image.

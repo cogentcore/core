@@ -452,7 +452,7 @@ func selectedEntry(tt *core.TreeTable) *Entry {
 		rows = rows.Elem()
 	}
 	if i := tt.SelectedIndex; rows.Kind() == reflect.Slice && i >= 0 && i < rows.Len() {
-		en, _ := rows.Index(i).Interface().(*Entry)
+		en, _ := reflect.TypeAssert[*Entry](rows.Index(i))
 		return en
 	}
 	return nil
@@ -474,7 +474,7 @@ func (cs *Commands) RunDialog(ctx core.Widget, cmd string, run RunFunc) {
 		root, name := splitCmd(cmd)
 		cm, err := cs.Cmd(root, false)
 		var sc *SubCmd
-		if err == nil && !(name == "" && (cm.HasSubCmds() || len(cm.Macros) > 0 || len(cm.Scripts) > 0)) {
+		if err == nil && (name != "" || !cm.HasSubCmds() && len(cm.Macros) == 0 && len(cm.Scripts) == 0) {
 			sc, err = cs.SubCmd(cmd, false)
 		}
 		cs.updateViews(nil)
@@ -893,17 +893,15 @@ func styleFormFields(fm *core.Form, textField func(tf *core.TextField)) {
 func focusForm(d *core.Body, fm *core.Form) {
 	fm.Update() // (makes the fields)
 	var first core.Widget
-	fm.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
-		if first != nil { // (Break only skips the children of a widget)
-			return tree.Break
-		}
+	for cw := range fm.AllWidgets() {
 		switch cw.(type) {
 		case *core.TextField, *core.Switch, *core.Spinner, *core.Chooser:
 			first = cw
-			return tree.Break
 		}
-		return tree.Continue
-	})
+		if first != nil {
+			break
+		}
+	}
 	if first != nil {
 		d.Scene.Events.SetStartFocus(first)
 	}

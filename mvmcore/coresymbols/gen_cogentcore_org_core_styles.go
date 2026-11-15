@@ -150,6 +150,7 @@ var _ = register(func() {
 			"SubProperties":             reflect.ValueOf(p_cogentcore_org_core_styles.SubProperties),
 			"Text":                      reflect.ValueOf((*p_cogentcore_org_core_styles.Text)(nil)),
 			"ToCSS":                     reflect.ValueOf(p_cogentcore_org_core_styles.ToCSS),
+			"ToCSSLength":               reflect.ValueOf(p_cogentcore_org_core_styles.ToCSSLength),
 			"VirtualKeyboards":          reflect.ValueOf((*p_cogentcore_org_core_styles.VirtualKeyboards)(nil)),
 			"VirtualKeyboardsN":         reflect.ValueOf(p_cogentcore_org_core_styles.VirtualKeyboardsN),
 			"VirtualKeyboardsValues":    reflect.ValueOf(p_cogentcore_org_core_styles.VirtualKeyboardsValues),

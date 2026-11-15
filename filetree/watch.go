@@ -428,7 +428,7 @@ func (ft *Tree) dirNode(path string) *Node {
 	if rp == "." {
 		return n
 	}
-	for _, name := range strings.Split(rp, string(filepath.Separator)) {
+	for name := range strings.SplitSeq(rp, string(filepath.Separator)) {
 		c := n.ChildByName(name, 0)
 		if c == nil {
 			return nil

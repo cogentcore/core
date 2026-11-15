@@ -173,8 +173,8 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 func unmarshalNodeType(b []byte) (*types.Type, error) {
 	typeName := ""
 	key := []byte(`"nodeType"`)
-	if i := bytes.Index(b, key); i >= 0 {
-		rest := b[i+len(key):]
+	if _, after, ok := bytes.Cut(b, key); ok {
+		rest := after
 		if start := bytes.IndexByte(rest, '"'); start >= 0 {
 			rest = rest[start+1:]
 			if end := bytes.IndexByte(rest, '"'); end >= 0 {

@@ -4,6 +4,8 @@
 
 package gpu
 
+//core:js-test browser browser-arg=--enable-unsafe-webgpu
+
 import (
 	"image"
 	"image/color"
@@ -23,7 +25,7 @@ type CamView struct {
 }
 
 func TestGPUTriangle(t *testing.T) {
-	t.Skip("Need software GPU on CI")
+	SkipIfNoGPU(t)
 	gp, dev, err := NoDisplayGPU()
 	assert.NoError(t, err)
 	sz := image.Point{480, 320}
@@ -54,7 +56,7 @@ func TestGPUTriangle(t *testing.T) {
 }
 
 func TestGPUIndexed(t *testing.T) {
-	t.Skip("Need software GPU on CI")
+	SkipIfNoGPU(t)
 	gp, dev, err := NoDisplayGPU()
 	assert.NoError(t, err)
 	sz := image.Point{480, 320}

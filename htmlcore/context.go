@@ -554,7 +554,7 @@ func nodeSize(n *html.Node) int {
 // NewContext returns a new [Context] with basic defaults.
 func NewContext() *Context {
 	return &Context{
-		pageState:         pageState{styles: map[*html.Node][]*cssDecl{}},
+		styles:            map[*html.Node][]*cssDecl{},
 		OpenURL:           func(url string, e events.Event) { system.TheApp.OpenURL(url) },
 		GetURL:            getURL,
 		ElementHandlers:   map[string]func(ctx *Context) bool{},
@@ -612,11 +612,6 @@ func (c *Context) InlineParent() core.Widget {
 		s.Grow.Set(1, 0)
 	})
 	return c.inlineParent
-}
-
-// addStyle adds the given CSS style string to the page's compiled styles.
-func (c *Context) addStyle(style string) {
-	c.addStyleOrigin(style, originAuthor)
 }
 
 // addStyleOrigin adds the given CSS style string with the given origin.
@@ -919,10 +914,10 @@ func TextTag(tx *core.Text) string {
 // from the widget of its element (as in a PDF, which styles headings by
 // their tags, and links to their ids).
 func TagTexts(w core.Widget) {
-	w.AsWidget().WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+	for cw, cwb := range w.AsWidget().AllWidgets() {
 		tx, ok := cw.(*core.Text)
 		if !ok {
-			return tree.Continue
+			continue
 		}
 		if el := TextElement(tx); el != cwb {
 			for _, k := range []string{"tag", "id"} {
@@ -931,8 +926,7 @@ func TagTexts(w core.Widget) {
 				}
 			}
 		}
-		return tree.Continue
-	})
+	}
 }
 
 // NodeOf returns the HTML node of the element that the given widget is
@@ -987,8 +981,7 @@ func (c *Context) UnlockStyles() { c.styleMu.Unlock() }
 // lockStylesOf makes the given widget and those in it hold the lock of the
 // styles of the context as they are styled (see [core.StyleLockProperty]).
 func (c *Context) lockStylesOf(root core.Widget) {
-	root.AsWidget().WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+	for _, cwb := range root.AsWidget().AllWidgets() {
 		cwb.SetProperty(core.StyleLockProperty, &c.styleMu)
-		return tree.Continue
-	})
+	}
 }

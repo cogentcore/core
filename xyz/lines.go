@@ -81,7 +81,7 @@ func UnitLineMesh(sc *Scene) *Lines {
 	if lm != nil {
 		return lm.(*Lines)
 	}
-	lmm := NewLines(sc, LineMeshName, []math32.Vector3{{-.5, 0, 0}, {.5, 0, 0}}, math32.Vec2(1, 1), OpenLines)
+	lmm := NewLines(sc, LineMeshName, []math32.Vector3{{X: -.5, Y: 0, Z: 0}, {X: .5, Y: 0, Z: 0}}, math32.Vec2(1, 1), OpenLines)
 	return lmm
 }
 

@@ -177,8 +177,7 @@ func TestImageCacheDecode(t *testing.T) {
 	urls := []string{"https://example.com/a.png", "https://example.com/b.png", "https://example.com/c.png"}
 	var wg sync.WaitGroup
 	for _, u := range urls {
-		wg.Add(1)
-		go func() { defer wg.Done(); cache.Decode(u, buf.Bytes()) }()
+		wg.Go(func() { ; cache.Decode(u, buf.Bytes()) })
 	}
 	cache.Decode("https://example.com/bad.png", []byte("not an image"))
 	wg.Wait()

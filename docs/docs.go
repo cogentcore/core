@@ -139,11 +139,11 @@ func main() {
 			fr.Update()
 		})
 		frameSizes := []math32.Vector2{
-			{20, 100},
-			{80, 20},
-			{60, 80},
-			{40, 120},
-			{150, 100},
+			{X: 20, Y: 100},
+			{X: 80, Y: 20},
+			{X: 60, Y: 80},
+			{X: 40, Y: 120},
+			{X: 150, Y: 100},
 		}
 		for _, sz := range frameSizes {
 			core.NewFrame(fr).Styler(func(s *styles.Style) {

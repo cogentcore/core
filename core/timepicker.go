@@ -243,22 +243,19 @@ func (dp *DatePicker) Init() {
 			eom := dp.Time.AddDate(0, 1, -dp.Time.Day())
 			// start of the week containing the start of the month
 			somw := som.AddDate(0, 0, -int(som.Weekday()))
-			// year day of the start of the week containing the start of the month
-			somwyd := somw.YearDay()
 			// end of the week containing the end of the month
 			eomw := eom.AddDate(0, 0, int(6-eom.Weekday()))
-			// year day of the end of the week containing the end of the month
-			eomwyd := eomw.YearDay()
-			// if we have moved up a year (happens in December),
-			// we add the number of days in this year
-			if eomw.Year() > somw.Year() {
-				eomwyd += time.Date(somw.Year(), 13, -1, 0, 0, 0, 0, somw.Location()).YearDay()
+			// the number of days from somw to eomw, which can be in
+			// different years (in January and December)
+			ndays := 0
+			for d := somw; !d.After(eomw); d = d.AddDate(0, 0, 1) {
+				ndays++
 			}
 			dp.getTime = func(i int) time.Time {
 				return somw.AddDate(0, 0, i)
 			}
 			dp.som = som
-			for i := range 1 + eomwyd - somwyd {
+			for i := range ndays {
 				tree.AddAt(p, strconv.Itoa(i), func(w *Button) {
 					w.SetType(ButtonAction)
 					w.Updater(func() {

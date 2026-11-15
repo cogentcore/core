@@ -4,6 +4,8 @@
 
 package golang
 
+//core:js-test
+
 import (
 	"path/filepath"
 	"testing"

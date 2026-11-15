@@ -22,7 +22,7 @@ func TestFilePicker(t *testing.T) {
 	// The files of the directory do not change, unlike those of the
 	// current directory, which are shown by default.
 	NewFilePicker(b).SetFilename("testdata/file-picker/files/")
-	b.AssertRender(t, "file-picker/basic")
+	AssertRender(t, b, "file-picker/basic")
 }
 
 // TestFilePickerSort tests that the files of a directory are in its sort
@@ -51,7 +51,7 @@ func TestFilePickerSort(t *testing.T) {
 		}
 		return ns
 	}
-	b.RenderImage(func() {}, func() {
+	RenderImage(b, func() {}, func() {
 		b.AsyncLock() // (it is rendered meanwhile)
 		defer b.AsyncUnlock()
 		tb := fp.filesTable

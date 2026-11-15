@@ -42,7 +42,7 @@ func TestAutosaveConcurrentEdits(t *testing.T) {
 func TestReplaceTexts(t *testing.T) {
 	ls := NewLines()
 	ls.SetText([]byte("one two three\nfour five\n"))
-	ls.Autosave = true // no filename: autosave is not written
+	ls.Autosave = true                  // no filename: autosave is not written
 	n := ls.ReplaceTexts([]Replacement{ // reverse position order
 		{Region: textpos.Region{Start: textpos.Pos{Line: 1, Char: 5}, End: textpos.Pos{Line: 1, Char: 9}}, Text: "5"},
 		{Region: textpos.Region{Start: textpos.Pos{Line: 0, Char: 4}, End: textpos.Pos{Line: 0, Char: 7}}, Text: "2"},

@@ -98,7 +98,7 @@ func TestTabsDragReorder(t *testing.T) {
 		bb := tab.Geom.TotalBBox
 		return bb.Min.Add(bb.Size().Div(2))
 	}
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		b.AsyncLock()
 		from, to := center(0), center(2)
 		b.AsyncUnlock()
@@ -164,7 +164,7 @@ func TestTabsMoveTabSameName(t *testing.T) {
 	assert.Equal(t, []string{"B", "X", "B-2"}, tabNames(t, other))
 	_, tab := other.TabAtIndex(2)
 	assert.Equal(t, "B", tab.Text, "its text is kept")
-	b2.AssertRender(t, "tabs/move-same-name", func() {
+	AssertRender(t, b2, "tabs/move-same-name", func() {
 		b2.AsyncLock() // (it is rendered meanwhile)
 		defer b2.AsyncUnlock()
 		other.SelectTabIndex(0)
@@ -283,7 +283,7 @@ func TestTabsDropIndex(t *testing.T) {
 	b := NewBody()
 	b.Styler(func(s *styles.Style) { s.Min.X.Dp(500) }) // (one row of tabs)
 	ts := newDragTabs(b, "A", "B", "C")
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		_, tab := ts.TabAtIndex(1)

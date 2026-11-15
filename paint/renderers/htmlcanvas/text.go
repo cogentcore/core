@@ -123,9 +123,10 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 	sty := run.Font.Style(&ctx.Style.Text)
 	// https://en.wikipedia.org/wiki/Subscript_and_superscript: latex does -.14 sub, .25 super
 	// others often use -.33 and .33
-	if sty.Special == rich.Super {
+	switch sty.Special {
+	case rich.Super:
 		off.Y -= 0.25 * fsz
-	} else if sty.Special == rich.Sub {
+	case rich.Sub:
 		off.Y += 0.14 * fsz
 	}
 
@@ -169,7 +170,7 @@ func (rs *Renderer) TextRun(ctx *render.Context, run *shapedgt.Run, ln *shaped.L
 }
 
 // applyTextStyle applies the given styles to the HTML canvas context.
-func (rs *Renderer) applyTextStyle(fnt *text.Font, tsty *text.Style, fill, stroke image.Image, size, lineHeight float32) {
+func (rs *Renderer) applyTextStyle(fnt *text.Font, tsty *text.Style, fill, stroke image.Image, _, lineHeight float32) {
 	rs.setFont(shapedjs.FontSpec(fnt, tsty, lineHeight))
 	rs.setFillStyle(rs.imageToStyle(fill))
 	rs.setStrokeStyle(rs.imageToStyle(stroke))

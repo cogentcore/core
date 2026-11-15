@@ -60,7 +60,7 @@ func TestPreLayout(t *testing.T) {
 	}
 	pre, plain := makeContent(), makeContent()
 	var preGeoms []string
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		b.AsyncLock()
 		pl := b.Scene.PreLayout(host)
 		b.AsyncUnlock()

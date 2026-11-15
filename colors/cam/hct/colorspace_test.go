@@ -4,6 +4,8 @@
 
 package hct
 
+//core:js-test
+
 import (
 	"image"
 	"image/color"
@@ -50,8 +52,8 @@ func TestColorSpace(t *testing.T) {
 				c := h.AsRGBA()
 				ys := (yp + ci) * sqSz
 				xs := (xp + ti) * sqSz
-				for y := 0; y < sqSz; y++ {
-					for x := 0; x < sqSz; x++ {
+				for y := range sqSz {
+					for x := range sqSz {
 						img.SetRGBA(xs+x, ys+y, c)
 					}
 				}

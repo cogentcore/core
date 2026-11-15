@@ -80,14 +80,13 @@ type Rule struct {
 // returns true if everything is ok
 func (lr *Rule) CompileAll(ls *State) bool {
 	allok := false
-	lr.WalkDown(func(k tree.Node) bool {
+	for k := range lr.All() {
 		lri := k.(*Rule)
 		ok := lri.Compile(ls)
 		if !ok {
 			allok = false
 		}
-		return true
-	})
+	}
 	return allok
 }
 
@@ -364,28 +363,28 @@ func (lr *Rule) IsMatchPos(ls *State) bool {
 		return true
 	case StartOfLine:
 		return ls.Pos == 0
-	case EndOfLine:
+	case EndOfLine: // the target ends at the end of the line
 		tsz := lr.TargetLen(ls)
-		return ls.Pos == lsz-1-tsz
+		return ls.Pos+tsz == lsz
 	case MiddleOfLine:
 		if ls.Pos == 0 {
 			return false
 		}
 		tsz := lr.TargetLen(ls)
-		return ls.Pos != lsz-1-tsz
+		return ls.Pos+tsz < lsz
 	case StartOfWord:
 		return ls.Pos == 0 || unicode.IsSpace(ls.Src[ls.Pos-1])
 	case EndOfWord:
 		tsz := lr.TargetLen(ls)
-		ep := ls.Pos + tsz
-		return ep == lsz || (ep+1 < lsz && unicode.IsSpace(ls.Src[ep+1]))
+		ep := ls.Pos + tsz // the end of the target, after which is a space or the end
+		return ep == lsz || (ep < lsz && unicode.IsSpace(ls.Src[ep]))
 	case MiddleOfWord:
 		if ls.Pos == 0 || unicode.IsSpace(ls.Src[ls.Pos-1]) {
 			return false
 		}
 		tsz := lr.TargetLen(ls)
 		ep := ls.Pos + tsz
-		if ep == lsz || (ep+1 < lsz && unicode.IsSpace(ls.Src[ep+1])) {
+		if ep >= lsz || unicode.IsSpace(ls.Src[ep]) {
 			return false
 		}
 		return true
@@ -463,13 +462,12 @@ func (lr *Rule) DoAct(ls *State, act Actions, tok *token.KeyToken) {
 // Find looks for rules in the tree that contain given string in String or Name fields
 func (lr *Rule) Find(find string) []*Rule {
 	var res []*Rule
-	lr.WalkDown(func(k tree.Node) bool {
+	for k := range lr.All() {
 		lri := k.(*Rule)
 		if strings.Contains(lri.String, find) || strings.Contains(lri.Name, find) {
 			res = append(res, lri)
 		}
-		return true
-	})
+	}
 	return res
 }
 
@@ -499,9 +497,10 @@ func (lr *Rule) WriteGrammar(writer io.Writer, depth int) {
 			actstr = "\t do: "
 			for _, ac := range lr.Acts {
 				actstr += ac.String()
-				if ac == PushState {
+				switch ac {
+				case PushState:
 					actstr += ": " + lr.PushState
-				} else if ac == ReadUntil {
+				case ReadUntil:
 					actstr += ": \"" + lr.Until + "\""
 				}
 				actstr += "; "

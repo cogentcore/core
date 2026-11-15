@@ -30,7 +30,7 @@ func TestTruncation(t *testing.T) {
 		}
 		r, ok := runs[len(runs)-1].(*Run)
 		ell := sh.truncator(defSty, tsty)
-		return ok && len(r.Output.Glyphs) == 1 && r.Output.Glyphs[0].GlyphID == ell.Glyphs[0].GlyphID
+		return ok && len(r.Glyphs) == 1 && r.Output.Glyphs[0].GlyphID == ell.Glyphs[0].GlyphID
 	}
 	for range 2 { // (the second from the caches)
 		tsty := testStyle()

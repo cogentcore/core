@@ -354,7 +354,7 @@ func (fl *File) Token(pos textpos.Pos) token.KeyToken {
 
 // PrevDepth returns the depth of the token immediately prior to given line
 func (fl *File) PrevDepth(ln int) int {
-	pos := textpos.Pos{ln, 0}
+	pos := textpos.Pos{Line: ln, Char: 0}
 	pos, ok := fl.PrevTokenPos(pos)
 	if !ok {
 		return 0
@@ -418,7 +418,7 @@ func (fl *File) TokenSrcPos(pos textpos.Pos) textpos.Region {
 		return textpos.Region{}
 	}
 	lx := fl.Lexs[pos.Line][pos.Char]
-	return textpos.Region{Start: textpos.Pos{pos.Line, lx.Start}, End: textpos.Pos{pos.Line, lx.End}}
+	return textpos.Region{Start: textpos.Pos{Line: pos.Line, Char: lx.Start}, End: textpos.Pos{Line: pos.Line, Char: lx.End}}
 }
 
 // TokenSrcReg translates a region of tokens into a region of source
@@ -429,7 +429,7 @@ func (fl *File) TokenSrcReg(reg textpos.Region) textpos.Region {
 	st := fl.Lexs[reg.Start.Line][reg.Start.Char].Start
 	ep, _ := fl.PrevTokenPos(reg.End) // ed is exclusive -- go to prev
 	ed := fl.Lexs[ep.Line][ep.Char].End
-	return textpos.Region{Start: textpos.Pos{reg.Start.Line, st}, End: textpos.Pos{ep.Line, ed}}
+	return textpos.Region{Start: textpos.Pos{Line: reg.Start.Line, Char: st}, End: textpos.Pos{Line: ep.Line, Char: ed}}
 }
 
 // RegSrc returns the source (as a string) for given region
@@ -470,12 +470,13 @@ func (fl *File) LexTagSrcLn(ln int) string {
 
 // LexTagSrc returns the lex'd tagged source for entire source
 func (fl *File) LexTagSrc() string {
-	txt := ""
+	var txt strings.Builder
 	nlines := fl.NLines()
-	for ln := 0; ln < nlines; ln++ {
-		txt += fl.LexTagSrcLn(ln) + "\n"
+	for ln := range nlines {
+		txt.WriteString(fl.LexTagSrcLn(ln))
+		txt.WriteString("\n")
 	}
-	return txt
+	return txt.String()
 }
 
 /////////////////////////////////////////////////////////////////
@@ -484,7 +485,7 @@ func (fl *File) LexTagSrc() string {
 // InsertEos inserts an EOS just after the given token position
 // (e.g., cp = last token in line)
 func (fl *File) InsertEos(cp textpos.Pos) textpos.Pos {
-	np := textpos.Pos{cp.Line, cp.Char + 1}
+	np := textpos.Pos{Line: cp.Line, Char: cp.Char + 1}
 	elx := fl.LexAt(cp)
 	depth := elx.Token.Depth
 	fl.Lexs[cp.Line].Insert(np.Char, Lex{Token: token.KeyToken{Token: token.EOS, Depth: depth}, Start: elx.End, End: elx.End})
@@ -511,7 +512,7 @@ func (fl *File) EnsureFinalEos(ln int) {
 	if sz == 0 {
 		return // can't get depth or anything -- useless
 	}
-	ep := textpos.Pos{ln, sz - 1}
+	ep := textpos.Pos{Line: ln, Char: sz - 1}
 	elx := fl.LexAt(ep)
 	if elx.Token.Token == token.EOS {
 		return
@@ -546,7 +547,7 @@ func (fl *File) NextEos(stpos textpos.Pos, depth int) (textpos.Pos, bool) {
 		if sz == 0 {
 			continue
 		}
-		for i := 0; i < sz; i++ {
+		for i := range sz {
 			ep.Char = eps[i]
 			lx := fl.LexAt(ep)
 			if lx.Token.Depth == depth {

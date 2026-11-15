@@ -51,7 +51,7 @@ func HueOf(linrgb math32.Vector3) float32 {
 	return math32.Atan2(b, a)
 }
 
-// Solves the lerp equation.
+// Intercept solves the lerp equation.
 // @param source The starting number.
 // @param mid The number in the middle.
 // @param target The ending number.
@@ -75,16 +75,13 @@ func GetAxis(v math32.Vector3, axis int) float32 {
 	}
 }
 
-/**
- * Intersects a segment with a plane.
- *
- * @param source The coordinates of point A.
- * @param coordinate The R-, G-, or B-coordinate of the plane.
- * @param target The coordinates of point B.
- * @param axis The axis the plane is perpendicular with. (0: R, 1: G, 2: B)
- * @return The intersection point of the segment AB with the plane R=coordinate,
- * G=coordinate, or B=coordinate
- */
+// SetCoordinate intersects a segment with a plane.
+// @param source The coordinates of point A.
+// @param coordinate The R-, G-, or B-coordinate of the plane.
+// @param target The coordinates of point B.
+// @param axis The axis the plane is perpendicular with. (0: R, 1: G, 2: B)
+// @return The intersection point of the segment AB with the plane R=coordinate,
+// G=coordinate, or B=coordinate
 func SetCoordinate(source, target math32.Vector3, coord float32, axis int) math32.Vector3 {
 	t := Intercept(GetAxis(source, axis), coord, GetAxis(target, axis))
 	return source.Lerp(target, t)
@@ -94,7 +91,7 @@ func IsBounded(x float32) bool {
 	return 0 <= x && x <= 100
 }
 
-// Returns the nth possible vertex of the polygonal intersection.
+// NthVertex returns the nth possible vertex of the polygonal intersection.
 // @param y The Y value of the plane.
 // @param n The zero-based index of the point. 0 <= n <= 11.
 // @return The nth possible vertex of the polygonal intersection of the y plane
@@ -103,78 +100,78 @@ func IsBounded(x float32) bool {
 //
 //	[-1.0, -1.0, -1.0] is returned.
 func NthVertex(y float32, n int) math32.Vector3 {
-	k_r := kYFromLinrgb[0]
-	k_g := kYFromLinrgb[1]
-	k_b := kYFromLinrgb[2]
-	coord_a := float32(0)
+	kR := kYFromLinrgb[0]
+	kG := kYFromLinrgb[1]
+	kB := kYFromLinrgb[2]
+	coordA := float32(0)
 	if n%4 > 1 {
-		coord_a = 100
+		coordA = 100
 	}
-	coord_b := float32(0)
+	coordB := float32(0)
 	if n%2 != 0 {
-		coord_b = 100
+		coordB = 100
 	}
 	if n < 4 {
-		g := coord_a
-		b := coord_b
-		r := (y - g*k_g - b*k_b) / k_r
+		g := coordA
+		b := coordB
+		r := (y - g*kG - b*kB) / kR
 		if IsBounded(r) {
 			return math32.Vec3(r, g, b)
 		}
 		return math32.Vec3(-1.0, -1.0, -1.0)
 
 	} else if n < 8 {
-		b := coord_a
-		r := coord_b
-		g := (y - r*k_r - b*k_b) / k_g
+		b := coordA
+		r := coordB
+		g := (y - r*kR - b*kB) / kG
 		if IsBounded(g) {
 			return math32.Vec3(r, g, b)
 		}
 		return math32.Vec3(-1.0, -1.0, -1.0)
 	}
-	r := coord_a
-	g := coord_b
-	b := (y - r*k_r - g*k_g) / k_b
+	r := coordA
+	g := coordB
+	b := (y - r*kR - g*kG) / kB
 	if IsBounded(b) {
 		return math32.Vec3(r, g, b)
 	}
 	return math32.Vec3(-1.0, -1.0, -1.0)
 }
 
-// Finds the segment containing the desired color.
+// BisectToSegment finds the segment containing the desired color.
 // @param y The Y value of the color.
 // @param target_hue The hue of the color.
 // @return A list of two sets of linear RGB coordinates, each corresponding to
 // an endpoint of the segment containing the desired color.
-func BisectToSegment(y, target_hue float32) [2]math32.Vector3 {
+func BisectToSegment(y, targetHue float32) [2]math32.Vector3 {
 	left := math32.Vec3(-1.0, -1.0, -1.0)
 	right := left
-	left_hue := float32(0.0)
-	right_hue := float32(0.0)
+	leftHue := float32(0.0)
+	rightHue := float32(0.0)
 	initialized := false
 	uncut := true
-	for n := 0; n < 12; n++ {
+	for n := range 12 {
 		mid := NthVertex(y, n)
 		if mid.X < 0 {
 			continue
 		}
-		mid_hue := HueOf(mid)
+		midHue := HueOf(mid)
 		if !initialized {
 			left = mid
 			right = mid
-			left_hue = mid_hue
-			right_hue = mid_hue
+			leftHue = midHue
+			rightHue = midHue
 			initialized = true
 			continue
 		}
-		if uncut || cam16.InCyclicOrder(left_hue, mid_hue, right_hue) {
+		if uncut || cam16.InCyclicOrder(leftHue, midHue, rightHue) {
 			uncut = false
-			if cam16.InCyclicOrder(left_hue, target_hue, mid_hue) {
+			if cam16.InCyclicOrder(leftHue, targetHue, midHue) {
 				right = mid
-				right_hue = mid_hue
+				rightHue = midHue
 			} else {
 				left = mid
-				left_hue = mid_hue
+				leftHue = midHue
 			}
 		}
 	}
@@ -192,7 +189,7 @@ func CriticalPlaneBelow(x float32) int { return int(math32.Floor(x - 0.5)) }
 
 func CriticalPlaneAbove(x float32) int { return int(math32.Ceil(x - 0.5)) }
 
-// Delinearizes an RGB component, returning a floating-point number.
+// TrueDelinearized delinearizes an RGB component, returning a floating-point number.
 // @param rgb_component 0.0 <= rgb_component <= 100.0, represents linear R/G/B
 // channel
 // @return 0.0 <= output <= 255.0, color channel converted to regular RGB space
@@ -207,41 +204,41 @@ func TrueDelinearized(comp float32) float32 {
 	return delinearized * 255
 }
 
-// Finds a color with the given Y and hue on the boundary of the cube.
+// BisectToLimit finds a color with the given Y and hue on the boundary of the cube.
 // @param y The Y value of the color.
 // @param target_hue The hue of the color.
 // @return The desired color, in linear RGB coordinates.
-func BisectToLimit(y, target_hue float32) math32.Vector3 {
-	segment := BisectToSegment(y, target_hue)
+func BisectToLimit(y, targetHue float32) math32.Vector3 {
+	segment := BisectToSegment(y, targetHue)
 	left := segment[0]
-	left_hue := HueOf(left)
+	leftHue := HueOf(left)
 	right := segment[1]
-	for axis := 0; axis < 3; axis++ {
+	for axis := range 3 {
 		if GetAxis(left, axis) != GetAxis(right, axis) {
-			l_plane := -1
-			r_plane := 255
+			lPlane := -1
+			rPlane := 255
 			if GetAxis(left, axis) < GetAxis(right, axis) {
-				l_plane = CriticalPlaneBelow(TrueDelinearized(GetAxis(left, axis)))
-				r_plane = CriticalPlaneAbove(TrueDelinearized(GetAxis(right, axis)))
+				lPlane = CriticalPlaneBelow(TrueDelinearized(GetAxis(left, axis)))
+				rPlane = CriticalPlaneAbove(TrueDelinearized(GetAxis(right, axis)))
 			} else {
-				l_plane = CriticalPlaneAbove(TrueDelinearized(GetAxis(left, axis)))
-				r_plane = CriticalPlaneBelow(TrueDelinearized(GetAxis(right, axis)))
+				lPlane = CriticalPlaneAbove(TrueDelinearized(GetAxis(left, axis)))
+				rPlane = CriticalPlaneBelow(TrueDelinearized(GetAxis(right, axis)))
 			}
-			for i := 0; i < 8; i++ {
-				if num.Abs(r_plane-l_plane) <= 1 {
+			for range 8 {
+				if num.Abs(rPlane-lPlane) <= 1 {
 					break
 				}
-				m_plane := int(math32.Floor(float32(l_plane+r_plane) / 2.0))
-				mid_plane_coordinate := kCriticalPlanes[m_plane]
-				mid := SetCoordinate(left, right, mid_plane_coordinate, axis)
-				mid_hue := HueOf(mid)
-				if cam16.InCyclicOrder(left_hue, target_hue, mid_hue) {
+				mPlane := int(math32.Floor(float32(lPlane+rPlane) / 2.0))
+				midPlaneCoordinate := kCriticalPlanes[mPlane]
+				mid := SetCoordinate(left, right, midPlaneCoordinate, axis)
+				midHue := HueOf(mid)
+				if cam16.InCyclicOrder(leftHue, targetHue, midHue) {
 					right = mid
-					r_plane = m_plane
+					rPlane = mPlane
 				} else {
 					left = mid
-					left_hue = mid_hue
-					l_plane = m_plane
+					leftHue = midHue
+					lPlane = mPlane
 				}
 			}
 		}

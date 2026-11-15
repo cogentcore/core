@@ -100,12 +100,13 @@ func (vs *Vars) AddGroup(role VarRoles, name ...string) *VarGroup {
 		vg.Name = name[0]
 	}
 	vg.alignBytes = 1
-	if role == Uniform {
+	switch role {
+	case Uniform:
 		vg.alignBytes = int(vs.sys.GPU().Limits.MinUniformBufferOffsetAlignment)
 		// note: wgpu-native reports alignment sizes of 64
 		// but then barfs when that is used.  256 seems to keep it happy
 		vg.alignBytes = max(vg.alignBytes, 256)
-	} else if role == Storage {
+	case Storage:
 		vg.alignBytes = int(vs.sys.GPU().Limits.MinStorageBufferOffsetAlignment)
 		vg.alignBytes = max(vg.alignBytes, 256)
 	}
@@ -154,7 +155,9 @@ func (vs *Vars) SetCurrentValue(group int, name string, valueIndex int) (*Var, e
 	if err != nil {
 		return nil, err
 	}
-	vr.Values.SetCurrentValue(valueIndex)
+	if _, err := vr.Values.SetCurrentValue(valueIndex); err != nil {
+		return nil, err
+	}
 	return vr, nil
 }
 
@@ -203,16 +206,16 @@ func (vs *Vars) StringDoc() string {
 		if vg == nil {
 			continue
 		}
-		sb.WriteString(fmt.Sprintf("Group: %d %s\n", vg.Group, vg.Name))
+		fmt.Fprintf(&sb, "Group: %d %s\n", vg.Group, vg.Name)
 
 		for ri := Vertex; ri < VarRolesN; ri++ {
 			rl, has := vg.RoleMap[ri]
 			if !has || len(rl) == 0 {
 				continue
 			}
-			sb.WriteString(fmt.Sprintf("%sRole: %s\n", indent.Spaces(1, ispc), ri.String()))
+			fmt.Fprintf(&sb, "%sRole: %s\n", indent.Spaces(1, ispc), ri.String())
 			for _, vr := range rl {
-				sb.WriteString(fmt.Sprintf("%sVar: %s\n", indent.Spaces(2, ispc), vr.String()))
+				fmt.Fprintf(&sb, "%sVar: %s\n", indent.Spaces(2, ispc), vr.String())
 			}
 		}
 	}
@@ -276,7 +279,7 @@ func (vs *Vars) VkPushConfig() []vk.PushConstantRange {
 
 // bindLayout configures the Layouts slice of BindGroupLayouts
 // for all of the non-Vertex vars
-func (vs *Vars) bindLayout(dev *Device, used ...*Var) []*wgpu.BindGroupLayout {
+func (vs *Vars) bindLayout(_ *Device, used ...*Var) []*wgpu.BindGroupLayout {
 	ngp := vs.NGroups()
 	if ngp == 0 {
 		vs.layouts = nil
@@ -284,7 +287,7 @@ func (vs *Vars) bindLayout(dev *Device, used ...*Var) []*wgpu.BindGroupLayout {
 	}
 
 	var lays []*wgpu.BindGroupLayout
-	for gi := 0; gi < ngp; gi++ { // auto-skips vertex, push
+	for gi := range ngp { // auto-skips vertex, push
 		vg := vs.Groups[gi]
 		if vg == nil {
 			continue

@@ -845,6 +845,17 @@ func (ls *Lines) TransposeChar(vid int, pos textpos.Pos) bool {
 	return ls.transposeChar(vw, pos)
 }
 
+// TransposeWord swaps the word at or before the given position with the
+// next word on its line, or with the word before it if it is the last
+// word of the line, as in "one tw|o three" to "one three two|". It returns
+// the position after the moved words, and false if there are not two
+// words to swap.
+func (ls *Lines) TransposeWord(pos textpos.Pos) (textpos.Pos, bool) {
+	ls.Lock()
+	defer ls.Unlock()
+	return ls.transposeWord(pos)
+}
+
 ////////  Words
 
 // IsWordEnd returns true if the cursor is just past the last letter of a word.
@@ -859,13 +870,12 @@ func (ls *Lines) IsWordEnd(pos textpos.Pos) bool {
 	if sz == 0 {
 		return false
 	}
-	if pos.Char >= len(txt) { // end of line
+	if pos.Char >= len(txt) { // end of line: after its last letter
 		r := txt[len(txt)-1]
-		return textpos.IsWordBreak(r, -1)
-	}
-	if pos.Char == 0 { // start of line
-		r := txt[0]
 		return !textpos.IsWordBreak(r, -1)
+	}
+	if pos.Char == 0 { // start of line: not after any letter
+		return false
 	}
 	r1 := txt[pos.Char-1]
 	r2 := txt[pos.Char]

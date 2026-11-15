@@ -13,10 +13,10 @@ type Ellipse struct {
 	NodeBase
 
 	// position of the center of the ellipse
-	Pos math32.Vector2 `xml:"{cx,cy}"`
+	Pos math32.Vector2 `svg:"cx,cy"`
 
 	// radii of the ellipse in the horizontal, vertical axes
-	Radii math32.Vector2 `xml:"{rx,ry}"`
+	Radii math32.Vector2 `svg:"rx,ry"`
 }
 
 func (g *Ellipse) SVGName() string { return "ellipse" }
@@ -26,12 +26,16 @@ func (g *Ellipse) Init() {
 	g.Radii.Set(1, 1)
 }
 
+// SetNodePos sets the upper left of the ellipse, whose Pos is its center.
 func (g *Ellipse) SetNodePos(pos math32.Vector2) {
-	g.Pos = pos.Sub(g.Radii)
+	g.Pos = pos.Add(g.Radii)
 }
 
+// SetNodeSize sets the size of the ellipse, keeping its upper left in place.
 func (g *Ellipse) SetNodeSize(sz math32.Vector2) {
+	ul := g.Pos.Sub(g.Radii)
 	g.Radii = sz.MulScalar(0.5)
+	g.Pos = ul.Add(g.Radii)
 }
 
 func (g *Ellipse) LocalBBox(sv *SVG) math32.Box2 {

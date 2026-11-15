@@ -41,6 +41,7 @@ type images struct {
 func (im *images) init() {
 	n := AllocChunk
 	im.all = make(map[any]*imgrec, n)
+	im.capacity = n
 	im.free = make([]int, n)
 	for i := range n {
 		im.free[i] = n - 1 - i
@@ -78,8 +79,10 @@ func (im *images) use(img any) (int, bool) {
 	if nf == 0 {
 		ni = im.capacity
 		im.capacity += AllocChunk
-		for i := ni + 1; i < im.capacity; i++ {
-			im.free = append(im.free, im.capacity-1-i)
+		// the new indexes after ni, in reverse order, so that the next
+		// one is used first
+		for i := im.capacity - 1; i > ni; i-- {
+			im.free = append(im.free, i)
 		}
 	} else {
 		ni = im.free[nf-1]

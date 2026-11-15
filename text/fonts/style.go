@@ -19,7 +19,7 @@ func Style(face *font.Face, sty *rich.Style, tsty *text.Style) {
 	tsty.CustomFont = rich.FontName(d.Family)
 	sty.Family = rich.Custom
 	as := d.Aspect
-	sty.Weight = rich.Weights(int(as.Weight / 100.0))
+	sty.Weight = rich.WeightFromFloat32(float32(as.Weight))
 	sty.Slant = rich.Slants(as.Style - 1)
 	// fi[i].Stretch = rich.Stretch() // not avail
 	// fi[i].Stretch = rich.StretchNormal

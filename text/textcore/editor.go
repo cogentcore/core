@@ -73,7 +73,7 @@ func (ed *Editor) UpdateNewFile() {
 	ln := ed.Lines
 	if ln == nil {
 		ed.curFilename = ""
-		ed.viewId = -1
+		ed.viewID = -1
 		return
 	}
 	fnm := ln.Filename()
@@ -103,7 +103,7 @@ func (ed *Editor) editorSetLines(ln *lines.Lines) {
 		ed.curFilename = ""
 		return
 	}
-	ln.OnChange(ed.viewId, func(e events.Event) {
+	ln.OnChange(ed.viewID, func(e events.Event) {
 		ed.UpdateNewFile()
 	})
 	ln.FileModPromptFunc = func() {

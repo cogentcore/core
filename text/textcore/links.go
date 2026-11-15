@@ -63,7 +63,12 @@ func (ed *Base) CursorNextLink(wraparound bool) bool {
 		if !wraparound {
 			return false
 		}
-		nl, ln = ed.Lines.NextLink(textpos.Pos{}) // wraparound
+		// wraparound: a link at the start is the next one, which NextLink
+		// would skip as the current one.
+		nl, ln = ed.Lines.LinkAt(textpos.Pos{}), 0
+		if nl == nil {
+			nl, ln = ed.Lines.NextLink(textpos.Pos{})
+		}
 		if nl == nil {
 			return false
 		}

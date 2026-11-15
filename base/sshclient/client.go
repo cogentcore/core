@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package sshclient provides an SSH client that runs commands on remote hosts,
+// interactively or not, and copies files to and from them.
 package sshclient
 
 import (

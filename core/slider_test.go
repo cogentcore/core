@@ -24,7 +24,7 @@ func TestSlider(t *testing.T) {
 	sr.SetTooltip("Rating")
 	tt, _ = sr.WidgetTooltip(image.Point{})
 	assert.Equal(t, "Rating (value: 0.5, minimum: 0, maximum: 1)", tt)
-	b.AssertRender(t, "slider/basic")
+	AssertRender(t, b, "slider/basic")
 }
 
 func TestSliderValue(t *testing.T) {
@@ -32,7 +32,7 @@ func TestSliderValue(t *testing.T) {
 	sr := NewSlider(b).SetValue(0.7)
 	tt, _ := sr.WidgetTooltip(image.Point{})
 	assert.Equal(t, "(value: 0.7, minimum: 0, maximum: 1)", tt)
-	b.AssertRender(t, "slider/value")
+	AssertRender(t, b, "slider/value")
 }
 
 func TestSliderBounds(t *testing.T) {
@@ -40,13 +40,13 @@ func TestSliderBounds(t *testing.T) {
 	sr := NewSlider(b).SetMin(5.7).SetMax(18).SetValue(10.2)
 	tt, _ := sr.WidgetTooltip(image.Point{})
 	assert.Equal(t, "(value: 10.2, minimum: 5.7, maximum: 18)", tt)
-	b.AssertRender(t, "slider/bounds")
+	AssertRender(t, b, "slider/bounds")
 }
 
 func TestSliderArrowKeys(t *testing.T) {
 	b := NewBody()
 	sr := NewSlider(b)
-	b.AssertRender(t, "slider/arrow-keys", func() {
+	AssertRender(t, b, "slider/arrow-keys", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		sr.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeLeftArrow, 0))
@@ -69,7 +69,7 @@ func TestSliderArrowKeys(t *testing.T) {
 func TestSliderStep(t *testing.T) {
 	b := NewBody()
 	sr := NewSlider(b).SetStep(0.3)
-	b.AssertRender(t, "slider/step", func() {
+	AssertRender(t, b, "slider/step", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		sr.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeRightArrow, 0))
@@ -82,7 +82,7 @@ func TestSliderStep(t *testing.T) {
 func TestSliderEnforceStep(t *testing.T) {
 	b := NewBody()
 	sr := NewSlider(b).SetStep(0.2).SetEnforceStep(true)
-	b.AssertRender(t, "slider/enforce-step", func() {
+	AssertRender(t, b, "slider/enforce-step", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		sr.SetValue(0.7)
@@ -93,13 +93,13 @@ func TestSliderEnforceStep(t *testing.T) {
 func TestSliderIcon(t *testing.T) {
 	b := NewBody()
 	NewSlider(b).SetIcon(icons.DeployedCodeFill)
-	b.AssertRender(t, "slider/icon")
+	AssertRender(t, b, "slider/icon")
 }
 
 func TestSliderStart(t *testing.T) {
 	b := NewBody()
 	sr := NewSlider(b)
-	b.AssertRender(t, "slider/start", func() {
+	AssertRender(t, b, "slider/start", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		sr.SystemEvents().MouseButton(events.MouseDown, events.Left, image.Pt(60, 20), 0)
@@ -115,7 +115,7 @@ func TestSliderChange(t *testing.T) {
 		n++
 		value = sr.Value
 	})
-	b.AssertRender(t, "slider/change", func() {
+	AssertRender(t, b, "slider/change", func() {
 		sr.SystemEvents().MouseButton(events.MouseDown, events.Left, image.Pt(60, 20), 0)
 		for x := 70; x < 200; x += 10 {
 			sr.SystemEvents().MouseMove(image.Pt(x, 20))
@@ -140,7 +140,7 @@ func TestSliderChangeClick(t *testing.T) {
 		n++
 		value = sr.Value
 	})
-	b.AssertRender(t, "slider/change-click", func() {
+	AssertRender(t, b, "slider/change-click", func() {
 		sr.SystemEvents().MouseButton(events.MouseDown, events.Left, image.Pt(200, 20), 0)
 		sr.SystemEvents().MouseButton(events.MouseUp, events.Left, image.Pt(200, 20), 0)
 		time.Sleep(100 * time.Millisecond)
@@ -162,7 +162,7 @@ func TestSliderInput(t *testing.T) {
 		assert.Greater(t, sr.Value, value)
 		value = sr.Value
 	})
-	b.AssertRender(t, "slider/input", func() {
+	AssertRender(t, b, "slider/input", func() {
 		sr.SystemEvents().MouseButton(events.MouseDown, events.Left, image.Pt(60, 20), 0)
 		for x := 70; x < 200; x += 10 {
 			sr.SystemEvents().MouseMove(image.Pt(x, 20))

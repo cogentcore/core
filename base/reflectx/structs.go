@@ -146,7 +146,7 @@ type ShouldSaver interface {
 	ShouldSave() bool
 }
 
-// TODO: it would be good to return an ordmap or struct of the fields for
+// TODO: it would be good to return a keylist or struct of the fields for
 // ordered output, but that may be difficult.
 
 // NonDefaultFields returns a map representing all of the fields of the given
@@ -165,13 +165,13 @@ func NonDefaultFields(v any) map[string]any {
 	}
 	rt := rv.Type()
 	nf := rt.NumField()
-	for i := 0; i < nf; i++ {
+	for i := range nf {
 		fv := rv.Field(i)
 		ft := rt.Field(i)
-		if ft.Tag.Get("save") == "-" {
+		if !ft.IsExported() || ft.Tag.Get("save") == "-" { // (unexported fields cannot be saved)
 			continue
 		}
-		if ss, ok := UnderlyingPointer(fv).Interface().(ShouldSaver); ok {
+		if ss, ok := reflect.TypeAssert[ShouldSaver](UnderlyingPointer(fv)); ok {
 			if !ss.ShouldSave() {
 				continue
 			}
@@ -238,8 +238,8 @@ func FieldByPath(s reflect.Value, fieldPath string) (reflect.Value, error) {
 	if sv.Kind() != reflect.Struct {
 		return reflect.Value{}, errors.New("reflectx.FieldByPath: kind is not struct")
 	}
-	fps := strings.Split(fieldPath, ".")
-	for _, fp := range fps {
+	fps := strings.SplitSeq(fieldPath, ".")
+	for fp := range fps {
 		fv := sv.FieldByName(fp)
 		if !fv.IsValid() {
 			return reflect.Value{}, errors.New("reflectx.FieldByPath: field name not found: " + fp)

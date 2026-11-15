@@ -129,8 +129,8 @@ func SliceSort(sl any, ascending bool) error {
 	}
 
 	// last resort!
-	switch {
-	case vk == reflect.String:
+	switch vk {
+	case reflect.String:
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
 			iv := NonPointerValue(svnp.Index(i)).String()
 			jv := NonPointerValue(svnp.Index(j)).String()
@@ -245,8 +245,8 @@ func StructSliceSort(structSlice any, fieldIndex []int, ascending bool) error {
 	}
 
 	// last resort!
-	switch {
-	case vk == reflect.String:
+	switch vk {
+	case reflect.String:
 		sort.SliceStable(svnp.Interface(), func(i, j int) bool {
 			ival := OnePointerValue(svnp.Index(i))
 			iv := ival.Elem().FieldByIndex(fieldIndex).String()
@@ -334,8 +334,8 @@ func ValueSliceSort(sl []reflect.Value, ascending bool) error {
 	}
 
 	// last resort!
-	switch {
-	case vk == reflect.String:
+	switch vk {
+	case reflect.String:
 		sort.Slice(sl, func(i, j int) bool {
 			iv := NonPointerValue(sl[i]).String()
 			jv := NonPointerValue(sl[j]).String()
@@ -375,7 +375,7 @@ func CopySliceRobust(to, from any) error {
 			tonp.SetLen(fmlen)
 		}
 	}
-	for i := 0; i < fmlen; i++ {
+	for i := range fmlen {
 		tolen := tonp.Len()
 		if i >= tolen {
 			SliceNewAt(to, i)

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package htmltext converts HTML and preformatted text with HTML markup to
+// rich text, and rich text to HTML.
 package htmltext
 
 import (

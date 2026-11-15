@@ -32,7 +32,7 @@ var (
 	Precision = 7
 
 	// Origin is the coordinate system's origin.
-	Origin = math32.Vector2{0.0, 0.0}
+	Origin = math32.Vec2(0.0, 0.0)
 )
 
 // Equal returns true if a and b are equal within an absolute

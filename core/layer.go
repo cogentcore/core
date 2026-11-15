@@ -14,7 +14,6 @@ import (
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system/composer"
-	"cogentcore.org/core/tree"
 	"golang.org/x/image/draw"
 )
 
@@ -197,10 +196,9 @@ func (sc *Scene) renderWhole() {
 	}
 	l.resize(sc)
 	if l.active { // (the flags of the last render)
-		sc.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+		for _, cwb := range sc.AllWidgets() {
 			cwb.setFlag(false, widgetInLayer, widgetHasLayer)
-			return tree.Continue
-		})
+		}
 	}
 	l.mode = layerFull
 	l.needsRender = false

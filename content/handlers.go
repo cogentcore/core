@@ -386,22 +386,22 @@ func (ct *Content) wikilinkLabel(pg *bcontent.Page, heading string) string {
 }
 
 // parseURL parses the given local url into a page and heading.
-func (ct *Content) parseURL(url string) (pgUrl string, pg *bcontent.Page, heading string) {
+func (ct *Content) parseURL(url string) (pgURL string, pg *bcontent.Page, heading string) {
 	url = strings.ReplaceAll(url, "/#", "#")
-	pgUrl, heading, _ = strings.Cut(url, "#")
-	pg = ct.pagesByURL[pgUrl]
+	pgURL, heading, _ = strings.Cut(url, "#")
+	pg = ct.pagesByURL[pgURL]
 	if pg == nil {
 		// We want only the URL after the last slash for automatic redirects
 		// (old URLs could have nesting).
-		last := pgUrl
+		last := pgURL
 		if li := strings.LastIndex(last, "/"); li >= 0 {
-			last = pgUrl[li+1:]
+			last = pgURL[li+1:]
 		}
 		pg = ct.similarPage(last)
 		if pg == nil {
 			core.ErrorSnackbar(ct, errors.New("no pages available"))
 		} else {
-			core.MessageSnackbar(ct, fmt.Sprintf("Redirected from %s", pgUrl))
+			core.MessageSnackbar(ct, fmt.Sprintf("Redirected from %s", pgURL))
 		}
 	}
 	heading = bcontent.SpecialToKebab(heading)
@@ -416,7 +416,7 @@ func (ct *Content) open(url string, history bool) {
 		return
 	}
 	if strings.HasPrefix(url, "ref://") {
-		ct.saveUpdatedPos(ct.current, ct.current.Page, ct.current.Heading)
+		ct.saveUpdatedPos(ct.current)
 		ct.openRef(url)
 		return
 	}
@@ -442,7 +442,7 @@ func (ct *Content) open(url string, history bool) {
 	_, pg, heading := ct.parseURL(url)
 	// fmt.Println("open:", url, heading, "pg:", pg.URL)
 	if history {
-		ct.saveUpdatedPos(curPg, pg, heading)
+		ct.saveUpdatedPos(curPg)
 		ct.historyAdd(pg, heading, url)
 	}
 	ct.current.Heading = heading
@@ -533,16 +533,13 @@ func (ct *Content) openID(id, element string) bool {
 		return true
 	}
 	var found *core.WidgetBase
-	ct.pageFrame().WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
-		// if found != nil {
-		// 	return tree.Break
-		// }
+	for _, cwb := range ct.pageFrame().AllWidgets() {
 		if cwb.Name != id {
-			return tree.Continue
+			continue
 		}
 		found = cwb
-		return tree.Break
-	})
+		break
+	}
 	if found == nil {
 		return false
 	}
@@ -576,34 +573,30 @@ func (ct *Content) elementInSpecial(sp *core.WidgetBase, element string) *core.W
 	}
 
 	var found *core.WidgetBase
-	sp.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
-		if found != nil {
-			return tree.Break
-		}
+	for cw, cwb := range sp.AllWidgets() {
 		if !cwb.IsDisplayable() {
-			return tree.Continue
+			continue
 		}
 		if hasPath {
 			pth := cw.AsTree().Path()
 			if strings.Contains(pth, pathPrefix) {
-				return tree.Continue
+				continue
 			}
 		}
 		label := labels.ToLabel(cw)
 		kb := bcontent.SpecialToKebab(label)
 		if !strings.EqualFold(label, element) && kb != element {
-			return tree.Continue
+			continue
 		}
 		if cwb.AbilityIs(abilities.Focusable) {
 			found = cwb
-			return tree.Break
+			break
 		}
 		next := core.AsWidget(tree.Next(cwb))
 		if next.AbilityIs(abilities.Focusable) {
 			found = next
-			return tree.Break
+			break
 		}
-		return tree.Continue
-	})
+	}
 	return found
 }

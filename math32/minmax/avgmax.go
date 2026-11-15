@@ -16,7 +16,7 @@ const (
 	MinFloat32 float32 = 1.175494351e-38
 )
 
-// AvgMax holds average and max statistics
+// AvgMax32 holds average and max statistics
 type AvgMax32 struct {
 	Avg float32
 	Max float32
@@ -42,7 +42,7 @@ func (am *AvgMax32) Init() {
 	am.MaxIndex = -1
 }
 
-// UpdateVal updates stats from given value
+// UpdateValue updates stats from given value
 func (am *AvgMax32) UpdateValue(val float32, idx int32) {
 	am.Sum += val
 	am.N++
@@ -81,12 +81,6 @@ func (am *AvgMax32) String() string {
 // UpdateFrom updates these values from other AvgMax32 values
 func (am *AvgMax32) UpdateFrom(oth *AvgMax32) {
 	am.UpdateFromOther(oth.Sum, oth.Max, oth.N, oth.MaxIndex)
-	am.Sum += oth.Sum
-	am.N += oth.N
-	if oth.Max > am.Max {
-		am.Max = oth.Max
-		am.MaxIndex = oth.MaxIndex
-	}
 }
 
 // CopyFrom copies from other AvgMax32
@@ -97,7 +91,7 @@ func (am *AvgMax32) CopyFrom(oth *AvgMax32) {
 ///////////////////////////////////////////////////////////////////////////
 //  64
 
-// AvgMax holds average and max statistics
+// AvgMax64 holds average and max statistics
 type AvgMax64 struct {
 	Avg float64
 	Max float64
@@ -121,7 +115,7 @@ func (am *AvgMax64) Init() {
 	am.MaxIndex = -1
 }
 
-// UpdateVal updates stats from given value
+// UpdateValue updates stats from given value
 func (am *AvgMax64) UpdateValue(val float64, idx int) {
 	am.Sum += val
 	am.N++

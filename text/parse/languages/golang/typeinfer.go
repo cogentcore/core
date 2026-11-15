@@ -74,6 +74,12 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *parse.FileState, pkg *sym
 			if ast.HasChildren() {
 				if strings.HasPrefix(ast.Name, "ForRange") {
 					gl.InferForRangeSymbolType(sy, fs, pkg)
+				} else if vty, ok, multi := gl.multiValueType(sy, fs, pkg, ast); multi {
+					if ok {
+						sy.Type = SymTypeNameForPkg(vty, pkg)
+					} else {
+						sy.Type = TypeErr
+					}
 				} else {
 					astyp = ast.ChildAST(len(ast.Children) - 1)
 					vty, ok := gl.TypeFromAST(fs, pkg, nil, astyp)
@@ -190,6 +196,75 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *parse.FileState, pkg *sym
 	}
 }
 
+// multiValueType returns the type of a variable of a definition of
+// several variables, as a, b := x, y or v, err := f(), from the value
+// that it gets. multi is false for a definition of one variable, whose
+// type is that of the last child of the ast (its value).
+func (gl *GoLang) multiValueType(sy *syms.Symbol, fs *parse.FileState, pkg *syms.Symbol, ast *parser.AST) (vty *syms.Type, ok, multi bool) {
+	// the variables are the names followed by a comma or :=
+	nvars := 0
+	idx := -1
+	for i := range ast.Children {
+		ch := ast.ChildAST(i)
+		if ch.Name != "Name" {
+			break
+		}
+		pos, valid := fs.Src.ValidTokenPos(ch.TokReg.End)
+		if !valid {
+			break
+		}
+		tok := fs.Src.LexAt(pos).Token.Token
+		if tok != token.PunctSepComma && tok != token.OpAsgnDefine {
+			break
+		}
+		if ch.Src == sy.Name {
+			idx = i
+		}
+		nvars++
+		if tok == token.OpAsgnDefine {
+			break
+		}
+	}
+	if nvars < 2 || idx < 0 {
+		return nil, false, false
+	}
+	vals := ast.Children[nvars:]
+	if len(vals) == nvars { // a, b := x, y
+		vty, ok = gl.TypeFromAST(fs, pkg, nil, vals[idx].(*parser.AST))
+		return vty, ok, true
+	}
+	if len(vals) != 1 {
+		return nil, false, true
+	}
+	val := vals[0].(*parser.AST)
+	if val.Name != "FuncCall" { // v, ok := m[k], x.(T), <-ch
+		if idx == 0 {
+			vty, ok = gl.TypeFromAST(fs, pkg, nil, val)
+			return vty, ok, true
+		}
+		return BuiltinTypes["bool"], true, true
+	}
+	// v, err := f(): only for a call of a function by name
+	fun := val.ChildAST(0)
+	if fun == nil || fun.Name != "Name" || val.NumChildren() != 1 {
+		if idx == 0 {
+			vty, ok = gl.TypeFromAST(fs, pkg, nil, val)
+		}
+		return vty, ok, true
+	}
+	fsym, got := fs.FindNameScoped(fun.Src, nil)
+	if !got || !gl.InferEmptySymbolType(fsym, fs, pkg) {
+		return nil, false, true
+	}
+	ftyp, _ := gl.FindTypeName(fsym.Type, fs, pkg)
+	if ftyp == nil || len(ftyp.Size) != 2 || idx >= ftyp.Size[1] {
+		return nil, false, true
+	}
+	rv := ftyp.Els[ftyp.Size[0]+idx]
+	vty, _ = gl.FindTypeName(rv.Type, fs, pkg)
+	return vty, vty != nil, true
+}
+
 // InferForRangeSymbolType infers the type of a ForRange expr
 // gets the container type properly
 func (gl *GoLang) InferForRangeSymbolType(sy *syms.Symbol, fs *parse.FileState, pkg *syms.Symbol) {
@@ -260,6 +335,12 @@ func (gl *GoLang) InferForRangeSymbolType(sy *syms.Symbol, fs *parse.FileState, 
 			sy.Type = "int"
 		} else {
 			sy.Type = "rune"
+		}
+	case syms.Chan: // the values received
+		if len(vty.Els) > 0 {
+			sy.Type = vty.Els[0].Type
+		} else {
+			sy.Type = TypeErr
 		}
 	default:
 		sy.Type = TypeErr

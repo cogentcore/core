@@ -29,7 +29,7 @@ func TestPagePDF(t *testing.T) {
 	})
 	ct := NewContent(b).SetSource(exampleContent)
 	ct.Open("button")
-	b.RenderImage(func() { // the snackbars of the PDF are shown at varying times
+	core.RenderImage(b, func() { // the snackbars of the PDF are shown at varying times
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		pf := ct.pageFrame()

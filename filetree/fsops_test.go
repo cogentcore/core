@@ -330,6 +330,7 @@ func TestFSMenu(t *testing.T) {
 		ft.AsyncLock()
 		n := fsNode2(ft, "sub")
 		n.Select()
+		n.Clipboard().Write(mimedata.NewText("paste")) // paste is disabled for an empty clipboard
 		m := core.NewScene()
 		n.contextMenu(m, image.Point{})
 		enabled := map[string]bool{}

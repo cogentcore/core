@@ -19,7 +19,7 @@ import (
 // RunTest runs a test for given test case.
 func RunTest(t *testing.T, nm string, f func() *core.Body) {
 	b := f()
-	// b.AssertRender(t, "text-only")
+	// core.AssertRender(t, b, "text-only")
 	showed := make(chan struct{})
 	b.OnFinal(events.Show, func(e events.Event) {
 		showed <- struct{}{}

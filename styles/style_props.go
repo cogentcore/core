@@ -363,7 +363,7 @@ var styleShadowFuncs = map[string]styleprops.Func{
 //////// Font
 
 // FromProperties sets style field values based on the given property list.
-func (s *Font) FromProperties(parent *Font, properties map[string]any, ctxt colors.Context) {
+func (fs *Font) FromProperties(parent *Font, properties map[string]any, ctxt colors.Context) {
 	for key, val := range properties {
 		if len(key) == 0 {
 			continue
@@ -371,17 +371,17 @@ func (s *Font) FromProperties(parent *Font, properties map[string]any, ctxt colo
 		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
 			continue
 		}
-		s.FromProperty(parent, key, val, ctxt)
+		fs.FromProperty(parent, key, val, ctxt)
 	}
 }
 
 // FromProperty sets style field values based on the given property key and value.
-func (s *Font) FromProperty(parent *Font, key string, val any, cc colors.Context) {
+func (fs *Font) FromProperty(parent *Font, key string, val any, cc colors.Context) {
 	if sfunc, ok := styleFontFuncs[key]; ok {
 		if parent != nil {
-			sfunc(s, key, val, parent, cc)
+			sfunc(fs, key, val, parent, cc)
 		} else {
-			sfunc(s, key, val, nil, cc)
+			sfunc(fs, key, val, nil, cc)
 		}
 		return
 	}
@@ -428,6 +428,7 @@ var styleFontFuncs = map[string]styleprops.Func{
 		if inh, init := styleprops.InhInit(val, parent); inh || init {
 			if inh {
 				fs.Family = parent.(*Font).Family
+				fs.CustomFont = parent.(*Font).CustomFont
 			} else if init {
 				fs.Family = rich.SansSerif // font has defaults
 			}
@@ -478,7 +479,7 @@ var styleFontFuncs = map[string]styleprops.Func{
 }
 
 // FromProperties sets style field values based on the given property list.
-func (s *Text) FromProperties(parent *Text, properties map[string]any, ctxt colors.Context) {
+func (ts *Text) FromProperties(parent *Text, properties map[string]any, ctxt colors.Context) {
 	for key, val := range properties {
 		if len(key) == 0 {
 			continue
@@ -486,17 +487,17 @@ func (s *Text) FromProperties(parent *Text, properties map[string]any, ctxt colo
 		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
 			continue
 		}
-		s.FromProperty(parent, key, val, ctxt)
+		ts.FromProperty(parent, key, val, ctxt)
 	}
 }
 
 // FromProperty sets style field values based on the given property key and value.
-func (s *Text) FromProperty(parent *Text, key string, val any, cc colors.Context) {
+func (ts *Text) FromProperty(parent *Text, key string, val any, cc colors.Context) {
 	if sfunc, ok := styleFuncs[key]; ok {
 		if parent != nil {
-			sfunc(s, key, val, parent, cc)
+			sfunc(ts, key, val, parent, cc)
 		} else {
-			sfunc(s, key, val, nil, cc)
+			sfunc(ts, key, val, nil, cc)
 		}
 		return
 	}

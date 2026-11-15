@@ -14,11 +14,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestDragImage tests the images of a button and a tree node for the
-// sprite of dragging them (see [Events.DragStart]), on all platforms,
-// including the web (see goscript_test.go): they are the size of the
-// widget, opaque, with the background of its parent at the corner, and
-// with its text (#1552: on the web, the text was missing).
+// TestDragImage tests the images of a button and a tree node for the sprite
+// of dragging them (see [Events.DragStart]), on all platforms, including the
+// web (see the core:js-test directive in align_test.go): they are the size
+// of the widget, opaque, with the background of its parent at the corner,
+// and with its text (#1552: on the web, the text was missing).
 func TestDragImage(t *testing.T) {
 	b := NewBody()
 	bt := NewButton(b).SetText("Drag this text")

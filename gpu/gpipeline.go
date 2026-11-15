@@ -105,7 +105,7 @@ func (pl *GraphicsPipeline) BindVertex(rp *wgpu.RenderPassEncoder) {
 	}
 }
 
-// DrawVertex adds commands to the given command encoder
+// DrawIndexed adds commands to the given command encoder
 // to Draw based on current Index and Vertex values.
 func (pl *GraphicsPipeline) DrawIndexed(rp *wgpu.RenderPassEncoder) {
 	vs := pl.Vars()

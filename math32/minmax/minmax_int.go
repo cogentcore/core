@@ -41,7 +41,7 @@ func (mr *Int) IsLow(val int) bool {
 
 // IsHigh tests whether value is higher than the maximum
 func (mr *Int) IsHigh(val int) bool {
-	return (val > mr.Min)
+	return (val > mr.Max)
 }
 
 // Range returns Max - Min
@@ -93,18 +93,18 @@ func (mr *Int) FitValInRange(val int) bool {
 	return adj
 }
 
-// NormVal normalizes value to 0-1 unit range relative to current Min / Max range
+// NormValue normalizes value to 0-1 unit range relative to current Min / Max range
 // Clips the value within Min-Max range first.
 func (mr *Int) NormValue(val int) float32 {
 	return float32(mr.Clamp(val)-mr.Min) * mr.Scale()
 }
 
-// ProjVal projects a 0-1 normalized unit value into current Min / Max range (inverse of NormVal)
+// ProjValue projects a 0-1 normalized unit value into current Min / Max range (inverse of NormValue)
 func (mr *Int) ProjValue(val float32) float32 {
 	return float32(mr.Min) + (val * float32(mr.Range()))
 }
 
-// ClipVal clips given value within Min / Max rangee
+// Clamp clips given value within Min / Max range
 func (mr *Int) Clamp(val int) int {
 	if val < mr.Min {
 		return mr.Min
@@ -115,7 +115,7 @@ func (mr *Int) Clamp(val int) int {
 	return val
 }
 
-// ClipNormVal clips then normalizes given value within 0-1
+// ClipNormValue clips then normalizes given value within 0-1
 func (mr *Int) ClipNormValue(val int) float32 {
 	if val < mr.Min {
 		return 0

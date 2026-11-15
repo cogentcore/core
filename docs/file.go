@@ -6,6 +6,8 @@ package main
 
 import "fmt"
 
-func exampleFile() {
+// ExampleFile is the function of this example file, which the docs of the
+// text editor open.
+func ExampleFile() {
 	fmt.Println("This is an example file.")
 }

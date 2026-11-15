@@ -217,7 +217,7 @@ func TestArgsPrint(t *testing.T) {
 	addFlags(allFields, allFlags, []string{}, map[string]string{})
 
 	fmt.Println("Args:")
-	fmt.Println(strings.Join(allFlags.Keys(), "\n"))
+	fmt.Println(strings.Join(allFlags.Keys, "\n"))
 }
 
 func TestSetFromArgs(t *testing.T) {
@@ -414,8 +414,7 @@ func TestNestedConfig(t *testing.T) {
 		{"Run"},
 	}
 
-	for i, kv := range fs.Order {
-		field := kv.Value
+	for i, field := range fs.Values {
 		assert.Equal(t, expected[i], field.Names, "index=%d", i)
 	}
 }

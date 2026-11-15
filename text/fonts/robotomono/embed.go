@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package robotomono embeds the Roboto Mono fonts, the default monospace fonts.
 package robotomono
 
 import "embed"

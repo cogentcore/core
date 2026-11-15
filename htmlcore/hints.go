@@ -63,7 +63,8 @@ func (c *Context) addHints(n *html.Node) {
 		case "nowrap":
 			c.addHint(n, "white-space", "nowrap")
 		case "border":
-			if n.Data == "table" {
+			switch n.Data {
+			case "table":
 				if bw, err := strconv.Atoi(v); err == nil || v == "" {
 					if v == "" {
 						bw = 1
@@ -72,7 +73,7 @@ func (c *Context) addHints(n *html.Node) {
 						c.addHint(n, "border", strconv.Itoa(bw)+"px outset #808080")
 					}
 				}
-			} else if n.Data == "img" {
+			case "img":
 				c.addHint(n, "border-width", v)
 			}
 		case "cellspacing":

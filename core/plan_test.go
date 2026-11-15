@@ -23,7 +23,7 @@ const (
 // fully declarative updating approach relative to a [Plan] based updating approach.
 
 func BenchmarkUpdateDeclarative(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		for range nUpdates {
 			b := NewBody()
 			for i := range nButtons {
@@ -42,7 +42,7 @@ func BenchmarkUpdateDeclarative(b *testing.B) {
 
 func BenchmarkUpdatePlan(bn *testing.B) {
 	b := NewBody()
-	for range bn.N {
+	for bn.Loop() {
 		for range nUpdates {
 			p := &tree.Plan{}
 			for i := range nButtons {

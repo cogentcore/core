@@ -143,7 +143,7 @@ func (ls *State) LineString() string {
 
 // Error adds a lexing error at given position
 func (ls *State) Error(pos int, msg string, rule *Rule) {
-	ls.Errs.Add(textpos.Pos{ls.Line, pos}, ls.Filename, "Lexer: "+msg, string(ls.Src), rule)
+	ls.Errs.Add(textpos.Pos{Line: ls.Line, Char: pos}, ls.Filename, "Lexer: "+msg, string(ls.Src), rule)
 }
 
 // AtEol returns true if current position is at end of line
@@ -178,7 +178,7 @@ func (ls *State) MatchString(off int, s string) bool {
 	return true
 }
 
-// Rune gets the rune at given offset from current position, returns false if out of range
+// RuneAt gets the rune at given offset from current position, returns false if out of range
 func (ls *State) RuneAt(off int) (rune, bool) {
 	idx := ls.Pos + off
 	if idx >= len(ls.Src) {
@@ -198,23 +198,26 @@ func (ls *State) Next(inc int) bool {
 	return true
 }
 
-// NextRune reads the next rune into Ch and returns false if at end of line
+// NextRune reads the next rune into Rune and returns false if at end of
+// line, where Rune is -1
 func (ls *State) NextRune() bool {
 	sz := len(ls.Src)
 	ls.Pos++
 	if ls.Pos >= sz {
 		ls.Pos = sz
+		ls.Rune = -1 // (not the last rune again, as for an escape at the end)
 		return false
 	}
 	ls.Rune = ls.Src[ls.Pos]
 	return true
 }
 
-// CurRune reads the current rune into Ch and returns false if at end of line
+// CurRuneAt reads the current rune into Ch and returns false if at end of line
 func (ls *State) CurRuneAt() bool {
 	sz := len(ls.Src)
 	if ls.Pos >= sz {
 		ls.Pos = sz
+		ls.Rune = -1
 		return false
 	}
 	ls.Rune = ls.Src[ls.Pos]

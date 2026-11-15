@@ -86,7 +86,7 @@ func (fm *Form) getStructFields() {
 		if field.Tag.Get("display") == "-" {
 			return false
 		}
-		if ss, ok := reflectx.UnderlyingPointer(parent).Interface().(ShouldDisplayer); ok {
+		if ss, ok := reflect.TypeAssert[ShouldDisplayer](reflectx.UnderlyingPointer(parent)); ok {
 			fm.isShouldDisplayer = true
 			if !ss.ShouldDisplay(field.Name) {
 				return false

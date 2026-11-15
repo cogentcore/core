@@ -54,7 +54,7 @@ func TestFitWords(t *testing.T) {
 	want := []int{9, 9, 10, 10, 9, 9, 9, 10, 10}
 	for i, g := range out.Glyphs {
 		if g.Advance != fixed.I(want[i]) {
-			t.Errorf("glyph %d (%q): advance %v, want %d", i, rs[g.ClusterIndex], g.Advance, want[i])
+			t.Errorf("glyph %d (%q): advance %v, want %d", i, rs[g.TextIndex()], g.Advance, want[i])
 		}
 	}
 }

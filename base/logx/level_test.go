@@ -4,6 +4,8 @@
 
 package logx
 
+//core:js-test
+
 import (
 	"log/slog"
 	"testing"

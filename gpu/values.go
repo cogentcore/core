@@ -113,7 +113,7 @@ func (vs *Values) SetName(idx int, name string) (*Value, error) {
 	return vl, nil
 }
 
-// ValueByIndexTry returns Value at given index with range checking error message.
+// ValueByIndex returns Value at given index with range checking error message.
 func (vs *Values) ValueByIndex(idx int) (*Value, error) {
 	if idx >= len(vs.Values) || idx < 0 {
 		err := fmt.Errorf("gpu.Values:ValueByIndexTry index %d out of range", idx)
@@ -125,7 +125,7 @@ func (vs *Values) ValueByIndex(idx int) (*Value, error) {
 	return vs.Values[idx], nil
 }
 
-// ValueByNameTry returns value by name, returning error if not found
+// ValueByName returns value by name, returning error if not found
 func (vs *Values) ValueByName(name string) (*Value, error) {
 	vl, ok := vs.NameMap[name]
 	if !ok {

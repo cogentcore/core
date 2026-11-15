@@ -650,7 +650,11 @@ func (ls *Lines) appendLines(n int) {
 	ls.hiTags = append(ls.hiTags, make([]lexer.Line, n)...)
 	ls.virtual = append(ls.virtualLinesFor(len(ls.tags)-n), make([][]virtualText, n)...)
 	for _, vw := range ls.views {
-		vw.lineToVline = append(vw.lineToVline, make([]int, n)...)
+		// the appended lines start at the end of the view lines, so that
+		// they are laid out there (not at view line 0, over the first line)
+		for range n {
+			vw.lineToVline = append(vw.lineToVline, vw.viewLines)
+		}
 	}
 }
 
@@ -727,7 +731,7 @@ func (ls *Lines) insertTextRectImpl(tbe *textpos.Edit) *textpos.Edit {
 		ls.linesInserted(ie)
 	}
 	nch := (ed.Char - st.Char)
-	for i := 0; i < nlns; i++ {
+	for i := range nlns {
 		ln := st.Line + i
 		lr := ls.lines[ln]
 		ir := tbe.Text[i]

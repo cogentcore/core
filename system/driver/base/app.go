@@ -40,6 +40,9 @@ type App struct {
 	// loop of the app should be terminated.
 	MainDone chan struct{} `display:"-"`
 
+	// mainDoneOnce makes MainDone once (see [App.InitMainDone]).
+	mainDoneOnce sync.Once
+
 	// Nm is the name of the app.
 	Nm string `label:"Name"`
 
@@ -72,9 +75,19 @@ func Init(a system.App, ab *App) {
 	// fmt.Println("locale:", sl, sl.Language(), sl.Region())
 }
 
+// InitMainDone makes [App.MainDone] if it has not been made yet. Both the
+// main loop and [App.StopMain] call it, as StopMain can be called before
+// the main loop starts (from another goroutine), when a send on a nil
+// channel would block forever.
+func (a *App) InitMainDone() {
+	a.mainDoneOnce.Do(func() {
+		a.MainDone = make(chan struct{})
+	})
+}
+
 func (a *App) MainLoop() {
 	a.MainQueue = make(chan FuncRun)
-	a.MainDone = make(chan struct{})
+	a.InitMainDone()
 	for {
 		select {
 		case <-a.MainDone:
@@ -110,6 +123,7 @@ func (a *App) SendEmptyEvent() {
 
 // StopMain stops the main loop and thus terminates the app
 func (a *App) StopMain() {
+	a.InitMainDone()
 	a.MainDone <- struct{}{}
 }
 

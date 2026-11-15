@@ -32,6 +32,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"maps"
 	"os"
 	"strings"
 
@@ -198,7 +199,7 @@ func (sy *Symbol) AddScopesStack(ss SymStack) bool {
 	}
 	sy.AllocScopes()
 	added := false
-	for i := 0; i < sz; i++ {
+	for i := range sz {
 		sc := ss[i]
 		sy.Scopes[sc.Kind] = sc.Name
 		if i == sz-1 {
@@ -291,10 +292,10 @@ func (sy *Symbol) WriteDoc(out io.Writer, depth int) {
 
 // ClearAST sets the AST pointers to nil for all symbols in this one.
 // otherwise the AST memory is never freed and can get quite large.
-func (sm *Symbol) ClearAST() {
-	sm.AST = nil
-	sm.Children.ClearAST()
-	sm.Types.ClearAST()
+func (sy *Symbol) ClearAST() {
+	sy.AST = nil
+	sy.Children.ClearAST()
+	sy.Types.ClearAST()
 }
 
 // ClearAST sets the AST pointers to nil for all symbols.
@@ -344,8 +345,6 @@ func (sn *SymNames) Clone() SymNames {
 		return nil
 	}
 	nsn := make(SymNames, sz)
-	for tk, nm := range *sn {
-		nsn[tk] = nm
-	}
+	maps.Copy(nsn, *sn)
 	return nsn
 }

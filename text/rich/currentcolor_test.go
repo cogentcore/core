@@ -4,6 +4,8 @@
 
 package rich
 
+//core:js-test
+
 import (
 	"image/color"
 	"testing"

@@ -42,7 +42,7 @@ func TestContextMenuKey(t *testing.T) {
 		NewButton(m).SetText("Item")
 	})
 	imagex.UpdateTestImagesFor(t) // the image is not compared
-	b.AssertRender(t, "context-menu-key", func() {
+	AssertRender(t, b, "context-menu-key", func() {
 		src := b.Scene.RenderWindow().SystemWindow.Events()
 		var shift key.Modifiers
 		shift.SetFlag(true, key.Shift)
@@ -110,7 +110,7 @@ func TestNewWindow(t *testing.T) {
 		return nb
 	}
 	defer func() { NewWindowFunc = nil }()
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		m := NewScene()

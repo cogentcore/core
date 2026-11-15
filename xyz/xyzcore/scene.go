@@ -108,7 +108,7 @@ func (sw *Scene) Destroy() {
 	// can use the frame texture of the scene after its source is drawn
 	// (see [xyzSource.Draw]), so the scene is destroyed under the lock of
 	// the window, which the composite holds.
-	if win := sw.WidgetBase.Scene.Events.RenderWindow(); win != nil && win.SystemWindow.Lock() {
+	if win := sw.Scene.Events.RenderWindow(); win != nil && win.SystemWindow.Lock() {
 		sw.XYZ.Destroy()
 		win.SystemWindow.Unlock()
 	} else {

@@ -19,7 +19,7 @@ func TestDialogMessage(t *testing.T) {
 	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Dp(300))
 	})
-	b.AssertRender(t, "dialog/message", func() {
+	AssertRender(t, b, "dialog/message", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		MessageDialog(b, "Something happened", "Message")

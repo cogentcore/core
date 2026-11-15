@@ -133,7 +133,7 @@ func (pl *Point) ViewPos(viewMat *math32.Matrix4) math32.Vector3 {
 	return pl.Pos.MulMatrix4AsVector4(viewMat, 1)
 }
 
-// Spotlight is a light with a position and direction and
+// Spot is a spotlight: a light with a position and direction and
 // associated decay factors and angles, which divide the light
 // intensity as a function of linear and quadratic distance.
 // The quadratic factor dominates at longer distances.

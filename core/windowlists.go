@@ -40,6 +40,13 @@ func (wl *renderWindowList) windows() []*renderWindow {
 	return slices.Clone(*wl)
 }
 
+// Len returns the number of windows in the list.
+func (wl *renderWindowList) Len() int {
+	renderWindowGlobalMu.Lock()
+	defer renderWindowGlobalMu.Unlock()
+	return len(*wl)
+}
+
 // last returns the last window of the list, or nil if it is empty.
 func (wl *renderWindowList) last() *renderWindow {
 	renderWindowGlobalMu.Lock()

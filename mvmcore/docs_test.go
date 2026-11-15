@@ -4,6 +4,8 @@
 
 package mvmcore
 
+//core:js-test browser timeout=20m skip-typecheck
+
 import (
 	"bytes"
 	"fmt"
@@ -106,8 +108,8 @@ func runBlock(src string) (err error) {
 // firstLine returns the first line of the message of err.
 func firstLine(err error) string {
 	s := err.Error()
-	if i := strings.IndexByte(s, '\n'); i >= 0 {
-		return s[:i]
+	if before, _, ok := strings.Cut(s, "\n"); ok {
+		return before
 	}
 	return s
 }

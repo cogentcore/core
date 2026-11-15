@@ -7,6 +7,8 @@
 
 package mergefs
 
+//core:js-test
+
 import (
 	"io/fs"
 	"os"
@@ -62,7 +64,7 @@ func TestMergeFS(t *testing.T) {
 					t.Errorf("expected len(dirs) == %d, but got %d", fp.dirArrayLength, len(dirs))
 				}
 
-				for i := 0; i < len(dirs); i++ {
+				for i := range dirs {
 					if dirs[i].Name() != fp.child {
 						t.Errorf("expected dirs[i].Name() == %s, but got %s", fp.child, dirs[i].Name())
 					}

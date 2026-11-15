@@ -26,17 +26,23 @@ func (km *Maps) MarkdownDoc() string { //types:add
 
 	b.WriteString("| Function                         ")
 	for _, m := range *km {
-		b.WriteString("| `" + m.Name + "` ")
+		b.WriteString("| `")
+		b.WriteString(m.Name)
+		b.WriteString("` ")
 	}
 	b.WriteString("|\n")
 	b.WriteString("| ---------------------------- ")
 	for _, m := range *km {
-		b.WriteString("| " + strings.Repeat("-", len(m.Name)+2) + " ")
+		b.WriteString("| ")
+		b.WriteString(strings.Repeat("-", len(m.Name)+2))
+		b.WriteString(" ")
 	}
 	b.WriteString("|\n")
 
 	for kf := MoveUp; kf < FunctionsN; kf++ {
-		b.WriteString("| " + kf.String() + " ")
+		b.WriteString("| ")
+		b.WriteString(kf.String())
+		b.WriteString(" ")
 		for mi, m := range *km {
 			f := fmap[mi][kf]
 			b.WriteString("| ")
@@ -50,7 +56,8 @@ func (km *Maps) MarkdownDoc() string { //types:add
 					}
 				}
 			} else {
-				b.WriteString(strings.Repeat(" ", len(m.Name)+2) + " ")
+				b.WriteString(strings.Repeat(" ", len(m.Name)+2))
+				b.WriteString(" ")
 			}
 		}
 		b.WriteString("|\n")
@@ -61,16 +68,22 @@ func (km *Maps) MarkdownDoc() string { //types:add
 		if md == "" {
 			b.WriteString("### No Modifiers\n\n")
 		} else {
-			b.WriteString("### " + md + "\n\n")
+			b.WriteString("### ")
+			b.WriteString(md)
+			b.WriteString("\n\n")
 		}
 		b.WriteString("| Key                          ")
 		for _, m := range *km {
-			b.WriteString("| `" + m.Name + "` ")
+			b.WriteString("| `")
+			b.WriteString(m.Name)
+			b.WriteString("` ")
 		}
 		b.WriteString("|\n")
 		b.WriteString("| ---------------------------- ")
 		for _, m := range *km {
-			b.WriteString("| " + strings.Repeat("-", len(m.Name)+2) + " ")
+			b.WriteString("| ")
+			b.WriteString(strings.Repeat("-", len(m.Name)+2))
+			b.WriteString(" ")
 		}
 		b.WriteString("|\n")
 
@@ -90,14 +103,20 @@ func (km *Maps) MarkdownDoc() string { //types:add
 			if !has {
 				continue
 			}
-			b.WriteString("| " + string(ch) + " ")
+			b.WriteString("| ")
+			b.WriteString(string(ch))
+			b.WriteString(" ")
 			for mi, m := range *km {
 				kf, ok := m.Map[ch]
 				if ok {
-					b.WriteString("| " + kf.String() + " ")
+					b.WriteString("| ")
+					b.WriteString(kf.String())
+					b.WriteString(" ")
 					fmap[mi][kf] = append(fmap[mi][kf], string(ch))
 				} else {
-					b.WriteString("| " + strings.Repeat(" ", len(m.Name)+2) + " ")
+					b.WriteString("| ")
+					b.WriteString(strings.Repeat(" ", len(m.Name)+2))
+					b.WriteString(" ")
 				}
 			}
 			b.WriteString("|\n")

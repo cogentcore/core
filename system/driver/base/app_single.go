@@ -101,10 +101,17 @@ func (a *AppSingle[C, W]) ScreenByName(name string) *system.Screen {
 	return nil
 }
 
+// hasWindow returns whether the app has its window, which is a nil
+// pointer (not a nil [system.Window]) before it is made.
+func (a *AppSingle[C, W]) hasWindow() bool {
+	var none W
+	return any(a.Win) != any(none)
+}
+
 func (a *AppSingle[C, W]) NWindows() int {
 	a.Mu.Lock()
 	defer a.Mu.Unlock()
-	if system.Window(a.Win) != nil {
+	if a.hasWindow() {
 		return 1
 	}
 	return 0
@@ -113,7 +120,7 @@ func (a *AppSingle[C, W]) NWindows() int {
 func (a *AppSingle[C, W]) Window(win int) system.Window {
 	a.Mu.Lock()
 	defer a.Mu.Unlock()
-	if win == 0 {
+	if win == 0 && a.hasWindow() {
 		return a.Win
 	}
 	return nil
@@ -122,7 +129,7 @@ func (a *AppSingle[C, W]) Window(win int) system.Window {
 func (a *AppSingle[C, W]) WindowByName(name string) system.Window {
 	a.Mu.Lock()
 	defer a.Mu.Unlock()
-	if a.Win.Name() == name {
+	if a.hasWindow() && a.Win.Name() == name {
 		return a.Win
 	}
 	return nil
@@ -131,7 +138,7 @@ func (a *AppSingle[C, W]) WindowByName(name string) system.Window {
 func (a *AppSingle[C, W]) WindowInFocus() system.Window {
 	a.Mu.Lock()
 	defer a.Mu.Unlock()
-	if a.Win.Is(system.Focused) {
+	if a.hasWindow() && a.Win.Is(system.Focused) {
 		return a.Win
 	}
 	return nil
@@ -140,6 +147,9 @@ func (a *AppSingle[C, W]) WindowInFocus() system.Window {
 func (a *AppSingle[C, W]) ContextWindow() system.Window {
 	a.Mu.Lock()
 	defer a.Mu.Unlock()
+	if !a.hasWindow() {
+		return nil
+	}
 	return a.Win
 }
 

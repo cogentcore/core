@@ -125,17 +125,17 @@ type SubCmd struct {
 }
 
 // IsParsed returns whether the help of the subcommand has been parsed.
-func (sc *SubCmd) IsParsed() bool {
-	return sc.Source != ""
+func (cm *SubCmd) IsParsed() bool {
+	return cm.Source != ""
 }
 
 // Label returns the text shown for the subcommand: [MainName], or its
 // last word in sentence case: "Commit", "List" for "stash list".
-func (sc *SubCmd) Label() string {
-	if sc.Name == MainName {
+func (cm *SubCmd) Label() string {
+	if cm.Name == MainName {
 		return MainName
 	}
-	return label(sc.Cmd)
+	return label(cm.Cmd)
 }
 
 // label returns the last word of the given command in sentence case.
@@ -223,7 +223,7 @@ func shellQuote(s string) string {
 		return "''"
 	}
 	if !strings.ContainsFunc(s, func(r rune) bool {
-		return !(r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9' || strings.ContainsRune("-_./:=,@%+", r))
+		return (r < 'a' || r > 'z') && (r < 'A' || r > 'Z') && (r < '0' || r > '9') && !strings.ContainsRune("-_./:=,@%+", r)
 	}) {
 		return s
 	}

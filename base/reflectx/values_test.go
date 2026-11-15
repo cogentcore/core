@@ -155,7 +155,7 @@ func TestPointerSetRobust(t *testing.T) {
 
 func BenchmarkFloatToFloat(b *testing.B) {
 	sum := 0.0
-	for range b.N {
+	for b.Loop() {
 		v, _ := ToFloat(1.0)
 		sum += v
 	}
@@ -164,7 +164,7 @@ func BenchmarkFloatToFloat(b *testing.B) {
 
 func BenchmarkUint64ToFloat(b *testing.B) {
 	sum := 0.0
-	for range b.N {
+	for b.Loop() {
 		v, _ := ToFloat(uint64(1))
 		sum += v
 	}
@@ -173,7 +173,7 @@ func BenchmarkUint64ToFloat(b *testing.B) {
 
 func BenchmarkStringToFloat(b *testing.B) {
 	sum := 0.0
-	for range b.N {
+	for b.Loop() {
 		v, _ := ToFloat("1")
 		sum += v
 	}

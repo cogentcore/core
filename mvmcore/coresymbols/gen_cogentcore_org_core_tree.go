@@ -67,6 +67,9 @@ func AddNew[T Node](p *Plan, name string, new func() T, init func(w T)) {
 
 func ChildByType[T Node](n Node, startIndex ...int) T {
 	nb := n.AsTree()
+	if len(startIndex) == 0 {
+		startIndex = []int{0}
+	}
 	idx := slicesx.Search(nb.Children, func(ch Node) bool {
 		_, ok := ch.(T)
 		return ok

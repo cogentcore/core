@@ -44,7 +44,7 @@ func (s *Sphere) SetFromPoints(points []Vector3, optCenter *Vector3) {
 		s.Center = box.Center()
 	}
 	var maxRadiusSq float32
-	for i := 0; i < len(points); i++ {
+	for i := range points {
 		maxRadiusSq = Max(maxRadiusSq, s.Center.DistanceToSquared(points[i]))
 	}
 	s.Radius = Sqrt(maxRadiusSq)

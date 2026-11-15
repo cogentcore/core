@@ -122,7 +122,7 @@ func ToWordCase(input string, wordCase WordCases, delimiter rune) string {
 	var prev, curr rune
 	next := runes[0] // 0 length will have already returned so safe to index
 	wordStart := 0
-	for i := 0; i < len(runes); i++ {
+	for i := range runes {
 		prev = curr
 		curr = next
 		if i+1 == len(runes) {

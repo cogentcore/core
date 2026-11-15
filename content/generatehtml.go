@@ -7,7 +7,6 @@ package content
 import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/htmlcore/tohtml"
-	"cogentcore.org/core/tree"
 )
 
 func init() {
@@ -19,16 +18,12 @@ func init() {
 // with [Content], it returns the JSON [bcontent.Site] data (see [generateSite]).
 func generateHTML(w core.Widget) string {
 	var ct *Content
-	w.AsTree().WalkDown(func(n tree.Node) bool {
-		if ct != nil {
-			return tree.Break
-		}
+	for n := range w.AsTree().All() {
 		if c, ok := n.(*Content); ok {
 			ct = c
-			return tree.Break
+			break
 		}
-		return tree.Continue
-	})
+	}
 	if ct == nil {
 		return tohtml.Generate(w) // basic fallback
 	}

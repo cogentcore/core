@@ -46,7 +46,7 @@ func TestLayoutFramesAlignItems(t *testing.T) {
 					s.Align.Items = align
 				})
 				plainFrames(b, math32.Vec2(0, 0))
-				b.AssertRender(t, tdir+tnm)
+				AssertRender(t, b, tdir+tnm)
 			}
 		}
 	}
@@ -74,7 +74,7 @@ func TestLayoutFramesAlignContent(t *testing.T) {
 					s.Align.Content = align
 				})
 				plainFrames(b, math32.Vec2(0, 0))
-				b.AssertRender(t, tdir+tnm)
+				AssertRender(t, b, tdir+tnm)
 			}
 		}
 	}
@@ -106,7 +106,7 @@ func TestLayoutFramesJustifyContent(t *testing.T) {
 					s.Justify.Content = align
 				})
 				plainFrames(b, math32.Vec2(0, 0))
-				b.AssertRender(t, tdir+tnm)
+				AssertRender(t, b, tdir+tnm)
 			}
 		}
 	}
@@ -126,7 +126,7 @@ func TestLayoutFramesJustifyItems(t *testing.T) {
 			s.Justify.Items = align
 		})
 		plainFrames(b, math32.Vec2(0, 0))
-		b.AssertRender(t, tdir+tnm)
+		AssertRender(t, b, tdir+tnm)
 	}
 }
 
@@ -147,7 +147,7 @@ func TestLayoutFramesJustifySelf(t *testing.T) {
 		b.Child(2).(Widget).AsWidget().Styler(func(s *styles.Style) {
 			s.Justify.Self = aligns[(ai+1)%len(aligns)]
 		})
-		b.AssertRender(t, tdir+tnm)
+		AssertRender(t, b, tdir+tnm)
 	}
 }
 
@@ -168,7 +168,7 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 		b.Child(2).(Widget).AsWidget().Styler(func(s *styles.Style) {
 			s.Align.Self = aligns[(ai+1)%len(aligns)]
 		})
-		b.AssertRender(t, tdir+tnm)
+		AssertRender(t, b, tdir+tnm)
 	}
 }
 
@@ -195,11 +195,11 @@ var (
 	longText = "This is a test of the layout logic, which is pretty complex and requires some experimenting to understand how it all works.  The styling and behavior is the same as the CSS / HTML Flex model, except we only support Grow, not Shrink. "
 
 	frameSizes = [5]math32.Vector2{
-		{20, 100},
-		{80, 20},
-		{60, 80},
-		{40, 120},
-		{150, 100},
+		{X: 20, Y: 100},
+		{X: 80, Y: 20},
+		{X: 60, Y: 80},
+		{X: 40, Y: 120},
+		{X: 150, Y: 100},
 	}
 )
 
@@ -210,7 +210,7 @@ func TestLayoutScrollLabel(t *testing.T) {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
 	NewText(b).SetText(longText)
-	b.AssertRender(t, "layout/scroll/label")
+	AssertRender(t, b, "layout/scroll/label")
 }
 
 func TestParentRelativeSize(t *testing.T) {
@@ -235,7 +235,7 @@ func TestParentRelativeSize(t *testing.T) {
 		s.Grow.Set(0, 0)
 		s.Min.Set(units.Pw(50))
 	})
-	b.AssertRender(t, "layout/parent-relative")
+	AssertRender(t, b, "layout/parent-relative")
 }
 
 func TestParentRelativeSizeSplits(t *testing.T) {
@@ -301,7 +301,7 @@ func TestParentRelativeSizeSplits(t *testing.T) {
 		s.Border.Width.Set(units.Dp(4))
 	})
 	NewText(lastFrame).SetText("20% Split Frame")
-	b.AssertRender(t, "layout/parent-relative-splits")
+	AssertRender(t, b, "layout/parent-relative-splits")
 }
 
 func TestCustomLayout(t *testing.T) {
@@ -324,7 +324,7 @@ func TestCustomLayout(t *testing.T) {
 		s.Min.Set(units.Dp(40))
 		s.Pos.Set(units.Dp(50))
 	})
-	b.AssertRender(t, "layout/custom")
+	AssertRender(t, b, "layout/custom")
 }
 
 func TestCustomLayoutButton(t *testing.T) {
@@ -338,7 +338,7 @@ func TestCustomLayoutButton(t *testing.T) {
 		s.Min.X.Dp(100)
 		s.Pos.Set(units.Dp(25))
 	})
-	b.AssertRender(t, "layout/custom-button")
+	AssertRender(t, b, "layout/custom-button")
 }
 
 func TestLayoutMaxGrow(t *testing.T) { // issue #1557
@@ -380,7 +380,7 @@ func TestLayoutMaxGrow(t *testing.T) { // issue #1557
 				s.Max.X.Dp(50)
 			}
 		})
-		b.AssertRender(t, "layout/maxgrow/"+name)
+		AssertRender(t, b, "layout/maxgrow/"+name)
 	}
 }
 
@@ -391,7 +391,7 @@ func TestLayoutMaxGrow(t *testing.T) { // issue #1557
 // height in dp, as when its window is resized, and then calls check with
 // the size of a dp in dots.
 func layoutAtWidth(b *Body, w, h float32, check func(dp float32)) {
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		dp := b.Styles.UnitContext.Dots(units.UnitDp)
 		b.AsyncLock()
 		b.Scene.LayoutFrame(math32.Vec2(w*dp, h*dp))
@@ -492,7 +492,7 @@ func TestLayoutPartsNotNarrowed(t *testing.T) {
 	})
 	tr := NewTree(col).SetText("A tree node with a long label")
 	var label *Text
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		b.AsyncLock() // (it is rendered meanwhile)
 		defer b.AsyncUnlock()
 		// the label of the tree node wraps
@@ -641,13 +641,13 @@ func TestLayoutContentSizingMeasure(t *testing.T) {
 	skipOnWeb(t, "the window is the size of the page, not of its content")
 	b := NewBody()
 	tx := NewText(b).SetText(wrapText)
-	b.RenderImage(func() {
+	RenderImage(b, Locked(b, func() {
 		measure := units.Ch(contentSizingMeasure)
 		measure.ToDots(&tx.Styles.UnitContext)
 		w := b.Scene.Geom.Size.Actual.Total.X
 		assert.LessOrEqual(t, w, measure.Dots+b.Styles.BoxSpace().Size().X+b.Scene.Styles.BoxSpace().Size().X+2, "the window is within the measure")
 		assert.Greater(t, len(tx.paintText.Lines), 2, "the text wraps in it")
-	})
+	}))
 }
 
 // TestLayoutTextScrollbar is for text in a frame that only gets a vertical
@@ -1080,9 +1080,9 @@ func TestLayoutGridSpanPercentMax(t *testing.T) {
 			wide = f
 		}
 	}
-	b.RenderImage(func() {
+	RenderImage(b, Locked(b, func() {
 		assert.InDelta(t, g.Geom.Size.Actual.Content.X, wide.Geom.Size.Actual.Total.X, 1, "as wide as the grid")
-	})
+	}))
 }
 
 // TestLayoutPercentPaddingFirst tests that a percentage padding is of the
@@ -1095,7 +1095,7 @@ func TestLayoutPercentPaddingFirst(t *testing.T) {
 	fr := NewFrame(b)
 	fr.Styler(func(s *styles.Style) { s.Direction = styles.Column; s.Min.X.Dp(200); s.Max.X.Dp(200) })
 	NewText(fr).SetText("before")
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		// a box added after the page is laid out (as by a script), in
 		// one layout
 		b.AsyncLock()
@@ -1165,8 +1165,8 @@ func TestLayoutGridSpanGrowFlexible(t *testing.T) {
 	desc := NewFrame(g)
 	desc.Styler(func(s *styles.Style) { s.ColSpan = 3; s.Grow.Set(1, 0) })
 	NewText(desc).SetText("a description that is wider than the title of this grid")
-	b.RenderImage(func() {
+	RenderImage(b, Locked(b, func() {
 		assert.Equal(t, float32(0), first.Geom.Size.Actual.Total.X, "the empty column")
 		assert.InDelta(t, g.Geom.Size.Actual.Content.X, title.Geom.Size.Actual.Total.X, 1, "the title is as wide as the grid")
-	})
+	}))
 }

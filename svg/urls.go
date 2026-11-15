@@ -69,10 +69,9 @@ func NameID(nm string, id int) string {
 // It automatically renames any that are not unique or empty.
 func (sv *SVG) GatherIDs() {
 	sv.UniqueIDs = make(map[int]struct{})
-	sv.Root.WalkDown(func(n tree.Node) bool {
+	for n := range sv.Root.All() {
 		sv.NodeEnsureUniqueID(n.(Node))
-		return tree.Continue
-	})
+	}
 }
 
 // NodeEnsureUniqueID ensures that the given node has a unique ID.
@@ -155,13 +154,12 @@ func (sv *SVG) FindNamedElement(name string) Node {
 	if def != nil {
 		return def
 	}
-	sv.Root.WalkDown(func(n tree.Node) bool {
+	for n := range sv.Root.All() {
 		if n.AsTree().Name == name {
 			def = n.(Node)
-			return tree.Break
+			break
 		}
-		return tree.Continue
-	})
+	}
 	if def != nil {
 		return def
 	}
@@ -243,7 +241,7 @@ func (sv *SVG) RemoveOrphanedDefs() bool {
 	for _, k := range sv.Defs.Children {
 		k.AsTree().SetProperty(refkey, 0)
 	}
-	sv.Root.WalkDown(func(n tree.Node) bool {
+	for n := range sv.Root.All() {
 		nb := n.(Node).AsNodeBase()
 		pr := nb.Properties
 		for _, v := range pr {
@@ -256,13 +254,12 @@ func (sv *SVG) RemoveOrphanedDefs() bool {
 				IncRefCount(el)
 			}
 		}
-		return tree.Continue
-	})
+	}
 	refGr := map[Node]bool{} // ref'd gradients -- move to top!
-	sv.Defs.WalkDown(func(n tree.Node) bool {
+	for n := range sv.Defs.All() {
 		gr, isgr := n.(*Gradient)
 		if !isgr {
-			return tree.Continue
+			continue
 		}
 		if gr.StopsName != "" {
 			el := sv.FindDefByName(gr.StopsName)
@@ -277,8 +274,7 @@ func (sv *SVG) RemoveOrphanedDefs() bool {
 				IncRefCount(n) // keep us around
 			}
 		}
-		return tree.Continue
-	})
+	}
 	ng := len(refGr)
 	for gn := range refGr {
 		idx := gn.AsNodeBase().IndexInParent()

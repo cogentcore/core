@@ -77,7 +77,7 @@ func (f *Frustum) SetFromMatrix(m *Matrix4) {
 	f.Planes[4].SetDims(me3-me2, me7-me6, me11-me10, me15-me14)
 	f.Planes[5].SetDims(me3+me2, me7+me6, me11+me10, me15+me14)
 
-	for i := 0; i < 6; i++ {
+	for i := range 6 {
 		f.Planes[i].Normalize()
 	}
 }
@@ -85,7 +85,7 @@ func (f *Frustum) SetFromMatrix(m *Matrix4) {
 // IntersectsSphere determines whether the specified sphere is intersecting the frustum
 func (f *Frustum) IntersectsSphere(sphere Sphere) bool {
 	negRadius := -sphere.Radius
-	for i := 0; i < 6; i++ {
+	for i := range 6 {
 		dist := f.Planes[i].DistanceToPoint(sphere.Center)
 		if dist < negRadius {
 			return false
@@ -99,7 +99,7 @@ func (f *Frustum) IntersectsBox(box Box3) bool {
 	var p1 Vector3
 	var p2 Vector3
 
-	for i := 0; i < 6; i++ {
+	for i := range 6 {
 		plane := &f.Planes[i]
 		if plane.Norm.X > 0 {
 			p1.X = box.Min.X
@@ -145,7 +145,7 @@ func (f *Frustum) IntersectsBox(box Box3) bool {
 
 // ContainsPoint determines whether the frustum contains the specified point
 func (f *Frustum) ContainsPoint(point Vector3) bool {
-	for i := 0; i < 6; i++ {
+	for i := range 6 {
 		if f.Planes[i].DistanceToPoint(point) < 0 {
 			return false
 		}

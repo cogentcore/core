@@ -116,7 +116,7 @@ func (pc *Paint) SetUnitContextExt(size image.Point) {
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels
 func (pc *Paint) ToDots() {
-	if !(pc.dotsSet && pc.UnitContext == pc.lastUnCtxt && pc.PropertiesNil) {
+	if !pc.dotsSet || pc.UnitContext != pc.lastUnCtxt || !pc.PropertiesNil {
 		pc.ToDotsImpl(&pc.UnitContext)
 		pc.dotsSet = true
 		pc.lastUnCtxt = pc.UnitContext

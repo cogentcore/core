@@ -96,7 +96,7 @@ func waitFor(t *testing.T, b *core.Body, what string, cond func() bool) {
 // editing (such as dash, the sh of Debian and Ubuntu) echo input that is
 // typed ahead before the prompt for it, so output follows a prompt.
 func hasOutputLine(tm *Terminal, s string) bool {
-	for _, ln := range strings.Split(linesText(tm), "\n") {
+	for ln := range strings.SplitSeq(linesText(tm), "\n") {
 		if strings.TrimPrefix(ln, "$ ") == s {
 			return true
 		}
@@ -265,7 +265,7 @@ func renderTerminal(t *testing.T, name, cmds string, ready func(tm *Terminal) bo
 	tm.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Ch(50), units.Em(12))
 	})
-	b.AssertRender(t, name, func() {
+	core.AssertRender(t, b, name, func() {
 		waitFor(t, b, "the output", func() bool { return ready(tm) })
 	})
 }
@@ -374,8 +374,9 @@ func TestTerminalContextMenu(t *testing.T) {
 	})
 	m := core.NewScene()
 	cms := tm.linesView.ContextMenus
-	for i := len(cms) - 1; i >= 0; i-- {
-		cms[i](m, image.Point{})
+	for ri := len(cms) - 1; ri >= 0; ri-- {
+		cm := cms[ri]
+		cm(m, image.Point{})
 	}
 	var items []string
 	m.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {

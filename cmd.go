@@ -18,5 +18,5 @@ func main() {
 	opts.DefaultFiles = []string{"core.toml"}
 	opts.SearchUp = true
 	cmd.SetFFmpegEnv() // the FFmpeg of core setup -video, for building apps with video
-	cli.Run(opts, &config.Config{}, cmd.Setup, cmd.Build, cmd.Run, cmd.Pack, cmd.Install, generate.Generate, cmd.Changed, cmd.Pull, cmd.Log, cmd.Release, cmd.NextRelease, cmd.Update)
+	cli.Run(opts, &config.Config{}, cmd.Setup, cmd.Build, cmd.Run, cmd.Test, cmd.Pack, cmd.Install, generate.Generate, cmd.Changed, cmd.Pull, cmd.Log, cmd.Release, cmd.NextRelease, cmd.Update)
 }

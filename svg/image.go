@@ -20,10 +20,10 @@ type Image struct {
 	NodeBase
 
 	// position of the top-left of the image
-	Pos math32.Vector2 `xml:"{x,y}"`
+	Pos math32.Vector2 `svg:"x,y"`
 
 	// rendered size of the image (imposes a scaling on image when it is rendered)
-	Size math32.Vector2 `xml:"{width,height}"`
+	Size math32.Vector2 `svg:"width,height"`
 
 	// file name of image loaded -- set by OpenImage
 	Filename string

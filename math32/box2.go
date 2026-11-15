@@ -79,7 +79,7 @@ func (b *Box2) Set(min, max *Vector2) {
 // SetFromPoints set this bounding box from the specified array of points.
 func (b *Box2) SetFromPoints(points []Vector2) {
 	b.SetEmpty()
-	for i := 0; i < len(points); i++ {
+	for i := range points {
 		b.ExpandByPoint(points[i])
 	}
 }
@@ -163,7 +163,7 @@ func (b Box2) MulMatrix2(m Matrix2) Box2 {
 	cs[3] = m.MulPoint(Vec2(b.Max.X, b.Max.Y))
 
 	nb := B2Empty()
-	for i := 0; i < 4; i++ {
+	for i := range 4 {
 		nb.ExpandByPoint(cs[i])
 	}
 	return nb

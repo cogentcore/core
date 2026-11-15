@@ -87,7 +87,7 @@ type NodeBase struct {
 
 	// numLifetimeChildren is the number of children that have ever been added to this
 	// node, which is used for automatic unique naming.
-	numLifetimeChildren uint64
+	numLifetimeChildren uint64 // (not an atomic.Uint64, as NodeBase is copied by value)
 
 	// index is the last value of our index, which is used as a starting point for
 	// finding us in our parent next time. It is not guaranteed to be accurate;
@@ -164,19 +164,18 @@ func (n *NodeBase) IndexInParent() int {
 }
 
 // ParentLevel finds a given potential parent node recursively up the
-// hierarchy, returning the level above the current node that the parent was
-// found, and -1 if not found.
+// hierarchy, returning the number of levels between this node and the parent
+// (0 for its direct parent, 1 for the parent of that, etc), and -1 if not found.
 func (n *NodeBase) ParentLevel(parent Node) int {
 	parLev := -1
 	level := 0
-	n.WalkUpParent(func(k Node) bool {
+	for k := range n.Ancestors() {
 		if k == parent {
 			parLev = level
-			return Break
+			break
 		}
 		level++
-		return Continue
-	})
+	}
 	return parLev
 }
 
@@ -279,8 +278,8 @@ func (n *NodeBase) PathFrom(parent Node) string {
 // at the given path.
 func (n *NodeBase) FindPath(path string) Node {
 	curn := n.This
-	pels := strings.Split(strings.Trim(strings.TrimSpace(path), "\""), "/")
-	for _, pe := range pels {
+	pels := strings.SplitSeq(strings.Trim(strings.TrimSpace(path), "\""), "/")
+	for pe := range pels {
 		if len(pe) == 0 {
 			continue
 		}
@@ -298,10 +297,14 @@ func findPathChild(n Node, child string) int {
 	if child[0] == '[' && child[len(child)-1] == ']' {
 		idx, err := strconv.Atoi(child[1 : len(child)-1])
 		if err != nil {
-			return idx
+			return -1
 		}
+		nc := len(n.AsTree().Children)
 		if idx < 0 { // from end
-			idx = len(n.AsTree().Children) + idx
+			idx = nc + idx
+		}
+		if idx < 0 || idx >= nc {
+			return -1
 		}
 		return idx
 	}
@@ -440,7 +443,10 @@ const (
 	Continue = true
 
 	// Break = false can be returned from tree iteration functions to stop processing
-	// this branch of the tree.
+	// this branch of the tree. In the walks down the tree ([NodeBase.WalkDown]),
+	// it skips the children of the node, and the walk continues with the rest
+	// of the tree: to stop at the first node that matches, range over
+	// [NodeBase.All] instead.
 	Break = false
 )
 
@@ -635,10 +641,7 @@ func (n *NodeBase) WalkDownBreadth(fun func(n Node) bool) {
 	queue := make([]Node, 1)
 	queue[0] = start
 
-	for {
-		if len(queue) == 0 {
-			break
-		}
+	for len(queue) > 0 {
 		cur := queue[0]
 		depth := cur.AsTree().depth
 		queue = queue[1:]

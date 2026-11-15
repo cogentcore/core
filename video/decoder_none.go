@@ -13,16 +13,16 @@ import "time"
 
 type decoder struct{ scaleWidth, scaleHeight int }
 
-func openDecoder(fpath string, options map[string]string, audio bool) (*decoder, error) {
+func openDecoder(_ string, _ map[string]string, _ bool) (*decoder, error) {
 	return nil, errUnsupported
 }
 
-func openSourceDecoder(src Source, start time.Duration, audio bool) (*decoder, error) {
+func openSourceDecoder(_ Source, _ time.Duration, _ bool) (*decoder, error) {
 	return nil, errUnsupported
 }
 
 func (d *decoder) free() {}
 
-func (d *decoder) seek(t time.Duration) error { return errUnsupported }
+func (d *decoder) seek(_ time.Duration) error { return errUnsupported }
 
-func (d *decoder) run(sink decodeSink) error { return errUnsupported }
+func (d *decoder) run(_ decodeSink) error { return errUnsupported }

@@ -57,7 +57,7 @@ func TestWidgetEventManager(t *testing.T) {
 
 	assert.Equal(t, &w.Scene.Events, w.Events())
 
-	b.AssertRender(t, "events/event-manager", func() {
+	AssertRender(t, b, "events/event-manager", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		assert.Equal(t, w.Scene.RenderWindow().SystemWindow.Events(), w.SystemEvents())
@@ -69,7 +69,7 @@ func TestSystemEvents(t *testing.T) {
 	b := NewBody()
 	bt := NewButton(b).SetText("Button")
 
-	b.AssertRender(t, "events/system-events", func() {
+	AssertRender(t, b, "events/system-events", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		bt.SystemEvents().MouseButton(events.MouseDown, events.Left, image.Pt(20, 20), 0)

@@ -437,7 +437,7 @@ func (c *Controls) hideAfter(delay time.Duration, shownAt time.Time) {
 			return
 		}
 		defer c.AsyncUnlock()
-		if c.This != nil && c.shownAt == shownAt && c.player.IsPlaying() && !c.position.StateIs(states.Sliding) {
+		if c.This != nil && c.shownAt.Equal(shownAt) && c.player.IsPlaying() && !c.position.StateIs(states.Sliding) {
 			c.SetShown(false)
 		}
 	})

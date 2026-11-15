@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package colormap provides color maps, which map values to colors, as for
+// plots, with standard maps and lookup tables.
 package colormap
 
 import (

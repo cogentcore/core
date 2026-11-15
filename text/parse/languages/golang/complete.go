@@ -446,7 +446,6 @@ func (gl *GoLang) CompleteASTStart(ast *parser.AST, scope token.Tokens) (start, 
 		prv = cur
 		cur = nxt
 	}
-	return cur, last
 }
 
 // CompleteEdit returns the completion edit data for integrating the selected completion
@@ -472,6 +471,8 @@ func (gl *GoLang) CompleteEdit(fss *parse.FileStates, text string, cp int, comp 
 			}
 		}
 	} else {
+		// a paren right after the cursor is the call of the name
+		gotParen = strings.HasPrefix(s2, "(")
 		s2 = ""
 	}
 

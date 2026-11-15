@@ -59,8 +59,9 @@ func (sh *Shaper) truncator(defSty *rich.Style, tsty *text.Style) shaping.Output
 	return o
 }
 
-// This should already have the mutex lock, and is used by shapedjs but is
-// not an end-user call. Returns new lines and number of truncations.
+// WrapLinesOutput wraps the given outputs into lines. The mutex should
+// already be locked; it is used by shapedjs but is not an end-user call.
+// Returns new lines and number of truncations.
 func (sh *Shaper) WrapLinesOutput(outs []shaping.Output, txt []rune, tx rich.Text, defSty *rich.Style, tsty *text.Style, size math32.Vector2) ([]shaping.Line, int) {
 	cfg, maxSize := wrapConfig(defSty, tsty, size)
 	if truncates(tsty) {
@@ -112,10 +113,8 @@ func singleLine(outs []shaping.Output, txt []rune, cfg shaping.WrapConfig, maxSi
 	}
 
 	// Any line break character (line break classes BK, CR, LF and NL) needs the wrapper.
-	for _, r := range txt {
-		if isLineBreak(r) {
-			return nil, false
-		}
+	if slices.ContainsFunc(txt, isLineBreak) {
+		return nil, false
 	}
 
 	// The wrapper sets the visual order of the runs (logical here)
@@ -152,7 +151,7 @@ func isLineBreak(r rune) bool {
 // than the last rune, where CR followed by LF breaks after the LF.
 func hasMandatoryBreak(txt []rune) bool {
 	for i := 0; i < len(txt)-1; i++ {
-		if r := txt[i]; isLineBreak(r) && !(r == '\r' && txt[i+1] == '\n') {
+		if r := txt[i]; isLineBreak(r) && (r != '\r' || txt[i+1] != '\n') {
 			return true
 		}
 	}
@@ -238,7 +237,8 @@ func wrapConfig(defSty *rich.Style, tsty *text.Style, size math32.Vector2) (shap
 	return cfg, maxSize
 }
 
-// This should already have the mutex lock, and is used by shapedjs but is
+// LinesBounds returns the shaped lines of the given lines, with their
+// bounds. The mutex should already be locked; it is used by shapedjs but is
 // not an end-user call.
 func (sh *Shaper) LinesBounds(lines []shaping.Line, truncated int, tx rich.Text, defSty *rich.Style, tsty *text.Style, size math32.Vector2) *shaped.Lines {
 

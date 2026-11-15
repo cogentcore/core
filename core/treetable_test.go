@@ -67,14 +67,14 @@ func TestTreeTable(t *testing.T) {
 	assert.Equal(t, []string{"Work", "  Email", "  Report", "    Outline", "Home", "  Dishes"}, rowNames(tt))
 	assert.Equal(t, 3, tt.numVisibleFields, "no column for the children")
 	tt.Close(2)
-	b.AssertRender(t, "tree-table/basic")
+	AssertRender(t, b, "tree-table/basic")
 }
 
 func TestTreeTableReadOnly(t *testing.T) {
 	b := NewBody()
 	tasks := testTasks()
 	NewTreeTable(b).SetItems(&tasks).SetReadOnly(true)
-	b.AssertRender(t, "tree-table/read-only")
+	AssertRender(t, b, "tree-table/read-only")
 }
 
 func TestTreeTableOpenClose(t *testing.T) {
@@ -180,7 +180,7 @@ func TestTreeTableStructOf(t *testing.T) {
 	tt.Open(0)
 	assert.Equal(t, []int{0, 1, 2, 0}, []int{tt.rows[0].depth, tt.rows[1].depth, tt.rows[2].depth, tt.rows[3].depth})
 	assert.Equal(t, typ, tt.rows[2].item.Elem().Type(), "the grandchild is an item, not a map")
-	b.AssertRender(t, "tree-table/struct-of")
+	AssertRender(t, b, "tree-table/struct-of")
 }
 
 // waitDragOver waits for the drag in the window of the body to be over
@@ -211,7 +211,7 @@ func TestTreeTableDragDrop(t *testing.T) {
 	tasks := testTasks()
 	tt := NewTreeTable(b).SetItems(&tasks)
 	imagex.UpdateTestImagesFor(t) // the image is not compared
-	b.AssertRender(t, "tree-table/drag-drop", func() {
+	AssertRender(t, b, "tree-table/drag-drop", func() {
 		src := b.Scene.RenderWindow().SystemWindow.Events()
 		b.AsyncLock()
 		cell := func(row int) *WidgetBase {
@@ -272,7 +272,7 @@ func TestTreeTableBranchKeys(t *testing.T) {
 	tt := NewTreeTable(b).SetItems(&tasks)
 	tt.SetReadOnly(true)
 	imagex.UpdateTestImagesFor(t) // the image is not compared
-	b.AssertRender(t, "tree-table/branch-keys", func() {
+	AssertRender(t, b, "tree-table/branch-keys", func() {
 		src := b.Scene.RenderWindow().SystemWindow.Events()
 		center := func(w *WidgetBase) image.Point {
 			bb := w.Geom.TotalBBox
@@ -333,7 +333,7 @@ func TestTreeTableClickSelect(t *testing.T) {
 	tasks := testTasks()
 	tt := NewTreeTable(b).SetItems(&tasks)
 	imagex.UpdateTestImagesFor(t) // the image is not compared
-	b.AssertRender(t, "tree-table/click-select", func() {
+	AssertRender(t, b, "tree-table/click-select", func() {
 		src := b.Scene.RenderWindow().SystemWindow.Events()
 		insertAfter := func() { // with the chord of the active key map
 			for ch, kf := range *keymap.ActiveMap {
@@ -387,7 +387,7 @@ func TestTreeTableContextMenu(t *testing.T) {
 	tasks := testTasks()
 	tt := NewTreeTable(b).SetItems(&tasks)
 	imagex.UpdateTestImagesFor(t) // the image is not compared
-	b.AssertRender(t, "tree-table/context-menu", func() {
+	AssertRender(t, b, "tree-table/context-menu", func() {
 		src := b.Scene.RenderWindow().SystemWindow.Events()
 		b.AsyncLock()
 		nw, _ := tt.RowWidgetNs()
@@ -432,7 +432,7 @@ func TestTreeTableAcceptDelete(t *testing.T) {
 	tasks := testTasks()
 	tt := NewTreeTable(b).SetItems(&tasks)
 	imagex.UpdateTestImagesFor(t) // the image is not compared
-	b.AssertRender(t, "tree-table/accept-delete", func() {
+	AssertRender(t, b, "tree-table/accept-delete", func() {
 		src := b.Scene.RenderWindow().SystemWindow.Events()
 		press := func(kf keymap.Functions) { // with the chord of the active key map
 			for ch, f := range *keymap.ActiveMap {
@@ -484,7 +484,7 @@ func TestTreeTableDragMoves(t *testing.T) {
 	tt := NewTreeTable(b).SetItems(&tasks)
 	tt.DragMoves = true
 	imagex.UpdateTestImagesFor(t) // the image is not compared
-	b.AssertRender(t, "tree-table/drag-moves", func() {
+	AssertRender(t, b, "tree-table/drag-moves", func() {
 		src := b.Scene.RenderWindow().SystemWindow.Events()
 		nw, _ := tt.RowWidgetNs()
 		drag := func(from, to int, mods key.Modifiers) (dragCopy bool) {
@@ -547,7 +547,7 @@ func TestTreeTableColumnWidths(t *testing.T) {
 	tasks := testTasks()
 	tt := NewTreeTable(b).SetItems(&tasks)
 	tt.ColumnWidths = map[string]float32{"Name": 90, "Hours": 130}
-	b.AssertRender(t, "tree-table/column-widths", func() {
+	AssertRender(t, b, "tree-table/column-widths", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		dots := tt.Styles.UnitContext.Dots(units.UnitDp)
@@ -563,7 +563,7 @@ func TestTreeTableColumnFill(t *testing.T) {
 	tasks := testTasks()
 	tt := NewTreeTable(b).SetItems(&tasks)
 	tt.ColumnWidths = map[string]float32{"Name": 600}
-	b.AssertRender(t, "tree-table/column-fill", func() {
+	AssertRender(t, b, "tree-table/column-fill", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		nw, _ := tt.RowWidgetNs()
@@ -592,7 +592,7 @@ func TestTreeTableFewerFields(t *testing.T) {
 	tt.Updater(func() {
 		tt.SetItems(items)
 	})
-	b.AssertRender(t, "tree-table/fewer-fields", func() {
+	AssertRender(t, b, "tree-table/fewer-fields", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		items = &shorts
@@ -611,7 +611,7 @@ func TestTreeTableInsertChild(t *testing.T) {
 	tasks := testTasks()
 	tt := NewTreeTable(b).SetItems(&tasks)
 	imagex.UpdateTestImagesFor(t) // the image is not compared
-	b.AssertRender(t, "tree-table/insert-child", func() {
+	AssertRender(t, b, "tree-table/insert-child", func() {
 		src := b.Scene.RenderWindow().SystemWindow.Events()
 		nw, _ := tt.RowWidgetNs()
 		b.AsyncLock()
@@ -657,7 +657,7 @@ func TestTreeTableSameType(t *testing.T) {
 	tt.Updater(func() {
 		tt.SetItems(items)
 	})
-	b.AssertRender(t, "tree-table/same-type", func() {
+	AssertRender(t, b, "tree-table/same-type", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		nw, _ := tt.RowWidgetNs()
@@ -686,7 +686,7 @@ func TestTreeTableEmpty(t *testing.T) {
 	var tasks []*task
 	tt := NewTreeTable(b).SetItems(&tasks)
 	imagex.UpdateTestImagesFor(t) // the image is not compared
-	b.AssertRender(t, "tree-table/empty", func() {
+	AssertRender(t, b, "tree-table/empty", func() {
 		b.AsyncLock()
 		assert.True(t, tt.CanFocus())
 		tt.SetFocus()
@@ -718,7 +718,7 @@ func TestTreeTableSortBool(t *testing.T) {
 	tasks = append(tasks, &task{Name: "Errands", Done: true})
 	tt := NewTreeTable(b).SetItems(&tasks)
 	imagex.UpdateTestImagesFor(t) // the image is not compared
-	b.AssertRender(t, "tree-table/sort-bool", func() {
+	AssertRender(t, b, "tree-table/sort-bool", func() {
 		b.AsyncLock()
 		bb := AsWidget(tt.header.Child(2)).Geom.TotalBBox // the header of Done
 		b.AsyncUnlock()
@@ -739,7 +739,7 @@ func TestTreeTableHideGroupValues(t *testing.T) {
 	tasks := testTasks()
 	tt := NewTreeTable(b).SetItems(&tasks)
 	tt.HideGroupValues = true
-	b.AssertRender(t, "tree-table/hide-group-values", func() {
+	AssertRender(t, b, "tree-table/hide-group-values", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		nw, _ := tt.RowWidgetNs()
@@ -769,7 +769,7 @@ func TestDragCopySprite(t *testing.T) {
 	tt := NewTreeTable(b).SetItems(&tasks)
 	tt.DragMoves = true
 	imagex.UpdateTestImagesFor(t) // the image is not compared
-	b.AssertRender(t, "tree-table/drag-copy-sprite", func() {
+	AssertRender(t, b, "tree-table/drag-copy-sprite", func() {
 		src := b.Scene.RenderWindow().SystemWindow.Events()
 		nw, _ := tt.RowWidgetNs()
 		b.AsyncLock()
@@ -828,7 +828,7 @@ func TestTreeTableColumnLongText(t *testing.T) {
 	b := NewBody()
 	tt := NewTreeTable(b).SetItems(&tasks)
 	tt.ColumnWidths = map[string]float32{"Name": 200}
-	b.AssertRender(t, "tree-table/column-long-text", func() {
+	AssertRender(t, b, "tree-table/column-long-text", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		nw, _ := tt.RowWidgetNs()
@@ -847,7 +847,7 @@ func TestTreeTableInsertSorted(t *testing.T) {
 	tasks := testTasks()
 	tt := NewTreeTable(b).SetItems(&tasks)
 	tt.SetSortFieldName("Done:down") // Email, done, before Report
-	b.AssertRender(t, "tree-table/insert-sorted", func() {
+	AssertRender(t, b, "tree-table/insert-sorted", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		tt.Update()
@@ -887,7 +887,7 @@ func TestRowButton(t *testing.T) {
 	tt.SetRowButton(icons.Edit, "Edit the task", func(item any) {
 		clicked = item.(*task)
 	})
-	b.AssertRender(t, "tree-table/row-button", func() {
+	AssertRender(t, b, "tree-table/row-button", func() {
 		b.AsyncLock()
 		nw, idxOff := tt.RowWidgetNs()
 		assert.Equal(t, tt.numVisibleFields+1, nw-idxOff, "the button after the values")
@@ -922,7 +922,7 @@ func TestTableShowField(t *testing.T) {
 		return field.Name != "Hours"
 	}
 	tt.SetItems(&tasks)
-	b.AssertRender(t, "tree-table/show-field", func() {
+	AssertRender(t, b, "tree-table/show-field", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		names := []string{}
@@ -961,7 +961,7 @@ func testTreeTableFitWidth(t *testing.T, hide bool) {
 	tt.ShowField = func(field reflect.StructField) bool { return field.Name != "Hours" }
 	tt.SetRowButton(icons.Edit, "Edit", func(item any) {})
 	tt.SetItems(&tasks)
-	b.AssertRender(t, fmt.Sprintf("tree-table/fit-width-hide-%v", hide), func() {
+	AssertRender(t, b, fmt.Sprintf("tree-table/fit-width-hide-%v", hide), func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		nw, _ := tt.RowWidgetNs()
@@ -991,7 +991,7 @@ func TestTreeTableScrollHidden(t *testing.T) {
 	}
 	tt := NewTreeTable(b).SetItems(&tasks)
 	tt.HideGroupValues = true
-	b.AssertRender(t, "tree-table/scroll-hidden", func() {
+	AssertRender(t, b, "tree-table/scroll-hidden", func() {
 		b.AsyncLock()
 		bb := tt.ListGrid.Geom.TotalBBox
 		b.AsyncUnlock()
@@ -1031,7 +1031,7 @@ func TestTreeTableSortOnChange(t *testing.T) {
 	tt := NewTreeTable(b).SetItems(&tasks)
 	tt.SetSortFieldName("Done")
 	var cell *WidgetBase
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		assert.Equal(t, []string{"Work", "Home", "Errands"}, rowNames(tt))
@@ -1074,7 +1074,7 @@ func TestTreeTableNewFocus(t *testing.T) {
 	bt := NewButton(b).SetText("Add item")
 	tt := NewTreeTable(b).SetItems(&tasks)
 	bt.OnClick(func(e events.Event) { tt.NewAt(-1) })
-	b.RenderImage(func() {}, func() {
+	RenderImage(b, func() {}, func() {
 		b.AsyncLock()
 		bb := bt.Geom.TotalBBox
 		b.AsyncUnlock()
@@ -1115,7 +1115,7 @@ func TestTreeTableFocusShrink(t *testing.T) {
 		}
 	}
 	last := 0
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		last = tt.StartIndex + tt.VisibleRows - 2
@@ -1170,7 +1170,7 @@ func TestTreeTableMultiSelect(t *testing.T) {
 		defer b.AsyncUnlock()
 		return tt.SelectedIndexesList(false)
 	}
-	b.RenderImage(func() {}, func() {
+	RenderImage(b, func() {}, func() {
 		src := b.Scene.RenderWindow().SystemWindow.Events()
 		click := func(row, col int, mods key.Modifiers) {
 			b.AsyncLock()
@@ -1211,7 +1211,7 @@ func TestTreeTableMoveSelected(t *testing.T) {
 	b := NewBody()
 	tasks := []*task{{Name: "A"}, {Name: "B"}, {Name: "C"}, {Name: "D"}}
 	tt := NewTreeTable(b).SetItems(&tasks)
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		sel := func(rows ...int) {

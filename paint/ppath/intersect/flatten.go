@@ -58,7 +58,7 @@ func FlattenEllipticArc(start math32.Vector2, rx, ry, phi float32, large, sweep 
 		theta := thetaEnd + thetaMid
 		for i := 0; i < int(n); i++ {
 			t := theta0 + math32.Copysign(theta, theta1-theta0)
-			pos := math32.Vector2Polar(t, r).Add(math32.Vector2{cx, cy})
+			pos := math32.Vector2Polar(t, r).Add(math32.Vec2(cx, cy))
 			p.LineTo(pos.X, pos.Y)
 			theta += 2.0 * thetaMid
 		}
@@ -96,6 +96,8 @@ func FlattenQuadraticBezier(p0, p1, p2 math32.Vector2, tolerance float32) ppath.
 	return p
 }
 
+// FlattenCubicBezier returns the cubic Bézier curve flattened into lines,
+// offset by d (for strokes), within the given tolerance.
 // see Flat, precise flattening of cubic Bézier path and offset curves, by T.F. Hain et al., 2005,  https://www.sciencedirect.com/science/article/pii/S0097849305001287
 // see https://github.com/Manishearth/stylo-flat/blob/master/gfx/2d/Path.cpp for an example implementation
 // or https://docs.rs/crate/lyon_bezier/0.4.1/source/src/flatten_cubic.rs
@@ -175,7 +177,7 @@ func FlattenCubicBezier(p0, p1, p2, p3 math32.Vector2, d, tolerance float32) ppa
 	return p
 }
 
-// split the curve and replace it by lines as long as (maximum deviation <= tolerance) is maintained
+// FlattenSmoothCubicBezier splits the curve and replaces it by lines as long as (maximum deviation <= tolerance) is maintained.
 func FlattenSmoothCubicBezier(p *ppath.Path, p0, p1, p2, p3 math32.Vector2, d, tolerance float32) {
 	t := float32(0.0)
 	for t < 1.0 {

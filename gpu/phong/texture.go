@@ -38,13 +38,13 @@ func (ph *Phong) SetTexture(name string, tx *Texture) {
 
 	tgp := ph.System.Vars().Groups[int(TextureGroup)]
 	tvr := errors.Log1(tgp.VarByName("TexSampler"))
-	idx, ok := ph.textures.Map[name]
+	idx, ok := ph.textures.IndexByKeyTry(name)
 	if !ok {
 		idx = ph.textures.Len()
-		ph.textures.Add(name, tx)
+		ph.textures.Set(name, tx)
 		tgp.SetNValues(ph.textures.Len())
 	} else {
-		ph.textures.Order[idx].Value = tx
+		ph.textures.Values[idx] = tx
 	}
 	tvv := tvr.Values.Values[idx]
 	tvv.SetFromGoImage(tx.Image, 1)

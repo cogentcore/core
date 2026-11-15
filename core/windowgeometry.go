@@ -197,9 +197,7 @@ func (ws *windowGeometrySaver) record(win *renderWindow) {
 	wgsc, hasCache := sgsc[winName]
 	if hasCache {
 		wgs.Last = wgsc.Last
-		for k, v := range wgsc.Screens {
-			wgs.Screens[k] = v
-		}
+		maps.Copy(wgs.Screens, wgsc.Screens)
 	}
 	wgs.Screens[sc.Name] = wgr
 	wgs.Last = sc.Name
@@ -346,8 +344,10 @@ type windowGeometries struct {
 func (wgs *windowGeometries) getForScreen(screenName string) (*windowGeometry, *system.Screen) {
 	sc := TheApp.ScreenByName(wgs.Last)
 	if sc != nil {
-		wgr := wgs.Screens[wgs.Last]
-		return &wgr, sc
+		// (only a saved geometry: a zero one would make the window empty)
+		if wgr, ok := wgs.Screens[wgs.Last]; ok {
+			return &wgr, sc
+		}
 	}
 	sc = TheApp.ScreenByName(screenName)
 	if sc != nil {

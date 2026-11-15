@@ -39,21 +39,21 @@ func (a *ArrayF32) Append(v ...float32) {
 
 // AppendVector2 appends any number of Vector2 to the array
 func (a *ArrayF32) AppendVector2(v ...Vector2) {
-	for i := 0; i < len(v); i++ {
+	for i := range v {
 		*a = append(*a, v[i].X, v[i].Y)
 	}
 }
 
 // AppendVector3 appends any number of Vector3 to the array
 func (a *ArrayF32) AppendVector3(v ...Vector3) {
-	for i := 0; i < len(v); i++ {
+	for i := range v {
 		*a = append(*a, v[i].X, v[i].Y, v[i].Z)
 	}
 }
 
 // AppendVector4 appends any number of Vector4 to the array
 func (a *ArrayF32) AppendVector4(v ...Vector4) {
-	for i := 0; i < len(v); i++ {
+	for i := range v {
 		*a = append(*a, v[i].X, v[i].Y, v[i].Z, v[i].W)
 	}
 }

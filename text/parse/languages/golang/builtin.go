@@ -69,36 +69,36 @@ func (gl *GoLang) CompleteBuiltins(fs *parse.FileState, seed string, md *complet
 // BuiltinTypeKind are the type names and kinds for builtin Go primitive types
 // (i.e., those with names)
 var BuiltinTypeKind = []syms.TypeKindSize{
-	{"int", syms.Int, int(unsafe.Sizeof(int(0)))},
-	{"int8", syms.Int8, 1},
-	{"int16", syms.Int16, 2},
-	{"int32", syms.Int32, 4},
-	{"int64", syms.Int64, 8},
+	{Name: "int", Kind: syms.Int, Size: int(unsafe.Sizeof(int(0)))},
+	{Name: "int8", Kind: syms.Int8, Size: 1},
+	{Name: "int16", Kind: syms.Int16, Size: 2},
+	{Name: "int32", Kind: syms.Int32, Size: 4},
+	{Name: "int64", Kind: syms.Int64, Size: 8},
 
-	{"uint", syms.Uint, int(unsafe.Sizeof(uint(0)))},
-	{"uint8", syms.Uint8, 1},
-	{"uint16", syms.Uint16, 2},
-	{"uint32", syms.Uint32, 4},
-	{"uint64", syms.Uint64, 8},
-	{"uintptr", syms.Uintptr, 8},
+	{Name: "uint", Kind: syms.Uint, Size: int(unsafe.Sizeof(uint(0)))},
+	{Name: "uint8", Kind: syms.Uint8, Size: 1},
+	{Name: "uint16", Kind: syms.Uint16, Size: 2},
+	{Name: "uint32", Kind: syms.Uint32, Size: 4},
+	{Name: "uint64", Kind: syms.Uint64, Size: 8},
+	{Name: "uintptr", Kind: syms.Uintptr, Size: 8},
 
-	{"byte", syms.Uint8, 1},
-	{"rune", syms.Int32, 4},
+	{Name: "byte", Kind: syms.Uint8, Size: 1},
+	{Name: "rune", Kind: syms.Int32, Size: 4},
 
-	{"float32", syms.Float32, 4},
-	{"float64", syms.Float64, 8},
+	{Name: "float32", Kind: syms.Float32, Size: 4},
+	{Name: "float64", Kind: syms.Float64, Size: 8},
 
-	{"complex64", syms.Complex64, 8},
-	{"complex128", syms.Complex128, 16},
+	{Name: "complex64", Kind: syms.Complex64, Size: 8},
+	{Name: "complex128", Kind: syms.Complex128, Size: 16},
 
-	{"bool", syms.Bool, 1},
+	{Name: "bool", Kind: syms.Bool, Size: 1},
 
-	{"string", syms.String, 0},
+	{Name: "string", Kind: syms.String, Size: 0},
 
-	{"error", syms.Interface, 0},
+	{Name: "error", Kind: syms.Interface, Size: 0},
 
-	{"struct{}", syms.Struct, 0},
-	{"interface{}", syms.Interface, 0},
+	{Name: "struct{}", Kind: syms.Struct, Size: 0},
+	{Name: "interface{}", Kind: syms.Interface, Size: 0},
 }
 
 // BuiltinMisc are misc builtin items

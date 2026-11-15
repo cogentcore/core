@@ -156,10 +156,9 @@ func (em *Events) dragOSEnd() {
 	em.dragOS = false
 	em.press = nil
 	em.dragPress = nil
-	em.scene.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+	for _, cwb := range em.scene.AllWidgets() {
 		cwb.dragStateReset()
-		return tree.Continue
-	})
+	}
 	em.scene.Restyle()
 }
 
@@ -167,10 +166,9 @@ func (em *Events) dragOSEnd() {
 // each, and resets the drag state of all widgets.
 func (em *Events) dragHoversClear(e events.Event) {
 	em.dragHovers = em.updateHovers(nil, em.dragHovers, e, events.DragEnter, events.DragLeave)
-	em.scene.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+	for _, cwb := range em.scene.AllWidgets() {
 		cwb.dragStateReset()
-		return tree.Continue
-	})
+	}
 	em.scene.Restyle()
 }
 

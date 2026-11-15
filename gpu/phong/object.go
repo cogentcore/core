@@ -43,16 +43,16 @@ func (ph *Phong) SetObject(name string, ob *Object) {
 	ph.Lock()
 	defer ph.Unlock()
 
-	idx, ok := ph.objects.Map[name]
+	idx, ok := ph.objects.IndexByKeyTry(name)
 	if !ok {
-		ph.objects.Add(name, ob)
+		ph.objects.Set(name, ob)
 		ph.objectUpdated = true
 		// note: allocation of DynamicN happens in updateObjects pass.
 		return
 	}
-	cob := ph.objects.Order[idx].Value
+	cob := ph.objects.Values[idx]
 	if *ob != *cob {
-		ph.objects.Order[idx].Value = ob
+		ph.objects.Values[idx] = ob
 		ph.objectUpdated = true
 	}
 }
@@ -64,15 +64,6 @@ func (ph *Phong) ResetObjects() {
 
 	ph.objects.Reset()
 	// updateObjects is auto-resetting
-}
-
-func (ph *Phong) object(name string) *Object {
-	ob, ok := ph.objects.ValueByKeyTry(name)
-	if !ok {
-		err := fmt.Errorf("phong:Object: name not found: %s", name)
-		errors.Log(err)
-	}
-	return ob
 }
 
 func (ph *Phong) setWorldMatrix(ob *Object) {
@@ -112,13 +103,12 @@ func (ph *Phong) UseObjectIndex(idx int) error {
 // updating the WorldMatrix based on current Camera settings first.
 // This is called in the RenderStart function.
 func (ph *Phong) updateObjects() {
-	if !(ph.objectUpdated || ph.cameraUpdated) {
+	if !ph.objectUpdated && !ph.cameraUpdated {
 		return
 	}
 	vl := errors.Log1(ph.System.Vars().ValueByIndex(int(ObjectGroup), "Object", 0))
 	vl.SetDynamicN(ph.objects.Len())
-	for i, kv := range ph.objects.Order {
-		ob := kv.Value
+	for i, ob := range ph.objects.Values {
 		ph.setWorldMatrix(ob)
 		gpu.SetDynamicValueFrom(vl, i, []Object{*ob})
 	}

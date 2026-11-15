@@ -123,10 +123,10 @@ type Fill struct {
 }
 
 // Defaults initializes default values for paint fill
-func (pf *Fill) Defaults() {
-	pf.Color = colors.Uniform(color.Black)
-	pf.Rule = ppath.NonZero
-	pf.Opacity = 1.0
+func (fs *Fill) Defaults() {
+	fs.Color = colors.Uniform(color.Black)
+	fs.Rule = ppath.NonZero
+	fs.Opacity = 1.0
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels

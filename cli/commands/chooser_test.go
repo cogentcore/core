@@ -146,7 +146,7 @@ func TestChooserForm(t *testing.T) {
 	require.NoError(t, cs.SetChoosers(StandardChoosers(), nil))
 	sc := testCommit()
 	d := cs.NewDialog(nil, sc, func(string) {})
-	d.AssertRender(t, "chooser-form", func() {
+	core.AssertRender(t, d, "chooser-form", func() {
 		fm := tree.ChildByType[*core.Form](d)
 		require.NotNil(t, fm)
 		var args, message *core.TextField
@@ -209,7 +209,7 @@ func TestMacroPromptValues(t *testing.T) {
 	prompt := func(mc *Macro, set func(v reflect.Value)) reflect.Value {
 		d := cs.NewPromptDialog(nil, "git", sc, mc, run)
 		var v reflect.Value
-		d.AssertRender(t, "macro-prompt-values", func() {
+		core.AssertRender(t, d, "macro-prompt-values", func() {
 			fm := tree.ChildByType[*core.Form](d)
 			require.NotNil(t, fm)
 			v = reflect.ValueOf(fm.Struct).Elem()
@@ -217,7 +217,7 @@ func TestMacroPromptValues(t *testing.T) {
 				set(v)
 				keys := mc.promptKeys()
 				require.NoError(t, cs.Args.SetMacroValues("git", mc, sc.ArgsOf(fm.Struct), keys))
-				cs.runMacroLine("git", mc, sc.ArgsCommandLine(mc.withPrompted(sc, sc.ArgsOf(fm.Struct), keys)), run)
+				cs.runMacroLine("git", mc, sc.ArgsCommandLine(mc.withPrompted(sc.ArgsOf(fm.Struct), keys)), run)
 			}
 		})
 		return v
@@ -284,7 +284,7 @@ func TestChoosersDialog(t *testing.T) {
 	assert.Equal(t, "Git tag", cs.ArgChooser(&SubCmd{Name: "stash push", Cmd: "git stash push"}, "--message"))
 
 	d := cs.NewChoosersDialog(nil)
-	d.AssertRender(t, "choosers-dialog")
+	core.AssertRender(t, d, "choosers-dialog")
 	require.NoError(t, cs.SetChoosers(cs.choosers(), cs.ChooserArgs()[1:]))
 	assert.Equal(t, "", cs.ArgChooser(&SubCmd{Name: "checkout", Cmd: "git checkout"}, argsField), "deleted")
 }

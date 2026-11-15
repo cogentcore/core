@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package pimage provides the render items for drawing images (drawing,
+// transforming, and blurring them), and image utilities.
 package pimage
 
 //go:generate core generate
@@ -81,8 +83,8 @@ type Params struct {
 
 func (pr *Params) IsRenderItem() {}
 
-func (p *Params) String() string {
-	return "image: " + p.Cmd.String()
+func (pr *Params) String() string {
+	return "image: " + pr.Cmd.String()
 }
 
 // NewClear returns a new Clear that renders entire image with given source image.

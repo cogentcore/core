@@ -49,7 +49,7 @@ func TestContentPages(t *testing.T) {
 					ct.MakeToolbar(p)
 				})
 			})
-			b.AssertRender(t, filepath.Join("pages", name), func() {
+			core.AssertRender(t, b, filepath.Join("pages", name), func() {
 				ct.AsyncLock()
 				ct.Open(url)
 				ct.AsyncUnlock()

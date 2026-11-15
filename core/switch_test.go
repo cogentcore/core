@@ -14,37 +14,37 @@ import (
 func TestSwitch(t *testing.T) {
 	b := NewBody()
 	NewSwitch(b)
-	b.AssertRender(t, "switch/basic")
+	AssertRender(t, b, "switch/basic")
 }
 
 func TestSwitchText(t *testing.T) {
 	b := NewBody()
 	NewSwitch(b).SetText("Remember me")
-	b.AssertRender(t, "switch/text")
+	AssertRender(t, b, "switch/text")
 }
 
 func TestSwitchChip(t *testing.T) {
 	b := NewBody()
 	NewSwitch(b).SetType(SwitchChip).SetText("Remember me")
-	b.AssertRender(t, "switch/chip")
+	AssertRender(t, b, "switch/chip")
 }
 
 func TestSwitchCheckbox(t *testing.T) {
 	b := NewBody()
 	NewSwitch(b).SetType(SwitchCheckbox).SetText("Remember me")
-	b.AssertRender(t, "switch/checkbox")
+	AssertRender(t, b, "switch/checkbox")
 }
 
 func TestSwitchRadioButton(t *testing.T) {
 	b := NewBody()
 	NewSwitch(b).SetType(SwitchRadioButton).SetText("Remember me")
-	b.AssertRender(t, "switch/radio-button")
+	AssertRender(t, b, "switch/radio-button")
 }
 
 func TestSwitchChipChecked(t *testing.T) {
 	b := NewBody()
 	NewSwitch(b).SetType(SwitchChip).SetText("Remember me").SetChecked(true)
-	b.AssertRender(t, "switch/chip-checked")
+	AssertRender(t, b, "switch/chip-checked")
 }
 
 func TestSwitchChange(t *testing.T) {
@@ -54,7 +54,7 @@ func TestSwitchChange(t *testing.T) {
 	sw.OnChange(func(e events.Event) {
 		checked = sw.IsChecked()
 	})
-	b.AssertRender(t, "switch/change", func() {
+	AssertRender(t, b, "switch/change", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		sw.Send(events.Click)

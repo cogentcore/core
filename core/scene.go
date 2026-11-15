@@ -135,6 +135,10 @@ type Scene struct { //core:no-new
 	// render context.
 	hasShown atomic.Bool
 
+	// shown is closed when the scene has been shown (with hasShown), for
+	// [WidgetBase.AsyncLock] to wait on.
+	shown chan struct{}
+
 	// asyncLocked is the render context locked by [WidgetBase.AsyncLock]
 	// (or [WidgetBase.AsyncLockIfShown]), which [WidgetBase.AsyncUnlock]
 	// unlocks. The render context of the scene can be nil in between, as
@@ -220,6 +224,7 @@ func NewScene(name ...string) *Scene {
 
 func (sc *Scene) Init() {
 	sc.Scene = sc
+	sc.shown = make(chan struct{})
 	sc.Frame.Init()
 	sc.AddContextMenu(sc.standardContextMenu)
 	sc.Styler(func(s *styles.Style) {
@@ -265,7 +270,7 @@ func (sc *Scene) Init() {
 			return
 		}
 		// the stage that will be visible next
-		st := sm.stack.ValueByIndex(sm.stack.Len() - 2)
+		st := sm.stack.Values[sm.stack.Len()-2]
 		getCurrentRenderWindow().SetStageTitle(st.Title)
 	})
 	sc.Updater(func() {
@@ -350,7 +355,7 @@ func (sc *Scene) Resize(geom math32.Geom2DInt) bool {
 	sz := math32.FromPoint(geom.Size)
 	if sc.Painter.State == nil {
 		sc.Painter = *paint.NewPainter(sz)
-		sc.Painter.Paint.UnitContext = sc.Styles.UnitContext
+		sc.Painter.UnitContext = sc.Styles.UnitContext
 	}
 	sc.SceneGeom.Pos = geom.Pos
 	if sc.Renderer != nil {
@@ -368,8 +373,8 @@ func (sc *Scene) Resize(geom math32.Geom2DInt) bool {
 	} else {
 		sc.Renderer = paint.NewSourceRenderer(sz)
 	}
-	sc.Painter.Paint.UnitContext = sc.Styles.UnitContext
-	sc.Painter.State.Init(sc.Painter.Paint, sz)
+	sc.Painter.UnitContext = sc.Styles.UnitContext
+	sc.Painter.Init(sc.Painter.Paint, sz)
 	sc.Renderer.SetSize(units.UnitDot, sz)
 	sc.SceneGeom.Size = geom.Size // make sure
 	sc.layer.resize(sc)
@@ -501,10 +506,9 @@ func (sc *Scene) Close() bool {
 	}
 	e := &events.Base{Typ: events.Close}
 	e.Init()
-	sc.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+	for cw := range sc.AllWidgets() {
 		cw.AsWidget().HandleEvent(e)
-		return tree.Continue
-	})
+	}
 	// if they set the event as handled, we do not close the scene
 	if e.IsHandled() {
 		return false

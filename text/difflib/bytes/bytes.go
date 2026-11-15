@@ -511,7 +511,7 @@ func (m *SequenceMatcher) GetGroupedOpCodes(n int) [][]OpCode {
 		}
 		group = append(group, OpCode{c.Tag, i1, i2, j1, j2})
 	}
-	if len(group) > 0 && !(len(group) == 1 && group[0].Tag == 'e') {
+	if len(group) > 0 && (len(group) != 1 || group[0].Tag != 'e') {
 		groups = append(groups, group)
 	}
 	return groups
@@ -582,7 +582,7 @@ func (m *SequenceMatcher) RealQuickRatio() float64 {
 	return calculateRatio(min(la, lb), la+lb)
 }
 
-func count_leading(line []byte, ch byte) (count int) {
+func countLeading(line []byte, ch byte) (count int) {
 	// Return number of `ch` characters at the start of `line`.
 	count = 0
 	n := len(line)
@@ -635,15 +635,16 @@ func (d *Differ) Compare(a [][]byte, b [][]byte) (diffs [][]byte, err error) {
 		blo := current.J1
 		bhi := current.J2
 		var g [][]byte
-		if current.Tag == 'r' {
+		switch current.Tag {
+		case 'r':
 			g, _ = d.FancyReplace(a, alo, ahi, b, blo, bhi)
-		} else if current.Tag == 'd' {
+		case 'd':
 			g = d.Dump(MINUS, a, alo, ahi)
-		} else if current.Tag == 'i' {
+		case 'i':
 			g = d.Dump(PLUS, b, blo, bhi)
-		} else if current.Tag == 'e' {
+		case 'e':
 			g = d.Dump(SPACE, a, alo, ahi)
-		} else {
+		default:
 			return nil, fmt.Errorf("unknown tag %q", current.Tag)
 		}
 		diffs = append(diffs, g...)
@@ -654,7 +655,7 @@ func (d *Differ) Compare(a [][]byte, b [][]byte) (diffs [][]byte, err error) {
 func (d *Differ) StructuredDump(tag byte, x [][]byte, low int, high int) (out []DiffLine) {
 	size := high - low
 	out = make([]DiffLine, size)
-	for i := 0; i < size; i++ {
+	for i := range size {
 		out[i] = NewDiffLine(tag, x[i+low])
 	}
 	return out
@@ -677,7 +678,7 @@ func (d *Differ) Dump(tag []byte, x [][]byte, low int, high int) (out [][]byte) 
 }
 
 func (d *Differ) PlainReplace(a [][]byte, alo int, ahi int, b [][]byte, blo int, bhi int) (out [][]byte, err error) {
-	if !(alo < ahi) || !(blo < bhi) { // assertion
+	if (alo >= ahi) || (blo >= bhi) { // assertion
 		return nil, errors.New("low greater than or equal to high")
 	}
 	// dump the shorter block first -- reduces the burden on short-term
@@ -699,8 +700,8 @@ func (d *Differ) FancyReplace(a [][]byte, alo int, ahi int, b [][]byte, blo int,
 	// similar pair. Lots of work, but often worth it.
 
 	// don't synch up unless the lines have a similarity score of at
-	// least cutoff; best_ratio tracks the best score seen so far
-	best_ratio := 0.74
+	// least cutoff; bestRatio tracks the best score seen so far
+	bestRatio := 0.74
 	cutoff := 0.75
 	cruncher := NewMatcherWithJunk(a, b, true, d.Charjunk)
 	eqi := -1 // 1st indices of equal lines (if any)
@@ -710,7 +711,7 @@ func (d *Differ) FancyReplace(a [][]byte, alo int, ahi int, b [][]byte, blo int,
 	// search for the pair that matches best without being identical
 	// (identical lines must be junk lines, & we don't want to synch up
 	// on junk -- unless we have to)
-	var best_i, best_j int
+	var bestI, bestJ int
 	for j := blo; j < bhi; j++ {
 		bj := b[j]
 		cruncher.SetSeq2(listifyString(bj))
@@ -730,16 +731,16 @@ func (d *Differ) FancyReplace(a [][]byte, alo int, ahi int, b [][]byte, blo int,
 			// note that ratio() is only expensive to compute the first
 			// time it's called on a sequence pair; the expensive part
 			// of the computation is cached by cruncher
-			if cruncher.RealQuickRatio() > best_ratio &&
-				cruncher.QuickRatio() > best_ratio &&
-				cruncher.Ratio() > best_ratio {
-				best_ratio = cruncher.Ratio()
-				best_i = i
-				best_j = j
+			if cruncher.RealQuickRatio() > bestRatio &&
+				cruncher.QuickRatio() > bestRatio &&
+				cruncher.Ratio() > bestRatio {
+				bestRatio = cruncher.Ratio()
+				bestI = i
+				bestJ = j
 			}
 		}
 	}
-	if best_ratio < cutoff {
+	if bestRatio < cutoff {
 		// no non-identical "pretty close" pair
 		if eqi == -1 {
 			// no identical pair either -- treat it as a straight replace
@@ -747,21 +748,21 @@ func (d *Differ) FancyReplace(a [][]byte, alo int, ahi int, b [][]byte, blo int,
 			return out, nil
 		}
 		// no close pair, but an identical pair -- synch up on that
-		best_i = eqi
-		best_j = eqj
-		best_ratio = 1.0
+		bestI = eqi
+		bestJ = eqj
+		bestRatio = 1.0
 	} else {
 		// there's a close pair, so forget the identical pair (if any)
 		eqi = -1
 	}
-	// a[best_i] very similar to b[best_j]; eqi is None iff they're not
+	// a[bestI] very similar to b[bestJ]; eqi is None iff they're not
 	// identical
 
 	// pump out diffs from before the synch point
-	out = append(out, d.fancyHelper(a, alo, best_i, b, blo, best_j)...)
+	out = append(out, d.fancyHelper(a, alo, bestI, b, blo, bestJ)...)
 
 	// do intraline marking on the synch pair
-	aelt, belt := a[best_i], b[best_j]
+	aelt, belt := a[bestI], b[bestJ]
 	if eqi == -1 {
 		// pump out a '-', '?', '+', '?' quad for the synched lines
 		var atags, btags []byte
@@ -773,17 +774,18 @@ func (d *Differ) FancyReplace(a [][]byte, alo int, ahi int, b [][]byte, blo int,
 			bj1 := current.J1
 			bj2 := current.J2
 			la, lb := ai2-ai1, bj2-bj1
-			if current.Tag == 'r' {
+			switch current.Tag {
+			case 'r':
 				atags = append(atags, bytes.Repeat(CARET, la)...)
 				btags = append(btags, bytes.Repeat(CARET, lb)...)
-			} else if current.Tag == 'd' {
+			case 'd':
 				atags = append(atags, bytes.Repeat(MINUS, la)...)
-			} else if current.Tag == 'i' {
+			case 'i':
 				btags = append(btags, bytes.Repeat(PLUS, lb)...)
-			} else if current.Tag == 'e' {
+			case 'e':
 				atags = append(atags, bytes.Repeat(SPACE, la)...)
 				btags = append(btags, bytes.Repeat(SPACE, lb)...)
-			} else {
+			default:
 				return nil, fmt.Errorf("unknown tag %q",
 					current.Tag)
 			}
@@ -794,7 +796,7 @@ func (d *Differ) FancyReplace(a [][]byte, alo int, ahi int, b [][]byte, blo int,
 		out = append(out, append([]byte{' ', ' '}, aelt...))
 	}
 	// pump out diffs from after the synch point
-	out = append(out, d.fancyHelper(a, best_i+1, ahi, b, best_j+1, bhi)...)
+	out = append(out, d.fancyHelper(a, bestI+1, ahi, b, bestJ+1, bhi)...)
 	return out, nil
 }
 
@@ -817,9 +819,9 @@ func (d *Differ) QFormat(aline []byte, bline []byte, atags []byte, btags []byte)
 	// Format "?" output and deal with leading tabs.
 
 	// Can hurt, but will probably help most of the time.
-	common := min(count_leading(aline, '\t'), count_leading(bline, '\t'))
-	common = min(common, count_leading(atags[:common], ' '))
-	common = min(common, count_leading(btags[:common], ' '))
+	common := min(countLeading(aline, '\t'), countLeading(bline, '\t'))
+	common = min(common, countLeading(atags[:common], ' '))
+	common = min(common, countLeading(btags[:common], ' '))
 	atags = bytes.TrimRightFunc(atags[common:], unicode.IsSpace)
 	btags = bytes.TrimRightFunc(btags[common:], unicode.IsSpace)
 
@@ -854,12 +856,12 @@ func formatRangeUnified(start, stop int) []byte {
 	beginning := start + 1 // lines start numbering with one
 	length := stop - start
 	if length == 1 {
-		return []byte(fmt.Sprintf("%d", beginning))
+		return fmt.Appendf(nil, "%d", beginning)
 	}
 	if length == 0 {
 		beginning -= 1 // empty ranges begin at line just before the range
 	}
-	return []byte(fmt.Sprintf("%d,%d", beginning, length))
+	return fmt.Appendf(nil, "%d,%d", beginning, length)
 }
 
 // UnifiedDiff contains unified diff parameters
@@ -898,7 +900,7 @@ func WriteUnifiedDiff(writer io.Writer, diff UnifiedDiff) error {
 	//defer buf.Flush()
 	var bld strings.Builder
 	bld.Reset()
-	wf := func(format string, args ...interface{}) error {
+	wf := func(format string, args ...any) error {
 		_, err := fmt.Fprintf(&bld, format, args...)
 		return err
 	}
@@ -998,9 +1000,9 @@ func formatRangeContext(start, stop int) []byte {
 		beginning -= 1 // empty ranges begin at line just before the range
 	}
 	if length <= 1 {
-		return []byte(fmt.Sprintf("%d", beginning))
+		return fmt.Appendf(nil, "%d", beginning)
 	}
-	return []byte(fmt.Sprintf("%d,%d", beginning, beginning+length-1))
+	return fmt.Appendf(nil, "%d,%d", beginning, beginning+length-1)
 }
 
 type ContextDiff UnifiedDiff
@@ -1026,8 +1028,8 @@ func WriteContextDiff(writer io.Writer, diff ContextDiff) error {
 	buf := bufio.NewWriter(writer)
 	defer buf.Flush()
 	var diffErr error
-	wf := func(format string, args ...interface{}) {
-		_, err := buf.WriteString(fmt.Sprintf(format, args...))
+	wf := func(format string, args ...any) {
+		_, err := fmt.Fprintf(buf, format, args...)
 		if diffErr == nil && err != nil {
 			diffErr = err
 		}

@@ -6,7 +6,8 @@ package csl
 
 import "strings"
 
-// The CSL input model supports two different date representations:
+// Date is a date of the CSL input model, which supports two different
+// date representations:
 // an EDTF string (preferred), and a more structured alternative.
 type Date struct {
 	DateParts [][]any `json:"date-parts,omitempty"`
@@ -32,8 +33,8 @@ func (dt *Date) Year() string {
 	if str == "" {
 		return "undated"
 	}
-	fs := strings.Fields(str)
-	for _, s := range fs {
+	fs := strings.FieldsSeq(str)
+	for s := range fs {
 		if len(s) == 4 {
 			return s
 		}

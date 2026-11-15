@@ -166,7 +166,7 @@ func (sl *Splits) Init() {
 			sl.evenSplits(sl.TileSplits)
 			sl.NeedsLayout()
 
-		} else if kn <= len(sl.Children) {
+		} else if kn <= len(sl.TileSplits) { // the number keys are for tiles
 			e.SetHandled()
 			if sl.TileSplits[kn-1] <= 0.01 {
 				sl.restoreChild(kn - 1)
@@ -537,6 +537,8 @@ func (sl *Splits) setSplitIndex(idx int, val float32) {
 	}
 	if idx < nt {
 		sl.TileSplits[idx] = val
+		sl.updateSplits()
+		sl.NeedsLayout()
 		return
 	}
 	ci := nt
@@ -545,6 +547,10 @@ func (sl *Splits) setSplitIndex(idx int, val float32) {
 		ri := idx - ci
 		if ri < 0 {
 			break
+		}
+		if ri >= tn {
+			ci += tn
+			continue
 		}
 		switch t {
 		case TileSpan:
@@ -660,10 +666,9 @@ func (sl *Splits) setHandlePos(idx int, val float32) {
 	sl.NeedsLayout()
 }
 
-// restoreChild restores given child(ren)
-// todo: not clear if this makes sense anymore
+// restoreChild restores the tiles of the given indexes to an even share.
 func (sl *Splits) restoreChild(idxs ...int) {
-	n := len(sl.Children)
+	n := len(sl.TileSplits)
 	for _, idx := range idxs {
 		if idx >= 0 && idx < n {
 			sl.TileSplits[idx] = 1.0 / float32(n)

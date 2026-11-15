@@ -9,6 +9,8 @@ import (
 	"testing"
 	"unsafe"
 
+	"cogentcore.org/core/base/goscript"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -246,20 +248,14 @@ func InitPointerTest() {
 
 func fieldValue(obj any, fld reflect.StructField) reflect.Value {
 	ov := reflect.ValueOf(obj)
-	f := unsafe.Pointer(ov.Pointer() + fld.Offset)
+	f := unsafe.Add(ov.UnsafePointer(), fld.Offset)
 	nw := reflect.NewAt(fld.Type, f)
-	return nw
-}
-
-func subFieldValue(obj any, fld reflect.StructField, sub reflect.StructField) reflect.Value {
-	ov := reflect.ValueOf(obj)
-	f := unsafe.Pointer(ov.Pointer() + fld.Offset + sub.Offset)
-	nw := reflect.NewAt(sub.Type, f)
 	return nw
 }
 
 // test ability to create an addressable pointer value to fields of a struct
 func TestNewAt(t *testing.T) {
+	goscript.Skip(t, "pointer arithmetic with unsafe.Add")
 	InitPointerTest()
 	typ := reflect.TypeOf(pt)
 	fld, _ := typ.FieldByName("Mbr2")

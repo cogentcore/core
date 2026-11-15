@@ -275,6 +275,9 @@ func (sc *Scene) ReadObj(fname string, rs []io.Reader, gp *Group) error {
 		return fmt.Errorf("xyz.ReadObj: file extension: %v not found in Decoders list", ext)
 	}
 	dfs, fnm, err := fsx.DirFS(fname)
+	if err != nil {
+		return err
+	}
 	dec := dt.New()
 	dec.SetFileFS(dfs, fnm)
 	err = dec.Decode(rs)
@@ -303,6 +306,9 @@ func (sc *Scene) ReadScene(fname string, rs []io.Reader, gp *Group) error {
 		return fmt.Errorf("xyz.ReadScene: file extension: %v not found in Decoders list", ext)
 	}
 	dfs, fnm, err := fsx.DirFS(fname)
+	if err != nil {
+		return err
+	}
 	dec := dt.New()
 	dec.SetFileFS(dfs, fnm)
 	err = dec.Decode(rs)

@@ -40,7 +40,7 @@ func (pc *Path) fromProperties(parent *Path, properties map[string]any, cc color
 				} else if init {
 					pc.Display = true
 				}
-				return
+				continue
 			}
 			sval := reflectx.ToString(val)
 			switch sval {
@@ -255,40 +255,40 @@ func (pc *Paint) toProperties(p map[string]any) {
 
 // toProperties sets map[string]any properties based on non-default style values.
 // properties map must be non-nil.
-func (pc *Stroke) toProperties(p map[string]any) {
-	if pc.Color == nil {
+func (ss *Stroke) toProperties(p map[string]any) {
+	if ss.Color == nil {
 		p["stroke"] = "none"
 		return
 	}
 	// todo: gradients!
-	p["stroke"] = colors.AsHex(colors.ToUniform(pc.Color))
-	if pc.Opacity != 1 {
-		p["stroke-opacity"] = reflectx.ToString(pc.Opacity)
+	p["stroke"] = colors.AsHex(colors.ToUniform(ss.Color))
+	if ss.Opacity != 1 {
+		p["stroke-opacity"] = reflectx.ToString(ss.Opacity)
 	}
-	if pc.Width.Unit != units.UnitDp || pc.Width.Value != 1 {
-		p["stroke-width"] = pc.Width.StringCSS()
+	if ss.Width.Unit != units.UnitDp || ss.Width.Value != 1 {
+		p["stroke-width"] = ss.Width.StringCSS()
 	}
 	// todo: dashes
-	if pc.Cap != ppath.CapButt {
-		p["stroke-linecap"] = pc.Cap.String()
+	if ss.Cap != ppath.CapButt {
+		p["stroke-linecap"] = ss.Cap.String()
 	}
-	if pc.Join != ppath.JoinMiter {
-		p["stroke-linejoin"] = pc.Join.String()
+	if ss.Join != ppath.JoinMiter {
+		p["stroke-linejoin"] = ss.Join.String()
 	}
 }
 
 // toProperties sets map[string]any properties based on non-default style values.
 // properties map must be non-nil.
-func (pc *Fill) toProperties(p map[string]any) {
-	if pc.Color == nil {
+func (fs *Fill) toProperties(p map[string]any) {
+	if fs.Color == nil {
 		p["fill"] = "none"
 		return
 	}
-	p["fill"] = colors.AsHex(colors.ToUniform(pc.Color))
-	if pc.Opacity != 1 {
-		p["fill-opacity"] = reflectx.ToString(pc.Opacity)
+	p["fill"] = colors.AsHex(colors.ToUniform(fs.Color))
+	if fs.Opacity != 1 {
+		p["fill-opacity"] = reflectx.ToString(fs.Opacity)
 	}
-	if pc.Rule != ppath.NonZero {
-		p["fill-rule"] = pc.Rule.String()
+	if fs.Rule != ppath.NonZero {
+		p["fill-rule"] = fs.Rule.String()
 	}
 }

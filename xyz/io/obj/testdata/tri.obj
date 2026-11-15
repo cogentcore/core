@@ -1,0 +1,15 @@
+# a quad of two triangles, with a material
+mtllib tri.mtl
+o quad
+v -1 -1 0
+v 1 -1 0
+v 1 1 0
+v -1 1 0
+vt 0 0
+vt 1 0
+vt 1 1
+vt 0 1
+vn 0 0 1
+usemtl red
+f 1/1/1 2/2/1 3/3/1
+f 1/1/1 3/3/1 4/4/1

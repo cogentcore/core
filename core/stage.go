@@ -346,15 +346,13 @@ func (st *Stage) Run() *Stage {
 	}
 	// need to prevent premature quitting by ensuring
 	// that WinWait is not done until we run the Stage
-	windowWait.Add(1)
-	go func() {
+	windowWait.Go(func() {
 		<-system.OnSystemWindowCreated
 		system.OnSystemWindowCreated = nil // no longer applicable
 		st.run()
 		// now that we have run the Stage, WinWait is accurate and
 		// we no longer need to prevent it from being done
-		windowWait.Done()
-	}()
+	})
 	return st
 }
 

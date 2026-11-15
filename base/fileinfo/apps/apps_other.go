@@ -8,15 +8,15 @@ package apps
 
 import "errors"
 
-func forFile(file string) ([]App, error) {
+func forFile(_ string) ([]App, error) {
 	return nil, errors.ErrUnsupported
 }
 
-func openWith(file string, app App) error {
+func openWith(_ string, _ App) error {
 	return errors.ErrUnsupported
 }
 
-func setDefault(file string, app App) error {
+func setDefault(_ string, _ App) error {
 	return errors.ErrUnsupported
 }
 

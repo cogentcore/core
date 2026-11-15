@@ -39,8 +39,8 @@ func GoRelPath(filename string) (string, error) {
 	relfn := absfn
 	got := false
 	for _, srcDir := range fsx.GoSrcDirs() {
-		if strings.HasPrefix(absfn, srcDir) {
-			relfn = strings.TrimPrefix(absfn, srcDir)
+		if after, ok := strings.CutPrefix(absfn, srcDir); ok {
+			relfn = after
 			got = true
 			break
 		}
@@ -53,8 +53,8 @@ func GoRelPath(filename string) (string, error) {
 		return relfn, err
 	}
 	homedir := usr.HomeDir
-	if strings.HasPrefix(absfn, homedir) {
-		relfn = strings.TrimPrefix(absfn, homedir)
+	if after, ok := strings.CutPrefix(absfn, homedir); ok {
+		relfn = after
 	}
 	return relfn, nil
 }
@@ -77,7 +77,7 @@ func CacheFilename(lang fileinfo.Known, filename string) (string, error) {
 	if path[0] == filepath.Separator {
 		path = path[1:]
 	}
-	path = strings.Replace(path, string(filepath.Separator), "%", -1)
+	path = strings.ReplaceAll(path, string(filepath.Separator), "%")
 	path = filepath.Join(cdir, path)
 	return path, nil
 }

@@ -4,6 +4,8 @@
 
 package htmltext
 
+//core:js-test
+
 import (
 	"bytes"
 	"testing"

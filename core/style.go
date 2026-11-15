@@ -97,7 +97,6 @@ func (wb *WidgetBase) resetStyleWidget() {
 	s.Font.Family = rich.SansSerif
 }
 
-// runStylers runs the [WidgetBase.Stylers].
 // StyleLockProperty is the name of the property of a widget that, if it
 // is a [sync.Locker], is held while the stylers of the widget run, as for
 // the widgets of web pages, whose stylers read the styles of their
@@ -106,6 +105,7 @@ func (wb *WidgetBase) resetStyleWidget() {
 // htmlcore.Context.PrepareReread).
 const StyleLockProperty = "style-lock"
 
+// runStylers runs the [WidgetBase.Stylers].
 func (wb *WidgetBase) runStylers() {
 	if l, ok := wb.Property(StyleLockProperty).(sync.Locker); ok {
 		l.Lock()

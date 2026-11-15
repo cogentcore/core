@@ -83,7 +83,7 @@ func TestInlineBlockInHeading(t *testing.T) {
 	assert.NoError(t, ReadHTMLString(ctx, bd, `<style>.es a { display: inline-block; line-height: 1 } .es a::before { content: "["; margin-right: 0.5em; color: #54595d } .es a::after { content: "]"; margin-inline: 0.25em 0 }</style>`+
 		`<div><h2 style="display: inline; font-size: 48px">Syntax</h2><span class="es" style="font-size: small"><a href="#e">edit</a></span></div>`))
 	var big, small *core.Text
-	bd.RenderImage(func() {}, func() {
+	core.RenderImage(bd, func() {}, core.Locked(bd, func() {
 		bd.WalkDown(func(k tree.Node) bool {
 			if tx, ok := k.(*core.Text); ok {
 				if strings.Contains(tx.Text, "Syntax") {
@@ -94,10 +94,10 @@ func TestInlineBlockInHeading(t *testing.T) {
 			}
 			return tree.Continue
 		})
-	})
+	}))
 	if assert.NotNil(t, big) && assert.NotNil(t, small) {
-		assert.Contains(t, small.Text, "<span style=\"color: #54595d\">[ ⁠</span>", "the margin of ::before is an en space, in its color")
-		assert.Contains(t, small.Text, "edit⁠ ]", "the last margin declaration of the side applies")
+		assert.Contains(t, small.Text, "<span style=\"color: #54595d\">[ \u2060</span>", "the margin of ::before is an en space, in its color")
+		assert.Contains(t, small.Text, "edit\u2060 ]", "the last margin declaration of the side applies")
 		bb, sb := big.Geom.TotalBBox, small.Geom.TotalBBox
 		assert.Less(t, sb.Dy(), bb.Dy()/2, "the font size of the span")
 		assert.Less(t, sb.Max.Y, bb.Max.Y, "on the baseline, above the descent of the heading")
@@ -132,11 +132,11 @@ func TestBoxShadow(t *testing.T) {
 		}
 		return tree.Continue
 	})
-	bd.RenderImage(func() {}, func() {
+	core.RenderImage(bd, func() {}, core.Locked(bd, func() {
 		assert.Len(t, b.Styles.BoxShadow, 2)
 		assert.True(t, b.Styles.BoxShadowOutside)
 		assert.Equal(t, a.Geom.Size.Actual.Total, b.Geom.Size.Actual.Total, "the shadows take no space")
-	})
+	}))
 }
 
 // TestTextIndentHidden tests the hiding of text with a large negative
@@ -157,12 +157,12 @@ func TestTextIndentHidden(t *testing.T) {
 		}
 		return tree.Continue
 	})
-	bd.RenderImage(func() {}, func() {
+	core.RenderImage(bd, func() {}, core.Locked(bd, func() {
 		_, _, _, a := show.Styles.Color.At(0, 0).RGBA()
 		assert.Equal(t, uint32(0), a, "the text is transparent")
 		_, _, _, a = after.Styles.Color.At(0, 0).RGBA()
 		assert.NotEqual(t, uint32(0), a)
-	})
+	}))
 }
 
 // TestListMarkerBaseline tests that the marker of a list item is on the
@@ -184,9 +184,9 @@ func TestListMarkerBaseline(t *testing.T) {
 		}
 		return tree.Continue
 	})
-	bd.RenderImage(func() {}, func() {
+	core.RenderImage(bd, func() {}, core.Locked(bd, func() {
 		mb, tb := marker.Geom.TotalBBox, text.Geom.TotalBBox
 		assert.InDelta(t, tb.Max.Y, mb.Max.Y, 1.5, "the same baseline (the same font)")
 		assert.Greater(t, mb.Min.Y, marker.Parent.(core.Widget).AsWidget().Geom.TotalBBox.Min.Y+10, "below the top of the item")
-	})
+	}))
 }

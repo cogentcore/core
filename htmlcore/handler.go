@@ -69,10 +69,10 @@ func HasAttr(n *html.Node, attr string) bool {
 // GetLanguage returns the 'x' in a `language-x` class from the given
 // string of class(es).
 func GetLanguage(class string) string {
-	fields := strings.Fields(class)
-	for _, field := range fields {
-		if strings.HasPrefix(field, "language-") {
-			return strings.TrimPrefix(field, "language-")
+	fields := strings.FieldsSeq(class)
+	for field := range fields {
+		if after, ok := strings.CutPrefix(field, "language-"); ok {
+			return after
 		}
 	}
 	return ""

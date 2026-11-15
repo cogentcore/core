@@ -25,43 +25,43 @@ import (
 func TestTextField(t *testing.T) {
 	b := NewBody()
 	NewTextField(b)
-	b.AssertRender(t, "text-field/basic")
+	AssertRender(t, b, "text-field/basic")
 }
 
 func TestTextFieldPlaceholder(t *testing.T) {
 	b := NewBody()
 	NewTextField(b).SetPlaceholder("Jane Doe")
-	b.AssertRender(t, "text-field/placeholder")
+	AssertRender(t, b, "text-field/placeholder")
 }
 
 func TestTextFieldText(t *testing.T) {
 	b := NewBody()
 	NewTextField(b).SetText("Hello, world!")
-	b.AssertRender(t, "text-field/text")
+	AssertRender(t, b, "text-field/text")
 }
 
 func TestTextFieldOverflow(t *testing.T) {
 	b := NewBody()
 	NewTextField(b).SetText("This is a long sentence that demonstrates how text field content can overflow onto multiple lines")
-	b.AssertRender(t, "text-field/overflow")
+	AssertRender(t, b, "text-field/overflow")
 }
 
 func TestTextFieldOutlined(t *testing.T) {
 	b := NewBody()
 	NewTextField(b).SetType(TextFieldOutlined)
-	b.AssertRender(t, "text-field/outlined")
+	AssertRender(t, b, "text-field/outlined")
 }
 
 func TestTextFieldPassword(t *testing.T) {
 	b := NewBody()
 	NewTextField(b).SetTypePassword().SetText("my password")
-	b.AssertRender(t, "text-field/password")
+	AssertRender(t, b, "text-field/password")
 }
 
 func TestTextFieldPasswordClick(t *testing.T) {
 	b := NewBody()
 	tf := NewTextField(b).SetTypePassword().SetText("my password")
-	b.AssertRender(t, "text-field/password-click", func() {
+	AssertRender(t, b, "text-field/password-click", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		tf.trailingIconButton.Send(events.Click)
@@ -71,13 +71,13 @@ func TestTextFieldPasswordClick(t *testing.T) {
 func TestTextFieldClear(t *testing.T) {
 	b := NewBody()
 	NewTextField(b).AddClearButton().SetText("Hello, world!")
-	b.AssertRender(t, "text-field/clear")
+	AssertRender(t, b, "text-field/clear")
 }
 
 func TestTextFieldClearClick(t *testing.T) {
 	b := NewBody()
 	tf := NewTextField(b).AddClearButton().SetText("Hello, world!")
-	b.AssertRender(t, "text-field/clear-click", func() {
+	AssertRender(t, b, "text-field/clear-click", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		tf.trailingIconButton.Send(events.Click)
@@ -91,7 +91,7 @@ func TestTextFieldIcons(t *testing.T) {
 	tf := NewTextField(b).SetTrailingIcon(icons.Euro).SetLeadingIcon(icons.OpenInNew, func(e events.Event) {
 		clicked = true
 	})
-	b.AssertRender(t, "text-field/icons", func() {
+	AssertRender(t, b, "text-field/icons", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		tf.leadingIconButton.Send(events.Click)
@@ -108,7 +108,7 @@ func TestTextFieldValidatorValid(t *testing.T) {
 		}
 		return nil
 	})
-	b.AssertRender(t, "text-field/validator-valid", func() {
+	AssertRender(t, b, "text-field/validator-valid", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		tf.SendChange() // trigger validation
@@ -127,7 +127,7 @@ func TestTextFieldValidatorInvalid(t *testing.T) {
 		}
 		return nil
 	})
-	b.AssertRender(t, "text-field/validator-invalid", func() {
+	AssertRender(t, b, "text-field/validator-invalid", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		tf.SendChange() // trigger validation
@@ -141,7 +141,7 @@ func TestTextFieldChange(t *testing.T) {
 	tf.OnChange(func(e events.Event) {
 		text = tf.Text()
 	})
-	b.AssertRender(t, "text-field/change", func() {
+	AssertRender(t, b, "text-field/change", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		tf.HandleEvent(events.NewKey(events.KeyChord, 'G', 0, 0))
@@ -161,7 +161,7 @@ func TestTextFieldInput(t *testing.T) {
 		n++
 		text = tf.Text()
 	})
-	b.AssertRender(t, "text-field/input", func() {
+	AssertRender(t, b, "text-field/input", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		tf.HandleEvent(events.NewKey(events.KeyChord, 'G', 0, 0))
@@ -231,7 +231,7 @@ func TestTextFieldCursorArrows(t *testing.T) {
 		})
 	}
 	imagex.UpdateTestImagesFor(t) // the image is not compared
-	b.AssertRender(t, "text-field/cursor-arrows", steps...)
+	AssertRender(t, b, "text-field/cursor-arrows", steps...)
 }
 
 // TestTextFieldCopy tests that copying the selected text, with the keys,
@@ -239,7 +239,7 @@ func TestTextFieldCursorArrows(t *testing.T) {
 func TestTextFieldCopy(t *testing.T) {
 	b := NewBody()
 	tf := NewTextField(b).SetText("Hello world")
-	b.AssertRender(t, "text-field/copy", func() {
+	AssertRender(t, b, "text-field/copy", func() {
 		b.AsyncLock()
 		tf.SetFocus()
 		tf.selectAll()
@@ -301,28 +301,28 @@ func TestTextFieldWidths(t *testing.T) {
 	}
 	t.Run("short", func(t *testing.T) {
 		tf, b := field(0, short)
-		b.RenderImage(func() {}, func() {
+		RenderImage(b, func() {}, Locked(b, func() {
 			assert.InDelta(t, 1, lines(tf), 0.3, "one line")
 			assert.Greater(t, tf.Geom.Size.Actual.Total.X, tf.styleMinDots().X, "wider than its Min, for its text")
-		})
+		}))
 	})
 	t.Run("max", func(t *testing.T) {
 		tf, b := field(0, long)
-		b.RenderImage(func() {}, func() {
+		RenderImage(b, func() {}, Locked(b, func() {
 			// as wide as its Max (the window is sized to it), wrapping in it
 			// (the width of its lines, which wrap within it)
 			assert.InDelta(t, tf.Geom.Size.Max.X, tf.Geom.Size.Actual.Content.X, 8)
 			assert.LessOrEqual(t, lines(tf), float32(4.3), "a few lines at its Max")
-		})
+		}))
 	})
 	t.Run("narrow", func(t *testing.T) {
 		tf, b := field(120, words)
-		b.RenderImage(func() {}, func() {
+		RenderImage(b, func() {}, Locked(b, func() {
 			w := tf.Geom.Size.Actual.Content.X
 			assert.Less(t, w, tf.styleMinDots().X, "narrower than its Min")
 			assert.GreaterOrEqual(t, w, tf.minContentWidth(), "not narrower than its longest word")
 			assert.Greater(t, lines(tf), float32(2.5), "wrapped")
-		})
+		}))
 	})
 	t.Run("form", func(t *testing.T) {
 		// as in the settings window, which is sized to its content
@@ -330,7 +330,7 @@ func TestTextFieldWidths(t *testing.T) {
 		b := NewBody()
 		st := &struct{ UserAgent string }{long}
 		NewForm(b).SetStruct(st)
-		b.RenderImage(func() {}, func() {
+		RenderImage(b, func() {}, Locked(b, func() {
 			var tf *TextField
 			b.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
 				if x, ok := cw.(*TextField); ok {
@@ -348,14 +348,11 @@ func TestTextFieldWidths(t *testing.T) {
 				m.ToDots(&tf.Styles.UnitContext)
 				// (as wide as the measure, within which its text wraps, not as
 				// wide as the screen, as it is offered)
-				// (under the lock, as the window is updated by its event loop)
-				b.AsyncLock()
 				csz := float32(b.Scene.contentSize(image.Pt(4000, 4000)).X)
-				b.AsyncUnlock()
 				assert.Greater(t, csz, m.Dots, "as wide as a readable measure")
 				assert.Less(t, csz, m.Dots+200, "within a readable measure")
 			}
-		})
+		}))
 	})
 }
 
@@ -366,10 +363,10 @@ func TestTextFieldWidthsRow(t *testing.T) {
 	fr := NewFrame(b)
 	a := NewTextField(fr).SetText("MacStandard")
 	d := NewTextField(fr).SetText("Standard Mac KeyMap")
-	b.RenderImage(func() {}, func() {
+	RenderImage(b, func() {}, Locked(b, func() {
 		assert.InDelta(t, 1, d.Geom.Size.Actual.Content.Y/d.lineHeight, 0.3, "one line")
 		assert.Less(t, a.Geom.Size.Actual.Total.X, d.Geom.Size.Actual.Total.X, "the one with the shorter text is narrower")
-	})
+	}))
 }
 
 // TestTextFieldSetCursorPos tests that the cursor of a text field is put at
@@ -378,7 +375,7 @@ func TestTextFieldWidthsRow(t *testing.T) {
 func TestTextFieldSetCursorPos(t *testing.T) {
 	b := NewBody()
 	tf := NewTextField(b).SetText("hello world")
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		tf.SetCursorPos(5)
@@ -424,7 +421,7 @@ func TestTextFieldSlideOverDrag(t *testing.T) {
 		b.Scene.Events.focusClear() // (the first text field of a window has it)
 		b.AsyncUnlock()
 	}
-	b.RenderImage(unfocus, slide, func() {
+	RenderImage(b, unfocus, slide, func() {
 		assert.Equal(t, 1, dragged, "dragged from a text field without the focus")
 		b.AsyncLock()
 		tf.SetFocus()

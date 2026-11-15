@@ -59,7 +59,7 @@ func Matrix3Scale2D(x, y float32) Matrix3 {
 	return Matrix3FromMatrix2(Scale2D(x, y))
 }
 
-// Rotate2D returns a Matrix2 2D matrix with given rotation, specified in radians
+// Matrix3Rotate2D returns a Matrix3 2D matrix with given rotation, specified in radians
 func Matrix3Rotate2D(angle float32) Matrix3 {
 	return Matrix3FromMatrix2(Rotate2D(angle))
 }
@@ -208,25 +208,25 @@ func (m *Matrix3) SetMulScalar(s float32) {
 
 // MulVector multiplies the Vector2 as a vector without adding translations.
 // This is for directional vectors and not points.
-func (a Matrix3) MulVector(v Vector2) Vector2 {
-	tx := a[0]*v.X + a[3]*v.Y
-	ty := a[1]*v.X + a[4]*v.Y
+func (m Matrix3) MulVector(v Vector2) Vector2 {
+	tx := m[0]*v.X + m[3]*v.Y
+	ty := m[1]*v.X + m[4]*v.Y
 	return Vec2(tx, ty)
 }
 
 // MulPoint multiplies the Vector2 as a point, including adding translations.
-func (a Matrix3) MulPoint(v Vector2) Vector2 {
-	tx := a[0]*v.X + a[3]*v.Y + a[6]
-	ty := a[1]*v.X + a[4]*v.Y + a[7]
+func (m Matrix3) MulPoint(v Vector2) Vector2 {
+	tx := m[0]*v.X + m[3]*v.Y + m[6]
+	ty := m[1]*v.X + m[4]*v.Y + m[7]
 	return Vec2(tx, ty)
 }
 
 // MulVector3 multiplies the Vector3 on the right (a * v),
 // as a standard matrix multiply.
-func (a Matrix3) MulVector3(v Vector3) Vector3 {
-	return Vec3(a[0]*v.X+a[3]*v.Y+a[6]*v.Z,
-		a[1]*v.X+a[4]*v.Y+a[7]*v.Z,
-		a[2]*v.X+a[5]*v.Y+a[8]*v.Z)
+func (m Matrix3) MulVector3(v Vector3) Vector3 {
+	return Vec3(m[0]*v.X+m[3]*v.Y+m[6]*v.Z,
+		m[1]*v.X+m[4]*v.Y+m[7]*v.Z,
+		m[2]*v.X+m[5]*v.Y+m[8]*v.Z)
 }
 
 // MulVector3Array multiplies count vectors (i.e., 3 sequential array values per each increment in count)
@@ -234,7 +234,7 @@ func (a Matrix3) MulVector3(v Vector3) Vector3 {
 func (m *Matrix3) MulVector3Array(array []float32, start, count int) {
 	var v1 Vector3
 	j := start
-	for i := 0; i < count; i++ {
+	for range count {
 		v1.FromSlice(array, j)
 		mv := v1.MulMatrix3(m)
 		mv.ToSlice(array, j)

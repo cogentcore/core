@@ -4,6 +4,8 @@
 
 package cam16
 
+//core:js-test
+
 import (
 	"testing"
 

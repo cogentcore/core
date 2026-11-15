@@ -22,13 +22,13 @@ func TestBrowserStyleSpacing(t *testing.T) {
 	ctx := NewContext()
 	ReadHTMLString(ctx, b, `<div style="padding: 10px 20px; margin-left: 30px; gap: 4px; display: flex">x</div>`)
 	var div *core.Frame
-	b.RenderImage(func() {
+	core.RenderImage(b, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		core.AppearanceSettings.Spacing = 30
 		b.Scene.StyleTree()
 		b.Scene.NeedsLayout()
-	}, func() {
+	}, core.Locked(b, func() {
 		b.WalkDown(func(n tree.Node) bool {
 			if fr, ok := n.(*core.Frame); ok && fr.Property("tag") == "div" {
 				div = fr
@@ -36,7 +36,7 @@ func TestBrowserStyleSpacing(t *testing.T) {
 			return tree.Continue
 		})
 		core.AppearanceSettings.Spacing = 100
-	})
+	}))
 	if assert.NotNil(t, div) {
 		dp := div.Styles.UnitContext.Dots(units.UnitDp)
 		s := &div.Styles
@@ -75,7 +75,7 @@ span.p { padding: 0 12px; margin: 0 7px }
 		b.Scene.Styler(func(s *styles.Style) { s.Padding.Zero() }) // (that of the window)
 		require.NoError(t, ReadHTMLString(NewContext(), b, page))
 		var m map[string]string
-		b.RenderImage(func() {}, func() { m = widgetStates(b) })
+		core.RenderImage(b, func() {}, core.Locked(b, func() { m = widgetStates(b) }))
 		return m
 	}
 	assert.Equal(t, layout(100), layout(40))

@@ -145,7 +145,7 @@ func (gl *GoLang) TypeFromASTExpr(fs *parse.FileState, origPkg, pkg *syms.Symbol
 		case "Name":
 			sym, got := fs.FindNameScoped(snm, conts)
 			if got {
-				sty, _, got = gl.TypeFromASTSym(fs, origPkg, pkg, ch, last, sym)
+				sty, _, _ = gl.TypeFromASTSym(fs, origPkg, pkg, ch, last, sym) // (sty is nil if not found)
 			} else {
 				if snm == "true" || snm == "false" {
 					return BuiltinTypes["bool"], nil, true
@@ -171,6 +171,41 @@ func (gl *GoLang) TypeFromASTExpr(fs *parse.FileState, origPkg, pkg *syms.Symbol
 	case tnm == "DePtrExpr":
 		sty, got := gl.SubTypeFromAST(fs, pkg, tyast, 0) // first child
 		return sty, nil, got
+	case tnm == "SendExpr": // <-ch, which receives (the grammar names it by its arrow)
+		if !tyast.HasChildren() {
+			return nil, tyast, false
+		}
+		cty, _, got := gl.TypeFromASTExpr(fs, origPkg, pkg, tyast.ChildAST(0), last)
+		if !got || cty.Kind != syms.Chan || len(cty.Els) == 0 {
+			return nil, tyast, false
+		}
+		ety, _ := gl.FindTypeName(cty.Els[0].Type, fs, pkg)
+		return ety, nil, ety != nil
+	case tnm == "NotExpr", tnm == "EqExpr", tnm == "NotEqExpr", tnm == "LessExpr", tnm == "LtEqExpr",
+		tnm == "GreaterExpr", tnm == "GtEqExpr", tnm == "LogAndExpr", tnm == "LogOrExpr":
+		return BuiltinTypes["bool"], nil, true
+	case tnm == "AddExpr" && tyast.HasChildren():
+		// strings are concatenated; numbers are taken to be float64 (see below)
+		if cty, _, got := gl.TypeFromASTExpr(fs, origPkg, pkg, tyast.ChildAST(0), last); got && cty.Kind == syms.String {
+			return cty, nil, true
+		}
+		return BuiltinTypes["float64"], nil, true
+	case tnm == "NewCall": // new(T) is a *T
+		sty, got := gl.SubTypeFromAST(fs, pkg, tyast, 0)
+		if !got {
+			return nil, tyast, false
+		}
+		ty := &syms.Type{Kind: syms.Ptr}
+		tynm := SymTypeNameForPkg(sty, pkg)
+		ty.Name = "*" + tynm
+		ty.Els.Add("ptr", tynm)
+		return ty, nil, true
+	case tnm == "FuncLit": // its signature, as for a FuncType
+		ty := &syms.Type{Kind: syms.Func}
+		gl.FuncTypeFromAST(fs, pkg, tyast, ty)
+		ty.Name = fs.NextAnonName(pkg.Name + "_func")
+		pkg.Types.Add(ty)
+		return ty, nil, true
 	case strings.HasSuffix(tnm, "Expr"):
 		// note: could figure out actual numerical type, but in practice we don't care
 		// for lookup / completion, so ignoring for now.
@@ -181,8 +216,8 @@ func (gl *GoLang) TypeFromASTExpr(fs *parse.FileState, origPkg, pkg *syms.Symbol
 	case tnm == "MakeCall":
 		sty, got := gl.SubTypeFromAST(fs, pkg, tyast, 0)
 		return sty, nil, got
-	case strings.Contains(tnm, "Chan"):
-		sty, got := gl.SubTypeFromAST(fs, pkg, tyast, 0)
+	case strings.Contains(tnm, "Chan"): // a channel type
+		sty, got := gl.TypeFromAST(fs, pkg, nil, tyast)
 		return sty, nil, got
 	default:
 		if TraceTypes {
@@ -191,7 +226,6 @@ func (gl *GoLang) TypeFromASTExpr(fs *parse.FileState, origPkg, pkg *syms.Symbol
 		}
 		return nil, tyast, false
 	}
-	return nil, tyast, false
 }
 
 // TypeFromASTSym attempts to get the type from given symbol as part of expression.
@@ -283,13 +317,21 @@ func (gl *GoLang) TypeFromASTType(fs *parse.FileState, origPkg, pkg *syms.Symbol
 		case nxt.Name == "Slice":
 			continue
 		case strings.HasPrefix(nxt.Name, "Slice"):
+			// the expression continues after the index (or slice) expression
+			end := lastDescendant(nxt)
+			if last != nil && last != nxt && last.ParentLevel(nxt) > 0 {
+				end = nxt
+			}
+			if nxt.Name == "SliceTwo" || nxt.Name == "SliceThree" { // a slice of the same type
+				return gl.TypeFromASTType(fs, origPkg, pkg, end, last, ttp.Name)
+			}
 			eltyp := ttp.Els.ByName("val")
 			if eltyp != nil {
 				elnm := QualifyType(pkgnm, eltyp.Type)
 				// if TraceTypes {
 				// 	fmt.Printf("TExpr: slice/map el type: %v\n", elnm)
 				// }
-				return gl.TypeFromASTType(fs, origPkg, pkg, nxt, last, elnm)
+				return gl.TypeFromASTType(fs, origPkg, pkg, end, last, elnm)
 			}
 			if ttp.Name == "string" {
 				return BuiltinTypes["string"], nil, true
@@ -316,15 +358,12 @@ func (gl *GoLang) TypeFromASTType(fs *parse.FileState, origPkg, pkg *syms.Symbol
 			return nil, fun, false
 
 		}
-		if brk || nxt == nil || nxt == last {
+		if brk { // (nxt is neither nil nor last here: see the start of the loop)
 			break
 		}
 		// if TraceTypes {
 		// 	fmt.Printf("TExpr: skipping over %v\n", nxt.Nm)
 		// }
-	}
-	if nxt == nil {
-		return ttp, nxt, false
 	}
 	nm := nxt.Src
 	stp := ttp.Els.ByName(nm)
@@ -341,7 +380,7 @@ func (gl *GoLang) TypeFromASTType(fs *parse.FileState, origPkg, pkg *syms.Symbol
 	return ttp, nxt, true // robust, needed for completion
 }
 
-// TypeFromASTFuncCall gets return type of function call as return value, and returns the sibling node to
+// TypeFromFuncCall gets return type of function call as return value, and returns the sibling node to
 // continue parsing in, skipping over everything in the function call
 func (gl *GoLang) TypeFromFuncCall(fs *parse.FileState, origPkg, pkg *syms.Symbol, tyast, last *parser.AST, ftyp *syms.Type) (*syms.Type, *parser.AST, bool) {
 	nxt := tyast.NextSiblingAST() // skip over everything within method in ast
@@ -411,4 +450,14 @@ func (gl *GoLang) TypeFromASTName(fs *parse.FileState, origPkg, pkg *syms.Symbol
 		fmt.Printf("TExpr: could not find symbol for name: %v\n", snm)
 	}
 	return nil, tyast, false
+}
+
+// lastDescendant returns the last node within the given node, in the
+// depth-first order of [parser.AST.NextAST]: the next node after it is
+// the node after the given node and all of its descendants.
+func lastDescendant(ast *parser.AST) *parser.AST {
+	for ast.HasChildren() {
+		ast = ast.ChildAST(len(ast.Children) - 1)
+	}
+	return ast
 }

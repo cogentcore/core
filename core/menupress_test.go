@@ -55,7 +55,7 @@ func (mt *menuTest) menus() []string {
 	var texts []string
 	ps := mt.b.Scene.Stage.popups
 	for i := range ps.stack.Len() {
-		st := ps.stack.ValueByIndex(i)
+		st := ps.stack.Values[i]
 		if st.Type == MenuStage && st.Scene.HasChildren() {
 			texts = append(texts, AsButton(st.Scene.Child(0)).Text)
 		}
@@ -74,7 +74,7 @@ func (mt *menuTest) center(text string) image.Point {
 	} else {
 		ps := mt.b.Scene.Stage.popups
 		for i := ps.stack.Len() - 1; i >= 0 && w == nil; i-- {
-			for _, kid := range ps.stack.ValueByIndex(i).Scene.Children {
+			for _, kid := range ps.stack.Values[i].Scene.Children {
 				if b := AsButton(kid); b != nil && b.Text == text {
 					w = b.AsWidget()
 					break
@@ -108,7 +108,7 @@ func TestMenuPressDrag(t *testing.T) {
 		mt.item(m, "B", nil)
 	})
 	imagex.UpdateTestImagesFor(t) // the image is not compared
-	mt.b.AssertRender(t, "menu-press-drag", func() {
+	AssertRender(t, mt.b, "menu-press-drag", func() {
 		src := mt.b.Scene.RenderWindow().SystemWindow.Events()
 		btc := mt.center("Menu")
 		src.MouseButton(events.MouseDown, events.Left, btc, 0)
@@ -154,7 +154,7 @@ func TestSubmenuParentClick(t *testing.T) {
 		mt.item(m, "Plain", nil)
 	})
 	imagex.UpdateTestImagesFor(t) // the image is not compared
-	mt.b.AssertRender(t, "submenu-parent-click", func() {
+	AssertRender(t, mt.b, "submenu-parent-click", func() {
 		src := mt.b.Scene.RenderWindow().SystemWindow.Events()
 		click := func(text string) {
 			p := mt.center(text)
@@ -187,7 +187,7 @@ func TestMenuPressDragSubmenu(t *testing.T) {
 		mt.item(m, "Plain", nil)
 	})
 	imagex.UpdateTestImagesFor(t) // the image is not compared
-	mt.b.AssertRender(t, "menu-press-drag-submenu", func() {
+	AssertRender(t, mt.b, "menu-press-drag-submenu", func() {
 		src := mt.b.Scene.RenderWindow().SystemWindow.Events()
 		drag := func(text string) image.Point {
 			p := mt.center(text)
@@ -228,7 +228,7 @@ func TestMenuPressDragTooltip(t *testing.T) {
 		mt.item(m, "Plain", nil)
 	})
 	imagex.UpdateTestImagesFor(t) // the image is not compared
-	mt.b.AssertRender(t, "menu-press-drag-tooltip", func() {
+	AssertRender(t, mt.b, "menu-press-drag-tooltip", func() {
 		src := mt.b.Scene.RenderWindow().SystemWindow.Events()
 		btc := mt.center("Menu")
 		src.MouseButton(events.MouseDown, events.Left, btc, 0)
@@ -259,7 +259,7 @@ func TestMenuItemContextMenu(t *testing.T) {
 		b.AddContextMenu(func(m *Scene, pos image.Point) { mt.item(m, "Edit B", nil) })
 	})
 	imagex.UpdateTestImagesFor(t) // the image is not compared
-	mt.b.AssertRender(t, "menu-item-context-menu", func() {
+	AssertRender(t, mt.b, "menu-item-context-menu", func() {
 		src := mt.b.Scene.RenderWindow().SystemWindow.Events()
 		click := func(text string, but events.Buttons) {
 			p := mt.center(text)

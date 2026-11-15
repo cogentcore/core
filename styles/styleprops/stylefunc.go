@@ -38,7 +38,7 @@ func InhInit(val, parent any) (inh, init bool) {
 	return false, false
 }
 
-// FuncInt returns a style function for any numerical value
+// Int returns a style function for any numerical value
 func Int[T any, F num.Integer](initVal F, getField func(obj *T) *F) Func {
 	return func(obj any, key string, val any, parent any, cc colors.Context) {
 		fp := getField(obj.(*T))
@@ -94,7 +94,7 @@ func FloatProportion[T any, F num.Float](initVal F, getField func(obj *T) *F) Fu
 			return
 		}
 		isPct := false
-		if vstr, ok := val.(string); ok {
+		if vstr, ok := val.(string); ok && strings.HasSuffix(vstr, "%") {
 			val = strings.TrimSuffix(vstr, "%")
 			isPct = true
 		}

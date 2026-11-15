@@ -75,9 +75,9 @@ func newMenuScene(menu func(m *Scene, pos image.Point), pos image.Point, name ..
 	}
 
 	hasSelected := false
-	msc.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+	for cw, cwb := range msc.AllWidgets() {
 		if cw == msc {
-			return tree.Continue
+			continue
 		}
 		if bt := AsButton(cw); bt != nil {
 			if bt.Menu == nil {
@@ -89,8 +89,7 @@ func newMenuScene(menu func(m *Scene, pos image.Point), pos image.Point, name ..
 			msc.Events.SetStartFocus(cwb)
 			hasSelected = true
 		}
-		return tree.Continue
-	})
+	}
 	if !hasSelected && msc.HasChildren() {
 		// fmt.Println("start focus first:", msc.Child(0).(Widget))
 		msc.Events.SetStartFocus(msc.Child(0).(Widget))
@@ -141,11 +140,12 @@ func (wb *WidgetBase) AddContextMenu(menu func(m *Scene, pos image.Point)) {
 // context menu function.
 func (wb *WidgetBase) applyContextMenus(m *Scene, pos image.Point) {
 	do := func(cms []func(m *Scene, pos image.Point)) {
-		for i := len(cms) - 1; i >= 0; i-- {
+		for ri := len(cms) - 1; ri >= 0; ri-- {
+			cm := cms[ri]
 			if m.NumChildren() > 0 {
 				NewSeparator(m)
 			}
-			cms[i](m, pos)
+			cm(m, pos)
 		}
 	}
 	do(wb.ContextMenus)
@@ -216,7 +216,7 @@ type MenuSearcher interface {
 	MenuSearch(items *[]ChooserItem)
 }
 
-// NewWindowFunc, if set, returns the body of a new window of the app, as
+// NewWindowFunc is, if set, a function that returns the body of a new window of the app, as
 // for its main window, made from the window of the given scene, which it
 // can take settings from, as a directory. The new window is run with the
 // size of the window from which it is made, below and to the right of it,
@@ -410,21 +410,21 @@ func menuSearchScene(sc *Scene) *Scene {
 // that updates path with context about the original button menu.
 // Consumers of this function should typically set path to "".
 func addButtonItems(items *[]ChooserItem, sc *Scene, parent tree.Node, path string) {
-	parent.AsTree().WalkDown(func(n tree.Node) bool {
+	for n := range parent.AsTree().All() {
 		if ms, ok := n.(MenuSearcher); ok {
 			ms.MenuSearch(items)
 		}
 		bt := AsButton(n)
 		if bt == nil || bt.IsDisabled() {
-			return tree.Continue
+			continue
 		}
 		_, isTb := bt.Parent.(*Toolbar)
 		_, isSc := bt.Parent.(*Scene)
 		if !isTb && !isSc {
-			return tree.Continue
+			continue
 		}
 		if bt.Text == "Menu search" {
-			return tree.Continue
+			continue
 		}
 		label := bt.Text
 		if label == "" {
@@ -441,7 +441,7 @@ func addButtonItems(items *[]ChooserItem, sc *Scene, parent tree.Node, path stri
 				npath += label
 			}
 			addButtonItems(items, sc, tmps, npath)
-			return tree.Continue
+			continue
 		}
 		if path != "" {
 			label = path + " > " + label
@@ -454,6 +454,5 @@ func addButtonItems(items *[]ChooserItem, sc *Scene, parent tree.Node, path stri
 				bt.Send(events.Click)
 			},
 		})
-		return tree.Continue
-	})
+	}
 }

@@ -58,7 +58,7 @@ func TestSimpleSpans(t *testing.T) {
 				for _, g := range out.Glyphs {
 					w := glyphs[gi]
 					gi++
-					if g.ClusterIndex != w.ClusterIndex || g.RuneCount != w.RuneCount || g.GlyphCount != w.GlyphCount || g.GlyphID != w.GlyphID {
+					if g.TextIndex() != w.TextIndex() || g.RunesCount() != w.RunesCount() || g.GlyphsCount() != w.GlyphsCount() || g.GlyphID != w.GlyphID {
 						t.Errorf("%q: glyph %d is %+v, want %+v", s, gi, g, w)
 					}
 				}

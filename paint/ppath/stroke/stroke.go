@@ -5,6 +5,8 @@
 // This is adapted from https://github.com/tdewolff/canvas
 // Copyright (c) 2015 Taco de Wolff, under an MIT License.
 
+// Package stroke provides the stroking of paths, with caps and joins, and
+// their dashing and offsetting.
 package stroke
 
 //go:generate core generate
@@ -19,6 +21,15 @@ import (
 func ellipseNormal(rx, ry, phi float32, sweep bool, theta, d float32) math32.Vector2 {
 	return ppath.EllipseDeriv(rx, ry, phi, sweep, theta).Rot90CW().Normal().MulScalar(d)
 }
+
+// FastStroke skips "settling" the resulting paths of [Offset] and [Stroke],
+// which ensures a well-formed path without overlaps or holes. Settling fixes
+// overlapping strokes and the inner bends of corners. Inner bends are already
+// fixed for two line segments, but otherwise leave a hole. Overlapping
+// strokes may not be a problem when they are drawn with the NonZero fill
+// rule. Strokes that are much wider than the path itself may be drawn wrong
+// with this, but it can be much faster for most (simple) paths.
+var FastStroke = false
 
 // NOTE: implementation inspired from github.com/golang/freetype/raster/stroke.go
 
@@ -38,23 +49,13 @@ func Stroke(p ppath.Path, w float32, cr Capper, jr Joiner, tolerance float32) pp
 	halfWidth := math32.Abs(w) / 2.0
 	for _, pi := range p.Split() {
 		rhs, lhs := offset(pi, halfWidth, cr, jr, true, tolerance)
-		if rhs == nil {
-			continue
-		} else if lhs == nil {
-			// open path
-			q = q.Append(intersect.Settle(rhs, ppath.Positive))
-		} else {
-			// closed path
-			// inner path should go opposite direction to cancel the outer path
-			if intersect.CCW(pi) {
-				q = q.Append(intersect.Settle(rhs, ppath.Positive))
-				q = q.Append(intersect.Settle(lhs, ppath.Positive).Reverse())
-			} else {
-				// outer first, then inner
-				q = q.Append(intersect.Settle(lhs, ppath.Negative))
-				q = q.Append(intersect.Settle(rhs, ppath.Negative).Reverse())
-			}
+		if rhs != nil {
+			q = q.Append(rhs).Append(lhs.Reverse())
 		}
+	}
+	if !FastStroke {
+		// fix overlapping and spilled parts
+		q = intersect.Settle(q, ppath.Positive)
 	}
 	return q
 }
@@ -392,7 +393,7 @@ func (j ArcsJoiner) Join(rhs, lhs *ppath.Path, halfWidth float32, pivot, n0, n1 
 			sweep := 0.0 < rMid
 			RMid := math32.Abs(rMid)
 			cx, cy, a0, _ := ppath.EllipseToCenter(pivot.X, pivot.Y, RMid, RMid, 0.0, false, sweep, mid.X, mid.Y)
-			cMid := math32.Vector2{cx, cy}
+			cMid := math32.Vec2(cx, cy)
 			dtheta := limit * halfWidth / rMid
 
 			clipMid = ppath.EllipsePos(RMid, RMid, 0.0, cMid.X, cMid.Y, a0+dtheta)
@@ -518,19 +519,23 @@ func optimizeClose(p *ppath.Path) {
 	}
 }
 
-func optimizeInnerBend(p ppath.Path, i int) {
+// optimizeInnerBend removes the join segment at index i of the inner bend
+// of a path (connecting both edges), when the edges intersect, by moving
+// the end of the previous segment to the intersection, and returns the
+// resulting path.
+func optimizeInnerBend(p ppath.Path, i int) ppath.Path {
 	// i is the index of the line segment in the inner bend connecting both edges
 	ai := i - ppath.CmdLen(p[i-1])
 	if ai == 0 {
-		return
+		return p
 	}
 	if i >= len(p) {
-		return
+		return p
 	}
 	bi := i + ppath.CmdLen(p[i])
 
-	a0 := math32.Vector2{p[ai-3], p[ai-2]}
-	b0 := math32.Vector2{p[bi-3], p[bi-2]}
+	a0 := math32.Vec2(p[ai-3], p[ai-2])
+	b0 := math32.Vec2(p[bi-3], p[bi-2])
 	if bi == len(p) {
 		// inner bend is at the path's start
 		bi = 4
@@ -552,7 +557,7 @@ func optimizeInnerBend(p ppath.Path, i int) {
 						p[ai] = ppath.Close
 						p[ai+3] = ppath.Close
 					} else {
-						p = append(p, ppath.Close, zs[0].X, zs[1].Y, ppath.Close)
+						p = append(p, ppath.Close, zs[0].X, zs[0].Y, ppath.Close)
 					}
 				}
 				p = p[:i]
@@ -563,6 +568,7 @@ func optimizeInnerBend(p ppath.Path, i int) {
 			}
 		}
 	}
+	return p
 }
 
 type pathStrokeState struct {
@@ -587,9 +593,9 @@ func offset(p ppath.Path, halfWidth float32, cr Capper, jr Joiner, strokeOpen bo
 		cmd := p[i]
 		switch cmd {
 		case ppath.MoveTo:
-			end = math32.Vector2{p[i+1], p[i+2]}
+			end = math32.Vec2(p[i+1], p[i+2])
 		case ppath.LineTo:
-			end = math32.Vector2{p[i+1], p[i+2]}
+			end = math32.Vec2(p[i+1], p[i+2])
 			n := end.Sub(start).Rot90CW().Normal().MulScalar(halfWidth)
 			states = append(states, pathStrokeState{
 				cmd: ppath.LineTo,
@@ -603,13 +609,13 @@ func offset(p ppath.Path, halfWidth float32, cr Capper, jr Joiner, strokeOpen bo
 		case ppath.QuadTo, ppath.CubeTo:
 			var cp1, cp2 math32.Vector2
 			if cmd == ppath.QuadTo {
-				cp := math32.Vector2{p[i+1], p[i+2]}
-				end = math32.Vector2{p[i+3], p[i+4]}
+				cp := math32.Vec2(p[i+1], p[i+2])
+				end = math32.Vec2(p[i+3], p[i+4])
 				cp1, cp2 = ppath.QuadraticToCubicBezier(start, cp, end)
 			} else {
-				cp1 = math32.Vector2{p[i+1], p[i+2]}
-				cp2 = math32.Vector2{p[i+3], p[i+4]}
-				end = math32.Vector2{p[i+5], p[i+6]}
+				cp1 = math32.Vec2(p[i+1], p[i+2])
+				cp2 = math32.Vec2(p[i+3], p[i+4])
+				end = math32.Vec2(p[i+5], p[i+6])
 			}
 			n0 := intersect.CubicBezierNormal(start, cp1, cp2, end, 0.0, halfWidth)
 			n1 := intersect.CubicBezierNormal(start, cp1, cp2, end, 1.0, halfWidth)
@@ -629,7 +635,7 @@ func offset(p ppath.Path, halfWidth float32, cr Capper, jr Joiner, strokeOpen bo
 		case ppath.ArcTo:
 			rx, ry, phi := p[i+1], p[i+2], p[i+3]
 			large, sweep := ppath.ToArcFlags(p[i+4])
-			end = math32.Vector2{p[i+5], p[i+6]}
+			end = math32.Vec2(p[i+5], p[i+6])
 			_, _, theta0, theta1 := ppath.EllipseToCenter(start.X, start.Y, rx, ry, phi, large, sweep, end.X, end.Y)
 			n0 := ellipseNormal(rx, ry, phi, sweep, theta0, halfWidth)
 			n1 := ellipseNormal(rx, ry, phi, sweep, theta1, halfWidth)
@@ -652,7 +658,7 @@ func offset(p ppath.Path, halfWidth float32, cr Capper, jr Joiner, strokeOpen bo
 				sweep:  sweep,
 			})
 		case ppath.Close:
-			end = math32.Vector2{p[i+1], p[i+2]}
+			end = math32.Vec2(p[i+1], p[i+2])
 			if !ppath.Equal(start.X, end.X) || !ppath.Equal(start.Y, end.Y) {
 				n := end.Sub(start).Rot90CW().Normal().MulScalar(halfWidth)
 				states = append(states, pathStrokeState{
@@ -714,9 +720,9 @@ func offset(p ppath.Path, halfWidth float32, cr Capper, jr Joiner, strokeOpen bo
 			prev := states[i-1]
 			cw := 0.0 <= prev.n1.Rot90CW().Dot(cur.n0)
 			if cw && rhsJoinIndex != -1 {
-				optimizeInnerBend(rhs, rhsJoinIndex)
+				rhs = optimizeInnerBend(rhs, rhsJoinIndex)
 			} else if !cw && lhsJoinIndex != -1 {
-				optimizeInnerBend(lhs, lhsJoinIndex)
+				lhs = optimizeInnerBend(lhs, lhsJoinIndex)
 			}
 		}
 		rhsJoinIndex = -1
@@ -744,9 +750,9 @@ func offset(p ppath.Path, halfWidth float32, cr Capper, jr Joiner, strokeOpen bo
 		if 1 < len(states) {
 			cw := 0.0 <= states[len(states)-1].n1.Rot90CW().Dot(states[0].n0)
 			if cw && rhsJoinIndex != -1 {
-				optimizeInnerBend(rhs, rhsJoinIndex)
+				rhs = optimizeInnerBend(rhs, rhsJoinIndex)
 			} else if !cw && lhsJoinIndex != -1 {
-				optimizeInnerBend(lhs, lhsJoinIndex)
+				lhs = optimizeInnerBend(lhs, lhsJoinIndex)
 			}
 		}
 
@@ -778,28 +784,20 @@ func Offset(p ppath.Path, w float32, tolerance float32) ppath.Path {
 		return p
 	}
 
-	positive := 0.0 < w
-	w = math32.Abs(w)
-
 	q := ppath.Path{}
+	if !FastStroke {
+		// make sure all filling paths are CCW
+		p = intersect.Settle(p, ppath.NonZero)
+	}
 	for _, pi := range p.Split() {
-		r := ppath.Path{}
-		rhs, lhs := offset(pi, w, ButtCap, RoundJoin, false, tolerance)
-		if rhs == nil {
-			continue
-		} else if positive {
-			r = rhs
-		} else {
-			r = lhs
+		rhs, _ := offset(pi, w, ButtCap, RoundJoin, false, tolerance)
+		if rhs != nil {
+			q = q.Append(rhs)
 		}
-		if pi.Closed() {
-			if intersect.CCW(pi) {
-				r = intersect.Settle(r, ppath.Positive)
-			} else {
-				r = intersect.Settle(r, ppath.Negative).Reverse()
-			}
-		}
-		q = q.Append(r)
+	}
+	if !FastStroke {
+		// fix overlapping and spilled parts
+		q = intersect.Settle(q, ppath.Positive)
 	}
 	return q
 }

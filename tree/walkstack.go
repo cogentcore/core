@@ -19,9 +19,10 @@ type walkEntry struct {
 
 // get returns the child index of n, or 0 if n is not in the stack.
 func (ws walkStack) get(n Node) int {
-	for i := len(ws) - 1; i >= 0; i-- {
-		if ws[i].node == n {
-			return ws[i].child
+	for ri := len(ws) - 1; ri >= 0; ri-- {
+		w := ws[ri]
+		if w.node == n {
+			return w.child
 		}
 	}
 	return 0
@@ -50,7 +51,8 @@ func (ws *walkStack) push(n Node, child int) {
 func (ws *walkStack) delete(n Node) {
 	s := *ws
 	for i := len(s) - 1; i >= 0; i-- {
-		if s[i].node == n {
+		v := s[i]
+		if v.node == n {
 			*ws = append(s[:i], s[i+1:]...)
 			return
 		}

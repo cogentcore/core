@@ -41,9 +41,9 @@ func (p Path) FastBounds() math32.Box2 {
 			cp2 := math32.Vec2(p[i+3], p[i+4])
 			end = math32.Vec2(p[i+5], p[i+6])
 			xmin = math32.Min(xmin, math32.Min(cp1.X, math32.Min(cp2.X, end.X)))
-			xmax = math32.Max(xmax, math32.Max(cp1.X, math32.Min(cp2.X, end.X)))
+			xmax = math32.Max(xmax, math32.Max(cp1.X, math32.Max(cp2.X, end.X)))
 			ymin = math32.Min(ymin, math32.Min(cp1.Y, math32.Min(cp2.Y, end.Y)))
-			ymax = math32.Max(ymax, math32.Max(cp1.Y, math32.Min(cp2.Y, end.Y)))
+			ymax = math32.Max(ymax, math32.Max(cp1.Y, math32.Max(cp2.Y, end.Y)))
 		case ArcTo:
 			var rx, ry, phi float32
 			var large, sweep bool

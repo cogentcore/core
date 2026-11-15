@@ -105,8 +105,8 @@ p { margin: 4px }
 			fresh := core.NewBody()
 			require.NoError(t, ReadDocument(ctx.NewPage(), fresh, doc))
 			var got, want map[string]string
-			again.RenderImage(func() {}, func() { got = widgetStates(again) })
-			fresh.RenderImage(func() {}, func() { want = widgetStates(fresh) })
+			core.RenderImage(again, func() {}, core.Locked(again, func() { got = widgetStates(again) }))
+			core.RenderImage(fresh, func() {}, core.Locked(fresh, func() { want = widgetStates(fresh) }))
 			assert.Equal(t, want, got)
 		})
 	}
@@ -137,8 +137,8 @@ func TestReuseStylesSiblings(t *testing.T) {
 	fresh := core.NewBody()
 	require.NoError(t, ReadDocument(ctx.NewPage(), fresh, doc))
 	var got, want map[string]string
-	again.RenderImage(func() {}, func() { got = widgetStates(again) })
-	fresh.RenderImage(func() {}, func() { want = widgetStates(fresh) })
+	core.RenderImage(again, func() {}, core.Locked(again, func() { got = widgetStates(again) }))
+	core.RenderImage(fresh, func() {}, core.Locked(fresh, func() { want = widgetStates(fresh) }))
 	assert.Equal(t, want, got)
 }
 
@@ -167,7 +167,7 @@ func TestReuseStylesAddedRules(t *testing.T) {
 	fresh := core.NewBody()
 	require.NoError(t, ReadDocument(ctx.NewPage(), fresh, doc))
 	var got, want map[string]string
-	again.RenderImage(func() {}, func() { got = widgetStates(again) })
-	fresh.RenderImage(func() {}, func() { want = widgetStates(fresh) })
+	core.RenderImage(again, func() {}, core.Locked(again, func() { got = widgetStates(again) }))
+	core.RenderImage(fresh, func() {}, core.Locked(fresh, func() { want = widgetStates(fresh) }))
 	assert.Equal(t, want, got)
 }

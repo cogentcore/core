@@ -578,13 +578,13 @@ StmtRules {
         PostAsgnBit:       ExprList 'OpBitAsgn' ExprList   >AST
         PostAsgnMath:      ExprList 'OpMathAsgn' ExprList  >AST
         PostAsgnNew:       ExprList ':=' ExprList          >AST
-        --->Acts:{ -1:ChangeToken:"Name...":NameVar<-Name; -1:AddSymbol:"Name":NameVar; -1:AddDetail:"[1]":None; }
+        --->Acts:{ -1:ChangeToken:"Name...":NameVar<-Name; -1:AddSymbol:"Name...":NameVar; -1:AddDetail:"[1]":None; }
         PostExprStmt:  Expr  >AST
     }
     Asgn {
         AsgnExisting:  ExprList '=' ExprList 'EOS'   >AST
         AsgnNew:       ExprList ':=' ExprList 'EOS'  >AST
-        --->Acts:{ -1:ChangeToken:"Name...":NameVar<-Name; -1:AddSymbol:"Name":NameVar; -1:AddDetail:"[1]":None; }
+        --->Acts:{ -1:ChangeToken:"Name...":NameVar<-Name; -1:AddSymbol:"Name...":NameVar; -1:AddDetail:"[1]":None; }
         AsgnMath:  ExprList 'OpMathAsgn' ExprList 'EOS'  >AST
         AsgnBit:   ExprList 'OpBitAsgn' ExprList 'EOS'   >AST
     }

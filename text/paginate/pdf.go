@@ -65,7 +65,7 @@ func PDF(w io.Writer, opts Options, ins ...core.Widget) {
 		sc.StyleTree()
 		sc.LayoutScene()
 
-		sc.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		for _, cwb := range sc.AllWidgets() {
 			if tx, ok := cwb.This.(*core.Text); ok {
 				lns := tx.PaintText()
 				if len(lns.Lines) > 0 {
@@ -73,8 +73,7 @@ func PDF(w io.Writer, opts Options, ins ...core.Widget) {
 					ln.Offset.Y += 3 // todo: seriously, this fixes an otherwise inexplicable offset
 				}
 			}
-			return true
-		})
+		}
 
 		p.RenderWidget()
 
@@ -117,7 +116,7 @@ func (p *pager) assemble() {
 		if p.opts.Title != nil && ii == 0 { // don't restyle the title
 			continue
 		}
-		iw.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		for _, cwb := range iw.AllWidgets() {
 			if tx, ok := cwb.This.(*core.Text); ok {
 				if _, ok := cwb.Parent.(*core.Frame); ok { // not inside buttons etc
 					cwb.Styler(func(s *styles.Style) {
@@ -135,7 +134,6 @@ func (p *pager) assemble() {
 					})
 				}
 			}
-			return true
-		})
+		}
 	}
 }

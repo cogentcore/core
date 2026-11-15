@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package phong renders 3D meshes with Blinn-Phong lighting on the GPU, with
+// lights, materials, textures, and a camera.
 package phong
 
 //go:generate core generate
@@ -11,7 +13,7 @@ import (
 	"sync"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/ordmap"
+	"cogentcore.org/core/base/keylist"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/shape"
 	"github.com/oliverbestmann/webgpu/wgpu"
@@ -62,15 +64,15 @@ type Phong struct {
 
 	// Meshes holds all of the mesh data, managed by [SetMesh],
 	// [ResetMeshes] methods.
-	meshes ordmap.Map[string, *shape.MeshData]
+	meshes keylist.List[string, *shape.MeshData]
 
 	// Textures holds all of the texture images, managed by [SetTexture],
 	// [ResetTextures] methods.
-	textures ordmap.Map[string, *Texture]
+	textures keylist.List[string, *Texture]
 
 	// Objects holds per-object data, keyed by unique name / path id.
 	// All objects must be added in a pre-Render pass via [SetObject].
-	objects ordmap.Map[string, *Object]
+	objects keylist.List[string, *Object]
 
 	// cameraUpdated is set whenver SetCamera is called.
 	// it triggers an up date of the object's WorldMatrix.

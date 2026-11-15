@@ -4,6 +4,8 @@
 
 package strcase
 
+import "strings"
+
 // FormatList returns a formatted version of the given list of items following these rules:
 //   - nil => ""
 //   - "Go" => "Go"
@@ -19,16 +21,16 @@ func FormatList(items ...string) string {
 	case 2:
 		return items[0] + " and " + items[1]
 	}
-	res := ""
+	var res strings.Builder
 	for i, match := range items {
-		res += match
+		res.WriteString(match)
 		if i == len(items)-1 {
 			// last one, so do nothing
 		} else if i == len(items)-2 {
-			res += ", and "
+			res.WriteString(", and ")
 		} else {
-			res += ", "
+			res.WriteString(", ")
 		}
 	}
-	return res
+	return res.String()
 }

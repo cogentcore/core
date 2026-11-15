@@ -13,10 +13,10 @@ type Line struct {
 	NodeBase
 
 	// position of the start of the line
-	Start math32.Vector2 `xml:"{x1,y1}"`
+	Start math32.Vector2 `svg:"x1,y1"`
 
 	// position of the end of the line
-	End math32.Vector2 `xml:"{x2,y2}"`
+	End math32.Vector2 `svg:"x2,y2"`
 }
 
 func (g *Line) SVGName() string { return "line" }

@@ -9,6 +9,7 @@ import (
 	"io"
 	"maps"
 	"slices"
+	"strings"
 
 	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/text/textpos"
@@ -100,13 +101,13 @@ func (ty *Type) AddScopesStack(ss SymStack) {
 		return
 	}
 	ty.AllocScopes()
-	for i := 0; i < sz; i++ {
+	for i := range sz {
 		sc := ss[i]
 		ty.Scopes[sc.Kind] = sc.Name
 	}
 }
 
-// String() satisfies the fmt.Stringer interface
+// String satisfies the fmt.Stringer interface
 func (ty *Type) String() string {
 	switch {
 	case ty.Kind.Cat() == Function && len(ty.Size) == 2:
@@ -135,7 +136,7 @@ func (ty *Type) String() string {
 	return ty.Name + ": " + ty.Kind.String()
 }
 
-// ArgString() returns string of args to function if it is a function type
+// ArgString returns string of args to function if it is a function type
 func (ty *Type) ArgString() string {
 	if ty.Kind.Cat() != Function || len(ty.Size) != 2 {
 		return ""
@@ -147,7 +148,7 @@ func (ty *Type) ArgString() string {
 	return ty.Els.StringRange(0, npars)
 }
 
-// ReturnString() returns string of return vals of function if it is a function type
+// ReturnString returns string of return vals of function if it is a function type
 func (ty *Type) ReturnString() string {
 	if ty.Kind.Cat() != Function || len(ty.Size) != 2 {
 		return ""
@@ -166,7 +167,7 @@ func (ty *Type) ReturnString() string {
 // NonPtrType returns the non-pointer name of this type, if it is a pointer type
 // otherwise just returns Name
 func (ty *Type) NonPtrType() string {
-	if !(ty.Kind == Ptr || ty.Kind == Ref || ty.Kind == UnsafePtr) {
+	if ty.Kind != Ptr && ty.Kind != Ref && ty.Kind != UnsafePtr {
 		return ty.Name
 	}
 	if len(ty.Els) == 1 {
@@ -224,7 +225,7 @@ type TypeEl struct {
 	Type string
 }
 
-// String() satisfies the fmt.Stringer interface
+// String satisfies the fmt.Stringer interface
 func (tel *TypeEl) String() string {
 	if tel.Name != "" {
 		return tel.Name + " " + tel.Type
@@ -232,7 +233,7 @@ func (tel *TypeEl) String() string {
 	return tel.Type
 }
 
-// Clone() returns a copy of this el
+// Clone returns a copy of this el
 func (tel *TypeEl) Clone() *TypeEl {
 	te := &TypeEl{Name: tel.Name, Type: tel.Type}
 	return te
@@ -248,9 +249,7 @@ func (te *TypeEls) Add(nm, typ string) {
 
 // CopyFrom copies from another list
 func (te *TypeEls) CopyFrom(cp TypeEls) {
-	for _, t := range cp {
-		(*te) = append(*te, t)
-	}
+	*te = append(*te, cp...)
 }
 
 // ByName returns type el with given name, nil if not there
@@ -275,21 +274,21 @@ func (te *TypeEls) ByType(typ string) *TypeEl {
 	return nil
 }
 
-// String() satisfies the fmt.Stringer interface
+// String satisfies the fmt.Stringer interface
 func (te *TypeEls) String() string {
 	return te.StringRange(0, len(*te))
 }
 
-// StringRange() returns a string rep of range of items
+// StringRange returns a string rep of range of items
 func (te *TypeEls) StringRange(st, n int) string {
 	n = min(n, len(*te))
-	str := ""
+	var str strings.Builder
 	for i := 0; i < n; i++ {
 		tel := (*te)[st+i]
-		str += tel.String()
+		str.WriteString(tel.String())
 		if i < n-1 {
-			str += ", "
+			str.WriteString(", ")
 		}
 	}
-	return str
+	return str.String()
 }

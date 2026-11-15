@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package Units supports full range of CSS-style length units (em, px, dp, etc)
+Package units supports full range of CSS-style length units (em, px, dp, etc)
 
 The unit is stored along with a value, and can be converted at a later point into
 a raw display pixel value using the Context which contains all the necessary reference

@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/tree"
 )
 
 // headingOf returns the heading level (1 to 6) and text of the given
@@ -31,12 +30,11 @@ func headingOf(w core.Widget) (level int, text string, ok bool) {
 		return level, tx.Text, true
 	}
 	var texts []string
-	w.AsWidget().WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+	for cw := range w.AsWidget().AllWidgets() {
 		if tx, ok := cw.(*core.Text); ok && strings.TrimSpace(tx.Text) != "" {
 			texts = append(texts, strings.TrimSpace(tx.Text))
 		}
-		return tree.Continue
-	})
+	}
 	if len(texts) == 0 {
 		return 0, "", false
 	}
@@ -53,12 +51,11 @@ func paragraphText(w core.Widget) (string, bool) {
 		return tx.Text, true
 	}
 	text := ""
-	w.AsWidget().WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+	for cw := range w.AsWidget().AllWidgets() {
 		if tx, ok := cw.(*core.Text); ok {
 			text = tx.Text
-			return tree.Break
+			break
 		}
-		return tree.Continue
-	})
+	}
 	return text, text != ""
 }

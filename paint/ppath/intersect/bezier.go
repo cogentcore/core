@@ -20,7 +20,7 @@ func cubicBezierDeriv2(p0, p1, p2, p3 math32.Vector2, t float32) math32.Vector2 
 	return p0.Add(p1).Add(p2).Add(p3)
 }
 
-func cubicBezierDeriv3(p0, p1, p2, p3 math32.Vector2, t float32) math32.Vector2 {
+func cubicBezierDeriv3(p0, p1, p2, p3 math32.Vector2, _ float32) math32.Vector2 {
 	p0 = p0.MulScalar(-6.0)
 	p1 = p1.MulScalar(18.0)
 	p2 = p2.MulScalar(-18.0)
@@ -50,7 +50,7 @@ func quadraticBezierPos(p0, p1, p2 math32.Vector2, t float32) math32.Vector2 {
 	return p0.Add(p1).Add(p2)
 }
 
-// negative when curve bends CW while following t
+// CubicBezierCurvatureRadius returns the curvature radius, negative when curve bends CW while following t.
 func CubicBezierCurvatureRadius(p0, p1, p2, p3 math32.Vector2, t float32) float32 {
 	dp := ppath.CubicBezierDeriv(p0, p1, p2, p3, t)
 	ddp := cubicBezierDeriv2(p0, p1, p2, p3, t)
@@ -293,10 +293,11 @@ func xmonotoneQuadraticBezier(p0, p1, p2 math32.Vector2) ppath.Path {
 	return p
 }
 
-// return the normal at the right-side of the curve (when increasing t)
+// CubicBezierNormal returns the normal at the right-side of the curve (when increasing t).
 func CubicBezierNormal(p0, p1, p2, p3 math32.Vector2, t, d float32) math32.Vector2 {
 	// TODO: remove and use CubicBezierDeriv + Rot90CW?
-	if t == 0.0 {
+	switch t {
+	case 0.0:
 		n := p1.Sub(p0)
 		if n.X == 0 && n.Y == 0 {
 			n = p2.Sub(p0)
@@ -308,7 +309,7 @@ func CubicBezierNormal(p0, p1, p2, p3 math32.Vector2, t, d float32) math32.Vecto
 			return math32.Vector2{}
 		}
 		return n.Rot90CW().Normal().MulScalar(d)
-	} else if t == 1.0 {
+	case 1.0:
 		n := p3.Sub(p2)
 		if n.X == 0 && n.Y == 0 {
 			n = p3.Sub(p1)
@@ -331,21 +332,22 @@ func addCubicBezierLine(p *ppath.Path, p0, p1, p2, p3 math32.Vector2, t, d float
 	}
 
 	pos := math32.Vector2{}
-	if t == 0.0 {
+	switch t {
+	case 0.0:
 		// line to beginning of path
 		pos = p0
 		if d != 0.0 {
 			n := CubicBezierNormal(p0, p1, p2, p3, t, d)
 			pos = pos.Add(n)
 		}
-	} else if t == 1.0 {
+	case 1.0:
 		// line to the end of the path
 		pos = p3
 		if d != 0.0 {
 			n := CubicBezierNormal(p0, p1, p2, p3, t, d)
 			pos = pos.Add(n)
 		}
-	} else {
+	default:
 		panic("not implemented")
 	}
 	p.LineTo(pos.X, pos.Y)

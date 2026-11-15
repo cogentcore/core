@@ -17,7 +17,7 @@ import (
 // layoutGeom lays out the body and calls fun with the layout done,
 // holding the lock of its window, as it is still being rendered.
 func layoutGeom(b *Body, fun func()) {
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		fun()

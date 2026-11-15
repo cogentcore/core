@@ -59,7 +59,7 @@ func (r *PDF) Text(style *styles.Paint, m math32.Matrix2, pos math32.Vector2, ln
 }
 
 // TextLine rasterizes the given shaped.Line.
-func (r *PDF) textLine(style *styles.Paint, m math32.Matrix2, li int, ln *shaped.Line, lns *shaped.Lines, runes []rune, clr image.Image, off math32.Vector2) {
+func (r *PDF) textLine(style *styles.Paint, m math32.Matrix2, _ int, ln *shaped.Line, lns *shaped.Lines, runes []rune, clr image.Image, off math32.Vector2) {
 	start := off.Add(ln.Offset)
 	off = start
 	for ri := range ln.Runs {
@@ -84,7 +84,7 @@ func (r *PDF) textLine(style *styles.Paint, m math32.Matrix2, li int, ln *shaped
 }
 
 // textRegionFill fills given regions within run with given fill color.
-func (r *PDF) textRegionFill(m math32.Matrix2, run *shapedgt.Run, off math32.Vector2, fill image.Image, ranges []textpos.Range) {
+func (r *PDF) textRegionFill(_ math32.Matrix2, run *shapedgt.Run, off math32.Vector2, fill image.Image, ranges []textpos.Range) {
 	if fill == nil {
 		return
 	}
@@ -119,7 +119,7 @@ func (r *PDF) textRunRegions(m math32.Matrix2, run *shapedgt.Run, ln *shaped.Lin
 // textRun rasterizes the given text run into the output image using the
 // font face set in the shaping.
 // The text will be drawn starting at the start pixel position.
-func (r *PDF) textRun(style *styles.Paint, m math32.Matrix2, run *shapedgt.Run, ln *shaped.Line, lns *shaped.Lines, runes []rune, clr image.Image, off math32.Vector2) {
+func (r *PDF) textRun(style *styles.Paint, _ math32.Matrix2, run *shapedgt.Run, _ *shaped.Line, lns *shaped.Lines, runes []rune, clr image.Image, off math32.Vector2) {
 	// dir := run.Direction
 	region := run.Runes()
 	rbb := run.MaxBounds.Translate(off)
@@ -141,10 +141,11 @@ func (r *PDF) textRun(style *styles.Paint, m math32.Matrix2, run *shapedgt.Run, 
 	sty := run.Font.Style(&style.Text)
 	// https://en.wikipedia.org/wiki/Subscript_and_superscript: latex does -.14 sub, .25 super
 	// others often use -.33 and .33
-	if sty.Special == rich.Super {
+	switch sty.Special {
+	case rich.Super:
 		off.X += 0.05 * fsz // tends to be cramped otherwise
 		off.Y -= 0.25 * fsz
-	} else if sty.Special == rich.Sub {
+	case rich.Sub:
 		off.X += 0.05 * fsz // tends to be cramped otherwise
 		off.Y += 0.14 * fsz
 	}
@@ -199,7 +200,7 @@ func (r *PDF) setTextStrokeColor(clr image.Image) bool {
 		}
 	}
 	sc.Color = clr
-	r.w.SetStroke(&sc)
+	r.w.SetStroke(&sc, math32.Box2{}, math32.Identity2())
 	return true
 }
 
@@ -210,7 +211,7 @@ func (r *PDF) setTextFillColor(clr image.Image) {
 }
 
 // setTextStyle applies the given styles.
-func (r *PDF) setTextStyle(fnt *text.Font, style *styles.Paint, fill, stroke image.Image, size, lineHeight float32) {
+func (r *PDF) setTextStyle(fnt *text.Font, style *styles.Paint, fill, stroke image.Image, _, _ float32) {
 	tsty := &style.Text
 	sty := fnt.Style(tsty)
 	r.w.SetFont(sty, tsty)
@@ -375,8 +376,7 @@ func (w *pdfPage) WriteText(tx string) error {
 		} else {
 			fmt.Fprintf(w, " (")
 		}
-		rs := []rune(s)
-		for _, r := range rs {
+		for _, r := range s {
 			c, ok := charmap.Windows1252.EncodeRune(r)
 			if !ok {
 				if '\u2000' <= r && r <= '\u200A' {

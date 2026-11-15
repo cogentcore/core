@@ -25,14 +25,14 @@ func TestMD(t *testing.T) {
 	for nm, s := range tests {
 		b := core.NewBody()
 		assert.NoError(t, ReadMDString(NewContext(), b, s))
-		b.AssertRender(t, "md/"+nm)
+		core.AssertRender(t, b, "md/"+nm)
 	}
 }
 
 func TestDoubleButtonBug(t *testing.T) {
 	b := core.NewBody()
 	assert.NoError(t, ReadMDString(NewContext(), b, `<button>A</button><button>B</button>`))
-	b.AssertRender(t, "md/double-button-bug")
+	core.AssertRender(t, b, "md/double-button-bug")
 }
 
 func TestExtraNewlineBug(t *testing.T) {
@@ -40,7 +40,7 @@ func TestExtraNewlineBug(t *testing.T) {
 	assert.NoError(t, ReadMDString(NewContext(), b, `A
 
 <button>B</button>`))
-	b.AssertRender(t, "md/extra-newline-bug")
+	core.AssertRender(t, b, "md/extra-newline-bug")
 }
 
 func TestButtonInHeadingBug(t *testing.T) {
@@ -48,7 +48,7 @@ func TestButtonInHeadingBug(t *testing.T) {
 	// (see the comment there).
 	b := core.NewBody()
 	assert.NoError(t, ReadMDString(NewContext(), b, `<h1><button>A</button>B</h1>`))
-	b.AssertRender(t, "md/button-in-heading-bug")
+	core.AssertRender(t, b, "md/button-in-heading-bug")
 }
 
 // TestLineBreakHTML checks that the line breaks of a backslash at the end of a

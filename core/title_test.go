@@ -35,7 +35,7 @@ func TestWindowTitle(t *testing.T) {
 	}
 	var d *Body
 	imagex.UpdateTestImagesFor(t) // the images are not compared
-	b.AssertRender(t, "title", func() {
+	AssertRender(t, b, "title", func() {
 		waitTitle("App", "the title of the window")
 		b.AsyncLock() // (it is rendered meanwhile)
 		MessageSnackbar(b, "A message")
@@ -53,7 +53,7 @@ func TestWindowTitle(t *testing.T) {
 		b.AsyncLock()
 		d.Close()
 		b.AsyncUnlock()
-	}, func() {
+	}, Locked(b, func() {
 		waitTitle("App", "back after the dialog")
-	})
+	}))
 }

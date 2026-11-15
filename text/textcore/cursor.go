@@ -11,16 +11,10 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/text/textpos"
-	"cogentcore.org/core/tree"
 )
 
-var (
-	// cursorSpriteName is the name of the window sprite used for the cursor
-	cursorSpriteName = "textcore.Base.Cursor"
-
-	// lastCursor is the *Base that last created a cursor sprite.
-	lastCursor tree.Node
-)
+// cursorSpriteName is the name of the window sprite used for the cursor
+var cursorSpriteName = "textcore.Base.Cursor"
 
 // startCursor starts the cursor blinking and renders it.
 // This must be called to update the cursor position -- is called in render.
@@ -41,15 +35,23 @@ func (ed *Base) stopCursor() {
 
 // toggleSprite turns on or off the cursor sprite.
 func (ed *Base) toggleCursor(on bool) {
-	core.TextCursor(on, ed.AsWidget(), &lastCursor, cursorSpriteName, ed.CursorWidth.Dots, ed.charSize.Y, ed.CursorColor, func() image.Point {
+	ed.cursorOn = on
+	core.TextCursor(on, ed.AsWidget(), cursorSpriteName, ed.CursorWidth.Dots, ed.charSize.Y, ed.CursorColor, func() image.Point {
 		return ed.charStartPos(ed.CursorPos).ToPointFloor()
 	})
 }
 
 // updateCursorPosition updates the position of the cursor.
 func (ed *Base) updateCursorPosition() {
+	// An editor that is not focused updates its cursor only if it is on
+	// (as with [Base.SetCursorShow]) and no other widget has it now.
 	if !ed.StateIs(states.Focused) {
-		return
+		if !ed.cursorOn {
+			return
+		}
+		if owner := core.TextCursorOwner(ed.AsWidget(), cursorSpriteName); owner != nil && owner != ed.This {
+			return
+		}
 	}
 	if ed.IsReadOnly() { // no cursor, but there can be an InputPos
 		ed.updateTextInput()
@@ -67,7 +69,7 @@ func (ed *Base) updateCursorPosition() {
 	}
 	ms.Sprites.Unlock()
 	// The sprites are removed when the scene is rebuilt or resized,
-	// so the cursor of the focused editor is started again.
+	// so the cursor is started again.
 	if !ok {
 		ed.startCursor()
 	}

@@ -7,6 +7,7 @@ package content
 import (
 	"fmt"
 	"io"
+	"maps"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
@@ -54,9 +55,7 @@ var GoalReplay []string
 // AddCompiledGoal adds the given compiled pages to [CompiledGoal].
 // Generated code calls it.
 func AddCompiledGoal(pages map[string]*GoalPage) {
-	for k, p := range pages {
-		CompiledGoal[k] = p
-	}
+	maps.Copy(CompiledGoal, pages)
 }
 
 // goalRun is the state of the Goal code of the page being shown.
@@ -115,9 +114,7 @@ func bindGoal(ed *textcore.Editor, parent *core.Frame) {
 		interpreted = true
 		interpretGoal(ed, parent)
 	})
-	runCode(ed, parent, "Goal", func(out io.Writer) {
-		gr.next = f(parent, out)
-	})
+	runCode(ed, parent, func(out io.Writer) { gr.next = f(parent, out) })
 }
 
 // interpretGoal runs the Goal code block of the given editor in the

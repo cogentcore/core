@@ -10,6 +10,7 @@
 package desktop
 
 import (
+	"errors"
 	"image"
 	"log"
 	"runtime"
@@ -30,9 +31,14 @@ import (
 func Init() {
 	// some operating systems require us to be on the main thread
 	runtime.LockOSThread()
+	setMainThread()
 
 	base.Init(TheApp, &TheApp.App)
 }
+
+// hideNewWindows is whether new windows are not shown, which the tests set,
+// so that they do not pop up on the screen of the user running them.
+var hideNewWindows bool
 
 // TheApp is the single [system.App] for the desktop platform
 var TheApp = &App{AppMulti: base.NewAppMulti[*Window]()}
@@ -122,7 +128,7 @@ func (a *App) SendEmptyEvent() {
 func (a *App) MainLoop() {
 	a.initGUI()
 	a.MainQueue = make(chan base.FuncRun)
-	a.MainDone = make(chan struct{})
+	a.InitMainDone()
 	for {
 		select {
 		case <-a.MainDone:
@@ -162,6 +168,10 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 		system.UpdateLogicalDPIScaleFunc()
 	}
 
+	// glfw can find no monitors, as with an X display without RandR outputs
+	if len(a.Screens) == 0 {
+		return nil, errors.New("system/driver/desktop: no screens to open a window on")
+	}
 	sc := a.Screens[0]
 
 	if opts == nil {
@@ -226,7 +236,9 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 	w.Glw.SetDropCallback(w.DropEvent)
 	w.Glw.SetInputMode(glfw.LockKeyMods, glfw.True)
 
-	w.Show()
+	if !hideNewWindows {
+		w.Show()
+	}
 	a.RunOnMain(func() {
 		w.updateGeometry()
 		w.ConstrainFrame(false) // constrain full frame on open

@@ -8,11 +8,12 @@ package core
 
 import "syscall/js"
 
-// init makes the window of the tests on the web (see goscript_test.go) the
-// size of a desktop window, as the tests expect, rather than that of a
-// phone, which is the default size of the frame of the tests in the browser,
-// with the spacing of the offscreen platform of the other tests (see
-// [DefaultSpacing]), rather than that of the desktop platform of the browser.
+// init makes the window of the tests on the web (see the core:js-test
+// directive in align_test.go) the size of a desktop window, as the tests
+// expect, rather than that of a phone, which is the default size of the
+// frame of the tests in the browser, with the spacing of the offscreen
+// platform of the other tests (see [DefaultSpacing]), rather than that of
+// the desktop platform of the browser.
 func init() {
 	LoadAllSettings() // (first, as in NewBody, which then does not load them again)
 	AppearanceSettings.Spacing = 100

@@ -28,7 +28,7 @@ func (ed *Base) reLayout() {
 		return
 	}
 	prevLines := ed.linesSize.Y
-	lns := ed.Lines.ViewLines(ed.viewId)
+	lns := ed.Lines.ViewLines(ed.viewID)
 	if lns == prevLines {
 		return
 	}
@@ -89,7 +89,7 @@ func (ed *Base) posIsVisible(pos textpos.Pos) bool {
 	if ed.Lines == nil {
 		return false
 	}
-	vpos := ed.Lines.PosToView(ed.viewId, pos)
+	vpos := ed.Lines.PosToView(ed.viewID, pos)
 	sp := int(math32.Floor(ed.scrollPos))
 	return vpos.Line >= sp && vpos.Line <= sp+ed.visSize.Y
 }
@@ -110,7 +110,7 @@ func (ed *Base) renderLines() {
 		li := 0
 		lastln := -1
 		for ln := stln; ln <= edln; ln++ {
-			sp := ed.Lines.PosFromView(ed.viewId, textpos.Pos{Line: ln})
+			sp := ed.Lines.PosFromView(ed.viewID, textpos.Pos{Line: ln})
 			if sp.Char == 0 && sp.Line != lastln { // Char=0 is start of source line
 				// but also get 0 for out-of-range..
 				ed.renderLineNumber(spos, li, sp.Line)
@@ -131,7 +131,7 @@ func (ed *Base) renderLines() {
 	buf := ed.Lines
 	rpos := spos
 	rpos.X += ed.LineNumberPixels()
-	vsel := buf.RegionToView(ed.viewId, ed.SelectRegion)
+	vsel := buf.RegionToView(ed.viewID, ed.SelectRegion)
 	rtoview := func(rs []textpos.Region) []textpos.Region {
 		if len(rs) == 0 {
 			return nil
@@ -140,7 +140,7 @@ func (ed *Base) renderLines() {
 		for _, reg := range rs {
 			reg := ed.Lines.AdjustRegion(reg)
 			if !reg.IsNil() {
-				hlts = append(hlts, buf.RegionToView(ed.viewId, reg))
+				hlts = append(hlts, buf.RegionToView(ed.viewID, reg))
 			}
 		}
 		return hlts
@@ -175,9 +175,9 @@ func (ed *Base) renderLine(li, ln int, rpos math32.Vector2, vsel textpos.Region,
 	pc := &ed.Scene.Painter
 	sz := ed.charSize
 	sz.X *= float32(ed.linesSize.X)
-	vlr := buf.ViewLineRegionNoLock(ed.viewId, ln)
+	vlr := buf.ViewLineRegionNoLock(ed.viewID, ln)
 	vseli := vlr.Intersect(vsel, ed.linesSize.X)
-	tx := buf.ViewMarkupLine(ed.viewId, ln)
+	tx := buf.ViewMarkupLine(ed.viewID, ln)
 	ts := ed.Lines.Settings.TabSize
 	indent := 0
 	sty, tsty := ed.Styles.NewRichText()
@@ -385,7 +385,7 @@ func (ed *Base) renderDepthBackground(pos math32.Vector2, stln, edln int) {
 	isDark := matcolor.SchemeIsDark
 	nclrs := len(viewDepthColors)
 	for ln := stln; ln <= edln; ln++ {
-		sp := ed.Lines.PosFromView(ed.viewId, textpos.Pos{Line: ln})
+		sp := ed.Lines.PosFromView(ed.viewID, textpos.Pos{Line: ln})
 		depth := buf.LineLexDepth(sp.Line)
 		if depth <= 0 {
 			continue
@@ -432,19 +432,19 @@ func (ed *Base) PixelToCursor(pt image.Point) textpos.Pos {
 	vpos := textpos.Pos{Line: vln, Char: 0}
 	stp := ed.viewCharStartPos(vpos)
 	if ptf.X < stp.X {
-		return ed.Lines.PosFromView(ed.viewId, vpos)
+		return ed.Lines.PosFromView(ed.viewID, vpos)
 	}
 	col := (ptf.X - stp.X) / ed.charSize.X
 	cells := ed.viewLineCells(vln)
-	vll := ed.Lines.ViewLineLen(ed.viewId, vln)
+	vll := ed.Lines.ViewLineLen(ed.viewID, vln)
 	for cc := range min(vll, len(cells)-1) {
 		if 2*col < float32(cells[cc]+cells[cc+1]) {
 			vpos.Char = cc
-			return ed.Lines.PosFromView(ed.viewId, vpos)
+			return ed.Lines.PosFromView(ed.viewID, vpos)
 		}
 	}
 	vpos.Char = vll
-	return ed.Lines.PosFromView(ed.viewId, vpos)
+	return ed.Lines.PosFromView(ed.viewID, vpos)
 }
 
 // CharStartPos returns the starting (top left) render coords for the
@@ -461,14 +461,14 @@ func (ed *Base) charStartPos(pos textpos.Pos) math32.Vector2 {
 	if ed.Lines == nil {
 		return math32.Vector2{}
 	}
-	return ed.viewCharStartPos(ed.Lines.PosToView(ed.viewId, pos))
+	return ed.viewCharStartPos(ed.Lines.PosToView(ed.viewID, pos))
 }
 
 // viewLineCells returns the cell column of the start of each char
 // of the given view line, followed by its end (see [lines.LineCells]).
 func (ed *Base) viewLineCells(vln int) []int {
 	ed.Lines.Lock() // required by ViewMarkupLine; never called from renderLines
-	tx := ed.Lines.ViewMarkupLine(ed.viewId, vln)
+	tx := ed.Lines.ViewMarkupLine(ed.viewID, vln)
 	ed.Lines.Unlock()
 	return lines.LineCells(tx, ed.Lines.Settings.TabSize)
 }

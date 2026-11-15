@@ -421,7 +421,7 @@ func TestDialog(t *testing.T) {
 	cm.SetFromHelp(gitCommitHelp)
 	ran := ""
 	d := cs.NewDialog(nil, cm, func(cmdline string) { ran = cmdline })
-	d.AssertRender(t, "dialog", func() {
+	core.AssertRender(t, d, "dialog", func() {
 		fm := tree.ChildByType[*core.Form](d)
 		require.NotNil(t, fm)
 		v := reflect.ValueOf(fm.Struct).Elem()

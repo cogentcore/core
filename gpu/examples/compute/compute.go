@@ -112,7 +112,7 @@ func compute(n int) int {
 	gpuTmr.Stop()
 
 	mx := min(n, 10)
-	for i := 0; i < mx; i++ {
+	for i := range mx {
 		tc := sd[i].A + sd[i].B
 		td := tc * tc
 		dc := sd[i].C - tc

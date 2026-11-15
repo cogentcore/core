@@ -65,9 +65,9 @@ func SpritesSource(stage *Stage, mainScene *Scene) composer.Source {
 	defer stage.Sprites.Unlock()
 
 	sz := math32.FromPoint(mainScene.SceneGeom.Size)
-	if stage.spritePainter == nil || stage.spritePainter.State.Size != sz {
+	if stage.spritePainter == nil || stage.spritePainter.Size != sz {
 		stage.spritePainter = paint.NewPainter(sz)
-		stage.spritePainter.Paint.UnitContext = mainScene.Styles.UnitContext
+		stage.spritePainter.UnitContext = mainScene.Styles.UnitContext
 		stage.spriteRenderer = paint.NewSourceRenderer(sz)
 	}
 	pc := stage.spritePainter

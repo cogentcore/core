@@ -234,7 +234,7 @@ func (ed *Editor) setSpell() {
 
 // correctText edits the text using the string chosen from the correction menu
 func (ed *Editor) correctText(s string) {
-	st := textpos.Pos{ed.spell.srcLn, ed.spell.srcCh} // start of word
+	st := textpos.Pos{Line: ed.spell.srcLn, Char: ed.spell.srcCh} // start of word
 	ed.Lines.RemoveTag(st, token.TextSpellErr)
 	oend := st
 	oend.Char += len(ed.spell.word)

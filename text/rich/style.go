@@ -7,6 +7,7 @@ package rich
 import (
 	"fmt"
 	"image/color"
+	"math"
 	"strings"
 
 	"cogentcore.org/core/colors"
@@ -224,6 +225,13 @@ const (
 // ToFloat32 converts the weight to its numerical 100x value
 func (w Weights) ToFloat32() float32 {
 	return float32((w + 1) * 100)
+}
+
+// WeightFromFloat32 returns the weight of the given numerical weight,
+// as in CSS and OpenType (100 = [Thin], 400 = [Normal], 700 = [Bold]),
+// the inverse of [Weights.ToFloat32].
+func WeightFromFloat32(w float32) Weights {
+	return Weights(min(max(int(math.Round(float64(w)/100))-1, int(Thin)), int(Black)))
 }
 
 func (w Weights) HTMLTag() string {
@@ -481,44 +489,52 @@ func (s *Style) IsMath() bool {
 }
 
 func (s *Style) String() string {
-	str := ""
+	var str strings.Builder
 	if s.Special == End {
 		return "{End Special}"
 	}
 	if s.Size != 1 {
-		str += fmt.Sprintf("%5.2fx ", s.Size)
+		fmt.Fprintf(&str, "%5.2fx ", s.Size)
 	}
 	if s.Family != SansSerif {
-		str += s.Family.String() + " "
+		str.WriteString(s.Family.String())
+		str.WriteString(" ")
 	}
 	if s.Slant != SlantNormal {
-		str += s.Slant.String() + " "
+		str.WriteString(s.Slant.String())
+		str.WriteString(" ")
 	}
 	if s.Weight != Normal {
-		str += s.Weight.String() + " "
+		str.WriteString(s.Weight.String())
+		str.WriteString(" ")
 	}
 	if s.Stretch != StretchNormal {
-		str += s.Stretch.String() + " "
+		str.WriteString(s.Stretch.String())
+		str.WriteString(" ")
 	}
 	if s.Special != Nothing {
-		str += s.Special.String() + " "
+		str.WriteString(s.Special.String())
+		str.WriteString(" ")
 		if s.Special == Link {
-			str += "[" + s.URL + "] "
+			str.WriteString("[")
+			str.WriteString(s.URL)
+			str.WriteString("] ")
 		}
 	}
 	for d := Underline; d <= ParagraphStart; d++ {
 		if s.Decoration.HasFlag(d) {
-			str += d.BitIndexString() + " "
+			str.WriteString(d.BitIndexString())
+			str.WriteString(" ")
 		}
 	}
 	if s.Decoration.HasFlag(fillColor) {
-		str += "fill-color "
+		str.WriteString("fill-color ")
 	}
 	if s.Decoration.HasFlag(strokeColor) {
-		str += "stroke-color "
+		str.WriteString("stroke-color ")
 	}
 	if s.Decoration.HasFlag(background) {
-		str += "background "
+		str.WriteString("background ")
 	}
-	return strings.TrimSpace(str)
+	return strings.TrimSpace(str.String())
 }

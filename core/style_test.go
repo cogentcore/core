@@ -27,20 +27,20 @@ func TestParentActualBackground(t *testing.T) {
 	}
 
 	sc, _ := make()
-	sc.AssertRender(t, "style/parent-background-color/white")
+	AssertRender(t, sc, "style/parent-background-color/white")
 
 	sc, fr := make()
 	fr.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Hoverable)
 	})
 	fr.SetState(true, states.Hovered)
-	sc.AssertRender(t, "style/parent-background-color/white-hovered-pre")
+	AssertRender(t, sc, "style/parent-background-color/white-hovered-pre")
 
 	sc, fr = make()
 	fr.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Hoverable)
 	})
-	sc.AssertRender(t, "style/parent-background-color/white-hovered-post", func() {
+	AssertRender(t, sc, "style/parent-background-color/white-hovered-post", func() {
 		sc.AsyncLock()
 		defer sc.AsyncUnlock()
 		fr.SetState(true, states.Hovered)
@@ -52,7 +52,7 @@ func TestParentActualBackground(t *testing.T) {
 	fr.Styler(func(s *styles.Style) {
 		s.Background = colors.Scheme.OutlineVariant
 	})
-	sc.AssertRender(t, "style/parent-background-color/gray")
+	AssertRender(t, sc, "style/parent-background-color/gray")
 
 	sc, fr = make()
 	fr.Styler(func(s *styles.Style) {
@@ -60,14 +60,14 @@ func TestParentActualBackground(t *testing.T) {
 		s.Background = colors.Scheme.OutlineVariant
 	})
 	fr.SetState(true, states.Hovered)
-	sc.AssertRender(t, "style/parent-background-color/gray-hovered-pre")
+	AssertRender(t, sc, "style/parent-background-color/gray-hovered-pre")
 
 	sc, fr = make()
 	fr.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Hoverable)
 		s.Background = colors.Scheme.OutlineVariant
 	})
-	sc.AssertRender(t, "style/parent-background-color/gray-hovered-post", func() {
+	AssertRender(t, sc, "style/parent-background-color/gray-hovered-post", func() {
 		sc.AsyncLock()
 		defer sc.AsyncUnlock()
 		fr.SetState(true, states.Hovered)
@@ -85,5 +85,5 @@ func TestParentUnits(t *testing.T) {
 		s.Background = colors.Scheme.Primary.Base
 		s.Min.Set(units.Pw(50), units.Ph(75))
 	})
-	b.AssertRender(t, "style/parent-units")
+	AssertRender(t, b, "style/parent-units")
 }

@@ -9,10 +9,10 @@ import (
 	"image/color"
 	"maps"
 	"reflect"
+	"slices"
 	"strings"
 
 	"cogentcore.org/core/base/reflectx"
-	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
@@ -201,7 +201,7 @@ func (g *NodeBase) SetPos(pos math32.Vector2)     {}
 func (g *NodeBase) SetSize(sz math32.Vector2)     {}
 func (g *NodeBase) PaintStyle() *styles.Paint     { return &g.Paint }
 func (g *NodeBase) LocalBBox(sv *SVG) math32.Box2 { return math32.Box2{} }
-func (g *NodeBase) BaseInterface() reflect.Type   { return reflect.TypeOf((*NodeBase)(nil)).Elem() }
+func (g *NodeBase) BaseInterface() reflect.Type   { return reflect.TypeFor[NodeBase]() }
 func (g *NodeBase) SetTransformProperty()         { g.SetProperty("transform", g.Paint.Transform.String()) }
 
 func (g *NodeBase) Init() {
@@ -213,11 +213,11 @@ func (g *NodeBase) Init() {
 
 // SetColorProperties sets color property from a string representation.
 // It breaks color alpha out as opacity.  prop is either "stroke" or "fill"
-func (g *NodeBase) SetColorProperties(prop, color string) {
-	if NameFromURL(color) != "" {
+func (g *NodeBase) SetColorProperties(prop, value string) {
+	if NameFromURL(value) != "" {
 		return
 	}
-	if color == "none" || color == "" {
+	if value == "none" || value == "" {
 		g.SetProperty(prop, "none")
 		g.DeleteProperty(prop + "-opacity")
 		if prop == "stroke" {
@@ -225,11 +225,13 @@ func (g *NodeBase) SetColorProperties(prop, color string) {
 		}
 		return
 	}
-	clr, _ := colors.FromString(color)
+	clr, _ := colors.FromString(value)
 	g.SetProperty(prop+"-opacity", fmt.Sprintf("%g", float32(clr.A)/255))
-	// we have consumed the A via opacity, so we reset it to 255
-	clr.A = 255
-	g.SetProperty(prop, colors.AsHex(clr))
+	// we have consumed the A via opacity, so we reset it to 255, after
+	// un-premultiplying the color by it
+	nclr := color.NRGBAModel.Convert(clr).(color.NRGBA)
+	nclr.A = 255
+	g.SetProperty(prop, colors.AsHex(nclr))
 }
 
 // ParentTransform returns the full compounded 2D transform matrix for all
@@ -239,10 +241,7 @@ func (g *NodeBase) ParentTransform(self bool) math32.Matrix2 {
 	pars := []Node{}
 	xf := math32.Identity2()
 	n := g.This.(Node)
-	for {
-		if n.AsTree().Parent == nil {
-			break
-		}
+	for n.AsTree().Parent != nil {
 		n = n.AsTree().Parent.(Node)
 		pars = append(pars, n)
 	}
@@ -456,7 +455,7 @@ func (g *NodeBase) IsVisible(sv *SVG) bool {
 
 // Painter returns a new Painter using my styles.
 func (g *NodeBase) Painter(sv *SVG) *paint.Painter {
-	return &paint.Painter{sv.painter.State, &g.Paint}
+	return &paint.Painter{State: sv.painter.State, Paint: &g.Paint}
 }
 
 // PushContext checks our bounding box and visibility, returning false if
@@ -520,9 +519,9 @@ func BitCopyFrom(to, fm any) {
 	switch x := to.(type) {
 	case *Path:
 		x.Data = fm.(*Path).Data.Clone()
-	case *Polyline:
-		slicesx.CopyFrom(x.Points, fm.(*Polyline).Points)
+	case *Polyline: // (the copy of the fields shares the points)
+		x.Points = slices.Clone(fm.(*Polyline).Points)
 	case *Polygon:
-		slicesx.CopyFrom(x.Points, fm.(*Polygon).Points)
+		x.Points = slices.Clone(fm.(*Polygon).Points)
 	}
 }

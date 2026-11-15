@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package rendericon renders the icon of an app (icon.svg) to an image of a
+// given size.
 package rendericon
 
 import (

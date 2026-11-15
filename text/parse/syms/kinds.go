@@ -201,7 +201,7 @@ const (
 	Interface
 )
 
-// Categories
+// Cats are the categories of the kinds.
 var Cats = []Kinds{
 	Unknown,
 	Primitive,
@@ -210,7 +210,7 @@ var Cats = []Kinds{
 	KindsN,
 }
 
-// Sub-Categories
+// SubCats are the sub-categories of the kinds.
 var SubCats = []Kinds{
 	Unknown,
 	Primitive,
@@ -233,7 +233,7 @@ var SubCats = []Kinds{
 	KindsN,
 }
 
-// Sub2-Categories
+// Sub2Cats are the second-level sub-categories of the kinds.
 var Sub2Cats = []Kinds{
 	Unknown,
 	Primitive,
@@ -265,7 +265,7 @@ func InitCatMap() {
 		return
 	}
 	CatMap = make(map[Kinds]Kinds, KindsN)
-	for tk := Unknown; tk < KindsN; tk++ {
+	for tk := range KindsN {
 		for c := 1; c < len(Cats); c++ {
 			if tk < Cats[c] {
 				CatMap[tk] = Cats[c-1]
@@ -281,7 +281,7 @@ func InitSubCatMap() {
 		return
 	}
 	SubCatMap = make(map[Kinds]Kinds, KindsN)
-	for tk := Unknown; tk < KindsN; tk++ {
+	for tk := range KindsN {
 		for c := 1; c < len(SubCats); c++ {
 			if tk < SubCats[c] {
 				SubCatMap[tk] = SubCats[c-1]
@@ -297,7 +297,7 @@ func InitSub2CatMap() {
 		return
 	}
 	Sub2CatMap = make(map[Kinds]Kinds, KindsN)
-	for tk := Unknown; tk < KindsN; tk++ {
+	for tk := range KindsN {
 		for c := 1; c < len(SubCats); c++ {
 			if tk < Sub2Cats[c] {
 				Sub2CatMap[tk] = Sub2Cats[c-1]

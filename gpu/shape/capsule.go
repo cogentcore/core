@@ -80,7 +80,7 @@ func (cp *Capsule) MeshSize() (numVertex, nIndex int, hasColor bool) {
 	return
 }
 
-// SetCapsuleSector sets points in given allocated arrays
+// Set sets points in given allocated arrays.
 func (cp *Capsule) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
 	voff := cp.VertexOffset
 	ioff := cp.IndexOffset

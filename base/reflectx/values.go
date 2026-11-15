@@ -972,6 +972,17 @@ func SetRobust(to, from any) error {
 		return fmt.Errorf("destination value cannot be set; it must be a variable or field, not a const or tmp or other value that cannot be set (value: %v of type %T)", pto, pto)
 	}
 
+	// A value set to itself (as by a value widget bound to the value that it
+	// edits) is not written, which would race with readers of the value
+	// (as in another window, for an inspector).
+	if fv := reflect.ValueOf(from); fv.IsValid() {
+		// (the pointers are compared as interfaces, as goscript does not
+		// have the addresses of [reflect.Value.Pointer])
+		if fp := UnderlyingPointer(fv); fp.IsValid() && fp.Type() == pto.Type() && fp.CanInterface() && fp.Interface() == pito {
+			return nil
+		}
+	}
+
 	// images should not be copied per content: just set the pointer!
 	// otherwise the original images (esp colors!) are altered.
 	// TODO: #1394 notes the more general ambiguity about deep vs. shallow pointer copy.

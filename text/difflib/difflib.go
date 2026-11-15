@@ -454,7 +454,7 @@ func (m *SequenceMatcher) GetGroupedOpCodes(n int) [][]OpCode {
 		}
 		group = append(group, OpCode{c.Tag, i1, i2, j1, j2})
 	}
-	if len(group) > 0 && !(len(group) == 1 && group[0].Tag == 'e') {
+	if len(group) > 0 && (len(group) != 1 || group[0].Tag != 'e') {
 		groups = append(groups, group)
 	}
 	return groups
@@ -520,7 +520,7 @@ func (m *SequenceMatcher) RealQuickRatio() float64 {
 	return calculateRatio(min(la, lb), la+lb)
 }
 
-func count_leading(line string, ch byte) (count int) {
+func countLeading(line string, ch byte) (count int) {
 	// Return number of `ch` characters at the start of `line`.
 	count = 0
 	n := len(line)
@@ -568,15 +568,16 @@ func (d *Differ) Compare(a []string, b []string) (diffs []string, err error) {
 		blo := current.J1
 		bhi := current.J2
 		var g []string
-		if current.Tag == 'r' {
+		switch current.Tag {
+		case 'r':
 			g, _ = d.FancyReplace(a, alo, ahi, b, blo, bhi)
-		} else if current.Tag == 'd' {
+		case 'd':
 			g = d.Dump("-", a, alo, ahi)
-		} else if current.Tag == 'i' {
+		case 'i':
 			g = d.Dump("+", b, blo, bhi)
-		} else if current.Tag == 'e' {
+		case 'e':
 			g = d.Dump(" ", a, alo, ahi)
-		} else {
+		default:
 			return nil, fmt.Errorf("unknown tag %q", current.Tag)
 		}
 		diffs = append(diffs, g...)
@@ -587,7 +588,7 @@ func (d *Differ) Compare(a []string, b []string) (diffs []string, err error) {
 func (d *Differ) StructuredDump(tag byte, x []string, low int, high int) (out []DiffLine) {
 	size := high - low
 	out = make([]DiffLine, size)
-	for i := 0; i < size; i++ {
+	for i := range size {
 		out[i] = NewDiffLine(tag, x[i+low])
 	}
 	return out
@@ -610,7 +611,7 @@ func (d *Differ) Dump(tag string, x []string, low int, high int) (out []string) 
 }
 
 func (d *Differ) PlainReplace(a []string, alo int, ahi int, b []string, blo int, bhi int) (out []string, err error) {
-	if !(alo < ahi) || !(blo < bhi) { // assertion
+	if (alo >= ahi) || (blo >= bhi) { // assertion
 		return nil, errors.New("low greater than or equal to high")
 	}
 	// dump the shorter block first -- reduces the burden on short-term
@@ -632,8 +633,8 @@ func (d *Differ) FancyReplace(a []string, alo int, ahi int, b []string, blo int,
 	// similar pair. Lots of work, but often worth it.
 
 	// don't synch up unless the lines have a similarity score of at
-	// least cutoff; best_ratio tracks the best score seen so far
-	best_ratio := 0.74
+	// least cutoff; bestRatio tracks the best score seen so far
+	bestRatio := 0.74
 	cutoff := 0.75
 	cruncher := NewMatcherWithJunk(a, b, true, d.Charjunk)
 	eqi := -1 // 1st indices of equal lines (if any)
@@ -643,7 +644,7 @@ func (d *Differ) FancyReplace(a []string, alo int, ahi int, b []string, blo int,
 	// search for the pair that matches best without being identical
 	// (identical lines must be junk lines, & we don't want to synch up
 	// on junk -- unless we have to)
-	var best_i, best_j int
+	var bestI, bestJ int
 	for j := blo; j < bhi; j++ {
 		bj := b[j]
 		cruncher.SetSeq2(listifyString(bj))
@@ -663,16 +664,16 @@ func (d *Differ) FancyReplace(a []string, alo int, ahi int, b []string, blo int,
 			// note that ratio() is only expensive to compute the first
 			// time it's called on a sequence pair; the expensive part
 			// of the computation is cached by cruncher
-			if cruncher.RealQuickRatio() > best_ratio &&
-				cruncher.QuickRatio() > best_ratio &&
-				cruncher.Ratio() > best_ratio {
-				best_ratio = cruncher.Ratio()
-				best_i = i
-				best_j = j
+			if cruncher.RealQuickRatio() > bestRatio &&
+				cruncher.QuickRatio() > bestRatio &&
+				cruncher.Ratio() > bestRatio {
+				bestRatio = cruncher.Ratio()
+				bestI = i
+				bestJ = j
 			}
 		}
 	}
-	if best_ratio < cutoff {
+	if bestRatio < cutoff {
 		// no non-identical "pretty close" pair
 		if eqi == -1 {
 			// no identical pair either -- treat it as a straight replace
@@ -680,21 +681,21 @@ func (d *Differ) FancyReplace(a []string, alo int, ahi int, b []string, blo int,
 			return out, nil
 		}
 		// no close pair, but an identical pair -- synch up on that
-		best_i = eqi
-		best_j = eqj
-		best_ratio = 1.0
+		bestI = eqi
+		bestJ = eqj
+		bestRatio = 1.0
 	} else {
 		// there's a close pair, so forget the identical pair (if any)
 		eqi = -1
 	}
-	// a[best_i] very similar to b[best_j]; eqi is None iff they're not
+	// a[bestI] very similar to b[bestJ]; eqi is None iff they're not
 	// identical
 
 	// pump out diffs from before the synch point
-	out = append(out, d.fancyHelper(a, alo, best_i, b, blo, best_j)...)
+	out = append(out, d.fancyHelper(a, alo, bestI, b, blo, bestJ)...)
 
 	// do intraline marking on the synch pair
-	aelt, belt := a[best_i], b[best_j]
+	aelt, belt := a[bestI], b[bestJ]
 	if eqi == -1 {
 		// pump out a '-', '?', '+', '?' quad for the synched lines
 		var atags, btags string
@@ -706,17 +707,18 @@ func (d *Differ) FancyReplace(a []string, alo int, ahi int, b []string, blo int,
 			bj1 := current.J1
 			bj2 := current.J2
 			la, lb := ai2-ai1, bj2-bj1
-			if current.Tag == 'r' {
+			switch current.Tag {
+			case 'r':
 				atags += strings.Repeat("^", la)
 				btags += strings.Repeat("^", lb)
-			} else if current.Tag == 'd' {
+			case 'd':
 				atags += strings.Repeat("-", la)
-			} else if current.Tag == 'i' {
+			case 'i':
 				btags += strings.Repeat("+", lb)
-			} else if current.Tag == 'e' {
+			case 'e':
 				atags += strings.Repeat(" ", la)
 				btags += strings.Repeat(" ", lb)
-			} else {
+			default:
 				return nil, fmt.Errorf("unknown tag %q",
 					current.Tag)
 			}
@@ -727,7 +729,7 @@ func (d *Differ) FancyReplace(a []string, alo int, ahi int, b []string, blo int,
 		out = append(out, "  "+aelt)
 	}
 	// pump out diffs from after the synch point
-	out = append(out, d.fancyHelper(a, best_i+1, ahi, b, best_j+1, bhi)...)
+	out = append(out, d.fancyHelper(a, bestI+1, ahi, b, bestJ+1, bhi)...)
 	return out, nil
 }
 
@@ -750,9 +752,9 @@ func (d *Differ) QFormat(aline string, bline string, atags string, btags string)
 	// Format "?" output and deal with leading tabs.
 
 	// Can hurt, but will probably help most of the time.
-	common := min(count_leading(aline, '\t'), count_leading(bline, '\t'))
-	common = min(common, count_leading(atags[:common], ' '))
-	common = min(common, count_leading(btags[:common], ' '))
+	common := min(countLeading(aline, '\t'), countLeading(bline, '\t'))
+	common = min(common, countLeading(atags[:common], ' '))
+	common = min(common, countLeading(btags[:common], ' '))
 	atags = strings.TrimRightFunc(atags[common:], unicode.IsSpace)
 	btags = strings.TrimRightFunc(btags[common:], unicode.IsSpace)
 
@@ -946,7 +948,7 @@ func WriteContextDiff(writer io.Writer, diff LineDiffParams) error {
 	defer buf.Flush()
 	var diffErr error
 	wf := func(format string, args ...any) {
-		_, err := buf.WriteString(fmt.Sprintf(format, args...))
+		_, err := fmt.Fprintf(buf, format, args...)
 		if diffErr == nil && err != nil {
 			diffErr = err
 		}

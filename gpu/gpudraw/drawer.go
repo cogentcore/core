@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package gpudraw draws images and fills onto a render surface or texture
+// with the GPU, as for compositing the windows of an app.
 package gpudraw
 
 //go:generate core generate

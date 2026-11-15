@@ -23,14 +23,14 @@ type ShapeBase struct { //types:add -setters
 	Pos math32.Vector3
 }
 
-// Offs returns starting offset for vertices, indexes in full shape array,
+// Offsets returns starting offset for vertices, indexes in full shape array,
 // in terms of points, not floats
 func (sb *ShapeBase) Offsets() (vtxOffset, idxOffset int) {
 	vtxOffset, idxOffset = sb.VertexOffset, sb.IndexOffset
 	return
 }
 
-// SetOffs sets starting offsets for vertices, indexes in full shape array
+// SetOffsets sets starting offsets for vertices, indexes in full shape array
 func (sb *ShapeBase) SetOffsets(vtxOffset, idxOffset int) {
 	sb.VertexOffset, sb.IndexOffset = vtxOffset, idxOffset
 }
@@ -44,7 +44,7 @@ func (sb *ShapeBase) MeshBBox() math32.Box3 {
 // SetColor sets color for given range of vertex indexes
 func SetColor(clrs math32.ArrayF32, vtxOff int, numVertex int, clr math32.Vector4) {
 	cidx := vtxOff * 4
-	for vi := 0; vi < numVertex; vi++ {
+	for vi := range numVertex {
 		clr.ToSlice(clrs, cidx+vi*4)
 	}
 }
@@ -54,7 +54,7 @@ func BBoxFromVtxs(vertex math32.ArrayF32, vtxOff int, numVertex int) math32.Box3
 	bb := math32.B3Empty()
 	vidx := vtxOff * 3
 	var vtx math32.Vector3
-	for vi := 0; vi < numVertex; vi++ {
+	for vi := range numVertex {
 		vtx.FromSlice(vertex, vidx+vi*3)
 		bb.ExpandByPoint(vtx)
 	}

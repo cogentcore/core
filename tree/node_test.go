@@ -516,14 +516,14 @@ func TestLiveType(t *testing.T) {
 
 func BenchmarkNodeType(b *testing.B) {
 	n := NewNodeBase()
-	for range b.N {
+	for b.Loop() {
 		n.NodeType()
 	}
 }
 
 func BenchmarkNodeNewInstance(b *testing.B) {
 	n := NewNodeBase()
-	for range b.N {
+	for b.Loop() {
 		n.NewInstance()
 	}
 }

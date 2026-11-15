@@ -4,6 +4,8 @@
 
 package strcase
 
+//core:js-test
+
 import "testing"
 
 func TestFormatList(t *testing.T) {

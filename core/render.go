@@ -36,31 +36,27 @@ import (
 // If the widget has been deleted, or if the [Scene] has been shown but the render
 // context is not available, then this will block forever. Enable
 // [DebugSettingsData.UpdateTrace] in [DebugSettings] to see when that happens.
-// If the scene has not been shown yet and the render context is nil, it will wait
-// until the scene is shown before trying again.
+// If the scene has not been shown yet, it waits until the scene is shown.
 func (wb *WidgetBase) AsyncLock() {
-	rc := wb.Scene.renderContext()
-	if rc == nil {
-		if wb.Scene.hasShown.Load() {
-			// If the scene has been shown but there is no render context,
-			// we are probably being deleted, so we just block forever.
-			if DebugSettings.UpdateTrace {
-				fmt.Println("AsyncLock: scene shown but no render context; blocking forever:", wb)
-			}
-			select {}
-		}
-		// Otherwise, if we haven't been shown yet, we just wait until we are
-		// and then try again.
+	sc := wb.Scene
+	// A scene that has not been shown can be in the process of being run,
+	// in another goroutine without the lock, so its stage is only read
+	// once it has been shown (except for an offscreen scene, which is
+	// never shown).
+	if !sc.hasShown.Load() && sc.offscreen == nil {
 		if DebugSettings.UpdateTrace {
 			fmt.Println("AsyncLock: waiting for scene to be shown:", wb)
 		}
-		onShow := make(chan struct{})
-		wb.OnShow(func(e events.Event) {
-			onShow <- struct{}{}
-		})
-		<-onShow
-		wb.AsyncLock() // try again
-		return
+		<-sc.shown
+	}
+	rc := sc.renderContext()
+	if rc == nil {
+		// If the scene has been shown but there is no render context,
+		// we are probably being deleted, so we just block forever.
+		if DebugSettings.UpdateTrace {
+			fmt.Println("AsyncLock: scene shown but no render context; blocking forever:", wb)
+		}
+		select {}
 	}
 	rc.Lock()
 	if wb.This == nil {
@@ -278,7 +274,7 @@ func (fr *Frame) layoutFrame(size math32.Vector2) {
 	// alternate (as a scrollbar that is added and removed) stop it too.
 	const maxIter, maxSettle = layoutIters, 6
 	var sizes, prev, prev2 float64
-	for iter := 0; iter < maxSettle; iter++ {
+	for iter := range maxSettle {
 		redo := fr.SizeDown(iter)
 		if !redo {
 			break
@@ -317,15 +313,14 @@ const layoutIters = 3
 // for knowing whether the layout has settled.
 func (fr *Frame) sizesSum() float64 {
 	sum := float64(0)
-	fr.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+	for _, cwb := range fr.AllWidgets() {
 		sz := cwb.Geom.Size.Actual.Total
 		sum += float64(sz.X)*1.0001 + float64(sz.Y)
-		return tree.Continue
-	})
+	}
 	return sum
 }
 
-// layoutFrame does a layout on the given Frame using given size.
+// LayoutFrame does a layout on the given Frame using given size.
 func (fr *Frame) LayoutFrame(size math32.Vector2) {
 	fr.layoutFrame(size)
 	fr.ApplyScenePos()
@@ -396,10 +391,9 @@ func (wb *WidgetBase) doNeedsRender() {
 		}
 		if rg, ok := cw.(renderGrouper); ok && rg.RenderGroup() {
 			// it is rendered as a whole (see renderGrouper)
-			cwb.WidgetWalkDown(func(dw Widget, dwb *WidgetBase) bool {
+			for _, dwb := range cwb.AllWidgets() {
 				dwb.setFlag(false, widgetChildNeedsRender)
-				return tree.Continue
-			})
+			}
 			// not when it is covered by widgets rendered over it in the
 			// image of the scene, which it would paint over (as a playing
 			// video under an absolute dialog of a page), but it is when they
@@ -515,7 +509,7 @@ func (sc *Scene) applyStyleScene() {
 
 	sc.StyleTree()
 	if sc.Painter.Paint != nil {
-		sc.Painter.Paint.UnitContext = sc.Styles.UnitContext
+		sc.Painter.UnitContext = sc.Styles.UnitContext
 	}
 	sc.setFlag(true, sceneNeedsLayout)
 }
@@ -533,7 +527,7 @@ func (sc *Scene) doRebuild() {
 // contentSize computes the size of the scene based on current content.
 // initSz is the initial size, e.g., size of screen.
 // Used for auto-sizing windows when created, and in [Scene.ResizeToContent].
-func (sc *Scene) contentSize(initSz image.Point) image.Point {
+func (sc *Scene) contentSize(_ image.Point) image.Point {
 	sc.setFlag(true, sceneUpdating) // prevent rendering
 	defer func() { sc.setFlag(false, sceneUpdating) }()
 
@@ -596,7 +590,7 @@ func (wb *WidgetBase) StartRender() bool {
 			pc.PushContext(nil, render.NewBoundsRect(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots()))
 		}
 	}
-	pc.Paint.Defaults() // start with default style values
+	pc.Defaults() // start with default style values
 	if DebugSettings.RenderTrace {
 		fmt.Printf("Render: %v at %v\n", wb.Path(), wb.Geom.TotalBBox)
 	}
@@ -809,13 +803,12 @@ func (wb *WidgetBase) Defer(fun func()) {
 
 // runDeferred runs deferred functions on all widgets in the scene.
 func (sc *Scene) runDeferred() {
-	sc.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+	for _, cwb := range sc.AllWidgets() {
 		for _, f := range cwb.Deferred {
 			f()
 		}
 		cwb.Deferred = nil
-		return tree.Continue
-	})
+	}
 }
 
 // DeferShown adds a [WidgetBase.Defer] function to call [WidgetBase.Shown]
@@ -839,10 +832,9 @@ func (wb *WidgetBase) DeferShown() {
 // Shown sends [events.Show] to all widgets from this one down. Also see
 // [WidgetBase.DeferShown].
 func (wb *WidgetBase) Shown() {
-	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+	for _, cwb := range wb.AllWidgets() {
 		cwb.Send(events.Show)
-		return tree.Continue
-	})
+	}
 	wb.Events().activateStartFocus()
 }
 

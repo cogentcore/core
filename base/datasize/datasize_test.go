@@ -7,6 +7,8 @@
 
 package datasize
 
+//core:js-test
+
 import (
 	"testing"
 )

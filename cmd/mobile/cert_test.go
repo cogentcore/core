@@ -8,7 +8,7 @@ import (
 	"crypto/rand"
 	"crypto/x509"
 	"encoding/pem"
-	"io/ioutil"
+
 	"os"
 	"testing"
 
@@ -32,7 +32,7 @@ func TestSignPKCS7(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	sig, err := ioutil.TempFile("", "content.rsa")
+	sig, err := os.CreateTemp("", "content.rsa")
 	if err != nil {
 		t.Fatal(err)
 	}

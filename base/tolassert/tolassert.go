@@ -40,13 +40,16 @@ func EqualTolSlice[T num.Float](t assert.TestingT, expected, actual []T, toleran
 	if h, ok := t.(interface{ Helper() }); ok {
 		h.Helper()
 	}
-	errs := false
+	if len(expected) != len(actual) {
+		return assert.Equal(t, expected, actual, msgAndArgs...)
+	}
+	ok := true
 	for i, ex := range expected {
 		a := actual[i]
 		if num.Abs(a-ex) > tolerance {
 			assert.Equal(t, expected, actual, fmt.Sprintf("index: %d", i))
-			errs = true
+			ok = false
 		}
 	}
-	return errs
+	return ok
 }

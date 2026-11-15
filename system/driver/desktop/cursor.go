@@ -16,7 +16,7 @@ import (
 )
 
 // TheCursor is the single [system.Cursor] for the desktop platform
-var TheCursor = &Cursor{CursorBase: system.CursorBase{Vis: true, Size: units.Dp(32)}, cursors: map[enums.Enum]map[int]*glfw.Cursor{}}
+var TheCursor = &Cursor{Vis: true, Size: units.Dp(32), cursors: map[enums.Enum]map[int]*glfw.Cursor{}}
 
 // Cursor is the [cursor.Cursor] implementation for the desktop platform
 type Cursor struct {

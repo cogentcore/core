@@ -291,11 +291,11 @@ func (p *Path) Grid(w, h float32, nx, ny int, r float32) *Path {
 	p.Rectangle(0, 0, w, h)
 	dx, dy := (w-float32(nx+1)*r)/float32(nx), (h-float32(ny+1)*r)/float32(ny)
 	cell := New().Rectangle(0, 0, dx, dy).Reverse()
-	for j := 0; j < ny; j++ {
-		for i := 0; i < nx; i++ {
+	for j := range ny {
+		for i := range nx {
 			x := r + float32(i)*(r+dx)
 			y := r + float32(j)*(r+dy)
-			*p = p.Append(cell.Translate(x, y))
+			*p = p.Append(cell.Clone().Translate(x, y)) // Translate is in place
 		}
 	}
 	return p

@@ -44,7 +44,7 @@ func TestIsInvisibleCovered(t *testing.T) {
 		if hidden {
 			overlay.SetState(true, states.Invisible)
 		}
-		b.RenderImage(func() {}, func() {
+		RenderImage(b, func() {}, func() {
 			b.AsyncLock()
 			defer b.AsyncUnlock()
 			assert.True(t, target.IsVisible(), name)
@@ -94,7 +94,7 @@ func TestRenderGroupCovered(t *testing.T) {
 		s.InsetSet.Set(true)
 		s.Background = colors.Uniform(colors.WithAF32(colors.Black, 0.5))
 	})
-	b.RenderImage(func() {}, func() {
+	RenderImage(b, func() {}, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		n := tg.renders
@@ -143,7 +143,7 @@ func TestRenderGroupOverlay(t *testing.T) {
 		s.Min.Set(units.Dp(300), units.Dp(30))
 		s.Background = colors.Uniform(colors.WithAF32(colors.Black, 0.5))
 	})
-	b.RenderImage(func() {}, func() {
+	RenderImage(b, func() {}, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		n, bn := tg.renders, bar.renders
@@ -188,7 +188,7 @@ func TestRenderGroupOverlayTransparent(t *testing.T) {
 		s.Background = colors.Uniform(colors.WithAF32(colors.Black, 0.5))
 	})
 	var bb image.Rectangle
-	im := b.RenderImage(func() {}, func() {
+	im := RenderImage(b, func() {}, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		bb = tg.Geom.TotalBBox
@@ -259,9 +259,9 @@ func testRenderAgain(t *testing.T, make func(b *Body) *Text) {
 		rw.renderWindow()
 		rw.waitRenderDone()
 	}
-	got := b.RenderImage(func() {}, again, again, again, again)
+	got := RenderImage(b, func() {}, again, again, again, again)
 	fresh, _ := newBody()
-	want := fresh.RenderImage()
+	want := RenderImage(fresh)
 	assert.False(t, bb.Empty())
 	for y := bb.Min.Y; y < bb.Max.Y; y++ {
 		for x := bb.Min.X; x < bb.Max.X; x++ {

@@ -28,7 +28,7 @@ func main() {
 // license that can be found in the LICENSE file.
 
 package units
-	`)
+`)
 	for _, v := range units.UnitsValues() {
 		// we ignore dots because they also set the dots field
 		// as a special case

@@ -9,9 +9,10 @@ import (
 	"testing"
 )
 
-// skipOnWeb skips the test on the web (see goscript_test.go), as one that
-// does not apply there, for the given reason, such as that it uses the
-// files of the operating system, or more than one window.
+// skipOnWeb skips the test on the web (see the core:js-test directive in
+// align_test.go), as one that does not apply there, for the given reason,
+// such as that it uses the files of the operating system, or more than one
+// window.
 func skipOnWeb(t *testing.T, reason string) {
 	t.Helper()
 	if runtime.GOOS == "js" {

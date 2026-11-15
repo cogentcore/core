@@ -117,7 +117,7 @@ func BenchmarkScan(b *testing.B) {
 	f := NewFiller(wx, wy, scanner)
 	p.AddTo(f)
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		f.Draw()
 	}
 }
@@ -131,7 +131,7 @@ func BenchmarkFill(b *testing.B) {
 	)
 	f := NewFiller(wx, wy, scanner)
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		p.AddTo(f)
 		f.Draw()
 		f.Clear()
@@ -148,7 +148,7 @@ func BenchmarkDash(b *testing.B) {
 	b.ResetTimer()
 	d := NewDasher(wx, wy, scanner)
 	d.SetStroke(10*64, 4*64, RoundCap, nil, RoundGap, ArcClip, []float32{33, 12}, 0)
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		p.AddTo(d)
 		d.Draw()
 		d.Clear()
@@ -421,7 +421,7 @@ func doShapes(t *testing.T, f Scanner, fa Adder, fname string, img image.Image) 
 	f.Draw()
 	f.Clear()
 
-	f.SetClip(image.ZR)
+	f.SetClip(image.Rectangle{})
 
 	f.SetColor(colors.Uniform(colors.Firebrick))
 	AddRect(370, 370, 400, 500, 15, fa)
@@ -492,7 +492,7 @@ func TestGradient(t *testing.T) {
 	p.AddTo(offsetPath)
 	f.Draw()
 	f.Clear()
-	scanner.SetClip(image.ZR)
+	scanner.SetClip(image.Rectangle{})
 	offsetPath.M = math32.Identity2().Translate(180, 340)
 	p.AddTo(offsetPath)
 	f.Draw()

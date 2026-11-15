@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"strings"
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/text/rich"
@@ -118,13 +119,13 @@ func (ln *Line) String() string {
 }
 
 func (ls *Lines) String() string {
-	str := ""
+	var str strings.Builder
 	for li := range ls.Lines {
 		ln := &ls.Lines[li]
-		str += fmt.Sprintf("#### Line: %d\n", li)
-		str += ln.String()
+		fmt.Fprintf(&str, "#### Line: %d\n", li)
+		str.WriteString(ln.String())
 	}
-	return str
+	return str.String()
 }
 
 // StartAtBaseline removes the offset from the first line that causes
@@ -200,9 +201,7 @@ func (ls *Lines) Clone() *Lines {
 	nln := len(ls.Lines)
 	if nln > 0 {
 		nln := make([]Line, nln)
-		for i := range ls.Lines {
-			nln[i] = ls.Lines[i]
-		}
+		copy(nln, ls.Lines)
 		nls.Lines = nln
 	}
 	return nls

@@ -9,8 +9,9 @@
 
 package bibtex
 
+import __yyfmt__ "fmt"
+
 import (
-	__yyfmt__ "fmt"
 	"io"
 )
 
@@ -67,6 +68,7 @@ var bibtexToknames = [...]string{
 	"BAREIDENT",
 	"IDENT",
 }
+
 var bibtexStatenames = [...]string{}
 
 const bibtexEofCode = 1
@@ -85,7 +87,7 @@ func Parse(r io.Reader) (*BibTex, error) {
 	}
 }
 
-var bibtexExca = [...]int{
+var bibtexExca = [...]int8{
 	-1, 1,
 	1, -1,
 	-2, 0,
@@ -95,52 +97,51 @@ const bibtexPrivate = 57344
 
 const bibtexLast = 61
 
-var bibtexAct = [...]int{
-
+var bibtexAct = [...]int8{
 	22, 39, 40, 41, 9, 10, 11, 24, 23, 44,
-	43, 27, 48, 26, 21, 20, 25, 8, 50, 28,
-	29, 33, 33, 49, 18, 16, 38, 19, 17, 14,
-	31, 12, 15, 42, 13, 30, 45, 46, 33, 33,
-	52, 51, 48, 36, 33, 47, 37, 33, 35, 34,
+	43, 27, 26, 33, 21, 48, 25, 8, 52, 28,
+	29, 50, 33, 33, 20, 31, 18, 38, 34, 19,
+	49, 16, 14, 42, 17, 15, 45, 46, 12, 33,
+	33, 13, 51, 48, 36, 33, 47, 37, 30, 35,
 	54, 53, 33, 7, 32, 4, 1, 6, 5, 3,
 	2,
 }
-var bibtexPact = [...]int{
 
-	-1000, -1000, 46, -1000, -1000, -1000, -1000, 0, 19, 17,
-	13, 12, -2, -3, -10, -10, -4, -6, -10, -10,
-	25, 20, 41, -1000, -1000, 36, 39, 34, 33, 10,
-	-14, -14, -1000, -8, -1000, -10, -10, -1000, -1000, 32,
-	-1000, 14, 2, -1000, -1000, 28, 27, -1000, -14, -10,
-	-1000, -1000, -1000, -1000, 11,
+var bibtexPact = [...]int16{
+	-32768, -32768, 46, -32768, -32768, -32768, -32768, 0, 26, 20,
+	19, 14, 7, -3, -10, -10, -5, -6, -10, -10,
+	38, 15, 41, -32768, -32768, 12, 40, 35, 34, 11,
+	-14, -14, -32768, -8, -32768, -10, -10, -32768, -32768, 33,
+	-32768, 21, 5, -32768, -32768, 29, 2, -32768, -14, -10,
+	-32768, -32768, -32768, -32768, 28,
 }
-var bibtexPgo = [...]int{
 
+var bibtexPgo = [...]int8{
 	0, 60, 59, 2, 58, 1, 0, 57, 56, 55,
 }
-var bibtexR1 = [...]int{
 
+var bibtexR1 = [...]int8{
 	0, 8, 1, 1, 1, 1, 1, 2, 2, 9,
 	9, 4, 4, 7, 7, 6, 6, 6, 6, 3,
 	3, 5, 5,
 }
-var bibtexR2 = [...]int{
 
+var bibtexR2 = [...]int8{
 	0, 1, 0, 2, 2, 2, 2, 7, 7, 5,
 	5, 7, 7, 5, 5, 1, 1, 3, 3, 0,
 	3, 1, 3,
 }
-var bibtexChk = [...]int{
 
-	-1000, -8, -1, -2, -9, -4, -7, 7, 17, 4,
+var bibtexChk = [...]int16{
+	-32768, -8, -1, -2, -9, -4, -7, 7, 17, 4,
 	5, 6, 12, 15, 12, 15, 12, 15, 12, 15,
 	17, 17, -6, 18, 17, -6, 17, 17, -6, -6,
-	10, 10, 13, 11, 13, 9, 9, 13, 16, -5,
+	10, 10, 13, 11, 16, 9, 9, 13, 16, -5,
 	-3, 17, -5, 18, 17, -6, -6, 13, 10, 9,
-	16, 13, 13, -3, -6,
+	16, 13, 16, -3, -6,
 }
-var bibtexDef = [...]int{
 
+var bibtexDef = [...]int8{
 	2, -2, 1, 3, 4, 5, 6, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 15, 16, 0, 0, 0, 0, 0,
@@ -148,16 +149,17 @@ var bibtexDef = [...]int{
 	21, 0, 0, 17, 18, 0, 0, 7, 19, 0,
 	8, 11, 12, 22, 20,
 }
-var bibtexToken1 = [...]int{
 
+var bibtexTok1 = [...]int8{
 	1,
 }
-var bibtexToken2 = [...]int{
 
+var bibtexTok2 = [...]int8{
 	2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
 	12, 13, 14, 15, 16, 17, 18,
 }
-var bibtexTokem3 = [...]int{
+
+var bibtexTok3 = [...]int8{
 	0,
 }
 
@@ -198,7 +200,7 @@ func bibtexNewParser() bibtexParser {
 	return &bibtexParserImpl{}
 }
 
-const bibtexFlag = -1000
+const bibtexFlag = -32768
 
 func bibtexTokname(c int) string {
 	if c >= 1 && c-1 < len(bibtexToknames) {
@@ -237,9 +239,9 @@ func bibtexErrorMessage(state, lookAhead int) string {
 	expected := make([]int, 0, 4)
 
 	// Look for shiftable tokens.
-	base := bibtexPact[state]
+	base := int(bibtexPact[state])
 	for tok := TOKSTART; tok-1 < len(bibtexToknames); tok++ {
-		if n := base + tok; n >= 0 && n < bibtexLast && bibtexChk[bibtexAct[n]] == tok {
+		if n := base + tok; n >= 0 && n < bibtexLast && int(bibtexChk[int(bibtexAct[n])]) == tok {
 			if len(expected) == cap(expected) {
 				return res
 			}
@@ -249,13 +251,13 @@ func bibtexErrorMessage(state, lookAhead int) string {
 
 	if bibtexDef[state] == -2 {
 		i := 0
-		for bibtexExca[i] != -1 || bibtexExca[i+1] != state {
+		for bibtexExca[i] != -1 || int(bibtexExca[i+1]) != state {
 			i += 2
 		}
 
 		// Look for tokens that we accept or reduce.
 		for i += 2; bibtexExca[i] >= 0; i += 2 {
-			tok := bibtexExca[i]
+			tok := int(bibtexExca[i])
 			if tok < TOKSTART || bibtexExca[i+1] == 0 {
 				continue
 			}
@@ -286,30 +288,30 @@ func bibtexlex1(lex bibtexLexer, lval *bibtexSymType) (char, token int) {
 	token = 0
 	char = lex.Lex(lval)
 	if char <= 0 {
-		token = bibtexToken1[0]
+		token = int(bibtexTok1[0])
 		goto out
 	}
-	if char < len(bibtexToken1) {
-		token = bibtexToken1[char]
+	if char < len(bibtexTok1) {
+		token = int(bibtexTok1[char])
 		goto out
 	}
 	if char >= bibtexPrivate {
-		if char < bibtexPrivate+len(bibtexToken2) {
-			token = bibtexToken2[char-bibtexPrivate]
+		if char < bibtexPrivate+len(bibtexTok2) {
+			token = int(bibtexTok2[char-bibtexPrivate])
 			goto out
 		}
 	}
-	for i := 0; i < len(bibtexTokem3); i += 2 {
-		token = bibtexTokem3[i+0]
+	for i := 0; i < len(bibtexTok3); i += 2 {
+		token = int(bibtexTok3[i+0])
 		if token == char {
-			token = bibtexTokem3[i+1]
+			token = int(bibtexTok3[i+1])
 			goto out
 		}
 	}
 
 out:
 	if token == 0 {
-		token = bibtexToken2[1] /* unknown char */
+		token = int(bibtexTok2[1]) /* unknown char */
 	}
 	if bibtexDebug >= 3 {
 		__yyfmt__.Printf("lex %s(%d)\n", bibtexTokname(token), uint(char))
@@ -364,7 +366,7 @@ bibtexstack:
 	bibtexS[bibtexp].yys = bibtexstate
 
 bibtexnewstate:
-	bibtexn = bibtexPact[bibtexstate]
+	bibtexn = int(bibtexPact[bibtexstate])
 	if bibtexn <= bibtexFlag {
 		goto bibtexdefault /* simple state */
 	}
@@ -375,8 +377,8 @@ bibtexnewstate:
 	if bibtexn < 0 || bibtexn >= bibtexLast {
 		goto bibtexdefault
 	}
-	bibtexn = bibtexAct[bibtexn]
-	if bibtexChk[bibtexn] == bibtextoken { /* valid shift */
+	bibtexn = int(bibtexAct[bibtexn])
+	if int(bibtexChk[bibtexn]) == bibtextoken { /* valid shift */
 		bibtexrcvr.char = -1
 		bibtextoken = -1
 		bibtexVAL = bibtexrcvr.lval
@@ -389,7 +391,7 @@ bibtexnewstate:
 
 bibtexdefault:
 	/* default state action */
-	bibtexn = bibtexDef[bibtexstate]
+	bibtexn = int(bibtexDef[bibtexstate])
 	if bibtexn == -2 {
 		if bibtexrcvr.char < 0 {
 			bibtexrcvr.char, bibtextoken = bibtexlex1(bibtexlex, &bibtexrcvr.lval)
@@ -398,18 +400,18 @@ bibtexdefault:
 		/* look through exception table */
 		xi := 0
 		for {
-			if bibtexExca[xi+0] == -1 && bibtexExca[xi+1] == bibtexstate {
+			if bibtexExca[xi+0] == -1 && int(bibtexExca[xi+1]) == bibtexstate {
 				break
 			}
 			xi += 2
 		}
 		for xi += 2; ; xi += 2 {
-			bibtexn = bibtexExca[xi+0]
+			bibtexn = int(bibtexExca[xi+0])
 			if bibtexn < 0 || bibtexn == bibtextoken {
 				break
 			}
 		}
-		bibtexn = bibtexExca[xi+1]
+		bibtexn = int(bibtexExca[xi+1])
 		if bibtexn < 0 {
 			goto ret0
 		}
@@ -431,10 +433,10 @@ bibtexdefault:
 
 			/* find a state where "error" is a legal shift action */
 			for bibtexp >= 0 {
-				bibtexn = bibtexPact[bibtexS[bibtexp].yys] + bibtexErrCode
+				bibtexn = int(bibtexPact[bibtexS[bibtexp].yys]) + bibtexErrCode
 				if bibtexn >= 0 && bibtexn < bibtexLast {
-					bibtexstate = bibtexAct[bibtexn] /* simulate a shift of "error" */
-					if bibtexChk[bibtexstate] == bibtexErrCode {
+					bibtexstate = int(bibtexAct[bibtexn]) /* simulate a shift of "error" */
+					if int(bibtexChk[bibtexstate]) == bibtexErrCode {
 						goto bibtexstack
 					}
 				}
@@ -470,7 +472,7 @@ bibtexdefault:
 	bibtexpt := bibtexp
 	_ = bibtexpt // guard against "declared and not used"
 
-	bibtexp -= bibtexR2[bibtexn]
+	bibtexp -= int(bibtexR2[bibtexn])
 	// bibtexp is now the index of $0. Perform the default action. Iff the
 	// reduced production is ε, $1 is possibly out of range.
 	if bibtexp+1 >= len(bibtexS) {
@@ -481,16 +483,16 @@ bibtexdefault:
 	bibtexVAL = bibtexS[bibtexp+1]
 
 	/* consult goto table to find next state */
-	bibtexn = bibtexR1[bibtexn]
-	bibtexg := bibtexPgo[bibtexn]
+	bibtexn = int(bibtexR1[bibtexn])
+	bibtexg := int(bibtexPgo[bibtexn])
 	bibtexj := bibtexg + bibtexS[bibtexp].yys + 1
 
 	if bibtexj >= bibtexLast {
-		bibtexstate = bibtexAct[bibtexg]
+		bibtexstate = int(bibtexAct[bibtexg])
 	} else {
-		bibtexstate = bibtexAct[bibtexj]
-		if bibtexChk[bibtexstate] != -bibtexn {
-			bibtexstate = bibtexAct[bibtexg]
+		bibtexstate = int(bibtexAct[bibtexj])
+		if int(bibtexChk[bibtexstate]) != -bibtexn {
+			bibtexstate = int(bibtexAct[bibtexg])
 		}
 	}
 	// dummy call; replaced with literal code

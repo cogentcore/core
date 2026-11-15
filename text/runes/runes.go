@@ -434,8 +434,6 @@ func SplitAfter(s, sep []rune) [][]rune {
 	return genSplit(s, sep, len(sep), -1)
 }
 
-var asciiSpace = [256]uint8{'\t': 1, '\n': 1, '\v': 1, '\f': 1, '\r': 1, ' ': 1}
-
 // Fields interprets s as a sequence of UTF-8-encoded code points.
 // It splits the slice s around each instance of one or more consecutive white space
 // characters, as defined by unicode.IsSpace, returning a slice of subslices of s or an
@@ -570,7 +568,8 @@ func indexFunc(s []rune, f func(r rune) bool, truth bool) int {
 // inverted.
 func lastIndexFunc(s []rune, f func(r rune) bool, truth bool) int {
 	for i := len(s) - 1; i >= 0; i-- {
-		if f(s[i]) == truth {
+		v := s[i]
+		if f(v) == truth {
 			return i
 		}
 	}

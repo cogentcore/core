@@ -108,9 +108,9 @@ func TestFieldByPath(t *testing.T) {
 	fv, err = FieldByPath(spv, "Pet.Name")
 	assert.NoError(t, err)
 	assert.Equal(t, "Pet Gopher", fv.Interface())
-	fv, err = FieldByPath(spv, "Pet.Ages")
+	_, err = FieldByPath(spv, "Pet.Ages")
 	assert.Error(t, err)
-	fv, err = FieldByPath(spv, "Pets.Age")
+	_, err = FieldByPath(spv, "Pets.Age")
 	assert.Error(t, err)
 
 	err = SetFieldsFromMap(sp, map[string]any{"Pet.Age": 8, "Data": "ddd"})

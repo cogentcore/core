@@ -221,12 +221,12 @@ func TestScriptDialogs(t *testing.T) {
 	s := psgrep()
 	s.Args = append(s.Args, ScriptArg{Name: "All", Kind: ArgSwitch, Doc: "whether to list all", On: "--all"})
 	d := cs.NewScriptDialog(nil, "", s, s)
-	d.AssertRender(t, "script")
+	core.AssertRender(t, d, "script")
 	ran := ""
 	run := func(cmdline string) { ran = cmdline }
 	d = cs.NewScriptPromptDialog(nil, "", s, run)
 	var form any
-	d.AssertRender(t, "script-prompt", func() {
+	core.AssertRender(t, d, "script-prompt", func() {
 		fm := tree.ChildByType[*core.Form](d)
 		require.NotNil(t, fm)
 		form = fm.Struct
@@ -252,7 +252,7 @@ func TestEditorSelectedScript(t *testing.T) {
 	b := core.NewBody()
 	tt := core.NewTreeTable(b)
 	tt.SetItems(&ens)
-	b.AssertRender(t, "editor-selected-script", func() {
+	core.AssertRender(t, b, "editor-selected-script", func() {
 		assert.Nil(t, selectedEntry(tt))
 		tt.SelectedIndex = 2 // (as a click does)
 		require.NotNil(t, selectedEntry(tt))

@@ -31,6 +31,27 @@ func ensureJSTools() error {
 	return ensureTool("bun", bunBinDirs(), installBun)
 }
 
+// TsrsVersion is the version of tsrs, the TypeScript type checker that
+// goscript test uses, which is that of the package.json of GoScript.
+const TsrsVersion = "0.18.0-ts7.1.0-dev.20260929"
+
+// SetupJS installs the tools of the js platform that are not installed:
+// GoScript and bun, which build apps to JavaScript, and tsrs, which
+// goscript test type checks the compiled code with (core build js does
+// not need it, as bun only strips the types).
+func SetupJS() error {
+	if err := ensureJSTools(); err != nil {
+		return err
+	}
+	return ensureTool("tsrs", bunBinDirs(), installTsrs)
+}
+
+// installTsrs installs tsrs globally with bun, which puts it in the bin
+// directory of bun.
+func installTsrs() error {
+	return exec.Verbose().SetBuffer(false).Run("bun", "add", "-g", "tsrs@"+TsrsVersion)
+}
+
 // ensureTool makes sure that the given tool can be found on the PATH. If it
 // is not on the PATH, but is in one of the given directories where it is
 // normally installed, that directory is added to the PATH. Otherwise, the

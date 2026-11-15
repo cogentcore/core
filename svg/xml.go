@@ -23,6 +23,10 @@ type XMLEncoder struct {
 	CurIndent   int
 	CurStart    string
 	NoEndIndent bool
+
+	// textDepth is the number of open elements that are text elements or
+	// in them, where whitespace is text, so nothing is indented.
+	textDepth int
 }
 
 func NewXMLEncoder(wr io.Writer) *XMLEncoder {
@@ -95,7 +99,7 @@ var (
 	escFFFD = []byte("\uFFFD") // Unicode replacement character
 )
 
-// XMLEscapeText writes to w the properly escaped XML equivalent
+// EscapeText writes to w the properly escaped XML equivalent
 // of the plain text data s. If escapeNewline is true, newline
 // XMLcharacters will be escaped.
 func EscapeText(w io.Writer, s []byte, escapeNewline bool) error {
@@ -189,11 +193,19 @@ func (xe *XMLEncoder) WriteStart(start *xml.StartElement) error {
 	if start.Name.Local == "" {
 		return errors.New("xml: start tag with no name")
 	}
+	inText := xe.textDepth > 0
 	if xe.CurStart != "" {
 		xe.WriteString(">")
-		xe.WriteEOL()
+		if !inText {
+			xe.WriteEOL()
+		}
 	}
-	xe.WriteIndent()
+	if !inText {
+		xe.WriteIndent()
+	}
+	if inText || start.Name.Local == "text" {
+		xe.textDepth++
+	}
 	xe.WriteString("<")
 	xe.WriteString(start.Name.Local)
 	xe.CurIndent++
@@ -221,18 +233,27 @@ func (xe *XMLEncoder) WriteEnd(name string) error {
 	if name == "" {
 		return errors.New("xml: end tag with no name")
 	}
+	wasText := xe.textDepth > 0
+	if wasText {
+		xe.textDepth--
+	}
+	inText := xe.textDepth > 0 // whether the parent is in text
 	if xe.CurStart == name {
 		xe.WriteString(" />")
-		xe.WriteEOL()
+		if !inText {
+			xe.WriteEOL()
+		}
 	} else {
-		if !xe.NoEndIndent {
+		if !xe.NoEndIndent && !wasText {
 			xe.WriteIndent()
 		}
 		xe.NoEndIndent = false
 		xe.WriteString("</")
 		xe.WriteString(name)
 		xe.WriteString(">")
-		xe.WriteEOL()
+		if !inText {
+			xe.WriteEOL()
+		}
 	}
 	xe.CurStart = ""
 	xe.Flush()

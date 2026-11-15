@@ -60,7 +60,7 @@ type Key struct {
 	Custom map[string]color.RGBA
 }
 
-// Key returns a new [Key] from the given primary accent key color.
+// KeyFromPrimary returns a new [Key] from the given primary accent key color.
 func KeyFromPrimary(primary color.RGBA) *Key {
 	k := &Key{}
 	p := hct.FromColor(primary)

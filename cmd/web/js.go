@@ -55,10 +55,7 @@ func buildJS(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	// The mvmnosrc tag leaves the standard library sources out of the mvm
-	// interpreter (mvmcore), which only runs code using the packages bound
-	// to it, so that it adds much less to the bundle.
-	tags := "goscript,purego,noasm,mvmnosrc"
+	tags := "goscript," + JSTags
 	if c.Build.Debug {
 		tags += ",debug"
 	}
@@ -290,6 +287,13 @@ func jsMainPackage(tags string) (pkg, mainFile string, err error) {
 	return "", "", fmt.Errorf("no main function found in package %s", fields[0])
 }
 
+// JSTags are the build tags (besides goscript) that apps are built with
+// for the js platform, and that core test js uses.
+// The mvmnosrc tag leaves the standard library sources out of the mvm
+// interpreter (mvmcore), which only runs code using the packages bound
+// to it, so that it adds much less to the bundle.
+const JSTags = "purego,noasm,mvmnosrc"
+
 // jsOverrideDirs returns the GoScript override directories of the modules
 // that the package in the current directory depends on: a module provides
 // GoScript overrides of its packages, the TypeScript implementations that
@@ -304,7 +308,7 @@ func jsOverrideDirs(tags string) ([]string, error) {
 	}
 	var dirs []string
 	seen := map[string]bool{}
-	for _, dir := range strings.Split(out, "\n") {
+	for dir := range strings.SplitSeq(out, "\n") {
 		dir = strings.TrimSpace(dir)
 		if dir == "" || seen[dir] {
 			continue

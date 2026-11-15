@@ -26,7 +26,7 @@ func TestBackgroundShorthand(t *testing.T) {
 	assert.NoError(t, ReadHTMLString(ctx, b, "<style>.reset{background:0 0}.grad{background:#336699;background:linear-gradient(red, blue)}</style>"+
 		"<button class=\"reset\">reset</button><button class=\"plain\">plain</button><div class=\"grad\">grad</div>"))
 	bg := map[string]string{}
-	b.RenderImage(func() {
+	core.RenderImage(b, core.Locked(b, func() {
 		b.WalkDown(func(n tree.Node) bool {
 			if wb := core.AsWidget(n); wb != nil {
 				if cl := fmt.Sprint(wb.Property("class")); cl == "reset" || cl == "plain" || cl == "grad" {
@@ -39,7 +39,7 @@ func TestBackgroundShorthand(t *testing.T) {
 			}
 			return tree.Continue
 		})
-	})
+	}))
 	assert.Contains(t, []string{"none", "#00000000"}, bg["reset"], "transparent")
 	assert.Equal(t, "#EFEFEF", bg["plain"], "the default of buttons")
 	assert.Equal(t, "#336699", bg["grad"], "the fallback color")

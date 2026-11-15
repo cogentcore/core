@@ -7,6 +7,7 @@ package lexer
 import (
 	"slices"
 	"sort"
+	"strings"
 	"unicode"
 
 	"cogentcore.org/core/text/token"
@@ -20,7 +21,7 @@ func (ll *Line) Add(lx Lex) {
 	*ll = append(*ll, lx)
 }
 
-// Add adds one element to the lex line with given params, returns pointer to that new lex
+// AddLex adds one element to the lex line with given params, returns pointer to that new lex
 func (ll *Line) AddLex(tok token.KeyToken, st, ed int) *Lex {
 	lx := NewLex(tok, st, ed)
 	li := len(*ll)
@@ -55,9 +56,7 @@ func (ll *Line) Clone() Line {
 		return nil
 	}
 	cp := make(Line, len(*ll))
-	for i := range *ll {
-		cp[i] = (*ll)[i]
-	}
+	copy(cp, *ll)
 	return cp
 }
 
@@ -128,7 +127,7 @@ func MergeLines(t1, t2 Line) Line {
 	tsz := sz1 + sz2
 	tl := make(Line, sz1, tsz)
 	copy(tl, t1)
-	for i := 0; i < sz2; i++ {
+	for i := range sz2 {
 		tl.AddSort(t2[i])
 	}
 	return tl
@@ -136,21 +135,26 @@ func MergeLines(t1, t2 Line) Line {
 
 // String satisfies the fmt.Stringer interface
 func (ll *Line) String() string {
-	str := ""
+	var str strings.Builder
 	for _, t := range *ll {
-		str += t.String() + " "
+		str.WriteString(t.String())
+		str.WriteString(" ")
 	}
-	return str
+	return str.String()
 }
 
 // TagSrc returns the token-tagged source
 func (ll *Line) TagSrc(src []rune) string {
-	str := ""
+	var str strings.Builder
 	for _, t := range *ll {
 		s := t.Src(src)
-		str += t.String() + `"` + string(s) + `"` + " "
+		str.WriteString(t.String())
+		str.WriteString(`"`)
+		str.WriteString(string(s))
+		str.WriteString(`"`)
+		str.WriteString(" ")
 	}
-	return str
+	return str.String()
 }
 
 // Strings returns a slice of strings for each of the Lex items in given rune src

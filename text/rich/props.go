@@ -40,7 +40,7 @@ func (s *Style) FromProperty(parent *Style, key string, val any, cc colors.Conte
 	}
 }
 
-// FontSizePoints maps standard font names to standard point sizes -- we use
+// FontSizes maps standard font names to standard point sizes -- we use
 // dpi zoom scaling instead of rescaling "medium" font size, so generally use
 // these values as-is.  smaller and larger relative scaling can move in 2pt increments
 var FontSizes = map[string]float32{

@@ -9,6 +9,7 @@ package textpos
 import (
 	"fmt"
 	"slices"
+	"strings"
 	"time"
 
 	"cogentcore.org/core/text/runes"
@@ -92,39 +93,33 @@ func (te *Edit) AdjustPos(pos Pos, del AdjustPosDel) Pos {
 	if pos.IsLess(te.Region.Start) || pos == te.Region.Start {
 		return pos
 	}
-	dl := te.Region.End.Line - te.Region.Start.Line
-	if pos.Line > te.Region.End.Line {
-		if te.Delete {
-			pos.Line -= dl
-		} else {
-			pos.Line += dl
-		}
-		return pos
-	}
+	st, ed := te.Region.Start, te.Region.End
+	dl := ed.Line - st.Line
 	if te.Delete {
-		if pos.Line < te.Region.End.Line || pos.Char < te.Region.End.Char {
+		// pos is before the edit, so the deleted region is in it
+		if pos.IsLess(ed) {
 			switch del {
 			case AdjustPosDelStart:
-				return te.Region.Start
+				return st
 			case AdjustPosDelEnd:
-				return te.Region.End
+				return ed
 			case AdjustPosDelErr:
 				return PosErr
 			}
 		}
-		// this means pos.Line == te.Region.End.Line, Ch >= end
-		if dl == 0 {
-			pos.Char -= (te.Region.End.Char - te.Region.Start.Char)
-		} else {
-			pos.Char -= te.Region.End.Char
+		// the rest of the end line joins the start line
+		if pos.Line == ed.Line {
+			return Pos{Line: st.Line, Char: st.Char + pos.Char - ed.Char}
 		}
-	} else {
-		if dl == 0 {
-			pos.Char += (te.Region.End.Char - te.Region.Start.Char)
-		} else {
-			pos.Line += dl
-		}
+		pos.Line -= dl
+		return pos
 	}
+	// pos is before the insert: the rest of the start line moves to the
+	// end of the inserted text
+	if pos.Line == st.Line {
+		return Pos{Line: ed.Line, Char: ed.Char + pos.Char - st.Char}
+	}
+	pos.Line += dl
 	return pos
 }
 
@@ -201,16 +196,17 @@ func (te *Edit) AdjustRegion(reg Region) Region {
 }
 
 func (te *Edit) String() string {
-	str := te.Region.String()
+	var str strings.Builder
+	str.WriteString(te.Region.String())
 	if te.Rect {
-		str += " [Rect]"
+		str.WriteString(" [Rect]")
 	}
 	if te.Delete {
-		str += " [Delete]"
+		str.WriteString(" [Delete]")
 	}
-	str += fmt.Sprintf(" Gp: %d\n", te.Group)
+	fmt.Fprintf(&str, " Gp: %d\n", te.Group)
 	for li := range te.Text {
-		str += fmt.Sprintf("%d\t%s\n", li, string(te.Text[li]))
+		fmt.Fprintf(&str, "%d\t%s\n", li, string(te.Text[li]))
 	}
-	return str
+	return str.String()
 }

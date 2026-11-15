@@ -127,7 +127,7 @@ func (ml *MarkdownLang) FindBibliography(pfs *parse.FileState) string {
 		return ""
 	}
 	fln := string(pfs.Src.Lines[0])
-	if !(fln == "---" || fln == "+++") {
+	if fln != "---" && fln != "+++" {
 		return ""
 	}
 	trg := `bibfile`
@@ -140,13 +140,13 @@ func (ml *MarkdownLang) FindBibliography(pfs *parse.FileState) string {
 			return ""
 		}
 		lnln := len(sln)
-		if lnln < trgln {
+		if lnln <= trgln {
 			continue
 		}
 		if strings.HasPrefix(lstr, trg) {
 			fnm := lstr[trgln:lnln]
-			if fnm[0] == ':' {
-				return fnm
+			if fnm[0] == ':' { // yaml: bibfile: name
+				return strings.Trim(strings.TrimSpace(fnm[1:]), `"'`)
 			}
 			flds := strings.Fields(fnm)
 			if len(flds) != 2 || flds[0] != "=" {

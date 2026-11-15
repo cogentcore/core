@@ -6,8 +6,6 @@ package parse
 
 import (
 	"fmt"
-	"path/filepath"
-	"strings"
 	"sync"
 
 	"cogentcore.org/core/base/fileinfo"
@@ -143,7 +141,7 @@ func (fs *FileState) PassTwoHasErrs() bool {
 	return len(fs.TwoState.Errs) > 0
 }
 
-// PassTwoErrString returns all the pass two errors as a string -- these should
+// PassTwoErrReport returns all the pass two errors as a string -- these should
 // only occur during development so we use a detailed report format
 func (fs *FileState) PassTwoErrReport() string {
 	return fs.TwoState.Errs.Report(0, fs.Src.BasePath, true, true)
@@ -182,7 +180,7 @@ func (fs *FileState) ParseErrReportDetailed() string {
 	return fs.ParseState.Errs.Report(10, fs.Src.BasePath, true, true)
 }
 
-// RuleString returns the rule info for entire source -- if full
+// ParseRuleString returns the rule info for entire source -- if full
 // then it includes the full stack at each point -- otherwise just the top
 // of stack
 func (fs *FileState) ParseRuleString(full bool) string {
@@ -285,11 +283,6 @@ func (fs *FileState) FindNamePrefixScoped(seed string, scope syms.SymMap, matche
 // and given context name (e.g., package name)
 func (fs *FileState) NextAnonName(ctxt string) string {
 	fs.AnonCtr++
-	fn := filepath.Base(fs.Src.Filename)
-	ext := filepath.Ext(fn)
-	if ext != "" {
-		fn = strings.TrimSuffix(fn, ext)
-	}
 	return fmt.Sprintf("anon_%s_%d", ctxt, fs.AnonCtr)
 }
 

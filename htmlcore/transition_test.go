@@ -35,7 +35,7 @@ func TestTransitions(t *testing.T) {
 	require.NoError(t, ReadDocument(ctx, bd, doc))
 	var got []Transition
 	ctx.OnTransition = func(ts []Transition) { got = append(got, ts...) }
-	bd.RenderImage(func() {
+	core.RenderImage(bd, func() {
 		bd.AsyncLock()
 		defer bd.AsyncUnlock()
 		a, b, c := elementByID(doc, "a"), elementByID(doc, "b"), elementByID(doc, "c")

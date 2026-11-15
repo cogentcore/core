@@ -33,12 +33,12 @@ func parseFilter(v string) cssFilter {
 		if !ok {
 			break
 		}
-		end := strings.Index(args, ")")
-		if end < 0 {
+		before, after, ok := strings.Cut(args, ")")
+		if !ok {
 			break
 		}
-		arg := strings.TrimSpace(args[:end])
-		rest = strings.TrimSpace(args[end+1:])
+		arg := strings.TrimSpace(before)
+		rest = strings.TrimSpace(after)
 		name = strings.TrimSpace(name)
 		amount := 1.0
 		if name == "hue-rotate" {

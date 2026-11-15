@@ -17,7 +17,7 @@ func ellipseDeriv2(rx, ry, phi float32, theta float32) math32.Vector2 {
 	sinphi, cosphi := math32.Sincos(phi)
 	ddx := -rx*costheta*cosphi + ry*sintheta*sinphi
 	ddy := -rx*costheta*sinphi - ry*sintheta*cosphi
-	return math32.Vector2{ddx, ddy}
+	return math32.Vec2(ddx, ddy)
 }
 
 // ellipseLength calculates the length of the elliptical arc

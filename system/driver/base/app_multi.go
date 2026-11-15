@@ -71,7 +71,7 @@ func (a *AppMulti[W]) NWindows() int {
 func (a *AppMulti[W]) Window(win int) system.Window {
 	a.Mu.Lock()
 	defer a.Mu.Unlock()
-	if win < len(a.Windows) {
+	if win >= 0 && win < len(a.Windows) {
 		return a.Windows[win]
 	}
 	return nil

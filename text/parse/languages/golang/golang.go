@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package golang provides the support for the Go language of the parse
+// package: its parser, symbols, type inference, and completion.
 package golang
 
 import (
@@ -151,6 +153,9 @@ func (gl *GoLang) HighlightLine(fss *parse.FileStates, line int, txt []rune) lex
 // Indent level is in increments of tabSz for spaces, and tabs for tabs.
 // Operates on rune source with markup lex tags per line.
 func (gl *GoLang) IndentLine(fs *parse.FileStates, src [][]rune, tags []lexer.Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Character) {
+	if ln == 0 { // the first line has no previous line to indent from
+		return
+	}
 	pInd, pLn, ichr = lexer.PrevLineIndent(src, tags, ln, tabSz)
 
 	curUnd, _ := lexer.LineStartEndBracket(src[ln], tags[ln])
@@ -181,11 +186,12 @@ func (gl *GoLang) IndentLine(fs *parse.FileStates, src [][]rune, tags []lexer.Li
 	cwrd := lexer.FirstWord(string(src[ln]))
 
 	if cwrd == "case" || cwrd == "default" {
-		if pwrd == "switch" {
+		switch pwrd {
+		case "switch":
 			delInd = 0
-		} else if pwrd == "case" {
+		case "case":
 			delInd = 0
-		} else {
+		default:
 			delInd = -1
 		}
 	} else if pwrd == "case" || pwrd == "default" {

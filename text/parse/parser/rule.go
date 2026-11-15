@@ -12,8 +12,10 @@ package parser
 import (
 	"fmt"
 	"io"
+	"slices"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"text/tabwriter"
 
 	"cogentcore.org/core/base/indent"
@@ -25,15 +27,31 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Set GUIActive to true if the gui (parseview) is active -- ensures that the
+// GUIActive is set to true if the gui (parseview) is active -- ensures that the
 // AST tree is updated when nodes are swapped in reverse mode, and maybe
-// other things
+// other things. It must only be set before any parsing starts: use
+// [SetGUIActive] to set it while files can be parsed in other goroutines.
 var GUIActive = false
+
+// guiActive is set by [SetGUIActive].
+var guiActive atomic.Bool
+
+// SetGUIActive sets whether the gui is active (see [GUIActive]), safely
+// while files are being parsed in other goroutines.
+func SetGUIActive(on bool) {
+	guiActive.Store(on)
+}
+
+// isGUIActive returns whether the gui is active, as set by [GUIActive] or
+// [SetGUIActive].
+func isGUIActive() bool {
+	return GUIActive || guiActive.Load()
+}
 
 // DepthLimit is the infinite recursion prevention cutoff
 var DepthLimit = 10000
 
-// parser.Rule operates on the lexically tokenized input, not the raw source.
+// Rule operates on the lexically tokenized input, not the raw source.
 //
 // The overall strategy is pragmatically based on the current known form of
 // most languages, which are organized around a sequence of statements having
@@ -50,7 +68,7 @@ var DepthLimit = 10000
 // variations for satisfying that rule, with precedence encoded directly in the
 // ordering of the children.  These have empty "Rule" string and Rules.
 // 2. Explicit rules specified in the Rule string.
-
+//
 // The first step is matching which searches in order for matches within the
 // children of parent nodes, and for explicit rule nodes, it looks first
 // through all the explicit tokens in the rule.  If there are no explicit tokens
@@ -209,15 +227,14 @@ func (pr *Rule) IsGroup() bool {
 // SetRuleMap is called on the top-level Rule and initializes the RuleMap
 func (pr *Rule) SetRuleMap(ps *State) {
 	RuleMap = map[string]*Rule{}
-	pr.WalkDown(func(k tree.Node) bool {
+	for k := range pr.All() {
 		pri := k.(*Rule)
 		if epr, has := RuleMap[pri.Name]; has {
 			ps.Error(textpos.PosZero, fmt.Sprintf("Parser Compile: multiple rules with same name: %v and %v", pri.Path(), epr.Path()), pri)
 		} else {
 			RuleMap[pri.Name] = pri
 		}
-		return true
-	})
+	}
 }
 
 // CompileAll is called on the top-level Rule to compile all nodes
@@ -226,14 +243,13 @@ func (pr *Rule) SetRuleMap(ps *State) {
 func (pr *Rule) CompileAll(ps *State) bool {
 	pr.SetRuleMap(ps)
 	allok := true
-	pr.WalkDown(func(k tree.Node) bool {
+	for k := range pr.All() {
 		pri := k.(*Rule)
 		ok := pri.Compile(ps)
 		if !ok {
 			allok = false
 		}
-		return true
-	})
+	}
 	return allok
 }
 
@@ -286,7 +302,9 @@ func (pr *Rule) Compile(ps *State) bool {
 		if rn == "!" { // exclusionary rule
 			nr = ri
 			pr.Rules = pr.Rules[:ri]
-			pr.CompileExcl(ps, rs, ri+1)
+			if !pr.CompileExcl(ps, rs, ri+1) {
+				valid = false
+			}
 			break
 		}
 		if rn[0] == ':' {
@@ -306,10 +324,11 @@ func (pr *Rule) Compile(ps *State) bool {
 				curStInc = 0
 			}
 			sz := len(rn)
-			if rn[0] == '+' {
+			switch rn[0] {
+			case '+':
 				td, _ := strconv.ParseInt(rn[1:tokst], 10, 64)
 				rr.Token.Depth = int(td)
-			} else if rn[0] == '-' {
+			case '-':
 				rr.FromNext = true
 			}
 			tn := rn[tokst+1 : sz-1]
@@ -385,7 +404,7 @@ func (pr *Rule) OptimizeOrder(ps *State) {
 	fmnSt := -1
 	fmnEd := -1
 	lastwas := false
-	for oi := 0; oi < osz; oi++ {
+	for oi := range osz {
 		ri := pr.Order[oi]
 		rr := &pr.Rules[ri]
 		if rr.FromNext {
@@ -450,7 +469,7 @@ func (pr *Rule) CompileExcl(ps *State, rs []string, rist int) bool {
 	var ktok token.KeyToken
 
 	ktoki := -1
-	for ri := 0; ri < rist; ri++ {
+	for ri := 0; ri < rist && ri < len(pr.Rules); ri++ { // (the rules are cut at the !)
 		rr := &pr.Rules[ri]
 		if !rr.IsToken() {
 			continue
@@ -670,7 +689,7 @@ func (pr *Rule) ParseRules(ps *State, parent *Rule, parAST *AST, scope textpos.R
 		if !ok {
 			return nil
 		}
-	} else if GUIActive {
+	} else if isGUIActive() {
 		if scope == textpos.RegionZero {
 			ps.Error(scope.Start, "scope is empty and no EOS in rule -- invalid rules -- starting rules must all have EOS", pr)
 			return nil
@@ -830,7 +849,7 @@ func (pr *Rule) MatchOnlyToks(ps *State, parAST *AST, scope textpos.Region, dept
 
 	creg := scope
 	osz := len(pr.Order)
-	for oi := 0; oi < osz; oi++ {
+	for oi := range osz {
 		ri := pr.Order[oi]
 		rr := &pr.Rules[ri]
 		kt := rr.Token
@@ -939,7 +958,7 @@ func (pr *Rule) MatchMixed(ps *State, parAST *AST, scope textpos.Region, depth i
 
 	// 	first pass filter on tokens
 	if optMap != nil {
-		for oi := 0; oi < osz; oi++ {
+		for oi := range osz {
 			ri := pr.Order[oi]
 			rr := &pr.Rules[ri]
 			if rr.IsToken() {
@@ -951,7 +970,7 @@ func (pr *Rule) MatchMixed(ps *State, parAST *AST, scope textpos.Region, depth i
 		}
 	}
 
-	for oi := 0; oi < osz; oi++ {
+	for oi := range osz {
 		ri := pr.Order[oi]
 		rr := &pr.Rules[ri]
 
@@ -1024,7 +1043,7 @@ func (pr *Rule) MatchMixed(ps *State, parAST *AST, scope textpos.Region, depth i
 		// look through smpos for last valid position -- use that as last match pos
 		mreg := smpos.StartEnd()
 		lmnpos, ok := ps.Src.NextTokenPos(mreg.End)
-		if !ok && !(ri == nr-1 || (ri == nr-2 && pr.setsScope)) {
+		if !ok && (ri != nr-1 && (ri != nr-2 || !pr.setsScope)) {
 			// if at end, or ends in EOS, then ok..
 			if ps.Trace.On {
 				ps.Trace.Out(ps, pr, NoMatch, creg.Start, creg, parAST, fmt.Sprintf("%v sub-rule: %v -- not at end and no tokens left", ri, rr.Rule.Name))
@@ -1249,7 +1268,7 @@ func (pr *Rule) DoRules(ps *State, parent *Rule, parentAST *AST, scope textpos.R
 	nr := len(pr.Rules)
 	valid := true
 	creg := scope
-	for ri := 0; ri < nr; ri++ {
+	for ri := range nr {
 		pr.DoActs(ps, ri, parent, ourAST, parentAST)
 		rr := &pr.Rules[ri]
 		if rr.IsToken() && !rr.Opt {
@@ -1458,10 +1477,11 @@ func (pr *Rule) DoActs(ps *State, ri int, parent *Rule, ourAST, parentAST *AST) 
 
 // DoAct performs one action after a rule executes
 func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAST, parAST *AST) bool {
-	if act.Act == PushStack {
+	switch act.Act {
+	case PushStack:
 		ps.Stack.Push(act.Path)
 		return true
-	} else if act.Act == PopStack {
+	case PopStack:
 		ps.Stack.Pop()
 		return true
 	}
@@ -1488,24 +1508,19 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAST, parAST *AST) bo
 				findAll = true
 				p = strings.TrimSuffix(p, "...")
 			}
-			var nd tree.Node
+			var nd *AST
 			if p[:3] == "../" {
-				nd = parAST.FindPath(p[3:])
+				nd = parAST.findPath(p[3:])
 			} else {
-				nd = useAST.FindPath(p)
+				nd = useAST.findPath(p)
 			}
 			if nd != nil {
 				if node == nil {
 					node = nd
 				}
 				if findAll {
-					pn := nd.AsTree().Parent
-					for _, pk := range pn.AsTree().Children {
-						if pk != nd && pk.AsTree().Name == nd.AsTree().Name {
-							adnl = append(adnl, pk)
-						}
-					}
-				} else if node != nd {
+					adnl = append(adnl, listSiblings(ps, nd)...)
+				} else if node != tree.Node(nd) {
 					adnl = append(adnl, nd)
 				}
 			}
@@ -1517,19 +1532,16 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAST, parAST *AST) bo
 				findAll = true
 				p = strings.TrimSuffix(p, "...")
 			}
+			var nd *AST
 			if p[:3] == "../" {
-				node = parAST.FindPath(p[3:])
+				nd = parAST.findPath(p[3:])
 			} else {
-				node = useAST.FindPath(p)
+				nd = useAST.findPath(p)
 			}
-			if node != nil {
+			if nd != nil {
+				node = nd
 				if findAll {
-					pn := node.AsTree().Parent
-					for _, pk := range pn.AsTree().Children {
-						if pk != node && pk.AsTree().Name == node.AsTree().Name {
-							adnl = append(adnl, pk)
-						}
-					}
+					adnl = listSiblings(ps, nd)
 				}
 				break
 			}
@@ -1702,13 +1714,12 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAST, parAST *AST) bo
 // Find looks for rules in the tree that contain given string in Rule or Name fields
 func (pr *Rule) Find(find string) []*Rule {
 	var res []*Rule
-	pr.WalkDown(func(k tree.Node) bool {
+	for k := range pr.All() {
 		pri := k.(*Rule)
 		if strings.Contains(pri.Rule, find) || strings.Contains(pri.Name, find) {
 			res = append(res, pri)
 		}
-		return true
-	})
+	}
 	return res
 }
 
@@ -1756,4 +1767,60 @@ func (pr *Rule) WriteGrammar(writer io.Writer, depth int) {
 			}
 		}
 	}
+}
+
+// findPath returns the node at the given path relative to this node, as
+// [tree.NodeBase.FindPath] does, except that a name specifies the first
+// child of the name: the names of AST nodes are not unique (they are the
+// names of their rules), and FindPath finds any child of a name.
+func (ast *AST) findPath(path string) *AST {
+	cur := ast
+	for pe := range strings.SplitSeq(strings.TrimSpace(path), "/") {
+		if pe == "" {
+			continue
+		}
+		var idx int
+		if pe[0] == '[' && pe[len(pe)-1] == ']' {
+			i, err := strconv.Atoi(pe[1 : len(pe)-1])
+			if err != nil {
+				return nil
+			}
+			if i < 0 {
+				i += len(cur.Children)
+			}
+			idx = i
+		} else {
+			idx = slices.IndexFunc(cur.Children, func(k tree.Node) bool { return k.AsTree().Name == pe })
+		}
+		if idx < 0 || idx >= len(cur.Children) {
+			return nil
+		}
+		cur = cur.ChildAST(idx)
+	}
+	return cur
+}
+
+// listSiblings returns the siblings of the given node of a path ending in
+// "...": the nodes of the same name that follow it in a comma-separated
+// list, as the other names of a, b, c in a, b, c := x, y, z.
+func listSiblings(ps *State, nd *AST) []tree.Node {
+	var sibs []tree.Node
+	par := nd.Parent
+	if par == nil {
+		return nil
+	}
+	kids := par.AsTree().Children
+	prev := nd
+	for _, k := range kids[nd.IndexInParent()+1:] {
+		if k.AsTree().Name != nd.Name {
+			break
+		}
+		pos, ok := ps.Src.ValidTokenPos(prev.TokReg.End)
+		if !ok || ps.Src.LexAt(pos).Token.Token != token.PunctSepComma {
+			break
+		}
+		sibs = append(sibs, k)
+		prev = k.(*AST)
+	}
+	return sibs
 }

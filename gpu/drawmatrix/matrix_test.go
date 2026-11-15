@@ -4,6 +4,8 @@
 
 package drawmatrix
 
+//core:js-test
+
 import (
 	"image"
 	"testing"
@@ -34,12 +36,12 @@ func NDCToFramebuffer(pts []math32.Vector2) []math32.Vector2 {
 
 func TestNDC(t *testing.T) {
 	pts := []math32.Vector2{ // tl, tr, bl, br
-		{-1, 1}, {1, 1}, {-1, -1}, {1, -1},
+		{X: -1, Y: 1}, {X: 1, Y: 1}, {X: -1, Y: -1}, {X: 1, Y: -1},
 	}
 	// fmt.Println("NDC:")
 	fbp := NDCToFramebuffer(pts)
 	trg := []math32.Vector2{ // tl, tr, bl, br
-		{0, 0}, {1000, 0}, {0, 500}, {1000, 500},
+		{X: 0, Y: 0}, {X: 1000, Y: 0}, {X: 0, Y: 500}, {X: 1000, Y: 500},
 	}
 	assert.Equal(t, trg, fbp)
 }
@@ -53,7 +55,7 @@ func TestTriangle(t *testing.T) {
 	}
 	fbp := NDCToFramebuffer(pts)
 	trg := []math32.Vector2{ // tl, tr, bl, br
-		{0, 500}, {500, 0}, {1000, 500},
+		{X: 0, Y: 500}, {X: 500, Y: 0}, {X: 1000, Y: 500},
 	}
 	assert.Equal(t, trg, fbp)
 }
@@ -62,13 +64,13 @@ func DrawFromMatrixMVP4(mat *math32.Matrix4) []math32.Vector2 {
 	m3 := math32.Matrix3FromMatrix4(mat)
 	// fmt.Println(m3)
 	pts := []math32.Vector2{ // tl, tr, bl, br
-		{0, 0}, {0, 1}, {1, 0}, {1, 1},
+		{X: 0, Y: 0}, {X: 0, Y: 1}, {X: 1, Y: 0}, {X: 1, Y: 1},
 	}
 	cpts := make([]math32.Vector2, 4) // clip coords
 	for i, pt := range pts {
-		pt3 := math32.Vector3{pt.X, pt.Y, 1} // depends on this!
+		pt3 := math32.Vec3(pt.X, pt.Y, 1) // depends on this!
 		cp := pt3.MulMatrix3(&m3)
-		cpts[i] = math32.Vector2{cp.X, cp.Y}
+		cpts[i] = math32.Vec2(cp.X, cp.Y)
 		// fmt.Println(i, pt, cp)
 	}
 	return NDCToFramebuffer(cpts)
@@ -76,7 +78,7 @@ func DrawFromMatrixMVP4(mat *math32.Matrix4) []math32.Vector2 {
 
 func CompareRect(t *testing.T, pts []math32.Vector2, rect image.Rectangle) {
 	trg := []math32.Vector2{ // tl, tr, bl, br
-		{float32(rect.Min.X), float32(rect.Min.Y)}, {float32(rect.Min.X), float32(rect.Max.Y)}, {float32(rect.Max.X), float32(rect.Min.Y)}, {float32(rect.Max.X), float32(rect.Max.Y)},
+		{X: float32(rect.Min.X), Y: float32(rect.Min.Y)}, {X: float32(rect.Min.X), Y: float32(rect.Max.Y)}, {X: float32(rect.Max.X), Y: float32(rect.Min.Y)}, {X: float32(rect.Max.X), Y: float32(rect.Max.Y)},
 	}
 	for i, tp := range trg {
 		pp := pts[i]

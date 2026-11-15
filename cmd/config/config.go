@@ -83,8 +83,17 @@ type Config struct { //types:add
 	// which core run android boots when no Android device is connected.
 	AndroidSim bool `cmd:"setup"`
 
+	// JS installs (setup) the tools of the js platform: GoScript and bun,
+	// which build apps to JavaScript, and tsrs, the TypeScript type checker
+	// that core test js uses.
+	JS bool `cmd:"setup"`
+
 	// the configuration options for the build, install, run, and pack commands
-	Build Build `cmd:"build,install,run,pack"`
+	// (and the target platform of the test command)
+	Build Build `cmd:"build,install,run,pack,test"`
+
+	// the configuration options for the test command
+	Test Test `cmd:"test"`
 
 	// the configuration information for the pack command
 	Pack Pack `cmd:"pack"`
@@ -105,6 +114,39 @@ type Config struct { //types:add
 
 	// the configuration options for the update command
 	Update Update `cmd:"update"`
+}
+
+// Test has the options of the test command.
+type Test struct { //types:add
+
+	// Packages are the packages to test, as for go test. They default to
+	// the package in the current directory. For the js platform, a pattern
+	// with ... in it only matches the packages that opt in with a
+	// //core:js-test line in one of their test files (see the goscript
+	// package in base).
+	Packages []string `posarg:"leftover" required:"-"`
+
+	// Run, if non-empty, only runs the tests matching this regular
+	// expression, as with go test -run.
+	Run string
+
+	// Bench, if non-empty, runs the benchmarks matching this regular
+	// expression, as with go test -bench.
+	Bench string
+
+	// BenchTime is the minimum time to run each benchmark, as a duration
+	// such as 2s, as with go test -benchtime.
+	BenchTime string
+
+	// Timeout, if non-empty, is the maximum time to run the tests of each
+	// package, as a duration such as 10m, as with go test -timeout (for the
+	// js platform, it replaces the timeout of a //core:js-test line).
+	Timeout string
+
+	// Browser runs the tests of all of the packages for the js platform
+	// in Chrome, instead of only those whose //core:js-test line says so
+	// (the others run in bun).
+	Browser bool
 }
 
 type Build struct { //types:add

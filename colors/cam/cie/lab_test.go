@@ -4,6 +4,8 @@
 
 package cie
 
+//core:js-test
+
 import (
 	"testing"
 

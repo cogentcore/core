@@ -93,7 +93,7 @@ func (w *renderWindow) fillInsets(cp composer.Composer) {
 		return
 	}
 	var clr image.Image = colors.Scheme.Surface
-	for _, st := range w.mains.stack.Values() {
+	for _, st := range w.mains.stack.Values {
 		if st.Type != WindowStage || st.Scene == nil {
 			continue
 		}
@@ -118,13 +118,13 @@ func (w *renderWindow) fillInsets(cp composer.Composer) {
 	cp.Add(&fillInsetsSource{rbb: rg.Bounds(), wbb: wg.Bounds(), clr: clr}, w)
 }
 
-// getImager is implemented by offscreen.Drawer for [Body.AssertRender].
+// getImager is implemented by offscreen.Drawer for [AssertRender].
 type getImager interface {
 	GetImage() *image.RGBA
 }
 
 // windowImage returns a copy of the rendered image of the given window,
-// for the tests (see [Body.RenderImage]), or nil if it is closed.
+// for the tests (see [RenderImage]), or nil if it is closed.
 func windowImage(rw *renderWindow) *image.RGBA {
 	// The image is copied under the window lock, which is held while it is
 	// composed, as paint events can still make the event loop render.
@@ -138,7 +138,7 @@ func windowImage(rw *renderWindow) *image.RGBA {
 }
 
 // testImageName returns the name of the test image of the given name in
-// testdata (see [Body.AssertRender]): the same, other than on the web.
+// testdata (see [AssertRender]): the same, other than on the web.
 func testImageName(name string) string {
 	return name
 }

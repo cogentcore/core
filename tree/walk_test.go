@@ -78,7 +78,7 @@ func benchTree(depth, width int) *NodeBase {
 
 func BenchmarkWalkDown(b *testing.B) {
 	root := benchTree(3, 10)
-	for range b.N {
+	for b.Loop() {
 		count := 0
 		root.WalkDown(func(n Node) bool {
 			count++
@@ -89,7 +89,7 @@ func BenchmarkWalkDown(b *testing.B) {
 
 func BenchmarkWalkDownPost(b *testing.B) {
 	root := benchTree(3, 10)
-	for range b.N {
+	for b.Loop() {
 		count := 0
 		root.WalkDownPost(func(n Node) bool { return Continue }, func(n Node) bool {
 			count++

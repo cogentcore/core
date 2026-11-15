@@ -113,10 +113,9 @@ func (bd *Body) RunWindow() *Stage {
 func (bd *Body) handleExternalParent() {
 	ExternalParent.AsWidget().AddChild(bd)
 	// we must set the correct scene for each node
-	bd.WalkDown(func(n tree.Node) bool {
+	for n := range bd.All() {
 		n.(Widget).AsWidget().Scene = bd.Scene
-		return tree.Continue
-	})
+	}
 	// we must not get additional scrollbars here
 	bd.Styler(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowVisible)
@@ -289,7 +288,7 @@ func (st *Stage) runWindow() *Stage {
 	}
 
 	if st.NewWindow || cw == nil {
-		sc.Resize(math32.Geom2DInt{st.renderContext.geom.Pos, sz})
+		sc.Resize(math32.Geom2DInt{Pos: st.renderContext.geom.Pos, Size: sz})
 		win := st.newRenderWindow(st.renderContext)
 		mainRenderWindows.add(win)
 		setCurrentRenderWindow(win)
@@ -427,7 +426,7 @@ func (st *Stage) runDialog() *Stage {
 
 	if st.NewWindow {
 		st.storeMains(nil)
-		sc.Resize(math32.Geom2DInt{st.renderContext.geom.Pos, sz})
+		sc.Resize(math32.Geom2DInt{Pos: st.renderContext.geom.Pos, Size: sz})
 		st.Type = WindowStage            // critical: now is its own window!
 		sc.SceneGeom.Pos = image.Point{} // ignore pos
 		win := st.newRenderWindow(nil)
@@ -517,7 +516,7 @@ func (st *Stage) mainHandleEvent(e events.Event) {
 func (sm *stages) mainHandleEvent(e events.Event) {
 	n := sm.stack.Len()
 	for i := n - 1; i >= 0; i-- {
-		st := sm.stack.ValueByIndex(i)
+		st := sm.stack.Values[i]
 		st.mainHandleEvent(e)
 		if e.IsHandled() || st.Modal || st.FullWindow {
 			break

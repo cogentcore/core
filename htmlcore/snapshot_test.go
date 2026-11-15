@@ -84,7 +84,7 @@ func TestSnapshot(t *testing.T) {
 	if *snapshotRun != "" {
 		re = regexp.MustCompile(*snapshotRun)
 	}
-	for _, line := range strings.Split(string(urls), "\n") {
+	for line := range strings.SplitSeq(string(urls), "\n") {
 		fs := strings.Fields(line)
 		if len(fs) < 2 || strings.HasPrefix(fs[0], "#") || (re != nil && !re.MatchString(fs[0])) {
 			continue
@@ -354,7 +354,7 @@ func resourceExt(u *url.URL, ctype string) string {
 // rewriteSrcset rewrites the URLs of the candidates of a srcset.
 func (sn *snapshotter) rewriteSrcset(base *url.URL, v string) string {
 	var out []string
-	for _, c := range strings.Split(v, ",") {
+	for c := range strings.SplitSeq(v, ",") {
 		fs := strings.Fields(c)
 		if len(fs) == 0 {
 			continue

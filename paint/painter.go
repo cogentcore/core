@@ -52,7 +52,7 @@ type Painter struct {
 // NewPainter returns a new [Painter] with default styles and given size.
 func NewPainter(size math32.Vector2) *Painter {
 	pc := &Painter{&State{}, styles.NewPaint()}
-	pc.State.Init(pc.Paint, size)
+	pc.Init(pc.Paint, size)
 	pc.SetUnitContextExt(size.ToPointCeil())
 	return pc
 }
@@ -60,7 +60,7 @@ func NewPainter(size math32.Vector2) *Painter {
 // Cumulative returns the current cumulative transform function,
 // including the current transform.
 func (pc *Painter) Cumulative() math32.Matrix2 {
-	return pc.Context().Cumulative.Mul(pc.Paint.Transform)
+	return pc.Context().Cumulative.Mul(pc.Transform)
 }
 
 //////// Path basics
@@ -109,7 +109,7 @@ func (pc *Painter) Close() {
 // settings present at this point, which will be used to render the path,
 // and creates a new current path.
 func (pc *Painter) Draw() {
-	pc.Paint.ToDots()
+	pc.ToDots()
 	pt := render.NewPath(pc.State.Path.Clone(), pc.Paint, pc.Context())
 	pc.Render.Add(pt)
 	pc.State.Path.Reset()
@@ -131,7 +131,7 @@ func (pc *Painter) Polyline(points ...math32.Vector2) {
 	pc.State.Path.Polyline(points...)
 }
 
-// Polyline adds multiple connected lines, with no final Close,
+// PolylinePx adds multiple connected lines, with no final Close,
 // with coordinates in Px units.
 func (pc *Painter) PolylinePx(points ...math32.Vector2) {
 	pu := &pc.UnitContext
@@ -152,7 +152,7 @@ func (pc *Painter) Polygon(points ...math32.Vector2) {
 	pc.Close()
 }
 
-// Polygon adds multiple connected lines with a final Close,
+// PolygonPx adds multiple connected lines with a final Close,
 // with coordinates in Px units.
 func (pc *Painter) PolygonPx(points ...math32.Vector2) {
 	pc.PolylinePx(points...)

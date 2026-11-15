@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package hsl provides the HSL (hue, saturation, lightness) color space.
 package hsl
 
 import (
@@ -57,7 +58,7 @@ func model(c color.Color) color.Color {
 	return FromColor(c)
 }
 
-// Implements the [color.Color] interface
+// RGBA implements the [color.Color] interface.
 // Performs the premultiplication of the RGB components by alpha at this point.
 func (h HSL) RGBA() (r, g, b, a uint32) {
 	fr, fg, fb := HSLtoRGBF32(h.H, h.S, h.L)

@@ -34,14 +34,14 @@ The "n" newline is used to mark the end of a paragraph, and in general text will
 		pos  textpos.Pos
 		vpos textpos.Pos
 	}{
-		{textpos.Pos{0, 0}, textpos.Pos{0, 0}},
-		{textpos.Pos{0, 90}, textpos.Pos{1, 12}},
-		{textpos.Pos{0, 180}, textpos.Pos{2, 24}},
-		{textpos.Pos{0, 260}, textpos.Pos{3, 26}},
-		{textpos.Pos{0, 438}, textpos.Pos{5, 48}},
-		{textpos.Pos{1, 10}, textpos.Pos{6, 10}},
-		{textpos.Pos{1, 41}, textpos.Pos{6, 41}},
-		{textpos.Pos{2, 42}, textpos.Pos{7, 42}},
+		{textpos.Pos{Line: 0, Char: 0}, textpos.Pos{Line: 0, Char: 0}},
+		{textpos.Pos{Line: 0, Char: 90}, textpos.Pos{Line: 1, Char: 12}},
+		{textpos.Pos{Line: 0, Char: 180}, textpos.Pos{Line: 2, Char: 24}},
+		{textpos.Pos{Line: 0, Char: 260}, textpos.Pos{Line: 3, Char: 26}},
+		{textpos.Pos{Line: 0, Char: 438}, textpos.Pos{Line: 5, Char: 48}},
+		{textpos.Pos{Line: 1, Char: 10}, textpos.Pos{Line: 6, Char: 10}},
+		{textpos.Pos{Line: 1, Char: 41}, textpos.Pos{Line: 6, Char: 41}},
+		{textpos.Pos{Line: 2, Char: 42}, textpos.Pos{Line: 7, Char: 42}},
 	}
 	for _, test := range posTests {
 		vp := lns.posToView(vw, test.pos)
@@ -58,9 +58,9 @@ The "n" newline is used to mark the end of a paragraph, and in general text will
 		vpos textpos.Pos
 		pos  textpos.Pos
 	}{
-		{textpos.Pos{0, 0}, textpos.Pos{0, 0}},
-		{textpos.Pos{0, 90}, textpos.Pos{0, 77}},
-		{textpos.Pos{1, 90}, textpos.Pos{0, 155}},
+		{textpos.Pos{Line: 0, Char: 0}, textpos.Pos{Line: 0, Char: 0}},
+		{textpos.Pos{Line: 0, Char: 90}, textpos.Pos{Line: 0, Char: 77}},
+		{textpos.Pos{Line: 1, Char: 90}, textpos.Pos{Line: 0, Char: 155}},
 	}
 	for _, test := range vposTests {
 		sp := lns.posFromView(vw, test.vpos)
@@ -74,16 +74,16 @@ The "n" newline is used to mark the end of a paragraph, and in general text will
 		steps int
 		tpos  textpos.Pos
 	}{
-		{textpos.Pos{0, 0}, 1, textpos.Pos{0, 1}},
-		{textpos.Pos{0, 0}, 8, textpos.Pos{0, 8}},
-		{textpos.Pos{0, 380}, 1, textpos.Pos{0, 381}},
-		{textpos.Pos{0, 438}, 1, textpos.Pos{0, 439}},
-		{textpos.Pos{0, 439}, 1, textpos.Pos{0, 440}},
-		{textpos.Pos{0, 440}, 1, textpos.Pos{1, 0}},
-		{textpos.Pos{0, 439}, 2, textpos.Pos{1, 0}},
-		{textpos.Pos{2, 393}, 1, textpos.Pos{2, 394}},
-		{textpos.Pos{2, 395}, 1, textpos.Pos{2, 395}},
-		{textpos.Pos{2, 395}, 10, textpos.Pos{2, 395}},
+		{textpos.Pos{Line: 0, Char: 0}, 1, textpos.Pos{Line: 0, Char: 1}},
+		{textpos.Pos{Line: 0, Char: 0}, 8, textpos.Pos{Line: 0, Char: 8}},
+		{textpos.Pos{Line: 0, Char: 380}, 1, textpos.Pos{Line: 0, Char: 381}},
+		{textpos.Pos{Line: 0, Char: 438}, 1, textpos.Pos{Line: 0, Char: 439}},
+		{textpos.Pos{Line: 0, Char: 439}, 1, textpos.Pos{Line: 0, Char: 440}},
+		{textpos.Pos{Line: 0, Char: 440}, 1, textpos.Pos{Line: 1, Char: 0}},
+		{textpos.Pos{Line: 0, Char: 439}, 2, textpos.Pos{Line: 1, Char: 0}},
+		{textpos.Pos{Line: 2, Char: 393}, 1, textpos.Pos{Line: 2, Char: 394}},
+		{textpos.Pos{Line: 2, Char: 395}, 1, textpos.Pos{Line: 2, Char: 395}},
+		{textpos.Pos{Line: 2, Char: 395}, 10, textpos.Pos{Line: 2, Char: 395}},
 	}
 	for _, test := range fwdTests {
 		tp := lns.moveForward(test.pos, test.steps)
@@ -97,16 +97,16 @@ The "n" newline is used to mark the end of a paragraph, and in general text will
 		steps int
 		tpos  textpos.Pos
 	}{
-		{textpos.Pos{0, 0}, 1, textpos.Pos{0, 0}},
-		{textpos.Pos{0, 0}, 8, textpos.Pos{0, 0}},
-		{textpos.Pos{0, 380}, 1, textpos.Pos{0, 379}},
-		{textpos.Pos{0, 438}, 1, textpos.Pos{0, 437}},
-		{textpos.Pos{0, 439}, 1, textpos.Pos{0, 438}},
-		{textpos.Pos{0, 440}, 1, textpos.Pos{0, 439}},
-		{textpos.Pos{1, 0}, 1, textpos.Pos{0, 440}},
-		{textpos.Pos{1, 0}, 2, textpos.Pos{0, 439}},
-		{textpos.Pos{2, 393}, 1, textpos.Pos{2, 392}},
-		{textpos.Pos{2, 395}, 1, textpos.Pos{2, 394}},
+		{textpos.Pos{Line: 0, Char: 0}, 1, textpos.Pos{Line: 0, Char: 0}},
+		{textpos.Pos{Line: 0, Char: 0}, 8, textpos.Pos{Line: 0, Char: 0}},
+		{textpos.Pos{Line: 0, Char: 380}, 1, textpos.Pos{Line: 0, Char: 379}},
+		{textpos.Pos{Line: 0, Char: 438}, 1, textpos.Pos{Line: 0, Char: 437}},
+		{textpos.Pos{Line: 0, Char: 439}, 1, textpos.Pos{Line: 0, Char: 438}},
+		{textpos.Pos{Line: 0, Char: 440}, 1, textpos.Pos{Line: 0, Char: 439}},
+		{textpos.Pos{Line: 1, Char: 0}, 1, textpos.Pos{Line: 0, Char: 440}},
+		{textpos.Pos{Line: 1, Char: 0}, 2, textpos.Pos{Line: 0, Char: 439}},
+		{textpos.Pos{Line: 2, Char: 393}, 1, textpos.Pos{Line: 2, Char: 392}},
+		{textpos.Pos{Line: 2, Char: 395}, 1, textpos.Pos{Line: 2, Char: 394}},
 	}
 	for _, test := range bkwdTests {
 		tp := lns.moveBackward(test.pos, test.steps)
@@ -120,17 +120,17 @@ The "n" newline is used to mark the end of a paragraph, and in general text will
 		steps int
 		tpos  textpos.Pos
 	}{
-		{textpos.Pos{0, 0}, 1, textpos.Pos{0, 3}},
-		{textpos.Pos{0, 3}, 1, textpos.Pos{0, 9}},
-		{textpos.Pos{0, 0}, 2, textpos.Pos{0, 9}},
-		{textpos.Pos{0, 382}, 1, textpos.Pos{0, 389}},
-		{textpos.Pos{0, 438}, 1, textpos.Pos{0, 439}},
-		{textpos.Pos{0, 439}, 1, textpos.Pos{0, 439}},
-		{textpos.Pos{0, 440}, 1, textpos.Pos{1, 2}},
-		{textpos.Pos{0, 440}, 2, textpos.Pos{1, 11}},
-		{textpos.Pos{2, 390}, 1, textpos.Pos{2, 394}},
-		{textpos.Pos{2, 395}, 1, textpos.Pos{2, 394}},
-		{textpos.Pos{2, 395}, 5, textpos.Pos{2, 394}},
+		{textpos.Pos{Line: 0, Char: 0}, 1, textpos.Pos{Line: 0, Char: 3}},
+		{textpos.Pos{Line: 0, Char: 3}, 1, textpos.Pos{Line: 0, Char: 9}},
+		{textpos.Pos{Line: 0, Char: 0}, 2, textpos.Pos{Line: 0, Char: 9}},
+		{textpos.Pos{Line: 0, Char: 382}, 1, textpos.Pos{Line: 0, Char: 389}},
+		{textpos.Pos{Line: 0, Char: 438}, 1, textpos.Pos{Line: 0, Char: 439}},
+		{textpos.Pos{Line: 0, Char: 439}, 1, textpos.Pos{Line: 0, Char: 439}},
+		{textpos.Pos{Line: 0, Char: 440}, 1, textpos.Pos{Line: 1, Char: 2}},
+		{textpos.Pos{Line: 0, Char: 440}, 2, textpos.Pos{Line: 1, Char: 11}},
+		{textpos.Pos{Line: 2, Char: 390}, 1, textpos.Pos{Line: 2, Char: 394}},
+		{textpos.Pos{Line: 2, Char: 395}, 1, textpos.Pos{Line: 2, Char: 394}},
+		{textpos.Pos{Line: 2, Char: 395}, 5, textpos.Pos{Line: 2, Char: 394}},
 	}
 	for _, test := range fwdWordTests {
 		tp := lns.moveForwardWord(test.pos, test.steps)
@@ -144,15 +144,15 @@ The "n" newline is used to mark the end of a paragraph, and in general text will
 		steps int
 		tpos  textpos.Pos
 	}{
-		{textpos.Pos{0, 0}, 1, textpos.Pos{0, 0}},
-		{textpos.Pos{0, 0}, 1, textpos.Pos{0, 0}},
-		{textpos.Pos{0, 3}, 1, textpos.Pos{0, 0}},
-		{textpos.Pos{0, 3}, 5, textpos.Pos{0, 0}},
-		{textpos.Pos{0, 9}, 2, textpos.Pos{0, 0}},
-		{textpos.Pos{0, 382}, 1, textpos.Pos{0, 377}},
-		{textpos.Pos{1, 0}, 1, textpos.Pos{0, 435}},
-		{textpos.Pos{1, 0}, 2, textpos.Pos{0, 424}},
-		{textpos.Pos{2, 395}, 1, textpos.Pos{2, 389}},
+		{textpos.Pos{Line: 0, Char: 0}, 1, textpos.Pos{Line: 0, Char: 0}},
+		{textpos.Pos{Line: 0, Char: 0}, 1, textpos.Pos{Line: 0, Char: 0}},
+		{textpos.Pos{Line: 0, Char: 3}, 1, textpos.Pos{Line: 0, Char: 0}},
+		{textpos.Pos{Line: 0, Char: 3}, 5, textpos.Pos{Line: 0, Char: 0}},
+		{textpos.Pos{Line: 0, Char: 9}, 2, textpos.Pos{Line: 0, Char: 0}},
+		{textpos.Pos{Line: 0, Char: 382}, 1, textpos.Pos{Line: 0, Char: 377}},
+		{textpos.Pos{Line: 1, Char: 0}, 1, textpos.Pos{Line: 0, Char: 435}},
+		{textpos.Pos{Line: 1, Char: 0}, 2, textpos.Pos{Line: 0, Char: 424}},
+		{textpos.Pos{Line: 2, Char: 395}, 1, textpos.Pos{Line: 2, Char: 389}},
 	}
 	for _, test := range bkwdWordTests {
 		tp := lns.moveBackwardWord(test.pos, test.steps)
@@ -167,12 +167,12 @@ The "n" newline is used to mark the end of a paragraph, and in general text will
 		col   int
 		tpos  textpos.Pos
 	}{
-		{textpos.Pos{0, 0}, 1, 50, textpos.Pos{0, 128}},
-		{textpos.Pos{0, 0}, 2, 50, textpos.Pos{0, 206}},
-		{textpos.Pos{0, 0}, 4, 60, textpos.Pos{0, 371}},
-		{textpos.Pos{0, 0}, 5, 60, textpos.Pos{0, 440}},
-		{textpos.Pos{0, 371}, 2, 60, textpos.Pos{1, 42}},
-		{textpos.Pos{1, 30}, 1, 60, textpos.Pos{2, 60}},
+		{textpos.Pos{Line: 0, Char: 0}, 1, 50, textpos.Pos{Line: 0, Char: 128}},
+		{textpos.Pos{Line: 0, Char: 0}, 2, 50, textpos.Pos{Line: 0, Char: 206}},
+		{textpos.Pos{Line: 0, Char: 0}, 4, 60, textpos.Pos{Line: 0, Char: 371}},
+		{textpos.Pos{Line: 0, Char: 0}, 5, 60, textpos.Pos{Line: 0, Char: 440}},
+		{textpos.Pos{Line: 0, Char: 371}, 2, 60, textpos.Pos{Line: 1, Char: 42}},
+		{textpos.Pos{Line: 1, Char: 30}, 1, 60, textpos.Pos{Line: 2, Char: 60}},
 	}
 	for _, test := range downTests {
 		tp := lns.moveDown(vw, test.pos, test.steps, test.col)
@@ -190,14 +190,14 @@ The "n" newline is used to mark the end of a paragraph, and in general text will
 		col   int
 		tpos  textpos.Pos
 	}{
-		{textpos.Pos{0, 128}, 1, 50, textpos.Pos{0, 50}},
-		{textpos.Pos{0, 128}, 2, 50, textpos.Pos{0, 50}},
-		{textpos.Pos{0, 206}, 1, 50, textpos.Pos{0, 128}},
-		{textpos.Pos{0, 371}, 1, 60, textpos.Pos{0, 294}},
-		{textpos.Pos{1, 5}, 1, 60, textpos.Pos{0, 440}},
-		{textpos.Pos{1, 5}, 1, 20, textpos.Pos{0, 410}},
-		{textpos.Pos{1, 5}, 2, 60, textpos.Pos{0, 371}},
-		{textpos.Pos{1, 5}, 3, 50, textpos.Pos{0, 284}},
+		{textpos.Pos{Line: 0, Char: 128}, 1, 50, textpos.Pos{Line: 0, Char: 50}},
+		{textpos.Pos{Line: 0, Char: 128}, 2, 50, textpos.Pos{Line: 0, Char: 50}},
+		{textpos.Pos{Line: 0, Char: 206}, 1, 50, textpos.Pos{Line: 0, Char: 128}},
+		{textpos.Pos{Line: 0, Char: 371}, 1, 60, textpos.Pos{Line: 0, Char: 294}},
+		{textpos.Pos{Line: 1, Char: 5}, 1, 60, textpos.Pos{Line: 0, Char: 440}},
+		{textpos.Pos{Line: 1, Char: 5}, 1, 20, textpos.Pos{Line: 0, Char: 410}},
+		{textpos.Pos{Line: 1, Char: 5}, 2, 60, textpos.Pos{Line: 0, Char: 371}},
+		{textpos.Pos{Line: 1, Char: 5}, 3, 50, textpos.Pos{Line: 0, Char: 284}},
 	}
 	for _, test := range upTests {
 		tp := lns.moveUp(vw, test.pos, test.steps, test.col)

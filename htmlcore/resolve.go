@@ -471,9 +471,9 @@ func (r *resolver) lineHeight() {
 	uc.FontEm = uc.ToDots(s.Font.Size.Value, s.Font.Size.Unit) * core.AppearanceSettings.FontSize / 100
 
 	// line height
-	switch lh := st.lineHeight; {
-	case lh == "":
-	case lh == "normal":
+	switch lh := st.lineHeight; lh {
+	case "":
+	case "normal":
 		s.Text.LineHeight = lineHeightNormal
 	default:
 		if f, err := strconv.ParseFloat(lh, 32); err == nil {

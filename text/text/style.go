@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package text provides the styles of the layout of text, such as its
+// alignment, line height, and white space, and the settings of text editors.
 package text
 
 import (

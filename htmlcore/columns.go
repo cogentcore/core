@@ -54,7 +54,7 @@ func (c *Context) columnCount(n *html.Node) int {
 		switch d.Property {
 		case "columns":
 			count, width = 0, 0
-			for _, f := range strings.Fields(v) {
+			for f := range strings.FieldsSeq(v) {
 				set(f)
 			}
 		case "column-count":
@@ -100,8 +100,9 @@ func (c *Context) availableWidth(env *lengthEnv, n *html.Node) float32 {
 	for p := n; p != nil && p.Type == html.ElementNode; p = p.Parent {
 		chain = append(chain, p)
 	}
-	for i := len(chain) - 1; i >= 0; i-- { // from the top down
-		p := chain[i]
+	for ri := len(chain) - 1; ri >= 0; ri-- { // from the top down
+		p := chain[ri]
+
 		// the spaces are outside of the width (of the content box)
 		for _, base := range []string{"padding", "margin"} {
 			l, r := c.horizontalSides(env, p, base)
@@ -155,12 +156,11 @@ func (c *Context) arrangeColumns(n *html.Node, fr *core.Frame) {
 	total := 0
 	for i, k := range kids {
 		w := 40
-		k.AsTree().WalkDown(func(d tree.Node) bool {
+		for d := range k.AsTree().All() {
 			if tx, ok := d.(*core.Text); ok {
 				w += len(tx.Text)
 			}
-			return tree.Continue
-		})
+		}
 		weights[i] = w
 		total += w
 	}

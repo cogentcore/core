@@ -768,7 +768,7 @@ func structSliceIndexByValue(structSlice any, fieldName string, fieldValue any) 
 		return -1, err
 	}
 	fldIndex := fld.Index
-	for idx := 0; idx < sz; idx++ {
+	for idx := range sz {
 		rval := reflectx.UnderlyingPointer(svnp.Index(idx))
 		fval := rval.Elem().FieldByIndex(fldIndex)
 		if !fval.IsValid() {

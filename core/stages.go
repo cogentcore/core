@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"sync"
 
-	"cogentcore.org/core/base/ordmap"
+	"cogentcore.org/core/base/keylist"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/system"
 )
@@ -17,7 +17,7 @@ import (
 type stages struct {
 
 	// stack is the stack of stages managed by this stage manager.
-	stack ordmap.Map[string, *Stage]
+	stack keylist.List[string, *Stage]
 
 	// modified is set to true whenever the stack has been modified.
 	// This is cleared by the RenderWindow each render cycle.
@@ -49,7 +49,7 @@ func (sm *stages) top() *Stage {
 	if sz == 0 {
 		return nil
 	}
-	return sm.stack.ValueByIndex(sz - 1)
+	return sm.stack.Values[sz-1]
 }
 
 // list returns a copy of the stages in the stack, from bottom to top,
@@ -59,8 +59,8 @@ func (sm *stages) list() []*Stage {
 	defer sm.Unlock()
 
 	sts := make([]*Stage, 0, sm.stack.Len())
-	for _, kv := range sm.stack.Order {
-		sts = append(sts, kv.Value)
+	for _, st := range sm.stack.Values { // (not append(sts, Values...), which goscript mistypes)
+		sts = append(sts, st)
 	}
 	return sts
 }
@@ -68,13 +68,13 @@ func (sm *stages) list() []*Stage {
 // uniqueName returns unique name for given item
 func (sm *stages) uniqueName(nm string) string {
 	ctr := 0
-	for _, kv := range sm.stack.Order {
-		if kv.Key == nm {
+	for _, key := range sm.stack.Keys {
+		if key == nm {
 			ctr++
 		}
 	}
 	if ctr > 0 {
-		return fmt.Sprintf("%s-%d", nm, len(sm.stack.Order))
+		return fmt.Sprintf("%s-%d", nm, sm.stack.Len())
 	}
 	return nm
 }
@@ -85,7 +85,7 @@ func (sm *stages) push(st *Stage) {
 	defer sm.Unlock()
 
 	sm.setModified()
-	sm.stack.Add(sm.uniqueName(st.Name), st)
+	sm.stack.Set(sm.uniqueName(st.Name), st)
 }
 
 // deleteStage deletes given stage (removing from stack, calling Delete
@@ -99,10 +99,10 @@ func (sm *stages) deleteStage(st *Stage) bool {
 	fullWindow := st.FullWindow
 	got := false
 	for i := l - 1; i >= 0; i-- {
-		s := sm.stack.ValueByIndex(i)
+		s := sm.stack.Values[i]
 		if st == s {
 			sm.setModified()
-			sm.stack.DeleteIndex(i, i+1)
+			sm.stack.DeleteByIndex(i, i+1)
 			st.delete()
 			got = true
 			break
@@ -116,7 +116,7 @@ func (sm *stages) deleteStage(st *Stage) bool {
 	if fullWindow && TheApp.Platform() == system.Web {
 		sz := sm.renderWindow.mains.stack.Len()
 		if sz > 0 {
-			ts := sm.renderWindow.mains.stack.ValueByIndex(sz - 1)
+			ts := sm.renderWindow.mains.stack.Values[sz-1]
 			if ts.Scene != nil {
 				ts.Scene.NeedsRender()
 			}
@@ -138,17 +138,17 @@ func (sm *stages) deleteStageAndBelow(st *Stage) bool {
 	l := sm.stack.Len()
 	got := false
 	for i := l - 1; i >= 0; i-- {
-		s := sm.stack.ValueByIndex(i)
+		s := sm.stack.Values[i]
 		if !got {
 			if st == s {
 				sm.setModified()
-				sm.stack.DeleteIndex(i, i+1)
+				sm.stack.DeleteByIndex(i, i+1)
 				st.delete()
 				got = true
 			}
 		} else {
 			if s.Type == styp {
-				sm.stack.DeleteIndex(i, i+1)
+				sm.stack.DeleteByIndex(i, i+1)
 				s.delete()
 			}
 		}
@@ -164,12 +164,12 @@ func (sm *stages) moveToTop(st *Stage) bool {
 
 	l := sm.stack.Len()
 	for i := l - 1; i >= 0; i-- {
-		s := sm.stack.ValueByIndex(i)
+		s := sm.stack.Values[i]
 		if st == s {
-			k := sm.stack.KeyByIndex(i)
+			k := sm.stack.Keys[i]
 			sm.setModified()
-			sm.stack.DeleteIndex(i, i+1)
-			sm.stack.InsertAtIndex(sm.stack.Len(), k, s)
+			sm.stack.DeleteByIndex(i, i+1)
+			sm.stack.Insert(sm.stack.Len(), k, s)
 			return true
 		}
 	}
@@ -184,10 +184,10 @@ func (sm *stages) popType(typ StageTypes) *Stage {
 
 	l := sm.stack.Len()
 	for i := l - 1; i >= 0; i-- {
-		st := sm.stack.ValueByIndex(i)
+		st := sm.stack.Values[i]
 		if st.Type == typ {
 			sm.setModified()
-			sm.stack.DeleteIndex(i, i+1)
+			sm.stack.DeleteByIndex(i, i+1)
 			return st
 		}
 	}
@@ -216,9 +216,9 @@ func (sm *stages) deleteAll() {
 	}
 	sm.setModified()
 	for i := sz - 1; i >= 0; i-- {
-		st := sm.stack.ValueByIndex(i)
+		st := sm.stack.Values[i]
 		st.delete()
-		sm.stack.DeleteIndex(i, i+1)
+		sm.stack.DeleteByIndex(i, i+1)
 	}
 }
 
@@ -226,8 +226,7 @@ func (sm *stages) deleteAll() {
 // if nothing actually needed to be resized, it returns false.
 func (sm *stages) resize(rg math32.Geom2DInt) bool {
 	resized := false
-	for _, kv := range sm.stack.Order {
-		st := kv.Value
+	for _, st := range sm.stack.Values {
 		if st.FullWindow {
 			did := st.Scene.Resize(rg)
 			if did {
@@ -266,8 +265,7 @@ func (sm *stages) updateAll() (stageMods, sceneMods bool) {
 	if sz == 0 {
 		return
 	}
-	for _, kv := range sm.stack.Order {
-		st := kv.Value
+	for _, st := range sm.stack.Values {
 		stMod, scMod := st.doUpdate()
 		stageMods = stageMods || stMod
 		sceneMods = sceneMods || scMod
@@ -279,7 +277,7 @@ func (sm *stages) updateAll() (stageMods, sceneMods bool) {
 func (sm *stages) windowStage() *Stage {
 	n := sm.stack.Len()
 	for i := n - 1; i >= 0; i-- {
-		st := sm.stack.ValueByIndex(i)
+		st := sm.stack.Values[i]
 		if st.Type == WindowStage {
 			return st
 		}
@@ -288,8 +286,7 @@ func (sm *stages) windowStage() *Stage {
 }
 
 func (sm *stages) runDeferred() {
-	for _, kv := range sm.stack.Order {
-		st := kv.Value
+	for _, st := range sm.stack.Values {
 		if st.Scene == nil {
 			continue
 		}
@@ -306,6 +303,7 @@ func (sm *stages) runDeferred() {
 			sc.showIter++
 			if !sc.hasShown.Load() {
 				sc.hasShown.Store(true)
+				close(sc.shown)
 				sc.Shown()
 			}
 		}

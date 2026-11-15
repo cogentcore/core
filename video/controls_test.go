@@ -6,6 +6,12 @@
 
 package video
 
+// The tests are run compiled to JavaScript by core test js in Chrome
+// (as those of video_js_test.go), which plays the H.264 and AAC of the
+// test video (Chromium does not).
+//
+//core:js-test browser
+
 import (
 	"image"
 	"testing"
@@ -31,7 +37,7 @@ func TestVideoControls(t *testing.T) {
 		s.Min.Y.Dp(240)
 	})
 	require.NoError(t, v.Open("testdata/short.mp4"))
-	b.RenderImage(func() {}, func() {
+	core.RenderImage(b, func() {}, func() {
 		// with the lock of the widgets, as in the event loop, released
 		// while waiting for the playback
 		b.AsyncLock()
@@ -122,7 +128,7 @@ func TestControlsZone(t *testing.T) {
 		s.Min.Y.Dp(240)
 	})
 	require.NoError(t, v.Open("testdata/short.mp4"))
-	b.RenderImage(func() {}, func() {
+	core.RenderImage(b, func() {}, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		c := v.controls
@@ -166,7 +172,7 @@ func TestControlsKeys(t *testing.T) {
 		s.Min.Y.Dp(240)
 	})
 	require.NoError(t, v.Open("testdata/short.mp4"))
-	b.RenderImage(func() {}, func() {
+	core.RenderImage(b, func() {}, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		c := v.controls
@@ -229,7 +235,7 @@ func TestControlsKeysHidden(t *testing.T) {
 		s.Min.Y.Dp(240)
 	})
 	require.NoError(t, v.Open("testdata/short.mp4"))
-	b.RenderImage(func() {}, func() {
+	core.RenderImage(b, func() {}, func() {
 		b.AsyncLock()
 		c := v.controls
 
@@ -271,7 +277,7 @@ func TestControlsHideAtStart(t *testing.T) {
 		s.Min.Y.Dp(240)
 	})
 	require.NoError(t, v.Open("testdata/short.mp4"))
-	b.RenderImage(func() {}, func() {
+	core.RenderImage(b, func() {}, func() {
 		b.AsyncLock()
 		c := v.controls
 		assert.True(t, c.IsShown(), "before it plays")

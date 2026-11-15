@@ -52,7 +52,7 @@ func TestWrapWide(t *testing.T) {
 	vw := lns.view(vid)
 	// the lines are wrapped at their width in cells: a word of wide
 	// chars is broken into lines that fill the width
-	assert.Equal(t, []textpos.Pos{{0, 0}, {0, 5}, {1, 0}, {1, 3}, {1, 8}}, vw.vlineStarts)
+	assert.Equal(t, []textpos.Pos{{Line: 0, Char: 0}, {Line: 0, Char: 5}, {Line: 1, Char: 0}, {Line: 1, Char: 3}, {Line: 1, Char: 8}}, vw.vlineStarts)
 	for vl := range vw.viewLines {
 		cells := lns.viewLineCells(vw, vl)
 		assert.LessOrEqual(t, cells[len(cells)-1], 10, "view line %d", vl)

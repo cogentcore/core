@@ -625,7 +625,7 @@ func coreRenderWidth(tagged, dir, baseURL string, width, height int, remote func
 	}
 	boxes := map[int]*fidBox{}
 	pageHeight := 0 // in dp, as laid out (the window can be higher)
-	img := b.RenderImage(func() {
+	img := core.RenderImage(b, core.Locked(b, func() {
 		dp := b.Styles.UnitContext.Dots(units.UnitDp)
 		bottom := float32(0) // of the content, as the body grows to fill the window
 		b.ForWidgetChildren(func(i int, cw core.Widget, cwb *core.WidgetBase) bool {
@@ -686,7 +686,7 @@ func coreRenderWidth(tagged, dir, baseURL string, width, height int, remote func
 		if coreRenderHook != nil {
 			coreRenderHook(b)
 		}
-	})
+	}))
 	if img != nil && pageHeight > 0 && pageHeight < img.Bounds().Dy() {
 		img = img.SubImage(image.Rect(0, 0, img.Bounds().Dx(), pageHeight)).(*image.RGBA)
 	}

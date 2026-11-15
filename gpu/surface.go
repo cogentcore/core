@@ -96,7 +96,7 @@ func (sf *Surface) init(gp *GPU, ws *wgpu.Surface, size image.Point, samples int
 func (sf *Surface) Device() *Device { return sf.device }
 func (sf *Surface) Render() *Render { return &sf.render }
 
-// When the render surface (e.g., window) is resized, call this function.
+// SetSize must be called when the render surface (e.g., window) is resized.
 // WebGPU does not have any internal mechanism for tracking this, so we
 // need to drive it from external events.
 func (sf *Surface) SetSize(sz image.Point) {

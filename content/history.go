@@ -38,15 +38,15 @@ func (ct *Content) nearestHeading() string {
 	return lastHead
 }
 
-// save an updated history record based on current position on current page.
-// args are for the _next_ page that will be opened: don't add updated history
-// if the same as these args.
-func (ct *Content) saveUpdatedPos(curPg Location, pg *bcontent.Page, heading string) {
+// saveUpdatedPos saves an updated history record of the current position
+// (the nearest heading) on the given current page, before another page is
+// opened.
+func (ct *Content) saveUpdatedPos(curPg Location) {
 	nhead := ct.nearestHeading()
 	if nhead == "" {
 		return
 	}
-	url := curPg.URL
+	var url string
 	_, nw, _ := ct.pageURL(curPg.Page, strcase.ToKebab(nhead))
 	if nw != nil {
 		url = nw.String()

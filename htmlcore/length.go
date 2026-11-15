@@ -94,8 +94,8 @@ func (e *lengthEnv) length(v string, pct units.Units) (units.Value, bool) {
 			return units.Dp(float32(f) * float32(e.rem)), true
 		}
 	}
-	if strings.HasSuffix(v, "%") {
-		f, err := strconv.ParseFloat(strings.TrimSuffix(v, "%"), 32)
+	if before, ok := strings.CutSuffix(v, "%"); ok {
+		f, err := strconv.ParseFloat(before, 32)
 		if err != nil {
 			return units.Value{}, false
 		}

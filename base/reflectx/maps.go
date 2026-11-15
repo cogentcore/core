@@ -39,7 +39,7 @@ func MapAdd(mv any) {
 	mvtyp := mpvnp.Type()
 	valtyp := MapValueType(mv)
 	if valtyp.Kind() == reflect.Interface && valtyp.String() == "interface {}" {
-		valtyp = reflect.TypeOf("")
+		valtyp = reflect.TypeFor[string]()
 	}
 	nkey := reflect.New(MapKeyType(mv))
 	nval := reflect.New(valtyp)
@@ -156,8 +156,8 @@ func MapValueSort(mpvnp reflect.Value, keys []reflect.Value, ascending bool) err
 	}
 
 	// last resort!
-	switch {
-	case vk == reflect.String:
+	switch vk {
+	case reflect.String:
 		sort.Slice(keys, func(i, j int) bool {
 			iv := Underlying(mpvnp.MapIndex(keys[i])).String()
 			jv := Underlying(mpvnp.MapIndex(keys[j])).String()
@@ -190,19 +190,15 @@ func SetMapRobust(mp, ky, val reflect.Value) bool {
 	}
 	ktyp := mtyp.Key()
 	etyp := mtyp.Elem()
-	if etyp.Kind() == val.Kind() && ky.Kind() == ktyp.Kind() {
-		mp.SetMapIndex(ky, val)
-		return true
+	// a key or value of a different (named) type of the same kind
+	// must be converted to the type of the map too.
+	if !ky.Type().AssignableTo(ktyp) {
+		ky = ky.Convert(ktyp)
 	}
-	if ky.Kind() == ktyp.Kind() {
-		mp.SetMapIndex(ky, val.Convert(etyp))
-		return true
+	if !val.Type().AssignableTo(etyp) {
+		val = val.Convert(etyp)
 	}
-	if etyp.Kind() == val.Kind() {
-		mp.SetMapIndex(ky.Convert(ktyp), val)
-		return true
-	}
-	mp.SetMapIndex(ky.Convert(ktyp), val.Convert(etyp))
+	mp.SetMapIndex(ky, val)
 	return true
 }
 

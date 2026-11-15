@@ -834,11 +834,15 @@ func (tf *TextField) cursorDeleteWord(steps int) {
 		tf.deleteSelection()
 		return
 	}
-	// note: no update b/c signal from buf will drive update
-	org := tf.cursorPos
-	tf.cursorForwardWord(steps)
-	tf.editText = append(tf.editText[:tf.cursorPos], tf.editText[org:]...)
+	// the text from the cursor to the end of the word(s) is deleted,
+	// and the cursor stays where it is.
+	end, _ := textpos.ForwardWord(tf.editText, tf.cursorPos, steps)
+	if end <= tf.cursorPos {
+		return
+	}
+	tf.editText = append(tf.editText[:tf.cursorPos], tf.editText[end:]...)
 	tf.textEdited()
+	tf.NeedsRender()
 }
 
 // cursorKill deletes text from cursor to end of text
@@ -1088,9 +1092,8 @@ func (us *textFieldUndos) saveUndo(txt []rune, curpos int) {
 	now := time.Now()
 	ts := now.Sub(us.lastSave)
 	if n > 0 && ts < 250*time.Millisecond {
-		r := us.stack[n-1]
-		r.set(txt, curpos)
-		us.stack[n-1] = r
+		// a quick edit is in the group of the last record, which keeps the
+		// text from before the group, so that undo goes back to it.
 		return
 	}
 	r := textFieldUndoRecord{}
@@ -1107,7 +1110,7 @@ func (tf *TextField) saveUndo() {
 func (us *textFieldUndos) undo(txt []rune, curpos int) *textFieldUndoRecord {
 	n := len(us.stack)
 	if us.pos <= 0 || n == 0 {
-		return &textFieldUndoRecord{}
+		return nil // nothing to undo
 	}
 	if us.pos == n {
 		us.lastSave = time.Time{}
@@ -1245,9 +1248,6 @@ func (tf *TextField) charRenderPos(charidx int) math32.Vector2 {
 var (
 	// textFieldSpriteName is the name of the window sprite used for the cursor.
 	textFieldSpriteName = "TextField.Cursor"
-
-	// textFieldCursor is the TextField that last created a new cursor sprite.
-	textFieldCursor tree.Node
 )
 
 // startCursor starts the cursor blinking and renders it
@@ -1268,7 +1268,7 @@ func (tf *TextField) stopCursor() {
 
 // toggleSprite turns on or off the cursor sprite.
 func (tf *TextField) toggleCursor(on bool) {
-	TextCursor(on, tf.AsWidget(), &textFieldCursor, textFieldSpriteName, tf.CursorWidth.Dots, tf.lineHeight, tf.CursorColor, func() image.Point {
+	TextCursor(on, tf.AsWidget(), textFieldSpriteName, tf.CursorWidth.Dots, tf.lineHeight, tf.CursorColor, func() image.Point {
 		return tf.charRenderPos(tf.cursorPos).ToPointFloor()
 	})
 }
@@ -1309,7 +1309,7 @@ func (tf *TextField) renderSelect() {
 	if effst == effed {
 		return
 	}
-	tf.renderVisible.SelectRegion(textpos.Range{effst, effed})
+	tf.renderVisible.SelectRegion(textpos.Range{Start: effst, End: effed})
 }
 
 // renderHighlights renders the highlights regions, if any, underneath the text
@@ -1322,7 +1322,7 @@ func (tf *TextField) renderHighlights() {
 		if effst == effed {
 			return
 		}
-		tf.renderVisible.HighlightRegion(textpos.Range{effst, effed})
+		tf.renderVisible.HighlightRegion(textpos.Range{Start: effst, End: effed})
 	}
 }
 
@@ -1361,10 +1361,9 @@ func (tf *TextField) autoScroll() {
 	if maxw < 0 {
 		return
 	}
-	tf.charWidth = int(maxw / st.UnitContext.Dots(units.UnitCh)) // rough guess in chars
-	if tf.charWidth < 1 {
-		tf.charWidth = 1
-	}
+	tf.charWidth = max(
+		// rough guess in chars
+		int(maxw/st.UnitContext.Dots(units.UnitCh)), 1)
 
 	// first rationalize all the values
 	if tf.dispRange.End == 0 || tf.dispRange.End > n { // not init
@@ -1937,8 +1936,8 @@ func concealDots(n int) []rune {
 
 // TextRunes returns any text content associated with the widget, to be used
 // for Search for example. If this is nil, then it is excluded from search.
-func (tx *TextField) TextRunes() []rune {
-	return tx.editText
+func (tf *TextField) TextRunes() []rune {
+	return tf.editText
 }
 
 // Search returns text search results for this widget, searching for
@@ -1946,8 +1945,8 @@ func (tx *TextField) TextRunes() []rune {
 // to define the meaning of the Region line, char values for the matches.
 // The bool return value indicates whether this widget handled the search,
 // thereby excluding further searching within the elements under it.
-func (tx *TextField) Search(find string, useCase bool) ([]textpos.Match, bool) {
-	return SearchRunes(tx.editText, find, useCase), true
+func (tf *TextField) Search(find string, useCase bool) ([]textpos.Match, bool) {
+	return SearchRunes(tf.editText, find, useCase), true
 }
 
 // HighlightMatches does highlighting of the given matches within this widget,
@@ -1956,14 +1955,14 @@ func (tx *TextField) Search(find string, useCase bool) ([]textpos.Match, bool) {
 // Any existing highlighting should always be reset first regardless.
 // The bool return value indicates whether this widget handled the search,
 // thereby excluding further searching within the elements under it.
-func (tx *TextField) HighlightMatches(matches []textpos.Match) bool {
-	tx.highlights = nil
-	tx.NeedsRender()
+func (tf *TextField) HighlightMatches(matches []textpos.Match) bool {
+	tf.highlights = nil
+	tf.NeedsRender()
 	if matches == nil {
 		return true
 	}
 	for _, m := range matches {
-		tx.highlights = append(tx.highlights, textpos.Range{Start: m.Region.Start.Char, End: m.Region.End.Char})
+		tf.highlights = append(tf.highlights, textpos.Range{Start: m.Region.Start.Char, End: m.Region.End.Char})
 	}
 	return true
 }
@@ -1971,15 +1970,15 @@ func (tx *TextField) HighlightMatches(matches []textpos.Match) bool {
 // SelectMatch selects match at given index from among those returned
 // from the Search method. scroll = scroll widget into view.
 // reset = clear selection instead of selecting (does not scroll).
-func (tx *TextField) SelectMatch(matches []textpos.Match, index int, scroll, reset bool) {
+func (tf *TextField) SelectMatch(matches []textpos.Match, index int, scroll, reset bool) {
 	if reset {
-		tx.selectReset()
+		tf.selectReset()
 		return
 	}
 	match := matches[index]
-	tx.selectRange = textpos.Range{Start: match.Region.Start.Char, End: match.Region.End.Char}
-	tx.NeedsRender()
+	tf.selectRange = textpos.Range{Start: match.Region.Start.Char, End: match.Region.End.Char}
+	tf.NeedsRender()
 	if scroll {
-		tx.ScrollThisToTop()
+		tf.ScrollThisToTop()
 	}
 }

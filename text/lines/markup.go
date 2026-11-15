@@ -21,6 +21,17 @@ import (
 // setFileInfo sets the syntax highlighting and other parameters
 // based on the type of file specified by given [fileinfo.FileInfo].
 func (ls *Lines) setFileInfo(info *fileinfo.FileInfo) {
+	// the file info is kept, for its language: all of it without a file,
+	// and only the type of content with one, keeping that of the file.
+	if info != &ls.fileInfo {
+		if ls.filename == "" {
+			ls.fileInfo = *info
+		} else {
+			ls.fileInfo.Known = info.Known
+			ls.fileInfo.Cat = info.Cat
+			ls.fileInfo.Mime = info.Mime
+		}
+	}
 	ls.parseState.SetSrc(string(info.Path), "", info.Known)
 	ls.Highlighter.Init(info, &ls.parseState)
 	ls.Settings.ConfigKnown(info.Known)
@@ -148,6 +159,9 @@ func (ls *Lines) markupApplyEdits(tags []lexer.Line) []lexer.Line {
 	ls.markupEdits = nil
 	if ls.Highlighter.UsingParse() {
 		pfs := ls.parseState.Done()
+		// The types of the symbols of the file can be resolved from its
+		// source in another goroutine, under the lock of its symbols.
+		pfs.SymsMu.Lock()
 		for _, tbe := range edits {
 			if tbe.Delete {
 				stln := tbe.Region.Start.Line
@@ -162,6 +176,7 @@ func (ls *Lines) markupApplyEdits(tags []lexer.Line) []lexer.Line {
 		for ln := range tags { // todo: something weird about this -- not working in test
 			tags[ln] = pfs.LexLine(ln) // does clone, combines comments too
 		}
+		pfs.SymsMu.Unlock()
 	} else {
 		for _, tbe := range edits {
 			if tbe.Delete {
@@ -289,7 +304,9 @@ func (ls *Lines) insertLineSlices(tbe *textpos.Edit) {
 		}
 		if ls.Highlighter.UsingParse() {
 			pfs := ls.parseState.Done()
+			pfs.SymsMu.Lock() // (see markupApplyEdits)
 			pfs.Src.LinesInserted(stln, nsz)
+			pfs.SymsMu.Unlock()
 		}
 	}
 }
@@ -309,7 +326,9 @@ func (ls *Lines) linesDeleted(tbe *textpos.Edit) {
 		}
 		if ls.Highlighter.UsingParse() {
 			pfs := ls.parseState.Done()
+			pfs.SymsMu.Lock() // (see markupApplyEdits)
 			pfs.Src.LinesDeleted(stln, edln)
+			pfs.SymsMu.Unlock()
 		}
 	}
 	// remarkup of start line:
@@ -434,9 +453,11 @@ func (ls *Lines) nextLink(pos textpos.Pos) (*rich.Hyperlink, int) {
 	if cl != nil {
 		pos.Char = cl.Range.End
 	}
+	// the first link starting at or after pos on its line, which is past
+	// the current link if pos is in one.
 	ll := ls.links[pos.Line]
 	for _, l := range ll {
-		if l.Range.Contains(pos.Char) {
+		if l.Range.Start >= pos.Char {
 			return &l, pos.Line
 		}
 	}
@@ -464,8 +485,10 @@ func (ls *Lines) prevLink(pos textpos.Pos) (*rich.Hyperlink, int) {
 			pos.Char = cl.Range.Start - 1
 		}
 	}
+	// the last link ending at or before pos on its line
 	ll := ls.links[pos.Line]
-	for _, l := range ll {
+	for ri := len(ll) - 1; ri >= 0; ri-- {
+		l := ll[ri]
 		if l.Range.End <= pos.Char {
 			return &l, pos.Line
 		}
@@ -479,7 +502,8 @@ func (ls *Lines) prevLink(pos textpos.Pos) (*rich.Hyperlink, int) {
 		if ln >= pos.Line {
 			continue
 		}
-		return &ls.links[ln][0], ln
+		ll := ls.links[ln]
+		return &ll[len(ll)-1], ln
 	}
 	return nil, -1
 }

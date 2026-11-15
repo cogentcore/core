@@ -54,8 +54,8 @@ func ExtractMarkdownCites(fsys fs.FS, files []string, src, cited *KeyList) error
 			cs := exp.FindAllString(string(scan.Bytes()), -1)
 			for _, c := range cs {
 				tc := c[1 : len(c)-1]
-				sp := strings.Split(tc, "@")
-				for _, ac := range sp {
+				sp := strings.SplitSeq(tc, "@")
+				for ac := range sp {
 					a := strings.TrimSpace(ac)
 					a = strings.TrimSuffix(a, ";")
 					if a == "" {
@@ -73,6 +73,9 @@ func ExtractMarkdownCites(fsys fs.FS, files []string, src, cited *KeyList) error
 					cited.Add(a, it)
 				}
 			}
+		}
+		if err := scan.Err(); err != nil {
+			errs = append(errs, err)
 		}
 		f.Close()
 	}

@@ -49,6 +49,7 @@ func TestLineMarkupCursor(t *testing.T) {
 	assert.Equal(t, []string{"$ ", "[ ]"}, spans(cm, tx))
 
 	rs, tx = cm.lineMarkup(cells("$ ls"), 1, 0)
+	assert.Equal(t, "$ ls", string(rs))
 	assert.Equal(t, []string{"[$]", " ls"}, spans(cm, tx))
 
 	rs, tx = cm.lineMarkup(cells("$ ls"), 3, -1) // hidden

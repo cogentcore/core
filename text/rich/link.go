@@ -25,7 +25,7 @@ type Hyperlink struct {
 func (tx Text) GetLinks() []Hyperlink {
 	var lks []Hyperlink
 	n := len(tx)
-	for si := range n {
+	for si := 0; si < n; si++ {
 		sp := RuneToSpecial(tx[si][0])
 		if sp != Link {
 			continue
@@ -40,10 +40,10 @@ func (tx Text) GetLinks() []Hyperlink {
 		lk.URL = s.URL
 		sr, _ := tx.Range(lr.Start)
 		_, er := tx.Range(lr.End)
-		lk.Range = textpos.Range{sr, er}
+		lk.Range = textpos.Range{Start: sr, End: er}
 		lk.Label = string(ls.Join())
 		lks = append(lks, lk)
-		si = lr.End
+		si = lr.End - 1 // continue after the link
 	}
 	return lks
 }

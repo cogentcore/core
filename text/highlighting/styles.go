@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"maps"
 	"os"
 	"path/filepath"
 	"slices"
@@ -121,9 +122,7 @@ func (hs *Styles) CopyFrom(os Styles) {
 	if *hs == nil {
 		*hs = make(Styles, len(os))
 	}
-	for nm, cse := range os {
-		(*hs)[nm] = cse
-	}
+	maps.Copy((*hs), os)
 }
 
 // MergeAvailStyles updates AvailStyles as combination of std and custom styles

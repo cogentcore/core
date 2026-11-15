@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package jsonx provides functions for opening, reading, saving, and writing
+// values in JSON.
 package jsonx
 
 import (

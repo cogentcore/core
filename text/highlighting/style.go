@@ -14,6 +14,7 @@ import (
 	"encoding/json"
 	"image/color"
 	"log/slog"
+	"maps"
 	"os"
 	"strings"
 
@@ -52,14 +53,14 @@ func (t Trilean) Prefix(s string) string {
 type StyleEntry struct {
 
 	// Color is the text color.
-	Color color.RGBA `json:",omitempty"`
+	Color color.RGBA
 
 	// Background color.
 	// In general it is not good to use this because it obscures highlighting.
-	Background color.RGBA `json:",omitempty"`
+	Background color.RGBA
 
 	// Border color? not sure what this is -- not really used.
-	Border color.RGBA `display:"-" json:",omitempty"`
+	Border color.RGBA `display:"-"`
 
 	// Bold font.
 	Bold Trilean `json:",omitempty"`
@@ -153,7 +154,7 @@ func (se StyleEntry) String() string {
 		out = append(out, se.Underline.Prefix("underline"))
 	}
 	if se.DottedUnderline != Pass {
-		out = append(out, se.Underline.Prefix("dotted-underline"))
+		out = append(out, se.DottedUnderline.Prefix("dotted-underline"))
 	}
 	if se.NoInherit {
 		out = append(out, "noinherit")
@@ -211,7 +212,7 @@ func (se StyleEntry) ToProperties() map[string]any {
 	}
 	if se.Underline == Yes {
 		pr["text-decoration"] = 1 << uint32(rich.Underline)
-	} else if se.Underline == Yes {
+	} else if se.DottedUnderline == Yes {
 		pr["text-decoration"] = 1 << uint32(rich.DottedUnderline)
 	}
 	return pr
@@ -272,11 +273,11 @@ func (se StyleEntry) Sub(e StyleEntry) StyleEntry {
 // Ancestors should be provided from oldest, furthest away to newest, closest.
 func (se StyleEntry) Inherit(ancestors ...StyleEntry) StyleEntry {
 	out := se
-	for i := len(ancestors) - 1; i >= 0; i-- {
+	for ri := len(ancestors) - 1; ri >= 0; ri-- {
+		ancestor := ancestors[ri]
 		if out.NoInherit {
 			return out
 		}
-		ancestor := ancestors[i]
 		if colors.IsNil(out.themeColor) {
 			out.Color = ancestor.Color
 			out.themeColor = ancestor.themeColor
@@ -320,9 +321,7 @@ func (hs *Style) CopyFrom(ss *Style) {
 		return
 	}
 	*hs = make(Style, len(*ss))
-	for k, v := range *ss {
-		(*hs)[k] = v
-	}
+	maps.Copy((*hs), *ss)
 }
 
 // TagRaw returns a StyleEntry for given tag without any inheritance of anything
@@ -350,6 +349,8 @@ func (hs Style) Tag(tag token.Tokens) StyleEntry {
 
 // ToCSS generates a CSS style sheet for this style, by token.Tokens tag
 func (hs Style) ToCSS() map[token.Tokens]string {
+	themeMu.RLock() // (the theme colors can be updated in another window)
+	defer themeMu.RUnlock()
 	css := map[token.Tokens]string{}
 	for ht := range token.Names {
 		entry := hs.Tag(ht)
@@ -363,6 +364,8 @@ func (hs Style) ToCSS() map[token.Tokens]string {
 
 // ToProperties generates a list of key-value properties for this style.
 func (hs Style) ToProperties() map[string]any {
+	themeMu.RLock() // (the theme colors can be updated in another window)
+	defer themeMu.RUnlock()
 	pr := map[string]any{}
 	for ht, nm := range token.Names {
 		entry := hs.Tag(ht)
@@ -378,14 +381,14 @@ func (hs Style) ToProperties() map[string]any {
 }
 
 // Open hi style from a JSON-formatted file.
-func (hs Style) OpenJSON(filename fsx.Filename) error {
+func (hs *Style) OpenJSON(filename fsx.Filename) error {
 	b, err := os.ReadFile(string(filename))
 	if err != nil {
 		// PromptDialog(nil, "File Not Found", err.Error(), true, false, nil, nil, nil)
 		slog.Error(err.Error())
 		return err
 	}
-	return json.Unmarshal(b, &hs)
+	return json.Unmarshal(b, hs)
 }
 
 // Save hi style to a JSON-formatted file.

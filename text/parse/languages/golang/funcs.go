@@ -102,7 +102,7 @@ func (gl *GoLang) FuncTypeFromAST(fs *parse.FileState, pkg *syms.Symbol, ast *pa
 	npars := len(pars.Children)
 	var sigpars *parser.AST
 	if npars > 0 && (pars.Name == "SigParams" || pars.Name == "SigParamsResult") {
-		if ps := pars.ChildAST(0); ps == nil {
+		if ps := pars.ChildAST(0); ps != nil {
 			sigpars = pars
 			pars = ps
 			npars = len(pars.Children)
@@ -136,7 +136,7 @@ func (gl *GoLang) FuncTypeFromAST(fs *parse.FileState, pkg *syms.Symbol, ast *pa
 func (gl *GoLang) ParamsFromAST(fs *parse.FileState, pkg *syms.Symbol, pars *parser.AST, fty *syms.Type, name string) {
 	npars := len(pars.Children)
 	var pnames []string // param names that all share same type
-	for i := 0; i < npars; i++ {
+	for i := range npars {
 		par := pars.Children[i].(*parser.AST)
 		psz := len(par.Children)
 		if par.Name == "ParType" && psz == 1 {

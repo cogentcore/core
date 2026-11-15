@@ -145,7 +145,7 @@ type renderWindow struct {
 	// and each time one completes, it is decremented. This ensures
 	// everything is synchronized. Basically a [sync.WaitGroup] but we
 	// need to just bail if not done, not wait.
-	winRenderCounter int32
+	winRenderCounter atomic.Int32
 }
 
 // newRenderWindow creates a new window with given internal name handle,
@@ -168,11 +168,11 @@ func newRenderWindow(name, title string, opts *system.NewWindowOptions) *renderW
 		rc.Lock()
 		w.flags.SetFlag(true, winClosing)
 		// ensure that everyone is closed first
-		for _, kv := range w.mains.stack.Order {
-			if kv.Value == nil || kv.Value.Scene == nil || kv.Value.Scene.This == nil {
+		for _, st := range w.mains.stack.Values {
+			if st == nil || st.Scene == nil || st.Scene.This == nil {
 				continue
 			}
-			if !kv.Value.Scene.Close() {
+			if !st.Scene.Close() {
 				w.flags.SetFlag(false, winClosing)
 				rc.Unlock()
 				return
@@ -343,8 +343,8 @@ func (w *renderWindow) resized() {
 		}
 		if w.mains.resize(rg) || newDPI {
 			// The scenes are restyled by their next update.
-			for _, kv := range w.mains.stack.Order {
-				kv.Value.Scene.lastRender.invalidate()
+			for _, st := range w.mains.stack.Values {
+				st.Scene.lastRender.invalidate()
 			}
 		}
 		return
@@ -442,14 +442,6 @@ func (w *renderWindow) isVisible() bool {
 func (w *renderWindow) goStartEventLoop() {
 	windowWait.Add(1)
 	go w.eventLoop()
-}
-
-// todo: fix or remove
-// sendWinFocusEvent sends the RenderWinFocusEvent to widgets
-func (w *renderWindow) sendWinFocusEvent(act events.WinActions) {
-	// se := window.NewEvent(act)
-	// se.Init()
-	// w.Mains.HandleEvent(se)
 }
 
 // eventLoop runs the event processing loop for the RenderWindow -- grabs system
@@ -597,7 +589,6 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			AllRenderWindows.moveToEnd(w)
 			if !w.flags.HasFlag(winGotFocus) {
 				w.flags.SetFlag(true, winGotFocus)
-				w.sendWinFocusEvent(events.WinFocus)
 				if DebugSettings.WindowEventTrace {
 					fmt.Printf("Win: %v got focus\n", w.name)
 				}
@@ -612,7 +603,6 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 				fmt.Printf("Win: %v lost focus\n", w.name)
 			}
 			w.flags.SetFlag(false, winGotFocus)
-			w.sendWinFocusEvent(events.WinFocusLost)
 		case events.ScreenUpdate:
 			if DebugSettings.WindowEventTrace {
 				log.Println("Win: ScreenUpdate", w.name, screenConfig())
@@ -745,7 +735,7 @@ func (w *renderWindow) renderWindow() {
 	// if it goes idle in this pass (see idle.go)
 	w.paintWanted.Store(false)
 
-	if atomic.LoadInt32(&w.winRenderCounter) > 0 { // still working
+	if w.winRenderCounter.Load() > 0 { // still working
 		w.flags.SetFlag(true, winRenderSkipped)
 		if DebugSettings.WindowRenderTrace {
 			log.Printf("RenderWindow: still rendering, skipped: %v\n", w.name)
@@ -847,7 +837,7 @@ func (w *renderWindow) renderWindow() {
 	winIndex := 0
 	var winScene *Scene
 	for i := n - 1; i >= 0; i-- {
-		st := sm.stack.ValueByIndex(i)
+		st := sm.stack.Values[i]
 		if st.Type == WindowStage {
 			if DebugSettings.WindowRenderTrace {
 				log.Println("GatherScenes: main Window:", st.String())
@@ -866,7 +856,7 @@ func (w *renderWindow) renderWindow() {
 
 	// then add everyone above that
 	for i := winIndex + 1; i < n; i++ {
-		st := sm.stack.ValueByIndex(i)
+		st := sm.stack.Values[i]
 		if st.Scrim && i == n-1 {
 			// (in the window, where the scene is drawn at its position)
 			cp.Add(ScrimSource(winScene.Geom.TotalBBox.Add(winScene.SceneGeom.Pos)), &st.Scrim)
@@ -878,8 +868,7 @@ func (w *renderWindow) renderWindow() {
 	}
 
 	// then add the popups for the top main stage
-	for _, kv := range top.popups.stack.Order {
-		st := kv.Value
+	for _, st := range top.popups.stack.Values {
 		st.Scene.addRenderSources(cp, draw.Over, false)
 		if DebugSettings.WindowRenderTrace {
 			log.Println("GatherScenes: popup:", st.String())
@@ -890,7 +879,7 @@ func (w *renderWindow) renderWindow() {
 
 	w.SystemWindow.Unlock()
 	if offscreen || w.flags.HasFlag(winResize) || sinceResize < 500*time.Millisecond {
-		atomic.AddInt32(&w.winRenderCounter, 1)
+		w.winRenderCounter.Add(1)
 		w.renderAsync(cp)
 		if w.flags.HasFlag(winResize) {
 			w.lastResize.Store(time.Now().UnixNano())
@@ -900,7 +889,7 @@ func (w *renderWindow) renderWindow() {
 		// note: it is critical to set *before* going into loop
 		// because otherwise we can lose an entire pass before the goroutine starts!
 		// function will turn flag off when it finishes.
-		atomic.AddInt32(&w.winRenderCounter, 1)
+		w.winRenderCounter.Add(1)
 		go w.renderAsync(cp)
 	}
 }
@@ -910,7 +899,7 @@ func (w *renderWindow) renderWindow() {
 // It calls the Compose function on the given composer.
 func (w *renderWindow) renderAsync(cp composer.Composer) {
 	if !w.SystemWindow.Lock() {
-		atomic.AddInt32(&w.winRenderCounter, -1)
+		w.winRenderCounter.Add(-1)
 		// fmt.Println("renderAsync SystemWindow lock fail")
 		return
 	}
@@ -919,7 +908,7 @@ func (w *renderWindow) renderAsync(cp composer.Composer) {
 	cp.Compose()
 	// pr.End()
 	w.SystemWindow.Unlock()
-	atomic.AddInt32(&w.winRenderCounter, -1)
+	w.winRenderCounter.Add(-1)
 }
 
 // RenderSource returns the [render.Render] state from the [Scene.Painter].

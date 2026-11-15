@@ -4,6 +4,8 @@
 
 package num
 
+//core:js-test
+
 import (
 	"testing"
 
@@ -28,4 +30,15 @@ func TestAbs(t *testing.T) {
 	// assert.Equal(t, uint8(5), Abs(uint8(5)))
 
 	assert.Equal(t, 4.31, Abs(-4.31))
+}
+
+func TestSetFromBool(t *testing.T) {
+	var i int
+	SetFromBool(&i, true)
+	assert.Equal(t, 1, i)
+	SetFromBool(&i, false)
+	assert.Equal(t, 0, i)
+	assert.Equal(t, uint8(0), FromBool[uint8](false))
+	assert.Equal(t, float32(3), Abs(float32(-3)))
+	assert.Equal(t, int8(3), Abs(int8(3)))
 }

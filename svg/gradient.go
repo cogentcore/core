@@ -11,7 +11,6 @@ import (
 
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/tree"
 )
 
 // note: this code provides convenience methods for updating gradient data
@@ -161,11 +160,10 @@ func (g *NodeBase) GradientFromGradients(sv *SVG) {
 // GradientGeom points to those gradients. This can be done after loading
 // for cases where node transforms will be updated dynamically.
 func (sv *SVG) GradientFromGradients() {
-	sv.Root.WalkDown(func(n tree.Node) bool {
+	for n := range sv.Root.All() {
 		nb := n.(Node).AsNodeBase()
 		nb.GradientFromGradients(sv)
-		return tree.Continue
-	})
+	}
 }
 
 ////////  Gradient management utilities for creating element-specific grads
@@ -190,6 +188,9 @@ func (sv *SVG) GradientDeleteForNode(n Node, grnm string) bool {
 		return false
 	}
 	unm := NameFromURL(grnm)
+	if unm == "" { // a bare name
+		unm = grnm
+	}
 	sv.Defs.DeleteChildByName(unm)
 	return true
 }
@@ -312,7 +313,7 @@ func (sv *SVG) GradientDuplicateNode(n Node) {
 		}
 		gr := gri.(*Gradient)
 		_, ngu := sv.GradientNewForNode(n, prop, gr.IsRadial(), gr.StopsName)
-		nb.Properties["fill"] = ngu
+		nb.Properties[prop] = ngu
 	}
 	setGr("fill")
 	setGr("stroke")

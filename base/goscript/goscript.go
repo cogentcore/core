@@ -7,28 +7,16 @@
 // used for the js platform. Code compiled by goscript is built with
 // GOOS=js, GOARCH=wasm, and the goscript build tag.
 //
-// The main use of this package is [Test], which runs the existing Go tests
-// of a package compiled to JavaScript, so that the same tests verify both
-// the native and the goscript versions of the code. Each package does this
-// with a test file like this:
+// The main use of this package is [RunTests], which runs the existing Go
+// tests of a package compiled to JavaScript, so that the same tests verify
+// both the native and the goscript versions of the code. It is run by
+// core test js (see the cmd package), for the packages given to it, and,
+// for a pattern with ... in it, for the packages that opt in with a
+// [Directive] line in one of their test files:
 //
-//	//go:build !goscript
+//	//core:js-test
 //
-//	package mypackage
-//
-//	import (
-//		"testing"
-//
-//		"cogentcore.org/core/base/goscript"
-//	)
-//
-//	func TestGoScript(t *testing.T) { goscript.Test(t) }
-//
-// Benchmarks can also be run in JavaScript by setting the CORE_GOSCRIPT_BENCH
-// environment variable to a benchmark regular expression (see [BenchEnvVar]),
-// for example:
-//
-//	CORE_GOSCRIPT_TEST=1 CORE_GOSCRIPT_BENCH=. go test -v -run TestGoScript
+// Tests that do not work in goscript call [Skip].
 //
 // This package must only import the standard library, so that it can be used
 // in the tests of any package without an import cycle.

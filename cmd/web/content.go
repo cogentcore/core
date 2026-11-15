@@ -173,7 +173,7 @@ func makeContentSite(c *config.Config, site *bcontent.Site, wasm bool, indexPage
 		}
 		var b []byte
 		if prp.URL == "" && wasm && indexPage != "" {
-			b, err = makeIndexHTML(c, "", &bcontent.PreRenderPage{Page: bcontent.Page{Name: c.Name}}, indexPage)
+			b, err = makeIndexHTML(c, "", &bcontent.PreRenderPage{Name: c.Name}, indexPage)
 		} else {
 			b, err = makeContentPage(c, site, prp, basePath(prp.URL), wasm, files)
 		}
@@ -191,7 +191,7 @@ func makeContentSite(c *config.Config, site *bcontent.Site, wasm bool, indexPage
 	// a page not found message. The base path is for pages one level below
 	// the root (see [notFoundBasePath]).
 	notFound := &bcontent.PreRenderPage{
-		Page: bcontent.Page{Name: "Page not found", URL: "404"},
+		Name: "Page not found", URL: "404",
 		HTML: `<div class="cc-page-frame"><h1 style="font-size:36px;font-weight:normal;line-height:1.2222222">Page not found</h1><p style="line-height:1.5">The requested page does not exist. Use the navigation or search to find another page.</p></div>`,
 	}
 	if wasm && root != nil {
@@ -291,26 +291,24 @@ func makeContentPage(c *config.Config, site *bcontent.Site, prp *bcontent.PreRen
 		return nil, err
 	}
 	d := &contentData{
-		indexHTMLData: indexHTMLData{
-			BasePath:               base,
-			Author:                 c.Web.Author,
-			Description:            html.EscapeString(desc),
-			Keywords:               c.Web.Keywords,
-			Title:                  html.EscapeString(title),
-			SiteName:               html.EscapeString(c.Name),
-			Image:                  c.Web.Image,
-			Styles:                 c.Web.Styles,
-			FontText:               html.EscapeString(c.Web.FontText),
-			VanityURL:              c.Web.VanityURL,
-			GithubVanityRepository: c.Web.GithubVanityRepository,
-			JS:                     IsJS(c),
-		},
-		Wasm:     wasm,
-		Lang:     c.Web.Lang,
-		HomeURL:  pageHref(base, ""),
-		NavHTML:  staticNavHTML(site, prp, base),
-		PageHTML: rebaseURLs(prp.HTML, base, prp.URL, pageURLs(site), files),
-		PageJSON: string(pj),
+		BasePath:               base,
+		Author:                 c.Web.Author,
+		Description:            html.EscapeString(desc),
+		Keywords:               c.Web.Keywords,
+		Title:                  html.EscapeString(title),
+		SiteName:               html.EscapeString(c.Name),
+		Image:                  c.Web.Image,
+		Styles:                 c.Web.Styles,
+		FontText:               html.EscapeString(c.Web.FontText),
+		VanityURL:              c.Web.VanityURL,
+		GithubVanityRepository: c.Web.GithubVanityRepository,
+		JS:                     IsJS(c),
+		Wasm:                   wasm,
+		Lang:                   c.Web.Lang,
+		HomeURL:                pageHref(base, ""),
+		NavHTML:                staticNavHTML(site, prp, base),
+		PageHTML:               rebaseURLs(prp.HTML, base, prp.URL, pageURLs(site), files),
+		PageJSON:               string(pj),
 	}
 	b := &bytes.Buffer{}
 	err = contentTmpl.Execute(b, d)

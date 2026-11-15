@@ -170,21 +170,26 @@ func (p Path) Direction(seg int, t float32) math32.Vector2 {
 		return math32.Vector2{}
 	}
 
+	// segments are the commands, including each MoveTo, and the direction
+	// is found in the subpath that has the segment.
 	curSeg := 0
-	iStart, iSeg, iEnd := 0, 0, 0
+	iStart, iSeg := 0, -1
 	for i := 0; i < len(p); {
 		cmd := p[i]
-		if cmd == MoveTo {
-			if seg < curSeg {
-				pi := p[iStart:iEnd]
-				return DirectionIndex(pi, iSeg-iStart, t)
+		if cmd == MoveTo && 0 < i {
+			if 0 <= iSeg {
+				return DirectionIndex(p[iStart:i], iSeg-iStart, t)
 			}
 			iStart = i
 		}
 		if seg == curSeg {
 			iSeg = i
 		}
+		curSeg++
 		i += CmdLen(cmd)
+	}
+	if 0 <= iSeg {
+		return DirectionIndex(p[iStart:], iSeg-iStart, t)
 	}
 	return math32.Vector2{} // if segment doesn't exist
 }

@@ -4,6 +4,8 @@
 
 package types
 
+//core:js-test
+
 import "testing"
 
 func TestFormatDoc(t *testing.T) {

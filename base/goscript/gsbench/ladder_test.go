@@ -41,7 +41,7 @@ func ladSrc() string {
 
 // LadderStructValue reads and writes the fields of a local struct value.
 func BenchmarkLadderStructValue(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		var p ladPos
 		for i := range 10000 {
 			p.Line += i & 7
@@ -54,7 +54,7 @@ func BenchmarkLadderStructValue(b *testing.B) {
 // LadderStructPointer reads and writes the fields of a struct through a
 // pointer to a new struct.
 func BenchmarkLadderStructPointer(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		p := &ladPos{}
 		for i := range 10000 {
 			p.Line += i & 7
@@ -67,7 +67,7 @@ func BenchmarkLadderStructPointer(b *testing.B) {
 // LadderVarPointer reads and writes the fields of a struct variable through
 // a pointer to the variable.
 func BenchmarkLadderVarPointer(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		var v ladPos
 		p := &v
 		for i := range 10000 {
@@ -88,7 +88,7 @@ type ladOuter struct {
 // pointer to a struct field of another struct (as &fs.LexState).
 func BenchmarkLadderFieldPointer(b *testing.B) {
 	o := &ladOuter{}
-	for range b.N {
+	for b.Loop() {
 		p := &o.St
 		p.Pos = 0
 		for i := range 10000 {
@@ -111,7 +111,7 @@ func (p *ladPos) ladAdvance(i int) { p.Line += i & 7 }
 
 // LadderValueMethod calls a method with a struct value receiver.
 func BenchmarkLadderValueMethod(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		p := ladPos{Line: 1}
 		s := 0
 		for i := range 10000 {
@@ -123,7 +123,7 @@ func BenchmarkLadderValueMethod(b *testing.B) {
 
 // LadderPointerMethod calls a method with a pointer receiver.
 func BenchmarkLadderPointerMethod(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		p := &ladPos{}
 		for i := range 10000 {
 			p.ladAdvance(i)
@@ -137,7 +137,7 @@ type ladStepper interface{ ladAdvance(i int) }
 
 // LadderInterfaceMethod calls a pointer method through an interface.
 func BenchmarkLadderInterfaceMethod(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		p := &ladPos{}
 		var st ladStepper = p
 		for i := range 10000 {
@@ -151,7 +151,7 @@ func BenchmarkLadderInterfaceMethod(b *testing.B) {
 // a slice by index.
 func BenchmarkLadderStructSliceIndex(b *testing.B) {
 	ps := make([]ladPos, 100)
-	for range b.N {
+	for b.Loop() {
 		for i := range 10000 {
 			j := i % 100
 			ps[j].Line += i & 7
@@ -165,7 +165,7 @@ func BenchmarkLadderStructSliceIndex(b *testing.B) {
 // (&s[i]) and uses the fields through it.
 func BenchmarkLadderStructSliceAddr(b *testing.B) {
 	ps := make([]ladPos, 100)
-	for range b.N {
+	for b.Loop() {
 		for i := range 10000 {
 			p := &ps[i%100]
 			p.Line += i & 7
@@ -178,7 +178,7 @@ func BenchmarkLadderStructSliceAddr(b *testing.B) {
 // LadderStructAppend appends struct values to a slice, as the lexer appends
 // tokens to a line.
 func BenchmarkLadderStructAppend(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		var ps []ladPos
 		for i := range 10000 {
 			ps = append(ps, ladPos{Line: i, Char: i & 7})
@@ -190,7 +190,7 @@ func BenchmarkLadderStructAppend(b *testing.B) {
 // LadderStringIndex reads the bytes of a string by index.
 func BenchmarkLadderStringIndex(b *testing.B) {
 	src := ladSrc()
-	for range b.N {
+	for b.Loop() {
 		s := 0
 		for i := range 10000 {
 			s += int(src[i%len(src)])
@@ -203,7 +203,7 @@ func BenchmarkLadderStringIndex(b *testing.B) {
 // matches literal strings.
 func BenchmarkLadderStringRange(b *testing.B) {
 	words := []string{"func", "if", "for", "range", ":=", "//"}
-	for range b.N {
+	for b.Loop() {
 		s := 0
 		for i := range 2000 {
 			for _, r := range words[i%len(words)] {
@@ -218,7 +218,7 @@ func BenchmarkLadderStringRange(b *testing.B) {
 // string.
 func BenchmarkLadderStringSliceCompare(b *testing.B) {
 	src := ladSrc()
-	for range b.N {
+	for b.Loop() {
 		n := 0
 		for i := range 10000 {
 			j := i % (len(src) - 4)
@@ -233,7 +233,7 @@ func BenchmarkLadderStringSliceCompare(b *testing.B) {
 // LadderRuneConvert converts a string to a []rune.
 func BenchmarkLadderRuneConvert(b *testing.B) {
 	src := ladSrc()
-	for range b.N {
+	for b.Loop() {
 		n := 0
 		for range 100 {
 			n += len([]rune(src))
@@ -246,7 +246,7 @@ func BenchmarkLadderRuneConvert(b *testing.B) {
 // reads its line.
 func BenchmarkLadderRuneIndex(b *testing.B) {
 	src := []rune(ladSrc())
-	for range b.N {
+	for b.Loop() {
 		s := 0
 		for i := range 10000 {
 			s += int(src[i%len(src)])
@@ -259,7 +259,7 @@ func BenchmarkLadderRuneIndex(b *testing.B) {
 // a pointer, by its position, as State.RuneAt does.
 func BenchmarkLadderRuneFieldIndex(b *testing.B) {
 	st := &ladState{Src: []rune(ladSrc())}
-	for range b.N {
+	for b.Loop() {
 		s := 0
 		for i := range 10000 {
 			st.Pos = i % len(st.Src)
@@ -275,7 +275,7 @@ func BenchmarkLadderRuneFieldIndex(b *testing.B) {
 // reads names.
 func BenchmarkLadderRunesToString(b *testing.B) {
 	src := []rune(ladSrc())
-	for range b.N {
+	for b.Loop() {
 		n := 0
 		for i := range 1000 {
 			j := i % (len(src) - 8)
@@ -289,7 +289,7 @@ func BenchmarkLadderRunesToString(b *testing.B) {
 func BenchmarkLadderMapStringKey(b *testing.B) {
 	m := map[string]int{"func": 1, "if": 2, "for": 3, "range": 4, "return": 5, "var": 6}
 	keys := []string{"func", "x", "range", "return", "foo", "var"}
-	for range b.N {
+	for b.Loop() {
 		s := 0
 		for i := range 10000 {
 			if v, ok := m[keys[i%len(keys)]]; ok {
@@ -313,7 +313,7 @@ func ladRuneAt(src []rune, i int) (rune, bool) {
 // LadderMultiReturn calls a function with two results.
 func BenchmarkLadderMultiReturn(b *testing.B) {
 	src := []rune(ladSrc())
-	for range b.N {
+	for b.Loop() {
 		s := 0
 		for i := range 10000 {
 			if r, ok := ladRuneAt(src, i%100); ok {
@@ -331,7 +331,7 @@ func ladMakePos(i int) ladPos { return ladPos{Line: i >> 4, Char: i & 15} }
 
 // LadderStructReturn calls a function that returns a small struct.
 func BenchmarkLadderStructReturn(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		s := 0
 		for i := range 10000 {
 			p := ladMakePos(i)
@@ -343,7 +343,7 @@ func BenchmarkLadderStructReturn(b *testing.B) {
 
 // LadderClosure calls a closure that captures and changes a local variable.
 func BenchmarkLadderClosure(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		s := 0
 		add := func(i int) { s += i & 7 }
 		for i := range 10000 {
@@ -357,7 +357,7 @@ func BenchmarkLadderClosure(b *testing.B) {
 // through a pointer.
 func BenchmarkLadderNestedField(b *testing.B) {
 	o := &ladOuter{}
-	for range b.N {
+	for b.Loop() {
 		for i := range 10000 {
 			o.St.Last.Char += i & 7
 		}
@@ -381,7 +381,7 @@ type ladEmbed struct {
 
 // LadderEmbedded uses a promoted field and calls a promoted method.
 func BenchmarkLadderEmbedded(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		e := &ladEmbed{}
 		for i := range 10000 {
 			e.ladInc(i)
@@ -415,7 +415,7 @@ func ladRules() *ladRule {
 // pointer type, as lexer.Rule.Lex does with its children.
 func BenchmarkLadderTypeAssert(b *testing.B) {
 	root := ladRules()
-	for range b.N {
+	for b.Loop() {
 		s := 0
 		for range 500 {
 			for _, k := range root.Kids {
@@ -453,7 +453,7 @@ func (r *ladRule) ladLex(st *ladState) *ladRule {
 func BenchmarkLadderLexLike(b *testing.B) {
 	root := ladRules()
 	st := &ladState{Src: []rune(ladSrc())}
-	for range b.N {
+	for b.Loop() {
 		n := 0
 		for range 25 {
 			for st.Pos = 0; st.Pos < len(st.Src); st.Pos++ {
@@ -491,7 +491,7 @@ func (r *ladRule) ladLexSync(st *ladState) *ladRule {
 func BenchmarkLadderLexLikeSync(b *testing.B) {
 	root := ladRules()
 	st := &ladState{Src: []rune(ladSrc())}
-	for range b.N {
+	for b.Loop() {
 		n := 0
 		for range 25 {
 			for st.Pos = 0; st.Pos < len(st.Src); st.Pos++ {
@@ -509,7 +509,7 @@ func BenchmarkLadderLexLikeSync(b *testing.B) {
 func BenchmarkLadderBitFlagHas(b *testing.B) {
 	s := &ladFlagged{}
 	s.Flags.SetFlag(true, ladFlagB)
-	for range b.N {
+	for b.Loop() {
 		n := 0
 		for i := range 10000 {
 			if s.Flags.HasFlag(ladFlagB) {
@@ -527,7 +527,7 @@ func BenchmarkLadderBitFlagHas(b *testing.B) {
 // SetFlag method.
 func BenchmarkLadderBitFlagSet(b *testing.B) {
 	s := &ladFlagged{}
-	for range b.N {
+	for b.Loop() {
 		for i := range 10000 {
 			s.Flags.SetFlag(i&1 == 0, ladFlagB)
 		}

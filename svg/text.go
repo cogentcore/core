@@ -29,7 +29,7 @@ type Text struct {
 	NodeBase
 
 	// position of the left, baseline of the text
-	Pos math32.Vector2 `xml:"{x,y}"`
+	Pos math32.Vector2 `svg:"x,y"`
 
 	// text string to render
 	Text string `xml:"text"`

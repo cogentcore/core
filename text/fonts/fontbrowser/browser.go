@@ -132,7 +132,7 @@ func (fb *Browser) UpdateRuneMap() {
 	// }
 	if fb.IsEmoji {
 		// for r := rune(0); r < math.MaxInt16; r++ {
-		for r := rune(0); r < math.MaxInt32; r++ { // takes a LONG time..
+		for r := range rune(math.MaxInt32) { // takes a LONG time..
 			gid, has := fb.Font.NominalGlyph(r)
 			if !has {
 				continue
@@ -140,7 +140,7 @@ func (fb *Browser) UpdateRuneMap() {
 			fb.RuneMap.Add(r, gid)
 		}
 	} else {
-		for r := rune(0); r < math.MaxInt16; r++ {
+		for r := range rune(math.MaxInt16) {
 			gid, has := fb.Font.NominalGlyph(r)
 			if !has {
 				continue

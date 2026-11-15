@@ -31,12 +31,12 @@ func includeFS(fsys fs.FS, fpath, code string, included map[string]struct{}) str
 			continue
 		}
 		fn := ln[10:]
-		qi := strings.Index(fn, `"`)
-		if qi < 0 {
+		before, _, ok := strings.Cut(fn, `"`)
+		if !ok {
 			slog.Error("IncludeFS: malformed #include: no final quote")
 			continue
 		}
-		fname := fn[:qi]
+		fname := before
 		fp := path.Join(fpath, fname)
 		if _, ok := included[fname]; ok {
 			fl[li] = "// " + ln

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package complete provides the matching of completions to the text being
+// completed (the seed), and the edits that insert them.
 package complete
 
 import (
@@ -169,12 +171,12 @@ func IsSeedMatching(lseed string, completion string) bool {
 	}
 
 	// the initials (first letters) of every field
-	ci := ""
-	csdf := strings.Fields(cs)
-	for _, f := range csdf {
-		ci += string(f[0])
+	var ci strings.Builder
+	csdf := strings.FieldsSeq(cs)
+	for f := range csdf {
+		ci.WriteString(string(f[0]))
 	}
-	return strings.Contains(ci, lseed)
+	return strings.Contains(ci.String(), lseed)
 }
 
 // MatchPrecedence returns the sorting precedence of the given
@@ -208,7 +210,7 @@ func SeedPath(text string) string {
 	})
 }
 
-// SeedPath returns the text after the last rune for which the given
+// SeedAfter returns the text after the last rune for which the given
 // function returns true, which is typically used for creating a completion
 // seed string.
 func SeedAfter(text string, f func(r rune) bool) string {
@@ -216,6 +218,7 @@ func SeedAfter(text string, f func(r rune) bool) string {
 	runes := []rune(text)
 	for i := len(runes) - 1; i >= 0; i-- {
 		r := runes[i]
+
 		if f(r) {
 			seedStart = i + 1
 			break

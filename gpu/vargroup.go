@@ -101,7 +101,7 @@ func (vg *VarGroup) AddStruct(name string, size int, arrayN int, shaders ...Shad
 func (vg *VarGroup) VarByName(name string) (*Var, error) {
 	vr, ok := vg.VarMap[name]
 	if !ok {
-		err := fmt.Errorf("Variable named %s not found", name)
+		err := fmt.Errorf("variable named %s not found", name)
 		if Debug {
 			errors.Log(err)
 		}
@@ -138,7 +138,9 @@ func (vg *VarGroup) SetCurrentValue(name string, valueIndex int) (*Var, error) {
 	if err != nil {
 		return nil, err
 	}
-	vr.Values.SetCurrentValue(valueIndex)
+	if _, err := vr.Values.SetCurrentValue(valueIndex); err != nil {
+		return nil, err
+	}
 	return vr, nil
 }
 
@@ -178,7 +180,7 @@ func (vg *VarGroup) ValuesUpdated() {
 	vg.Unlock()
 }
 
-// ValuesUpdated is called whenever values have been updated in a way
+// BindGroupUpdateCount is the count of the times that values have been updated in a way
 // that requires new a new bind group to be computed.
 func (vg *VarGroup) BindGroupUpdateCount() int {
 	vg.Lock()
@@ -254,7 +256,7 @@ func (vg *VarGroup) Release() {
 // Only for non-VertexGroup sets.
 // Must have set NValuesPer for any SampledTexture vars,
 // which require separate descriptors per.
-func (vg *VarGroup) bindLayout(vs *Vars, used ...*Var) (*wgpu.BindGroupLayout, error) {
+func (vg *VarGroup) bindLayout(_ *Vars, used ...*Var) (*wgpu.BindGroupLayout, error) {
 	var binds []wgpu.BindGroupLayoutEntry
 
 	vg.nDynamicOffsets = 0
@@ -271,8 +273,8 @@ func (vg *VarGroup) bindLayout(vs *Vars, used ...*Var) (*wgpu.BindGroupLayout, e
 			Binding:    uint32(vr.Binding),
 			Visibility: vr.shaders,
 		}
-		switch {
-		case vr.Role == SampledTexture:
+		switch vr.Role {
+		case SampledTexture:
 			binds = append(binds, wgpu.BindGroupLayoutEntry{
 				Binding:    uint32(vr.Binding),
 				Visibility: vr.shaders,

@@ -49,8 +49,9 @@ func (kl *KeyList) AlphaKeys() []string {
 func (kl *KeyList) PrettyString() string {
 	var w strings.Builder
 	for _, it := range kl.Values {
-		w.WriteString(fmt.Sprintf("%s [%s]:\n", it.CitationKey, it.Type))
-		w.WriteString(string(Ref(DefaultStyle, it).Join()) + "\n\n")
+		fmt.Fprintf(&w, "%s [%s]:\n", it.CitationKey, it.Type)
+		w.WriteString(string(Ref(DefaultStyle, it).Join()))
+		w.WriteString("\n\n")
 	}
 	return w.String()
 }

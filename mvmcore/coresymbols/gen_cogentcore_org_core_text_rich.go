@@ -120,6 +120,7 @@ var _ = register(func() {
 			"UltraCondensed":     reflect.ValueOf(p_cogentcore_org_core_text_rich.UltraCondensed),
 			"UltraExpanded":      reflect.ValueOf(p_cogentcore_org_core_text_rich.UltraExpanded),
 			"Underline":          reflect.ValueOf(p_cogentcore_org_core_text_rich.Underline),
+			"WeightFromFloat32":  reflect.ValueOf(p_cogentcore_org_core_text_rich.WeightFromFloat32),
 			"WeightMask":         reflect.ValueOf(p_cogentcore_org_core_text_rich.WeightMask),
 			"WeightStart":        reflect.ValueOf(p_cogentcore_org_core_text_rich.WeightStart),
 			"Weights":            reflect.ValueOf((*p_cogentcore_org_core_text_rich.Weights)(nil)),

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package textpos provides positions, ranges, regions, and edits of text in
+// lines of runes.
 package textpos
 
 import (

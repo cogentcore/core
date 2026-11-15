@@ -4,7 +4,7 @@
 
 //go:generate core generate -add-types
 
-// package printer provides standard printer settings.
+// Package printer provides standard printer settings.
 package printer
 
 import (
@@ -23,7 +23,7 @@ import (
 // the locale for initialization.
 var Settings SettingsData
 
-// Settings has standard printer settings.
+// SettingsData has standard printer settings.
 type SettingsData struct {
 	// PageSize specifies a standard page size, or Custom.
 	PageSize PageSizes

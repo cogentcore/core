@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build !darwin
+//go:build !darwin && !linux && !windows
 
 package desktop
 
-// onMainThread returns true: only macOS requires the windowing system
-// to be initialized on the main thread, which is checked there.
+// onMainThread returns true, as the main thread is not known on these
+// platforms (see the versions for macOS, Linux, and Windows).
 func onMainThread() bool {
 	return true
 }

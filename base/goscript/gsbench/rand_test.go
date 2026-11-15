@@ -19,7 +19,7 @@ var sinkF64 float64
 const randDraws = 1000
 
 func BenchmarkRandFloat32(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		var s float32
 		for range randDraws {
 			s += rand.Float32()
@@ -29,7 +29,7 @@ func BenchmarkRandFloat32(b *testing.B) {
 }
 
 func BenchmarkRandFloat64(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		var s float64
 		for range randDraws {
 			s += rand.Float64()
@@ -39,7 +39,7 @@ func BenchmarkRandFloat64(b *testing.B) {
 }
 
 func BenchmarkRandIntn(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		s := 0
 		for range randDraws {
 			s += rand.Intn(100)
@@ -49,7 +49,7 @@ func BenchmarkRandIntn(b *testing.B) {
 }
 
 func BenchmarkRandInt63(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		var s int64
 		for range randDraws {
 			s ^= rand.Int63()
@@ -59,7 +59,7 @@ func BenchmarkRandInt63(b *testing.B) {
 }
 
 func BenchmarkRandNormFloat64(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		var s float64
 		for range randDraws {
 			s += rand.NormFloat64()
@@ -69,7 +69,7 @@ func BenchmarkRandNormFloat64(b *testing.B) {
 }
 
 func BenchmarkRandPerm(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		p := rand.Perm(randDraws)
 		sinkI = p[0]
 	}
@@ -81,7 +81,7 @@ func newSeeded() *rand.Rand { return rand.New(rand.NewSource(42)) }
 
 func BenchmarkRandSeededFloat32(b *testing.B) {
 	r := newSeeded()
-	for range b.N {
+	for b.Loop() {
 		var s float32
 		for range randDraws {
 			s += r.Float32()
@@ -92,7 +92,7 @@ func BenchmarkRandSeededFloat32(b *testing.B) {
 
 func BenchmarkRandSeededFloat64(b *testing.B) {
 	r := newSeeded()
-	for range b.N {
+	for b.Loop() {
 		var s float64
 		for range randDraws {
 			s += r.Float64()
@@ -103,7 +103,7 @@ func BenchmarkRandSeededFloat64(b *testing.B) {
 
 func BenchmarkRandSeededIntn(b *testing.B) {
 	r := newSeeded()
-	for range b.N {
+	for b.Loop() {
 		s := 0
 		for range randDraws {
 			s += r.Intn(100)
@@ -114,7 +114,7 @@ func BenchmarkRandSeededIntn(b *testing.B) {
 
 func BenchmarkRandSeededInt63(b *testing.B) {
 	r := newSeeded()
-	for range b.N {
+	for b.Loop() {
 		var s int64
 		for range randDraws {
 			s ^= r.Int63()
@@ -125,7 +125,7 @@ func BenchmarkRandSeededInt63(b *testing.B) {
 
 func BenchmarkRandSeededNormFloat64(b *testing.B) {
 	r := newSeeded()
-	for range b.N {
+	for b.Loop() {
 		var s float64
 		for range randDraws {
 			s += r.NormFloat64()
@@ -136,7 +136,7 @@ func BenchmarkRandSeededNormFloat64(b *testing.B) {
 
 func BenchmarkRandSeededPerm(b *testing.B) {
 	r := newSeeded()
-	for range b.N {
+	for b.Loop() {
 		p := r.Perm(randDraws)
 		sinkI = p[0]
 	}
@@ -152,7 +152,7 @@ func BenchmarkRandSeed(b *testing.B) {
 }
 
 func BenchmarkRandV2Float32(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		var s float32
 		for range randDraws {
 			s += randv2.Float32()
@@ -162,7 +162,7 @@ func BenchmarkRandV2Float32(b *testing.B) {
 }
 
 func BenchmarkRandV2IntN(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		s := 0
 		for range randDraws {
 			s += randv2.IntN(100)
@@ -173,7 +173,7 @@ func BenchmarkRandV2IntN(b *testing.B) {
 
 func BenchmarkRandV2PCGFloat64(b *testing.B) {
 	r := randv2.New(randv2.NewPCG(1, 2))
-	for range b.N {
+	for b.Loop() {
 		var s float64
 		for range randDraws {
 			s += r.Float64()
@@ -184,7 +184,7 @@ func BenchmarkRandV2PCGFloat64(b *testing.B) {
 
 func BenchmarkRandV2ChaCha8Float64(b *testing.B) {
 	r := randv2.New(randv2.NewChaCha8([32]byte{1, 2, 3}))
-	for range b.N {
+	for b.Loop() {
 		var s float64
 		for range randDraws {
 			s += r.Float64()
@@ -291,7 +291,7 @@ func BenchmarkRandSimSeeded(b *testing.B) {
 	rnd := &sysRand{Rand: newSeeded()}
 	units := make([]simUnit, 100)
 	order := make([]int, 10)
-	for range b.N {
+	for b.Loop() {
 		simCycles(rnd, units, order)
 	}
 	sinkF = units[0].Act
@@ -302,7 +302,7 @@ func BenchmarkRandSimGlobal(b *testing.B) {
 	rnd := &sysRand{}
 	units := make([]simUnit, 100)
 	order := make([]int, 10)
-	for range b.N {
+	for b.Loop() {
 		simCycles(rnd, units, order)
 	}
 	sinkF = units[0].Act

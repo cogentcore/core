@@ -450,17 +450,21 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 	fr := ts.getFrame()
 	sz := len(fr.Children)
 	tb := ts.getTabs()
+	// the tab to select after the deletion, by its index after it
 	nidx := -1
-	if fr.StackTop == idx {
+	cur := fr.StackTop
+	switch {
+	case cur == idx: // the one before it, or the next one for the first
 		if idx > 0 {
 			nidx = idx - 1
 		} else if idx < sz-1 {
 			nidx = idx
 		}
-	}
-	// if we didn't delete the current tab and have at least one
-	// other tab, we go to the next tab over
-	if nidx < 0 && ts.NumTabs() > 1 {
+	case cur > idx: // the current tab, which moves down by one
+		nidx = cur - 1
+	case cur >= 0: // the current tab, which stays where it is
+		nidx = cur
+	case sz > 1: // no current tab: one next to the deleted one
 		nidx = max(idx-1, 0)
 	}
 	fr.DeleteChildAt(idx)
@@ -499,7 +503,7 @@ func (ts *Tabs) getFrame() *Frame {
 func (ts *Tabs) unselectOtherTabs(idx int) {
 	sz := ts.NumTabs()
 	tbs := ts.getTabs()
-	for i := 0; i < sz; i++ {
+	for i := range sz {
 		if i == idx {
 			continue
 		}

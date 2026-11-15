@@ -230,8 +230,8 @@ func (tt *TreeTable) setItemType(typ reflect.Type) {
 // treeTableField returns the field of the given struct type
 // with the given treetable tag.
 func treeTableField(typ reflect.Type, tag string) (reflect.StructField, bool) {
-	for i := range typ.NumField() {
-		if f := typ.Field(i); f.Tag.Get("treetable") == tag {
+	for f := range typ.Fields() {
+		if f.Tag.Get("treetable") == tag {
 			return f, true
 		}
 	}
@@ -745,8 +745,9 @@ func (tt *TreeTable) movedItems(items []reflect.Value) {
 	tt.updateRows()
 	tt.ResetSelectedIndexes()
 	tt.SelectedIndex = -1
-	for i := len(items) - 1; i >= 0; i-- {
-		if idx := tt.rowOf(items[i]); idx >= 0 {
+	for ri := len(items) - 1; ri >= 0; ri-- {
+		item := items[ri]
+		if idx := tt.rowOf(item); idx >= 0 {
 			tt.SelectIndex(idx)
 			tt.SelectedIndex = idx
 		}
@@ -794,15 +795,16 @@ func (tt *TreeTable) OutdentSelected(idx int) {
 		tt.Outdent(idx)
 		return
 	}
-	for i := len(items) - 1; i >= 0; i-- { // (the last first, for their order)
-		r := tt.rowOf(items[i])
+	for ri := len(items) - 1; ri >= 0; ri-- { // (the last first, for their order)
+		item := items[ri]
+		r := tt.rowOf(item)
 		if r < 0 || !tt.rows[r].parent.IsValid() {
 			continue
 		}
 		sl, k := tt.siblingsOf(r)
 		psl, pk := tt.siblingsOf(tt.rowOf(tt.rows[r].parent))
 		deleteItem(sl, k)
-		insertItem(psl, pk+1, items[i])
+		insertItem(psl, pk+1, item)
 		tt.updateRows()
 	}
 	tt.movedItems(items)

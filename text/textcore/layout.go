@@ -82,8 +82,8 @@ func (ed *Base) layoutAllLines() {
 
 	// todo: may want to support horizontal scroll and min width
 	ed.linesSize.X = ed.visSize.X - ed.lineNumberOffset // width
-	buf.SetWidth(ed.viewId, ed.linesSize.X)             // inexpensive if same, does update
-	ed.linesSize.Y = buf.ViewLines(ed.viewId)
+	buf.SetWidth(ed.viewID, ed.linesSize.X)             // inexpensive if same, does update
+	ed.linesSize.Y = buf.ViewLines(ed.viewID)
 	ed.totalSize.X = ed.charSize.X * float32(ed.visSize.X)
 	ed.totalSize.Y = ed.charSize.Y * float32(ed.linesSize.Y)
 	ed.lineRenders = make([]renderCache, ed.visSize.Y+1)
@@ -113,7 +113,7 @@ func (ed *Base) sizeToLines() {
 	if ed.Styles.Grow.Y > 0 {
 		return
 	}
-	nln := ed.Lines.ViewLines(ed.viewId)
+	nln := ed.Lines.ViewLines(ed.viewID)
 	// if ed.linesSize.Y > 0 { // we have already been through layout
 	// 	nln = ed.linesSize.Y
 	// }
@@ -260,7 +260,7 @@ func (ed *Base) updateScroll(pos float32) bool {
 // scrollLineToTop positions scroll so that the line of given source position
 // is at the top (to the extent possible).
 func (ed *Base) scrollLineToTop(pos textpos.Pos) bool {
-	vp := ed.Lines.PosToView(ed.viewId, pos)
+	vp := ed.Lines.PosToView(ed.viewID, pos)
 	return ed.updateScroll(float32(vp.Line))
 }
 
@@ -272,7 +272,7 @@ func (ed *Base) scrollCursorToTop() bool {
 // scrollLineToBottom positions scroll so that the line of given source position
 // is at the bottom (to the extent possible).
 func (ed *Base) scrollLineToBottom(pos textpos.Pos) bool {
-	vp := ed.Lines.PosToView(ed.viewId, pos)
+	vp := ed.Lines.PosToView(ed.viewID, pos)
 	return ed.updateScroll(float32(vp.Line - ed.visSize.Y + 1))
 }
 
@@ -284,7 +284,7 @@ func (ed *Base) scrollCursorToBottom() bool {
 // scrollLineToCenter positions scroll so that the line of given source position
 // is at the center (to the extent possible).
 func (ed *Base) scrollLineToCenter(pos textpos.Pos) bool {
-	vp := ed.Lines.PosToView(ed.viewId, pos)
+	vp := ed.Lines.PosToView(ed.viewID, pos)
 	return ed.updateScroll(float32(max(vp.Line-ed.visSize.Y/2, 0)))
 }
 
@@ -309,7 +309,7 @@ func (ed *Base) scrollToCenterIfHidden(pos textpos.Pos) bool {
 	if ed.Lines == nil {
 		return false
 	}
-	vp := ed.Lines.PosToView(ed.viewId, pos)
+	vp := ed.Lines.PosToView(ed.viewID, pos)
 	spos := ed.Geom.ContentBBox.Min.X + int(ed.LineNumberPixels())
 	epos := ed.Geom.ContentBBox.Max.X
 	csp := ed.charStartPos(pos).ToPoint()
@@ -322,9 +322,7 @@ func (ed *Base) scrollToCenterIfHidden(pos textpos.Pos) bool {
 	}
 	if csp.X < spos {
 		ed.scrollCursorToRight()
-	} else if csp.X > epos {
-		// ed.scrollCursorToLeft()
-	}
+	} // (a cursor after the end, csp.X > epos, could scroll to the left)
 	ed.updateCursorPosition()
 	return true
 }

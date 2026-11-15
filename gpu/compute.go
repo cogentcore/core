@@ -193,17 +193,12 @@ func VectorizeFunc(threads, n int, fun func(idx uint32)) {
 	nper := int(math.Ceil(float64(n) / float64(threads)))
 	wait := sync.WaitGroup{}
 	for start := 0; start < n; start += nper {
-		end := start + nper
-		if end > n {
-			end = n
-		}
-		wait.Add(1)
-		go func() {
+		end := min(start+nper, n)
+		wait.Go(func() {
 			for idx := start; idx < end; idx++ {
 				fun(uint32(idx))
 			}
-			wait.Done()
-		}()
+		})
 	}
 	wait.Wait()
 }

@@ -26,13 +26,13 @@ func openTypes(opens []string) ([]fileinfo.MimeType, error) {
 		}
 		kn, err := fileinfo.KnownByName(op)
 		if err != nil || kn == fileinfo.Unknown {
-			return nil, fmt.Errorf("Opens: %q is not a category or a known type of file", op)
+			return nil, fmt.Errorf("opens: %q is not a category or a known type of file", op)
 		}
 		knowns = append(knowns, kn)
 	}
 	var mts []fileinfo.MimeType
 	for _, mt := range fileinfo.StandardMimes {
-		if len(mt.Exts) == 0 || !(slices.Contains(cats, mt.Cat) || (mt.Known != fileinfo.Unknown && slices.Contains(knowns, mt.Known))) {
+		if len(mt.Exts) == 0 || (!slices.Contains(cats, mt.Cat) && (mt.Known == fileinfo.Unknown || !slices.Contains(knowns, mt.Known))) {
 			continue
 		}
 		if slices.ContainsFunc(mts, func(m fileinfo.MimeType) bool { return m.Mime == mt.Mime }) {
@@ -109,7 +109,8 @@ func macDocTypes(mts []fileinfo.MimeType) []macDocType {
 func mimeTypeList(mts []fileinfo.MimeType) string {
 	var b strings.Builder
 	for _, mt := range mts {
-		b.WriteString(mt.Mime + ";")
+		b.WriteString(mt.Mime)
+		b.WriteString(";")
 	}
 	return b.String()
 }

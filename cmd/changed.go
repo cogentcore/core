@@ -25,9 +25,7 @@ func Changed(c *config.Config) error { //types:add
 	errs := []error{}
 	errMu := sync.Mutex{}
 	fs.WalkDir(os.DirFS("."), ".", func(path string, d fs.DirEntry, err error) error {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			if d.Name() != ".git" {
 				return
 			}
@@ -54,7 +52,7 @@ func Changed(c *config.Config) error { //types:add
 			if strings.Contains(out, "Your branch is ahead") { // if we are ahead, we have been changed
 				fmt.Println(logx.CmdColor(dir))
 			}
-		}()
+		})
 		return nil
 	})
 	wg.Wait()

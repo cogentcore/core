@@ -21,7 +21,7 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Set Update3DTrace to true to get a trace of 3D updating
+// Update3DTrace can be set to true to get a trace of 3D updating.
 var Update3DTrace = false
 
 // note: Scene provides a complete separate representation of the
@@ -133,13 +133,12 @@ func NewOffscreenScene() *Scene {
 // Update does the [tree] Maker / Plan updating of nodes.
 func (sc *Scene) Update() {
 	sc.RunUpdaters()
-	sc.WalkDown(func(n tree.Node) bool {
+	for n := range sc.All() {
 		if n.AsTree().This == sc.This {
-			return tree.Continue
+			continue
 		}
 		n.(Node).Update()
-		return tree.Continue
-	})
+	}
 }
 
 // IsLive indicates whether the Phong system is active and we can

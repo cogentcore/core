@@ -494,7 +494,7 @@ func (fp *FilePicker) readFiles() {
 		}
 		fi, ferr := fileinfo.NewFileInfo(path)
 		keep := ferr == nil
-		if fp.Filterer != nil {
+		if keep && fp.Filterer != nil { // (fi is nil for an error)
 			keep = fp.Filterer(fp, fi)
 		}
 		if keep {
@@ -522,8 +522,8 @@ func (fp *FilePicker) addPathToFavorites() { //types:add
 	_, fnm := filepath.Split(dp)
 	hd, _ := homedir.Dir()
 	hd += string(filepath.Separator)
-	if strings.HasPrefix(dp, hd) {
-		dp = filepath.Join("~", strings.TrimPrefix(dp, hd))
+	if after, ok := strings.CutPrefix(dp, hd); ok {
+		dp = filepath.Join("~", after)
 	}
 	if fnm == "" {
 		fnm = dp

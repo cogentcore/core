@@ -24,7 +24,7 @@ var cssUsageFlag = flag.Bool("css-usage", false, "report the CSS properties used
 var supportedProperties = map[string]bool{}
 
 func init() {
-	for _, p := range strings.Fields(`display margin margin-top margin-right margin-bottom margin-left
+	for p := range strings.FieldsSeq(`display margin margin-top margin-right margin-bottom margin-left
 	padding padding-top padding-right padding-bottom padding-left border border-top border-right
 	border-bottom border-left border-width border-style border-color border-top-width border-right-width
 	border-bottom-width border-left-width border-top-style border-right-style border-bottom-style

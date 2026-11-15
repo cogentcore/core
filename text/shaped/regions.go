@@ -13,7 +13,7 @@ import (
 // the original source runes. Use SelectReset to clear first if desired.
 func (ls *Lines) SelectRegion(r textpos.Range) {
 	nr := ls.Source.Len()
-	r = r.Intersect(textpos.Range{0, nr})
+	r = r.Intersect(textpos.Range{Start: 0, End: nr})
 	for li := range ls.Lines {
 		ln := &ls.Lines[li]
 		lr := r.Intersect(ln.SourceRange)
@@ -36,7 +36,7 @@ func (ls *Lines) SelectReset() {
 func (ls *Lines) HighlightRegion(rs ...textpos.Range) {
 	nr := ls.Source.Len()
 	for _, r := range rs {
-		r = r.Intersect(textpos.Range{0, nr})
+		r = r.Intersect(textpos.Range{Start: 0, End: nr})
 		for li := range ls.Lines {
 			ln := &ls.Lines[li]
 			lr := r.Intersect(ln.SourceRange)
@@ -64,7 +64,7 @@ func (ls *Lines) RuneToLinePos(ti int) textpos.Pos {
 	}
 	n := ls.Source.Len()
 	el := len(ls.Lines) - 1
-	ep := textpos.Pos{el, ls.Lines[el].SourceRange.End}
+	ep := textpos.Pos{Line: el, Char: ls.Lines[el].SourceRange.End}
 	if ti >= n {
 		return ep
 	}
@@ -73,7 +73,7 @@ func (ls *Lines) RuneToLinePos(ti int) textpos.Pos {
 		if !ln.SourceRange.Contains(ti) {
 			continue
 		}
-		return textpos.Pos{li, ti - ln.SourceRange.Start}
+		return textpos.Pos{Line: li, Char: ti - ln.SourceRange.Start}
 	}
 	return ep // shouldn't happen
 }
@@ -124,7 +124,7 @@ func (ls *Lines) RuneBounds(ti int) math32.Box2 {
 		off := start.Add(ln.Offset)
 		ep := ln.Bounds.Max.Add(off)
 		ep.Y = ln.Bounds.Min.Y + off.Y
-		return math32.Box2{ep, ep}
+		return math32.Box2{Min: ep, Max: ep}
 	}
 	for li := range ls.Lines {
 		ln := &ls.Lines[li]
@@ -154,7 +154,7 @@ func (ls *Lines) RuneAtPoint(pt math32.Vector2, start math32.Vector2) int {
 	lbb := ls.Bounds.Translate(start)
 	if !lbb.ContainsPoint(pt) {
 		// smaller bb so point will be inside stuff
-		sbb := math32.Box2{lbb.Min.Add(math32.Vec2(0, 2)), lbb.Max.Sub(math32.Vec2(0, 2))}
+		sbb := math32.Box2{Min: lbb.Min.Add(math32.Vec2(0, 2)), Max: lbb.Max.Sub(math32.Vec2(0, 2))}
 		pt = sbb.ClampPoint(pt)
 	}
 	nl := len(ls.Lines)

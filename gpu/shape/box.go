@@ -37,7 +37,7 @@ func (bx *Box) MeshSize() (numVertex, nIndex int, hasColor bool) {
 	return
 }
 
-// SetBox sets points in given allocated arrays.
+// Set sets points in given allocated arrays.
 func (bx *Box) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
 	hSz := SetBox(vertex, normal, texcoord, index, bx.VertexOffset, bx.IndexOffset, bx.Size, bx.Segs, bx.Pos)
 
@@ -46,7 +46,7 @@ func (bx *Box) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math32.
 	bx.CBBox.Set(&mn, &mx)
 }
 
-// PlaneN returns the N's for a single plane's worth of
+// BoxN returns the N's for a single plane's worth of
 // vertex and index data with given number of segments.
 // Note: In *vertex* units, not float units (i.e., x3 to get
 // actual float offset in Vtx array).

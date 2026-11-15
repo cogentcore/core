@@ -40,7 +40,7 @@ type Model struct {
 	sync.RWMutex
 }
 
-// Create and initialise a new model
+// NewModel creates and initializes a new model
 func NewModel() *Model {
 	md := new(Model)
 	return md.Init()
@@ -84,10 +84,11 @@ func (md *Model) AddWord(term string) {
 	md.createSuggestKeys(term)
 }
 
-// Delete removes given word from dictionary -- undoes learning
+// Delete removes given word from the dictionary and the user dictionary,
+// which undoes learning it.
 func (md *Model) Delete(term string) {
 	md.Lock()
-	edits := md.EditsMulti(term, 1)
+	edits := md.EditsMulti(term, md.Depth) // the keys that it was added for
 	for _, edit := range edits {
 		sug := md.Suggest[edit]
 		ns := len(sug)
@@ -104,6 +105,7 @@ func (md *Model) Delete(term string) {
 		}
 	}
 	delete(md.Dict, term)
+	delete(md.UserDict, term) // so that it is not saved as learned
 	md.Unlock()
 }
 
@@ -125,7 +127,7 @@ func (md *Model) createSuggestKeys(term string) {
 	}
 }
 
-// Edits at any depth for a given term. The depth of the model is used
+// EditsMulti returns the edits at any depth for a given term. The depth of the model is used
 func (md *Model) EditsMulti(term string, depth int) []string {
 	edits := Edits1(term)
 	for {
@@ -135,9 +137,7 @@ func (md *Model) EditsMulti(term string, depth int) []string {
 		}
 		for _, edit := range edits {
 			edits2 := Edits1(edit)
-			for _, edit2 := range edits2 {
-				edits = append(edits, edit2)
-			}
+			edits = append(edits, edits2...)
 		}
 	}
 	return edits
@@ -156,27 +156,27 @@ func Edits1(word string) []string {
 		splits = append(splits, Pair{word[:i], word[i:]})
 	}
 
-	total_set := []string{}
+	totalSet := []string{}
 	for _, elem := range splits {
 
 		//deletion
 		if len(elem.str2) > 0 {
-			total_set = append(total_set, elem.str1+elem.str2[1:])
+			totalSet = append(totalSet, elem.str1+elem.str2[1:])
 		} else {
-			total_set = append(total_set, elem.str1)
+			totalSet = append(totalSet, elem.str1)
 		}
 
 	}
 
 	// Special case ending in "ies" or "ys"
 	if strings.HasSuffix(word, "ies") {
-		total_set = append(total_set, word[:len(word)-3]+"ys")
+		totalSet = append(totalSet, word[:len(word)-3]+"ys")
 	}
 	if strings.HasSuffix(word, "ys") {
-		total_set = append(total_set, word[:len(word)-2]+"ies")
+		totalSet = append(totalSet, word[:len(word)-2]+"ies")
 	}
 
-	return total_set
+	return totalSet
 }
 
 // For a given input term, suggest some alternatives.
@@ -241,7 +241,7 @@ func (md *Model) suggestPotential(input string) []string {
 	return sord
 }
 
-// Return the most likely corrections in order from best to worst
+// Suggestions returns the most likely corrections in order from best to worst
 func (md *Model) Suggestions(input string, n int) []string {
 	md.RLock()
 	suggestions := md.suggestPotential(input)
@@ -249,7 +249,7 @@ func (md *Model) Suggestions(input string, n int) []string {
 	return suggestions
 }
 
-// Calculate the Levenshtein distance between two strings
+// Levenshtein calculates the Levenshtein distance between two strings
 func Levenshtein(a, b *string) int {
 	la := len(*a)
 	lb := len(*b)

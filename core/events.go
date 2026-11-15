@@ -255,29 +255,43 @@ func (em *Events) handleFocusEvent(e events.Event) {
 		}
 	}
 	if !tree.IsNil(em.focus) {
-		em.focus.AsTree().WalkUpParent(func(k tree.Node) bool {
+		for k := range em.focus.AsTree().Ancestors() {
 			wb := AsWidget(k)
 			if !wb.IsDisplayable() {
-				return tree.Break
+				break
 			}
 			wb.firstHandleEvent(e)
-			return !e.IsHandled()
-		})
+			if e.IsHandled() {
+				break
+			}
+		}
 		if !e.IsHandled() {
 			em.focus.AsWidget().HandleEvent(e)
 		}
 		if !e.IsHandled() {
-			em.focus.AsTree().WalkUpParent(func(k tree.Node) bool {
+			for k := range em.focus.AsTree().Ancestors() {
 				wb := AsWidget(k)
 				if !wb.IsDisplayable() {
-					return tree.Break
+					break
 				}
 				wb.finalHandleEvent(e)
-				return !e.IsHandled()
-			})
+				if e.IsHandled() {
+					break
+				}
+			}
 		}
 	}
 	em.managerKeyChordEvents(e)
+}
+
+// capturesMouse returns whether the mouse events of the scene go to it
+// wherever the mouse is, which they do while a widget of it is sliding, or
+// can start to slide, until the mouse button is released.
+func (em *Events) capturesMouse(e events.Event) bool {
+	if et := e.Type(); et != events.MouseDrag && et != events.MouseUp {
+		return false
+	}
+	return !tree.IsNil(em.slide) || !tree.IsNil(em.slidePress)
 }
 
 func (em *Events) resetOnMouseDown() {
@@ -336,6 +350,17 @@ func (em *Events) handlePosEvent(e events.Event) {
 				return
 			}
 		}
+	case events.MouseUp:
+		// a slide of a sprite stops wherever the mouse is released
+		if sp := em.spriteSlide; sp != nil && !e.WindowPos().In(sp.EventBBox) {
+			em.spriteSlide = nil
+			em.spritePress = nil
+			sp.handleEvent(e)
+			sp.send(events.SlideStop, e)
+			e.SetHandled()
+			em.setCursorFromStyle()
+			return
+		}
 	case events.Scroll:
 		if !tree.IsNil(em.scroll) {
 			scInTime := time.Since(em.lastScrollTime) < TimingSettings.ScrollFocusTime
@@ -358,6 +383,8 @@ func (em *Events) handlePosEvent(e events.Event) {
 			em.setCursorFromStyle()
 			return
 		}
+	} else if len(em.spriteHovers) > 0 { // the mouse left them
+		em.spriteHovers = em.updateSpriteHovers(nil, em.spriteHovers, e, events.MouseEnter, events.MouseLeave)
 	}
 
 	em.mouseInBBox = nil
@@ -365,7 +392,8 @@ func (em *Events) handlePosEvent(e events.Event) {
 	em.mouseInBBox = sortByRenderLayer(em.mouseInBBox)
 
 	n := len(em.mouseInBBox)
-	if n == 0 {
+	// A slide continues (or starts) and stops wherever the mouse is.
+	if n == 0 && (!em.capturesMouse(e) || (et != events.MouseDrag && et != events.MouseUp)) {
 		if DebugSettings.EventTrace && et != events.MouseMove {
 			log.Println("Nothing in bbox:", sc.Geom.TotalBBox, "pos:", pos)
 		}
@@ -419,7 +447,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 			if tree.IsNil(slidePress) && wb.AbilityIs(abilities.Slideable) {
 				// On mobile, sliding results in scrolling, so we must have the appropriate
 				// scrolling attention to allow sliding.
-				if TheApp.SystemPlatform().IsMobile() && !wb.AbilityIs(abilities.ScrollableUnattended) && !(wb.StateIs(states.Focused) || wb.StateIs(states.Attended)) {
+				if TheApp.SystemPlatform().IsMobile() && !wb.AbilityIs(abilities.ScrollableUnattended) && !wb.StateIs(states.Focused) && !wb.StateIs(states.Attended) {
 					continue
 				}
 				slidePress = w
@@ -435,7 +463,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 				up = w
 			}
 		case events.Scroll:
-			if !wb.AbilityIs(abilities.ScrollableUnattended) && !(wb.StateIs(states.Focused) || wb.StateIs(states.Attended)) {
+			if !wb.AbilityIs(abilities.ScrollableUnattended) && !wb.StateIs(states.Focused) && !wb.StateIs(states.Attended) {
 				continue
 			}
 			if e.IsHandled() {
@@ -553,6 +581,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 		}
 	case events.MouseUp:
 		em.cancelRepeatClick()
+		em.slidePress = nil
 		if !tree.IsNil(em.slide) {
 			em.slide.AsWidget().Send(events.SlideStop, e)
 			e.SetHandled()
@@ -565,7 +594,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 		}
 		// if we have sent a long press start event, we don't send click
 		// events (non-nil widget plus nil timer means we already sent)
-		if em.press == up && !tree.IsNil(up) && !(!tree.IsNil(em.longPressWidget) && em.longPressTimer == nil) {
+		if em.press == up && !tree.IsNil(up) && (tree.IsNil(em.longPressWidget) || em.longPressTimer != nil) {
 			em.cancelLongPress()
 			switch e.MouseButton() {
 			case events.Left:
@@ -677,8 +706,9 @@ func (em *Events) updateSpriteHovers(hov, prev []*Sprite, e events.Event, enter,
 // topLongHover returns the top-most LongHoverable widget among the Hovers
 func (em *Events) topLongHover() Widget {
 	var deep Widget
-	for i := len(em.hovers) - 1; i >= 0; i-- {
-		h := em.hovers[i]
+	for ri := len(em.hovers) - 1; ri >= 0; ri-- {
+		h := em.hovers[ri]
+
 		if h.AsWidget().AbilityIs(abilities.LongHoverable) {
 			deep = h
 			break
@@ -963,7 +993,7 @@ func pathLayer(path []*WidgetBase, i int) int {
 		if r == nil {
 			continue
 		}
-		for k := 0; k < i; k++ {
+		for k := range i {
 			if path[k] == r {
 				l = max(l, 2+path[j].Styles.ZIndex)
 				break
@@ -1020,14 +1050,17 @@ func (em *Events) startRepeatClickTimer() {
 		delay *= 8
 	}
 	em.repeatClickTimer = time.AfterFunc(delay, func() {
+		// We are not in the event loop here, so the state of the events
+		// is only accessed with the lock (as the event loop can cancel the
+		// repeat click at the same time).
+		if !em.scene.AsyncLockIfShown() {
+			return
+		}
+		defer em.scene.AsyncUnlock()
 		if tree.IsNil(em.repeatClick) || !em.repeatClick.AsWidget().IsVisible() {
 			return
 		}
-		// note: we are not in event loop here anymore!
-		rw := em.repeatClick.AsWidget()
-		rw.AsyncLock()
-		rw.Send(events.Click)
-		rw.AsyncUnlock()
+		em.repeatClick.AsWidget().Send(events.Click)
 		em.startRepeatClickTimer()
 	})
 }
@@ -1221,10 +1254,9 @@ func (em *Events) dragDrop(drag Widget, e events.Event) {
 	em.dragClearSprite()
 	data := em.dragData
 	em.drag = nil
-	em.scene.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+	for _, cwb := range em.scene.AllWidgets() {
 		cwb.dragStateReset()
-		return tree.Continue
-	})
+	}
 	em.scene.Restyle()
 
 	if len(em.dragHovers) == 0 {
@@ -1681,8 +1713,8 @@ func (em *Events) addShortcut(chord key.Chord, bt *Button) {
 	if em.shortcuts == nil {
 		em.shortcuts = shortcuts{}
 	}
-	chords := strings.Split(string(chord), "\n")
-	for _, c := range chords {
+	chords := strings.SplitSeq(string(chord), "\n")
+	for c := range chords {
 		cc := key.Chord(c)
 		if DebugSettings.KeyEventTrace {
 			old, exists := em.shortcuts[cc]

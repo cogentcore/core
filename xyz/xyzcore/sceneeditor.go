@@ -23,7 +23,7 @@ type SceneEditor struct {
 	core.Frame
 }
 
-// NewSceneForScene returns a new [Scene] for existing [xyz.Scene],
+// NewSceneEditorForScene returns a new [SceneEditor] for existing [xyz.Scene],
 // in given parent (if non-nil).
 func NewSceneEditorForScene(sc *xyz.Scene, parent ...tree.Node) *SceneEditor {
 	n := &SceneEditor{}

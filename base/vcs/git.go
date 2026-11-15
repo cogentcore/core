@@ -247,7 +247,7 @@ func (gr *GitRepo) Delete(fname string) error {
 	return err
 }
 
-// Delete removes the file from the repo
+// DeleteRemote removes the file from the repo
 func (gr *GitRepo) DeleteRemote(fname string) error {
 	_, err := gr.runErr("git", "rm", "--cached", relPath(gr, fname))
 	return err
@@ -266,8 +266,8 @@ func (gr *GitRepo) RevertFile(fname string) error {
 }
 
 // UpdateVersion sets the version of a package currently checked out via Git.
-func (s *GitRepo) UpdateVersion(version string) error {
-	_, err := s.runErr("git", "switch", "--detach", version)
+func (gr *GitRepo) UpdateVersion(version string) error {
+	_, err := gr.runErr("git", "switch", "--detach", version)
 	return err
 }
 
@@ -321,7 +321,7 @@ func fieldsThroughDelim(flds [][]byte, delim byte, idx int) (int, string) {
 func (gr *GitRepo) Log(fname string, since string) (Log, error) {
 	args := []string{"log", "--all"}
 	if since != "" {
-		args = append(args, `--since="`+since+`"`)
+		args = append(args, "--since="+since) // (no shell to remove quotes)
 	}
 	args = append(args, `--pretty=format:%h %ad} %an} %ae} %s`)
 	if fname != "" {
@@ -427,8 +427,8 @@ func (gr *GitRepo) Blame(fname string) ([]byte, error) {
 }
 
 // Branches returns a list of the local branches.
-func (s *GitRepo) Branches() ([]string, error) {
-	out, err := s.runErr("git", "branch")
+func (gr *GitRepo) Branches() ([]string, error) {
+	out, err := gr.runErr("git", "branch")
 	if err != nil {
 		return []string{}, err
 	}

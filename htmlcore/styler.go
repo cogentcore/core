@@ -5,11 +5,12 @@
 package htmlcore
 
 import (
-	"cogentcore.org/core/text/shaped"
 	_ "embed"
 	"fmt"
 	"image"
 	"strings"
+
+	"cogentcore.org/core/text/shaped"
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
@@ -412,9 +413,10 @@ func (c *Context) inlineInheritedOps(node *html.Node, wb *core.WidgetBase) []sty
 		break
 	}
 	var ops []styleOp
-	for i := len(chain) - 1; i >= 0; i-- {
+	for ri := len(chain) - 1; ri >= 0; ri-- {
+		c0 := chain[ri]
 		var inh []*cssDecl
-		for _, d := range c.declarations(chain[i]) {
+		for _, d := range c.declarations(c0) {
 			if inheritedProperties[d.Property] {
 				inh = append(inh, d)
 			}

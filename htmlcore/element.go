@@ -304,7 +304,7 @@ func (c *Context) flexDirection(n *html.Node) string {
 	prop, v := c.lastDeclaration(n, "flex-direction", "flex-flow")
 	v = strings.ToLower(strings.TrimSpace(v))
 	if prop == "flex-flow" {
-		for _, f := range strings.Fields(v) {
+		for f := range strings.FieldsSeq(v) {
 			if strings.HasPrefix(f, "row") || strings.HasPrefix(f, "column") {
 				return f
 			}
@@ -372,7 +372,7 @@ func (c *Context) handleInLink(node *html.Node, w core.Widget) {
 // are beside the blocks after it, as in CSS, where they are not limited
 // to the block that they are in (as they are in core). Such blocks are
 // common wrappers, as the section elements of Wikipedia.
-func (ctx *Context) flattensBlock(n *html.Node) bool {
+func (c *Context) flattensBlock(n *html.Node) bool {
 	switch n.Data {
 	case "body", "html", "form", "a", "button", "label", "details", "dialog", "fieldset":
 		return false // they have widgets with a function
@@ -381,47 +381,47 @@ func (ctx *Context) flattensBlock(n *html.Node) bool {
 	if p == nil || p.Type != html.ElementNode || p.Data == "html" {
 		return false
 	}
-	switch ctx.displayOf(p) {
+	switch c.displayOf(p) {
 	case "block", "list-item", "flow-root", "table-cell":
 	default:
 		return false // a flex, grid, or table item
 	}
-	if !ctx.unstyledBlock(n) {
+	if !c.unstyledBlock(n) {
 		return false
 	}
 	// Only the blocks among siblings that have floats in them are
 	// flattened, so that the floats are beside all of their content.
-	if ctx.floatSiblings == nil {
-		ctx.floatSiblings = map[*html.Node]bool{}
+	if c.floatSiblings == nil {
+		c.floatSiblings = map[*html.Node]bool{}
 	}
-	if ctx.flattened[n] { // flattened already
+	if c.flattened[n] { // flattened already
 		return true
 	}
-	has, ok := ctx.floatSiblings[p]
-	if !ok && ctx.flattened[p] {
+	has, ok := c.floatSiblings[p]
+	if !ok && c.flattened[p] {
 		has, ok = true, true // in a flattened block, as beside its floats
 	}
 	if !ok {
-		for c := p.FirstChild; c != nil && !has; c = c.NextSibling {
-			if c.Type == html.ElementNode && ctx.unstyledBlock(c) {
-				has = ctx.hasFloatChild(c)
+		for k := p.FirstChild; k != nil && !has; k = k.NextSibling {
+			if k.Type == html.ElementNode && c.unstyledBlock(k) {
+				has = c.hasFloatChild(k)
 			}
 		}
-		ctx.floatSiblings[p] = has
+		c.floatSiblings[p] = has
 	}
 	if has {
-		if ctx.flattened == nil {
-			ctx.flattened = map[*html.Node]bool{}
+		if c.flattened == nil {
+			c.flattened = map[*html.Node]bool{}
 		}
-		ctx.flattened[n] = true
+		c.flattened[n] = true
 	}
 	return has
 }
 
 // unstyledBlock returns whether the given element has no declarations
 // other than its display (and custom properties).
-func (ctx *Context) unstyledBlock(n *html.Node) bool {
-	for _, d := range ctx.declarations(n) {
+func (c *Context) unstyledBlock(n *html.Node) bool {
+	for _, d := range c.declarations(n) {
 		switch d.Property {
 		case "display", "unicode-bidi", "will-change", "orphans", "widows", "user-select", "-webkit-user-select":
 		default:
@@ -430,7 +430,7 @@ func (ctx *Context) unstyledBlock(n *html.Node) bool {
 			}
 		}
 	}
-	return ctx.displayOf(n) == "block"
+	return c.displayOf(n) == "block"
 }
 
 // noBoxProperty returns whether the given property does not change the box
@@ -448,12 +448,12 @@ func noBoxProperty(prop string) bool {
 }
 
 // hasFloatChild returns whether the given element has a child that floats.
-func (ctx *Context) hasFloatChild(n *html.Node) bool {
-	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		if c.Type != html.ElementNode {
+func (c *Context) hasFloatChild(n *html.Node) bool {
+	for k := n.FirstChild; k != nil; k = k.NextSibling {
+		if k.Type != html.ElementNode {
 			continue
 		}
-		if f := ctx.declaration(c, "float"); f != "" && f != "none" && ctx.displayOf(c) != "none" {
+		if f := c.declaration(k, "float"); f != "" && f != "none" && c.displayOf(k) != "none" {
 			return true
 		}
 	}

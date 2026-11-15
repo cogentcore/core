@@ -275,8 +275,8 @@ func MinifyNumber(num []byte, prec int) []byte {
 
 	// intExp would be the exponent if it were an integer
 	intExp := normExp - n
-	lenIntExp := strconv.LenInt(int64(intExp))
-	lenNormExp := strconv.LenInt(int64(normExp))
+	lenIntExp := lenDigits(intExp)
+	lenNormExp := lenDigits(normExp)
 
 	// there are three cases to consider when printing the number
 	// case 1: without decimals and with a positive exponent (large numbers: 5e4)
@@ -357,7 +357,7 @@ func MinifyNumber(num []byte, prec int) []byte {
 					start += -d
 				}
 				num[newDot] = '.'
-				for i := 0; i < zeroes; i++ {
+				for i := range zeroes {
 					num[newDot+1+i] = '0'
 				}
 			}
@@ -410,7 +410,7 @@ func MinifyNumber(num []byte, prec int) []byte {
 			exp = origExp
 			lenExp = 1
 			if origExp <= -10 || 10 <= origExp {
-				lenExp = strconv.LenInt(int64(origExp))
+				lenExp = lenDigits(origExp)
 			}
 		}
 		num[end] = 'e'
@@ -428,4 +428,17 @@ func MinifyNumber(num []byte, prec int) []byte {
 		num[start] = '-'
 	}
 	return num[start:end]
+}
+
+// lenDigits returns the number of decimal digits of i, not counting
+// its sign (which strconv.LenInt counts in some versions).
+func lenDigits(i int) int {
+	if i < 0 {
+		i = -i
+	}
+	n := 1
+	for ; 10 <= i; i /= 10 {
+		n++
+	}
+	return n
 }

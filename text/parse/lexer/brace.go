@@ -53,68 +53,66 @@ func BraceMatch(src [][]rune, tags []Line, r rune, st textpos.Pos, maxLns int) (
 	nln := len(src)
 	mx := min(nln-ln, maxLns)
 	mn := min(ln, maxLns)
-	txt := src[ln]
-	tln := tags[ln]
+	// isCode returns whether the rune at i in line l is not in a comment.
+	isCode := func(l, i int) bool {
+		lx, _ := tags[l].AtPos(i)
+		return lx == nil || lx.Token.Token.Cat() != token.Comment
+	}
 	if left > right {
-		for l := ln + 1; l < ln+mx; l++ {
-			for i := ch + 1; i < len(txt); i++ {
-				if txt[i] == r {
-					lx, _ := tln.AtPos(i)
-					if lx == nil || lx.Token.Token.Cat() != token.Comment {
+		// lines ln to ln+mx-1, after the brace on its line
+		for l := ln; l < ln+mx && !found; l++ {
+			txt := src[l]
+			from := 0
+			if l == ln {
+				from = ch + 1
+			}
+			for i := from; i < len(txt); i++ {
+				switch txt[i] {
+				case r:
+					if isCode(l, i) {
 						left++
-						continue
 					}
-				}
-				if txt[i] == match {
-					lx, _ := tln.AtPos(i)
-					if lx == nil || lx.Token.Token.Cat() != token.Comment {
+				case match:
+					if isCode(l, i) {
 						right++
 						if left == right {
-							en.Line = l - 1
-							en.Char = i
-							break
+							en = textpos.Pos{Line: l, Char: i}
+							found = true
 						}
 					}
 				}
+				if found {
+					break
+				}
 			}
-			if en.Line >= 0 {
-				found = true
-				break
-			}
-			txt = src[l]
-			tln = tags[l]
-			ch = -1
 		}
 	} else {
-		for l := ln - 1; l >= ln-mn; l-- {
-			ch = min(ch, len(txt))
-			for i := ch - 1; i >= 0; i-- {
-				if txt[i] == r {
-					lx, _ := tln.AtPos(i)
-					if lx == nil || lx.Token.Token.Cat() != token.Comment {
+		// lines ln down to ln-mn, before the brace on its line
+		for l := ln; l >= ln-mn && !found; l-- {
+			txt := src[l]
+			from := len(txt) - 1
+			if l == ln {
+				from = min(ch, len(txt)) - 1
+			}
+			for i := from; i >= 0; i-- {
+				switch txt[i] {
+				case r:
+					if isCode(l, i) {
 						right++
-						continue
 					}
-				}
-				if txt[i] == match {
-					lx, _ := tln.AtPos(i)
-					if lx == nil || lx.Token.Token.Cat() != token.Comment {
+				case match:
+					if isCode(l, i) {
 						left++
 						if left == right {
-							en.Line = l + 1
-							en.Char = i
-							break
+							en = textpos.Pos{Line: l, Char: i}
+							found = true
 						}
 					}
 				}
+				if found {
+					break
+				}
 			}
-			if en.Line >= 0 {
-				found = true
-				break
-			}
-			txt = src[l]
-			tln = tags[l]
-			ch = len(txt)
 		}
 	}
 	return en, found

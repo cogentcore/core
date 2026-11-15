@@ -338,12 +338,10 @@ func UnmarshalXML(r io.Reader, withIcon bool, minSdkVersion, targetSdkVersion in
 		switch tkn := tkn.(type) {
 		case xml.StartElement:
 			el := &Element{
-				NodeHeader: NodeHeader{
-					LineNumber: uint32(line),
-					Comment:    0xFFFFFFFF,
-				},
-				NS:   NoEntry,
-				Name: pool.ref(tkn.Name.Local),
+				LineNumber: uint32(line),
+				Comment:    0xFFFFFFFF,
+				NS:         NoEntry,
+				Name:       pool.ref(tkn.Name.Local),
 			}
 			if len(bx.stack) == 0 {
 				bx.Children = append(bx.Children, el)
@@ -366,12 +364,10 @@ func UnmarshalXML(r io.Reader, withIcon bool, minSdkVersion, targetSdkVersion in
 						return nil, errors.New("multiple declarations of xmlns:android encountered")
 					}
 					bx.Namespace = &Namespace{
-						NodeHeader: NodeHeader{
-							LineNumber: uint32(line),
-							Comment:    NoEntry,
-						},
-						prefix: 0,
-						uri:    0,
+						LineNumber: uint32(line),
+						Comment:    NoEntry,
+						prefix:     0,
+						uri:        0,
 					}
 					continue
 				}
@@ -451,11 +447,11 @@ func UnmarshalXML(r io.Reader, withIcon bool, minSdkVersion, targetSdkVersion in
 							dref, err := tbl.RefByName(attr.Value)
 							if err != nil {
 								if strings.HasPrefix(attr.Value, "@mipmap") {
-									// firstDrawableId is a TableRef matching first entry of mipmap spec initialized by NewMipmapTable.
+									// firstDrawableID is a TableRef matching first entry of mipmap spec initialized by NewMipmapTable.
 									// 7f is default package, 02 is mipmap spec, 0000 is first entry; e.g. R.drawable.icon
 									// TODO resource table should generate ids as required.
-									const firstDrawableId = 0x7f020000
-									nattr.TypedValue.Value = firstDrawableId
+									const firstDrawableID = 0x7f020000
+									nattr.TypedValue.Value = firstDrawableID
 									continue
 								}
 								return nil, err
@@ -485,7 +481,7 @@ func UnmarshalXML(r io.Reader, withIcon bool, minSdkVersion, targetSdkVersion in
 							}
 						case DataIntHex:
 							nattr.TypedValue.Type = t
-							for _, x := range strings.Split(attr.Value, "|") {
+							for x := range strings.SplitSeq(attr.Value, "|") {
 								for _, val := range nt.values {
 									if val.name == 0x01000000 {
 										continue
@@ -509,11 +505,9 @@ func UnmarshalXML(r io.Reader, withIcon bool, minSdkVersion, targetSdkVersion in
 		case xml.CharData:
 			if s := poolTrim(string(tkn)); s != "" {
 				cdt := &CharData{
-					NodeHeader: NodeHeader{
-						LineNumber: uint32(line),
-						Comment:    NoEntry,
-					},
-					RawData: pool.ref(s),
+					LineNumber: uint32(line),
+					Comment:    NoEntry,
+					RawData:    pool.ref(s),
 				}
 				el := bx.stack[len(bx.stack)-1]
 				if el.head == nil {
@@ -527,12 +521,10 @@ func UnmarshalXML(r io.Reader, withIcon bool, minSdkVersion, targetSdkVersion in
 		case xml.EndElement:
 			if tkn.Name.Local == "manifest" {
 				bx.Namespace.end = &Namespace{
-					NodeHeader: NodeHeader{
-						LineNumber: uint32(line),
-						Comment:    NoEntry,
-					},
-					prefix: 0,
-					uri:    0,
+					LineNumber: uint32(line),
+					Comment:    NoEntry,
+					prefix:     0,
+					uri:        0,
 				}
 			}
 			n := len(bx.stack)
@@ -542,12 +534,10 @@ func UnmarshalXML(r io.Reader, withIcon bool, minSdkVersion, targetSdkVersion in
 				return nil, errors.New("element end already exists")
 			}
 			el.end = &ElementEnd{
-				NodeHeader: NodeHeader{
-					LineNumber: uint32(line),
-					Comment:    NoEntry,
-				},
-				NS:   el.NS,
-				Name: el.Name,
+				LineNumber: uint32(line),
+				Comment:    NoEntry,
+				NS:         el.NS,
+				Name:       el.Name,
 			}
 		case xml.Comment, xml.ProcInst:
 			// discard

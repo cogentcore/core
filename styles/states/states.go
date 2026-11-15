@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package states provides the states of widgets, as hovered, focused, or
+// active, which are used in styling them.
 package states
 
 //go:generate core generate

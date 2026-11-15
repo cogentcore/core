@@ -5,30 +5,12 @@
 package shape
 
 import (
-	"fmt"
-	"strings"
 	"testing"
 
 	"cogentcore.org/core/base/tolassert"
 	"cogentcore.org/core/math32"
 	"github.com/stretchr/testify/assert"
 )
-
-func goslice[T any](sl []T) string {
-	v := fmt.Sprint(sl)
-	v = strings.ReplaceAll(v, ` `, `, `)
-	typ := fmt.Sprintf("%T", sl)
-	typ = strings.ReplaceAll(typ, "[]float32", "math32.ArrayF32")
-	typ = strings.ReplaceAll(typ, "[]uint32", "math32.ArrayU32")
-	return typ + "{" + v[1:len(v)-1] + "}"
-}
-
-func printData(md *MeshData) {
-	fmt.Println("vtx :=", goslice(md.Vertex))
-	fmt.Println("norm :=", goslice(md.Normal))
-	fmt.Println("tex :=", goslice(md.TexCoord))
-	fmt.Println("idx :=", goslice(md.Index))
-}
 
 // testData compares the mesh data with a small tolerance for floating point
 // values, as fused multiply-add (e.g., on arm64) changes the last bits.

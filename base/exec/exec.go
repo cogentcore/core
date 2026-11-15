@@ -43,9 +43,12 @@ func (c *Config) exec(ctx context.Context, sio *StdIO, start bool, cmd string, a
 		return os.Getenv(s)
 	}
 	cmd = os.Expand(cmd, expand)
-	for i := range args {
-		args[i] = os.Expand(args[i], expand)
+	// the expanded args are a new slice, so the caller's are not changed
+	eargs := make([]string, len(args))
+	for i, a := range args {
+		eargs[i] = os.Expand(a, expand)
 	}
+	args = eargs
 	excmd, ran, code, err := c.run(ctx, sio, start, cmd, args...)
 	_ = code
 	if err == nil {
@@ -84,7 +87,7 @@ var InterruptWait = time.Second
 
 func (c *Config) run(ctx context.Context, sio *StdIO, start bool, cmd string, args ...string) (excmd *exec.Cmd, ran bool, code int, err error) {
 	var cm *exec.Cmd
-	if ctx != nil && !start && interruptible(sio.In) {
+	if ctx != nil && ctx.Done() != nil && !start && interruptible(sio.In) { // (Background is never done)
 		cm = exec.CommandContext(ctx, cmd, args...)
 		cm.Cancel = func() error { return interrupt(cm.Process) }
 		cm.WaitDelay = InterruptWait
@@ -124,6 +127,7 @@ func (c *Config) run(ctx context.Context, sio *StdIO, start bool, cmd string, ar
 			restore := saveConsole(sio.In, sio.Out)
 			err = cm.Run()
 			restore()
+			excmd = cm // for its process state (as in [Config.RunIO])
 		}
 
 		// we must call InitColor after calling a system command

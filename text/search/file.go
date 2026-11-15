@@ -12,6 +12,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"strings"
 	"unicode/utf8"
 
 	"cogentcore.org/core/text/parse/lexer"
@@ -27,11 +28,12 @@ type Results struct {
 }
 
 func (r *Results) String() string {
-	str := fmt.Sprintf("%s: %d", r.Filepath, r.Count)
+	var str strings.Builder
+	str.WriteString(fmt.Sprintf("%s: %d", r.Filepath, r.Count))
 	for _, m := range r.Matches {
-		str += "\n" + m.String()
+		str.WriteString("\n" + m.String())
 	}
-	return str
+	return str.String()
 }
 
 // RuneLines looks for a string (no regexp) within lines of runes,
@@ -81,7 +83,7 @@ func LexItems(src [][]rune, lexs []lexer.Line, find []byte, ignoreCase bool) (in
 	cnt := 0
 	var matches []textpos.Match
 	mx := min(len(src), len(lexs))
-	for ln := 0; ln < mx; ln++ {
+	for ln := range mx {
 		rln := src[ln]
 		lxln := lexs[ln]
 		for _, lx := range lxln {

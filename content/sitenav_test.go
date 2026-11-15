@@ -115,7 +115,7 @@ func renderNav(t *testing.T, fname string, steps []navStep) string {
 		dump = dumpTreeStyles(ct)
 		ct.AsyncUnlock()
 	})
-	b.AssertRender(t, fname, funs...)
+	core.AssertRender(t, b, fname, funs...)
 	return dump
 }
 

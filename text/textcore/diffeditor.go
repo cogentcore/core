@@ -52,9 +52,9 @@ func DiffFiles(ctx core.Widget, afile, bfile string) (*DiffEditor, error) {
 // at two different revisions from given repository
 // if empty, defaults to: A = current HEAD, B = current WC file.
 // -1, -2 etc also work as universal ways of specifying prior revisions.
-func DiffEditorDialogFromRevs(ctx core.Widget, repo vcs.Repo, file string, fbuf *lines.Lines, rev_a, rev_b string) (*DiffEditor, error) {
+func DiffEditorDialogFromRevs(ctx core.Widget, repo vcs.Repo, file string, fbuf *lines.Lines, revA, revB string) (*DiffEditor, error) {
 	var astr, bstr []string
-	if rev_b == "" { // default to current file
+	if revB == "" { // default to current file
 		if fbuf != nil {
 			bstr = fbuf.Strings(false)
 		} else {
@@ -66,23 +66,23 @@ func DiffEditorDialogFromRevs(ctx core.Widget, repo vcs.Repo, file string, fbuf 
 			bstr = lines.BytesToLineStrings(fb, false) // don't add new lines
 		}
 	} else {
-		fb, err := repo.FileContents(file, rev_b)
+		fb, err := repo.FileContents(file, revB)
 		if err != nil {
 			core.ErrorDialog(ctx, err)
 			return nil, err
 		}
 		bstr = lines.BytesToLineStrings(fb, false) // don't add new lines
 	}
-	if rev_a == "" { // FileContents returns the working copy for ""
-		rev_a = "HEAD"
+	if revA == "" { // FileContents returns the working copy for ""
+		revA = "HEAD"
 	}
-	fb, err := repo.FileContents(file, rev_a)
+	fb, err := repo.FileContents(file, revA)
 	if err != nil {
 		core.ErrorDialog(ctx, err)
 		return nil, err
 	}
 	astr = lines.BytesToLineStrings(fb, false) // don't add new lines
-	return DiffEditorDialog(ctx, "DiffVcs: "+fsx.DirAndFile(file), astr, bstr, file, file, rev_a, rev_b), nil
+	return DiffEditorDialog(ctx, "DiffVcs: "+fsx.DirAndFile(file), astr, bstr, file, file, revA, revB), nil
 }
 
 // DiffEditorDialog opens a dialog for displaying diff between two files as line-strings
@@ -174,10 +174,10 @@ func (dv *DiffEditor) Init() {
 				s.Min.Y.Em(40)
 			})
 			w.On(events.Scroll, func(e events.Event) {
-				dv.syncEditors(events.Scroll, e, name)
+				dv.syncEditors(events.Scroll, name)
 			})
 			w.On(events.Input, func(e events.Event) {
-				dv.syncEditors(events.Input, e, name)
+				dv.syncEditors(events.Input, name)
 			})
 		})
 	}
@@ -202,7 +202,7 @@ func (dv *DiffEditor) setFilenames() {
 }
 
 // syncEditors synchronizes the text [Editor] scrolling and cursor positions
-func (dv *DiffEditor) syncEditors(typ events.Types, e events.Event, name string) {
+func (dv *DiffEditor) syncEditors(typ events.Types, name string) {
 	tva, tvb := dv.textEditors()
 	me, other := tva, tvb
 	if name == "text-b" {
@@ -352,7 +352,7 @@ func (dv *DiffEditor) DiffStrings(astr, bstr []string) {
 			ad.J1 = absln
 			ad.J2 = absln + dj
 			dv.alignD[i] = ad
-			for i := 0; i < mx; i++ {
+			for i := range mx {
 				dv.linesA.SetLineColor(absln+i, chg)
 				dv.linesB.SetLineColor(absln+i, chg)
 				blen := 0
@@ -382,7 +382,7 @@ func (dv *DiffEditor) DiffStrings(astr, bstr []string) {
 			ad.J1 = absln
 			ad.J2 = absln + di
 			dv.alignD[i] = ad
-			for i := 0; i < di; i++ {
+			for i := range di {
 				dv.linesA.SetLineColor(absln+i, ins)
 				dv.linesB.SetLineColor(absln+i, del)
 				aln := []byte(astr[df.I1+i])
@@ -399,7 +399,7 @@ func (dv *DiffEditor) DiffStrings(astr, bstr []string) {
 			ad.J1 = absln
 			ad.J2 = absln + dj
 			dv.alignD[i] = ad
-			for i := 0; i < dj; i++ {
+			for i := range dj {
 				dv.linesA.SetLineColor(absln+i, del)
 				dv.linesB.SetLineColor(absln+i, ins)
 				bln := []byte(bstr[df.J1+i])
@@ -416,7 +416,7 @@ func (dv *DiffEditor) DiffStrings(astr, bstr []string) {
 			ad.J1 = absln
 			ad.J2 = absln + di
 			dv.alignD[i] = ad
-			for i := 0; i < di; i++ {
+			for i := range di {
 				ab = append(ab, []byte(astr[df.I1+i]))
 				bb = append(bb, []byte(bstr[df.J1+i]))
 			}
@@ -441,7 +441,7 @@ func (dv *DiffEditor) tagWordDiffs() {
 		dj := df.J2 - df.J1
 		mx := max(di, dj)
 		stln := df.I1
-		for i := 0; i < mx; i++ {
+		for i := range mx {
 			ln := stln + i
 			ra := dv.linesA.Line(ln)
 			rb := dv.linesB.Line(ln)

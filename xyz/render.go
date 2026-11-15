@@ -208,10 +208,10 @@ func (sc *Scene) UpdateMeshBBox() {
 // UpdateWorldMatrix updates the world matrix for node and everything inside it
 func UpdateWorldMatrix(n tree.Node) {
 	idmtx := math32.Identity4()
-	n.AsTree().WalkDown(func(cn tree.Node) bool {
+	for cn := range n.AsTree().All() {
 		ni, _ := AsNode(cn)
 		if ni == nil {
-			return tree.Continue
+			continue
 		}
 		_, pd := AsNode(cn.AsTree().Parent)
 		if pd == nil {
@@ -219,8 +219,7 @@ func UpdateWorldMatrix(n tree.Node) {
 		} else {
 			ni.UpdateWorldMatrix(&pd.Pose.WorldMatrix)
 		}
-		return tree.Continue
-	})
+	}
 }
 
 // UpdateMVPMatrix updates the Model-View-Projection matrix for all scene elements
@@ -313,10 +312,9 @@ func (sc *Scene) renderImpl(grabImage bool) *image.NRGBA {
 		if !ni.IsSolid() {
 			return tree.Continue
 		}
-		rc := ni.RenderClass()
-		if rc > RClassTransTexture { // all in one group b/c z-sorting is key
-			rc = RClassTransTexture
-		}
+		rc := min(ni.RenderClass(),
+			// all in one group b/c z-sorting is key
+			RClassTransTexture)
 		rcs[rc] = append(rcs[rc], ni)
 		return tree.Continue
 	})
@@ -340,12 +338,7 @@ func (sc *Scene) renderImpl(grabImage bool) *image.NRGBA {
 		// 	fmt.Printf("obj: %s  max z: %g   min z: %g\n", objs[i].Name, objs[i].AsNode().NDCBBox.Max.Z, objs[i].AsNode().NDCBBox.Min.Z)
 		// }
 
-		lastrc := RClassOpaqueVertex
 		for _, obj := range objs {
-			rc = obj.RenderClass()
-			if rc >= RClassTransTexture && rc != lastrc {
-				lastrc = rc
-			}
 			obj.PreRender()
 		}
 	}
@@ -354,17 +347,8 @@ func (sc *Scene) renderImpl(grabImage bool) *image.NRGBA {
 	if err != nil {
 		return nil
 	}
-	for rci, objs := range rcs {
-		rc := RenderClasses(rci)
-		if len(objs) == 0 {
-			continue
-		}
-		lastrc := RClassOpaqueVertex
+	for _, objs := range rcs {
 		for _, obj := range objs {
-			rc = obj.RenderClass()
-			if rc >= RClassTransTexture && rc != lastrc {
-				lastrc = rc
-			}
 			obj.Render(rp)
 		}
 	}

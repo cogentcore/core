@@ -92,9 +92,12 @@ func (c *Complete) Show(ctx Widget, pos image.Point, text string) {
 	if c.delayTimer != nil {
 		c.delayTimer.Stop()
 	}
+	// The context and position of the completion are those at the time
+	// of the call, as they can change in the event loop meanwhile.
+	data, ln, ch := c.Context, c.SrcLn, c.SrcCh
 	c.delayTimer = time.AfterFunc(wait,
 		func() {
-			c.showNowAsync(ctx, pos, text)
+			c.showNowAsync(ctx, pos, text, data, ln, ch)
 			c.delayMu.Lock()
 			c.delayTimer = nil
 			c.delayMu.Unlock()
@@ -110,28 +113,36 @@ func (c *Complete) showNow(ctx Widget, pos image.Point, text string) {
 	}
 	c.showMu.Lock()
 	defer c.showMu.Unlock()
-	if c.showNowImpl(ctx, pos, text) {
+	md := c.MatchFunc(c.Context, text, c.SrcLn, c.SrcCh)
+	if c.showMatches(ctx, pos, md) {
 		c.stage.runPopup()
 	}
 }
 
 // showNowAsync actually calls MatchFunc to get a list of completions and builds the
 // completion popup menu.  This is the Async version for delayed AfterFunc call.
-func (c *Complete) showNowAsync(ctx Widget, pos image.Point, text string) {
+// The matches are found without the lock of the context widget (as
+// they can take time), and then the completer is updated and shown with it.
+func (c *Complete) showNowAsync(ctx Widget, pos image.Point, text string, data any, ln, ch int) {
+	md := c.MatchFunc(data, text, ln, ch)
+	wb := ctx.AsWidget()
+	if !wb.AsyncLockIfShown() {
+		return
+	}
+	defer wb.AsyncUnlock()
 	if c.stage != nil {
-		c.cancelAsync()
+		c.Cancel()
 	}
 	c.showMu.Lock()
 	defer c.showMu.Unlock()
-	if c.showNowImpl(ctx, pos, text) {
-		c.stage.runPopupAsync()
+	if c.showMatches(ctx, pos, md) {
+		c.stage.runPopup()
 	}
 }
 
-// showNowImpl is the implementation of ShowNow, presenting completions.
-// Returns false if nothing to show.
-func (c *Complete) showNowImpl(ctx Widget, pos image.Point, text string) bool {
-	md := c.MatchFunc(c.Context, text, c.SrcLn, c.SrcCh)
+// showMatches presents the given completions, returning false if there
+// are none to show.
+func (c *Complete) showMatches(ctx Widget, pos image.Point, md complete.Matches) bool {
 	c.completions = md.Matches
 	c.Seed = md.Seed
 	if len(c.completions) == 0 {
@@ -187,20 +198,6 @@ func (c *Complete) Cancel() bool {
 	st := c.stage
 	c.stage = nil
 	st.ClosePopup()
-	return true
-}
-
-// cancelAsync cancels any existing *or* pending completion,
-// inside a delayed callback function (Async)
-// Call when new events nullify prior completions.
-// Returns true if canceled.
-func (c *Complete) cancelAsync() bool {
-	if c.stage == nil {
-		return false
-	}
-	st := c.stage
-	c.stage = nil
-	st.closePopupAsync()
 	return true
 }
 

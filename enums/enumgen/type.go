@@ -92,7 +92,7 @@ func SortValues(values []Value, typ *Type) []Value {
 // in [Config.TrimPrefix] from each name
 // of the given values.
 func (g *Generator) TrimValueNames(values []Value, c *Config) {
-	for _, prefix := range strings.Split(c.TrimPrefix, ",") {
+	for prefix := range strings.SplitSeq(c.TrimPrefix, ",") {
 		for i := range values {
 			values[i].Name = strings.TrimPrefix(values[i].Name, prefix)
 		}

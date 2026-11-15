@@ -83,11 +83,14 @@ func (hf *Heightfield) MeshSize() (numVertex, nIndex int, hasColor bool) {
 // Set sets points in given allocated arrays.
 func (hf *Heightfield) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
 	waxis, haxis, wdir, hdir := NormPlaneAxes(hf.NormalAxis, hf.NormalNeg)
+	vo, io := hf.VertexOffset, hf.IndexOffset
 	if hf.Bars {
-		SetHeightfieldBars(vertex, normal, texcoord, index, 0, 0, int(hf.Size.X), int(hf.Size.Y), hf.Data, waxis, haxis, wdir, hdir, hf.VisSize.X, hf.VisSize.Y, 0, 0, hf.Offset, hf.VisSize.Z, hf.BarPct, math32.Vector3{})
+		SetHeightfieldBars(vertex, normal, texcoord, index, vo, io, int(hf.Size.X), int(hf.Size.Y), hf.Data, waxis, haxis, wdir, hdir, hf.VisSize.X, hf.VisSize.Y, 0, 0, hf.Offset, hf.VisSize.Z, hf.BarPct, hf.Pos)
 	} else {
-		SetHeightfield(vertex, normal, texcoord, index, 0, 0, int(hf.Size.X), int(hf.Size.Y), hf.Data, waxis, haxis, wdir, hdir, hf.VisSize.X, hf.VisSize.Y, 0, 0, hf.Offset, hf.VisSize.Z, math32.Vector3{})
+		SetHeightfield(vertex, normal, texcoord, index, vo, io, int(hf.Size.X), int(hf.Size.Y), hf.Data, waxis, haxis, wdir, hdir, hf.VisSize.X, hf.VisSize.Y, 0, 0, hf.Offset, hf.VisSize.Z, hf.Pos)
 	}
+	nv, _, _ := hf.MeshSize()
+	hf.CBBox = BBoxFromVtxs(vertex, vo, nv)
 }
 
 //////// Planar representation
@@ -109,7 +112,7 @@ func HeightfieldN(nx, ny int) (numVertex, nIndex int) {
 // pos is a 3D position offset.
 func SetHeightfield(vertex, normal, texcoord math32.ArrayF32, index math32.ArrayU32, vtxOff, idxOff int, nx, ny int, data HeightfieldData2D, waxis, haxis math32.Dims, wdir, hdir int, width, height, woff, hoff, zoff, zscale float32, pos math32.Vector3) error {
 	if ny < 2 || nx < 2 {
-		return fmt.Errorf("SetHeightfield: must have at least 2 data points along each dimension.")
+		return fmt.Errorf("SetHeightfield: must have at least 2 data points along each dimension")
 	}
 	zaxis := OrthoAxis(waxis, haxis)
 
@@ -154,7 +157,7 @@ func SetHeightfield(vertex, normal, texcoord math32.ArrayF32, index math32.Array
 	nidx := vtxOff * 3
 	iidx := idxOff // index index
 	for yi := ny1; yi >= 0; yi-- {
-		for xi := 0; xi < nx; xi++ {
+		for xi := range nx {
 			if yi == 0 { // no index
 				if xi == nx-1 { // no right
 					vertex.GetVector3(vIdx(1, xi-1)*3, &a) // a = yi=1, xi=left

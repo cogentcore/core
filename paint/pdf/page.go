@@ -30,6 +30,10 @@ type pdfPage struct {
 	textPosition   math32.Vector2
 	textCharSpace  float32
 	textRenderMode int
+
+	// maskSet is whether the soft mask of a transparent gradient is set,
+	// which is removed after the path is painted (see endMask).
+	maskSet bool
 }
 
 func (w *pdfPage) writePage(parent pdfRef) pdfRef {
@@ -70,10 +74,10 @@ func (w *pdfPage) DrawImage(img image.Image, m math32.Matrix2) {
 
 	// add clipping path around image for smooth edges when rotating
 	outerRect := math32.B2(0.0, 0.0, float32(size.X), float32(size.Y)).MulMatrix2(m)
-	bl := m.MulPoint(math32.Vector2{0, 0})
-	br := m.MulPoint(math32.Vector2{float32(size.X), 0})
-	tl := m.MulPoint(math32.Vector2{0, float32(size.Y)})
-	tr := m.MulPoint(math32.Vector2{float32(size.X), float32(size.Y)})
+	bl := m.MulPoint(math32.Vec2(0, 0))
+	br := m.MulPoint(math32.Vec2(float32(size.X), 0))
+	tl := m.MulPoint(math32.Vec2(0, float32(size.Y)))
+	tr := m.MulPoint(math32.Vec2(float32(size.X), float32(size.Y)))
 	fmt.Fprintf(w, " q %v %v %v %v re W n", dec(outerRect.Min.X), dec(outerRect.Min.Y), dec(outerRect.Size().X), dec(outerRect.Size().Y))
 	fmt.Fprintf(w, " %v %v m %v %v l %v %v l %v %v l h W n", dec(bl.X), dec(bl.Y), dec(tl.X), dec(tl.Y), dec(tr.X), dec(tr.Y), dec(br.X), dec(br.Y))
 

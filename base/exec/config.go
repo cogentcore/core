@@ -17,6 +17,7 @@ package exec
 
 import (
 	"io"
+	"maps"
 	"os"
 
 	"log/slog"
@@ -94,9 +95,7 @@ var major *Config
 // unique, so it can be modified directly.
 func Major() *Config {
 	if major != nil {
-		// need to make a new copy so people can't modify the underlying
-		res := *major
-		return &res
+		return major.clone() // a copy, so that the default is not modified
 	}
 	if logx.UserLevel <= slog.LevelInfo {
 		c := &Config{
@@ -137,9 +136,7 @@ var minor *Config
 // guaranteed to be unique, so it can be modified directly.
 func Minor() *Config {
 	if minor != nil {
-		// need to make a new copy so people can't modify the underlying
-		res := *minor
-		return &res
+		return minor.clone() // a copy, so that the default is not modified
 	}
 	if logx.UserLevel <= slog.LevelDebug {
 		c := &Config{
@@ -180,9 +177,7 @@ var verbose *Config
 // Verbose is guaranteed to be unique, so it can be modified directly.
 func Verbose() *Config {
 	if verbose != nil {
-		// need to make a new copy so people can't modify the underlying
-		res := *verbose
-		return &res
+		return verbose.clone() // a copy, so that the default is not modified
 	}
 	if logx.UserLevel <= slog.LevelWarn {
 		c := &Config{
@@ -221,9 +216,7 @@ var silent *Config
 // returned by Silent is guaranteed to be unique, so it can be modified directly.
 func Silent() *Config {
 	if silent != nil {
-		// need to make a new copy so people can't modify the underlying
-		res := *silent
-		return &res
+		return silent.clone() // a copy, so that the default is not modified
 	}
 	c := &Config{
 		Buffer: true,
@@ -269,6 +262,14 @@ func (c *Config) PrintCmd(cmd string, err error) {
 // PrintCmd calls [Config.PrintCmd] on [Major]
 func PrintCmd(cmd string, err error) {
 	Major().PrintCmd(cmd, err)
+}
+
+// clone returns a copy of the config, with its own environment variables,
+// which a copy of the struct would share.
+func (c *Config) clone() *Config {
+	res := *c
+	res.Env = maps.Clone(c.Env)
+	return &res
 }
 
 // SetEnv sets the given environment variable.

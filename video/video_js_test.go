@@ -19,8 +19,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// These tests run in a browser (see goscript_test.go), where a [Video] is
-// a video element of the browser.
+// These tests run in a browser (see the core:js-test directive in
+// controls_test.go), where a [Video] is a video element of the browser.
 
 // shortMP4 is 1 second of 64x48 video at 10 frames per second, with audio.
 //

@@ -59,7 +59,7 @@ type copyOuter struct {
 func TestCopyStructDeep(t *testing.T) {
 	one := 1
 	src := &copyOuter{
-		CopyBase:  CopyBase{Name: "src", Skip: 1, Base: 2, BaseAny: []int{1}},
+		Name: "src", Skip: 1, Base: 2, BaseAny: []int{1},
 		copyInner: &copyInner{Ints: []int{3}},
 		Struct:    copyInner{Ints: []int{1, 2}, Map: map[string]int{"a": 1}, Ptr: &one, Any: []int{4}, inner: 5},
 		Ptr:       &copyInner{Ints: []int{6}},
@@ -77,7 +77,7 @@ func TestCopyStructDeep(t *testing.T) {
 		private:   []int{13},
 	}
 	dstPtr := &copyInner{Ints: []int{0, 0, 0}}
-	dst := &copyOuter{CopyBase: CopyBase{Name: "dst", Skip: 2}, Ptr: dstPtr, Anys: []any{1, 2}}
+	dst := &copyOuter{Name: "dst", Skip: 2, Ptr: dstPtr, Anys: []any{1, 2}}
 	CopyStructDeep(dst, src)
 
 	// tags
@@ -133,7 +133,7 @@ func TestCopyStructDeep(t *testing.T) {
 
 	// unexported embedded fields are shallow
 	assert.Same(t, src.copyInner, dst.copyInner) // unexported embedded
-	assert.Equal(t, []int{3}, dst.copyInner.Ints)
+	assert.Equal(t, []int{3}, dst.Ints)
 }
 
 type copyShadow struct {

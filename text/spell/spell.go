@@ -104,6 +104,12 @@ func (sp *SpellData) OpenUser() error {
 	}
 	sp.mu.Lock()
 	defer sp.mu.Unlock()
+	return sp.openUser()
+}
+
+// openUser is the implementation of [SpellData.OpenUser], called with
+// the mutex locked.
+func (sp *SpellData) openUser() error {
 	d, err := OpenDict(sp.UserFile)
 	if err != nil {
 		// slog.Error(err.Error())
@@ -130,7 +136,7 @@ func (sp *SpellData) OpenUserCheck() error {
 		return err
 	}
 	if tm.After(sp.openTime) {
-		sp.OpenUser()
+		sp.openUser() // (the mutex is locked)
 		sp.openTime = tm
 		// log.Printf("opened newer spell file: %s\n", openTime.String())
 	}
@@ -141,8 +147,8 @@ func (sp *SpellData) OpenUserCheck() error {
 // note: this will overwrite any existing file; be sure to have opened
 // the current file before making any changes.
 func (sp *SpellData) SaveUser() error {
-	sp.mu.RLock()
-	defer sp.mu.RUnlock()
+	sp.mu.Lock() // (it sets the times)
+	defer sp.mu.Unlock()
 
 	if sp.native != nil || sp.model == nil {
 		return nil

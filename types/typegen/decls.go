@@ -83,8 +83,8 @@ func SetterFields(typ *Type) []types.Field {
 // given type. It converts slices to variadic arguments.
 func SetterType(f types.Field, typ *Type) string {
 	lt := typ.Fields.LocalTypes[f.Name]
-	if strings.HasPrefix(lt, "[]") {
-		return "..." + strings.TrimPrefix(lt, "[]")
+	if after, ok := strings.CutPrefix(lt, "[]"); ok {
+		return "..." + after
 	}
 	return lt
 }

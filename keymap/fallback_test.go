@@ -4,6 +4,8 @@
 
 package keymap
 
+//core:js-test browser
+
 import (
 	"testing"
 

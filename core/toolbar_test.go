@@ -81,7 +81,7 @@ func childNames(tb *Toolbar) []string {
 
 func TestToolbarOverflow(t *testing.T) {
 	b, tb, _ := newOverflowToolbarBody(300, 10)
-	b.AssertRender(t, "toolbar/overflow", func() {
+	AssertRender(t, b, "toolbar/overflow", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		ch := childNames(tb)
@@ -114,7 +114,7 @@ func TestToolbarOverflow(t *testing.T) {
 
 func TestToolbarOverflowMenuOpen(t *testing.T) {
 	b, tb, _ := newOverflowToolbarBody(300, 10)
-	b.AssertRender(t, "toolbar/overflow-menu-open", func() {
+	AssertRender(t, b, "toolbar/overflow-menu-open", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		tb.overflowButton.Send(events.Click)
@@ -123,7 +123,7 @@ func TestToolbarOverflowMenuOpen(t *testing.T) {
 
 func TestToolbarNoOverflow(t *testing.T) {
 	b, tb, _ := newOverflowToolbarBody(800, 3)
-	b.AssertRender(t, "toolbar/no-overflow", func() {
+	AssertRender(t, b, "toolbar/no-overflow", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		assert.Len(t, tb.overflowItems, 0)
@@ -137,7 +137,7 @@ func TestToolbarNoOverflow(t *testing.T) {
 // only ever rendered with their final size.
 func TestToolbarOverflowLayoutNoRender(t *testing.T) {
 	b, tb, rc := newOverflowToolbarBody(300, 10)
-	b.AssertRender(t, "toolbar/overflow-layout", func() {
+	AssertRender(t, b, "toolbar/overflow-layout", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		final := rc.Geom.Size.Actual.Total
@@ -165,7 +165,7 @@ func TestToolbarOverflowResize(t *testing.T) {
 		s.Min.X.Dp(100)
 		s.Max.X.Zero()
 	})
-	b.AssertRender(t, "toolbar/overflow-resize", func() {
+	AssertRender(t, b, "toolbar/overflow-resize", func() {
 		rw := b.Scene.RenderWindow()
 		ht := b.Scene.SceneGeom.Size.Y
 		b.AsyncLock()
@@ -242,7 +242,7 @@ func TestToolbarSettlingKeepsItems(t *testing.T) {
 		})
 	})
 	var names []string
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		// the content is added and the toolbar updated, as when a page opens
 		b.AsyncLock()
 		content := NewFrame(b)

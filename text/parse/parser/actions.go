@@ -120,12 +120,14 @@ func (ac Acts) String() string {
 	if len(ac) == 0 {
 		return ""
 	}
-	str := "{ "
+	var str strings.Builder
+	str.WriteString("{ ")
 	for i := range ac {
-		str += ac[i].String() + "; "
+		str.WriteString(ac[i].String())
+		str.WriteString("; ")
 	}
-	str += "}"
-	return str
+	str.WriteString("}")
+	return str.String()
 }
 
 // ASTActs are actions to perform on the [AST] nodes

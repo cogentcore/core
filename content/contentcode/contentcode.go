@@ -216,8 +216,7 @@ func App(dir string) (*Config, error) {
 	// a main package that imports content
 	pkg, err := build.ImportDir(dir, 0)
 	if err != nil {
-		var noGo *build.NoGoError
-		if errors.As(err, &noGo) {
+		if _, ok := errors.AsType[*build.NoGoError](err); ok {
 			return nil, nil
 		}
 		return nil, err
@@ -260,7 +259,7 @@ func generateDirective(dir string, files []string) (*Config, error) {
 		if err != nil {
 			return nil, err
 		}
-		for _, l := range strings.Split(string(b), "\n") {
+		for l := range strings.SplitSeq(string(b), "\n") {
 			args, ok := strings.CutPrefix(strings.TrimSpace(l), "//go:generate ")
 			if !ok {
 				continue
@@ -988,7 +987,10 @@ func assemble(pkgName, hash string, blocks []*block, pages []*goalPage) []byte {
 	sort.Strings(paths)
 
 	var buf bytes.Buffer
-	buf.WriteString(header + hashPrefix + hash + "\n\n")
+	buf.WriteString(header)
+	buf.WriteString(hashPrefix)
+	buf.WriteString(hash)
+	buf.WriteString("\n\n")
 	fmt.Fprintf(&buf, "package %s\n\nimport (\n", pkgName)
 	for _, p := range paths {
 		fmt.Fprintf(&buf, "\t%q\n", p)
@@ -1061,7 +1063,9 @@ func assemble(pkgName, hash string, blocks []*block, pages []*goalPage) []byte {
 		}
 	}
 	if len(left) > 0 {
-		buf.WriteString("// Code blocks left out:\n" + strings.Join(left, "\n") + "\n")
+		buf.WriteString("// Code blocks left out:\n")
+		buf.WriteString(strings.Join(left, "\n"))
+		buf.WriteString("\n")
 	}
 	return buf.Bytes()
 }
@@ -1093,7 +1097,7 @@ func typeCheck(dir, output string, src []byte, tags string) ([]typeError, error)
 	base := filepath.Base(output)
 	var errs []typeError
 	var outside []string // the errors of the other files of the package
-	for _, l := range strings.Split(string(out), "\n") {
+	for l := range strings.SplitSeq(string(out), "\n") {
 		l = strings.TrimSpace(l)
 		if l == "" || strings.HasPrefix(l, "#") {
 			continue

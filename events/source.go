@@ -65,7 +65,7 @@ type SourceState struct {
 	Key key.Codes
 }
 
-// SendKey processes a basic key event and sends it
+// Key processes a basic key event and sends it
 func (es *Source) Key(typ Types, rn rune, code key.Codes, mods key.Modifiers) {
 	ev := NewKey(typ, rn, code, mods)
 	es.Last.Mods = mods
@@ -194,11 +194,12 @@ func (es *Source) Touch(typ Types, seq Sequence, where image.Point) {
 	ev.Init()
 	es.Deque.Send(ev)
 
-	if typ == TouchStart {
+	switch typ {
+	case TouchStart:
 		es.MouseButton(MouseDown, Left, where, 0) // TODO: modifiers
-	} else if typ == TouchEnd {
+	case TouchEnd:
 		es.MouseButton(MouseUp, Left, where, 0) // TODO: modifiers
-	} else {
+	default:
 		es.MouseMove(where)
 	}
 }

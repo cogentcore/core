@@ -13,7 +13,6 @@ import (
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/tree"
 	"github.com/hack-pad/hackpadfs"
 )
 
@@ -169,7 +168,7 @@ func (fn *Node) DeleteFile() error {
 	return err
 }
 
-// renames any selected files
+// RenameFiles renames any selected files.
 func (fn *Node) RenameFiles() { //types:add
 	fn.FileRoot().NeedsLayout()
 	fn.SelectedFunc(func(sn *Node) {
@@ -245,22 +244,21 @@ func (fn *Node) RenameFile(newpath string) error { //types:add
 func (fn *Node) movedDir(orgpath string) {
 	root := fn.FileRoot()
 	newpath := string(fn.Filepath)
-	fn.WalkDown(func(k tree.Node) bool {
+	for k := range fn.All() {
 		sfn := AsNode(k)
 		if sfn == nil || sfn == fn {
-			return tree.Continue
+			continue
 		}
 		opath := string(sfn.Filepath)
 		if !isWithin(opath, orgpath) {
-			return tree.Continue
+			continue
 		}
 		sfn.Filepath = core.Filename(newpath + opath[len(orgpath):])
 		sfn.This.(Filer).GetFileInfo()
 		if sfn.IsDir() && root.isDirOpen(core.Filename(opath)) {
 			root.setDirOpen(sfn.Filepath)
 		}
-		return tree.Continue
-	})
+	}
 }
 
 // newFiles makes a new file in selected directory

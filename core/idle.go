@@ -60,7 +60,7 @@ func (w *renderWindow) idleUntilBlink(top *Stage, blink time.Duration) {
 // hasAnimations returns whether any scene of the main stages, or of
 // their popups, has animations, which run at every paint event.
 func (sm *stages) hasAnimations() bool {
-	for _, st := range sm.stack.Values() {
+	for _, st := range sm.stack.Values {
 		if st.Scene != nil && len(st.Scene.Animations) > 0 {
 			return true
 		}

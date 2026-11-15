@@ -40,7 +40,7 @@ func TestMaskImage(t *testing.T) {
 		`.tiled { display: block; width: 40px; height: 20px; background: #0000ff; -webkit-mask: url('`+circle+`') 0 0 / 20px }</style>`+
 		`<span class="icon"></span><span class="tiled"></span><span class="icon faded" style="opacity: 0.5"></span>`))
 	boxes := map[string]image.Rectangle{}
-	img := b.RenderImage(func() {
+	img := core.RenderImage(b, core.Locked(b, func() {
 		b.WalkDown(func(n tree.Node) bool {
 			if wb := core.AsWidget(n); wb != nil {
 				if cl, ok := wb.Property("class").(string); ok {
@@ -52,7 +52,7 @@ func TestMaskImage(t *testing.T) {
 			}
 			return tree.Continue
 		})
-	})
+	}))
 	at := func(cl string, fx, fy float32) color.RGBA {
 		bb := boxes[cl]
 		return color.RGBAModel.Convert(img.At(bb.Min.X+int(fx*float32(bb.Dx())), bb.Min.Y+int(fy*float32(bb.Dy())))).(color.RGBA)
@@ -77,7 +77,7 @@ func TestMinWidthBelowWidth(t *testing.T) {
 	assert.NoError(t, ReadHTMLString(ctx, b, `<span class="a" style="display: inline-block; width: 20px; height: 20px; min-width: 10px; min-height: 10px; background: red"></span>`+
 		`<span class="b" style="display: inline-block; width: 20px; height: 20px; min-width: 30px; background: red"></span>`))
 	sizes := map[string]math32.Vector2{}
-	b.RenderImage(func() {
+	core.RenderImage(b, core.Locked(b, func() {
 		b.WalkDown(func(n tree.Node) bool {
 			if wb := core.AsWidget(n); wb != nil {
 				if cl, ok := wb.Property("class").(string); ok {
@@ -86,7 +86,7 @@ func TestMinWidthBelowWidth(t *testing.T) {
 			}
 			return tree.Continue
 		})
-	})
+	}))
 	assert.InDelta(t, 20, sizes["a"].X, 1)
 	assert.InDelta(t, 20, sizes["a"].Y, 1)
 	assert.InDelta(t, 30, sizes["b"].X, 1, "a larger min-width wins")
@@ -106,7 +106,7 @@ func TestRotatedMask(t *testing.T) {
 	assert.NoError(t, ReadHTMLString(ctx, b, `<style>.caret { display: block; width: 40px; height: 40px; background-color: #000000; mask-image: url('`+tri+`'); mask-size: 40px; mask-repeat: no-repeat }</style>`+
 		`<div class="down"><span class="caret"></span></div><div class="right" style="transform: rotate(-90deg)"><span class="caret"></span></div>`))
 	boxes := map[string]image.Rectangle{}
-	img := b.RenderImage(func() {
+	img := core.RenderImage(b, core.Locked(b, func() {
 		b.WalkDown(func(n tree.Node) bool {
 			if wb := core.AsWidget(n); wb != nil {
 				if cl, ok := wb.Property("class").(string); ok && cl != "caret" {
@@ -115,7 +115,7 @@ func TestRotatedMask(t *testing.T) {
 			}
 			return tree.Continue
 		})
-	})
+	}))
 	dark := func(cl string, fx, fy float32) bool {
 		bb := boxes[cl]
 		c := color.RGBAModel.Convert(img.At(bb.Min.X+int(fx*float32(bb.Dx())), bb.Min.Y+int(fy*float32(bb.Dy())))).(color.RGBA)
@@ -139,7 +139,7 @@ func TestMaskCurrentColor(t *testing.T) {
 .b::after { content: ""; background-color: currentcolor; width: 20px; height: 20px; mask-size: cover; mask-image: url('`+chevron+`') }</style>
 <div style="display: flex"><button class="b" type="button"><span>HTML</span></button></div>`))
 	var button, caret *core.WidgetBase
-	img := b.RenderImage(func() {
+	img := core.RenderImage(b, core.Locked(b, func() {
 		b.WalkDown(func(n tree.Node) bool {
 			if wb := core.AsWidget(n); wb != nil {
 				if wb.Property("class") == "b" {
@@ -150,7 +150,7 @@ func TestMaskCurrentColor(t *testing.T) {
 			}
 			return tree.Continue
 		})
-	})
+	}))
 	if assert.NotNil(t, caret) {
 		dark := 0
 		bb := caret.Geom.TotalBBox

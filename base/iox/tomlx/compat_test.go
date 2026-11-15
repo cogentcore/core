@@ -4,6 +4,8 @@
 
 package tomlx
 
+//core:js-test
+
 import (
 	"os"
 	"path/filepath"

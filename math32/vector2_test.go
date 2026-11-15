@@ -55,7 +55,7 @@ func TestVector2(t *testing.T) {
 	assert.Equal(t, image.Pt(4, 20), v.ToPointCeil())
 	assert.Equal(t, image.Pt(4, 19), v.ToPointRound())
 
-	assert.Equal(t, fixed.Point26_6{224, 1228}, v.ToFixed())
+	assert.Equal(t, fixed.Point26_6{X: 224, Y: 1228}, v.ToFixed())
 
 	size := Vec2(4.7, 9.3)
 
