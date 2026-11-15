@@ -33,6 +33,7 @@ func newTestSettings(t *testing.T, ext string) *testSettingsData {
 // TestSettingsSaveLoadReset tests saving, loading, and resetting settings,
 // in TOML and JSON, where only the non-default values are saved.
 func TestSettingsSaveLoadReset(t *testing.T) {
+	skipOnWeb(t, "it saves the settings in files of a temporary directory")
 	for _, ext := range []string{".toml", ".json"} {
 		ts := newTestSettings(t, ext)
 		require.NoError(t, loadSettings(ts), "not saved yet is fine")

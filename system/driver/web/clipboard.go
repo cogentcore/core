@@ -20,25 +20,40 @@ import (
 // TheClipboard is the single [system.Clipboard] for the web platform
 var TheClipboard = &Clipboard{}
 
-// Clipboard is the [system.Clipboard] implementation for the web platform
+// Clipboard is the [system.Clipboard] implementation for the web platform.
+// It keeps the text that it last wrote, which it reads when the browser
+// refuses to read the clipboard (as without the permission, or the focus
+// of the page), so that copying and pasting in the app still works then.
 type Clipboard struct {
 	system.ClipboardBase
+
+	// mu guards last.
+	mu sync.Mutex
+
+	// last is the text that was last written.
+	last string
+}
+
+// lastText returns the text that was last written.
+func (cl *Clipboard) lastText() string {
+	cl.mu.Lock()
+	defer cl.mu.Unlock()
+	return cl.last
 }
 
 func (cl *Clipboard) Read(types []string) mimedata.Mimes {
 	str := make(chan string)
 	clip := js.Global().Get("navigator").Get("clipboard")
 	if clip.IsUndefined() {
-		errors.Log(errors.New("web.Clipboard.Read: navigator.clipboard unsupported"))
-		return mimedata.NewText("")
+		return mimedata.NewText(cl.lastText())
 	}
 	clip.Call("readText").
 		Call("then", js.FuncOf(func(this js.Value, args []js.Value) any {
 			str <- args[0].String()
 			return nil
 		}), js.FuncOf(func(this js.Value, args []js.Value) any {
-			errors.Log(errors.New("web.Clipboard.Read: unable to read clipboard text"))
-			str <- ""
+			// (refused: the text that the app last wrote)
+			str <- cl.lastText()
 			return nil
 		}))
 	return mimedata.NewText(<-str)
@@ -58,9 +73,12 @@ func (cl *Clipboard) Write(data mimedata.Mimes) error {
 			str = string(d.Data)
 		}
 	}
+	cl.mu.Lock()
+	cl.last = str
+	cl.mu.Unlock()
 	clip := js.Global().Get("navigator").Get("clipboard")
 	if clip.IsUndefined() {
-		return errors.Log(errors.New("web.Clipboard.Write: navigator.clipboard unsupported"))
+		return nil // (only in the app)
 	}
 	clip.Call("writeText", str).Call("catch", clipboardWriteFailed())
 	return nil
