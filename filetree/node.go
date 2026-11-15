@@ -299,7 +299,9 @@ func (fn *Node) isExternal() bool {
 		if sfn == nil {
 			return tree.Break
 		}
-		if sfn.IsIrregular() {
+		// the node of the external files is the parent of each of them,
+		// whose own file info (mode) is that of their files
+		if sfn.IsIrregular() || sfn.Filepath == externalFilesName {
 			isExt = true
 			return tree.Break
 		}

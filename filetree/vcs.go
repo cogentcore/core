@@ -105,6 +105,17 @@ func (fn *Node) Repo() (vcs.Repo, *Node) {
 	return repo, rnode
 }
 
+// setVCSStatus sets the VCS status of the node after a VCS operation on
+// it, and updates the files of its repository, whose cached status of the
+// file is stale until then (so the node is not updated from it now).
+func (fn *Node) setVCSStatus(status vcs.FileStatus) {
+	fn.Info.VCS = status
+	fn.NeedsRender()
+	if _, rnode := fn.Repo(); rnode != nil {
+		rnode.updateRepoFiles()
+	}
+}
+
 func (fn *Node) updateRepoFiles() {
 	if fn.DirRepo == nil {
 		return
@@ -135,8 +146,7 @@ func (fn *Node) AddToVCS() {
 		core.ErrorSnackbar(fn, err, "Error adding file to VCS")
 		return
 	}
-	fn.Info.VCS = vcs.Added
-	fn.Update()
+	fn.setVCSStatus(vcs.Added)
 }
 
 // deleteFromVCSSelected removes selected files from version control system
@@ -158,8 +168,7 @@ func (fn *Node) deleteFromVCS() {
 		core.ErrorSnackbar(fn, err, "Error deleting file from VCS")
 		return
 	}
-	fn.Info.VCS = vcs.Deleted
-	fn.Update()
+	fn.setVCSStatus(vcs.Deleted)
 }
 
 // commitToVCSSelected commits to version control system based on last selected file
@@ -186,8 +195,7 @@ func (fn *Node) commitToVCS(message string) (err error) {
 	if err != nil {
 		return err
 	}
-	fn.Info.VCS = vcs.Stored
-	fn.Update()
+	fn.setVCSStatus(vcs.Stored)
 	return err
 }
 
@@ -213,16 +221,15 @@ func (fn *Node) revertVCS() (err error) {
 	if err != nil {
 		return err
 	}
-	if fn.Info.VCS == vcs.Modified {
-		fn.Info.VCS = vcs.Stored
-	} else if fn.Info.VCS == vcs.Added {
-		// do nothing - leave in "added" state
-	}
+	status := fn.Info.VCS
+	if status == vcs.Modified {
+		status = vcs.Stored
+	} // an added file stays added
 	// todo:
 	// if fn.Lines != nil {
 	// 	fn.Lines.Revert()
 	// }
-	fn.Update()
+	fn.setVCSStatus(status)
 	return err
 }
 
