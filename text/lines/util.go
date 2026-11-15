@@ -112,8 +112,7 @@ func PreCommentStart(lns [][]byte, stLn int, comLn, comSt, comEd string, lnBack 
 		l := lns[i]
 		fl := bytes.Fields(l)
 		if len(fl) == 0 {
-			stLn = i + 1
-			break
+			return i + 1
 		}
 		if !gotEd {
 			for _, ff := range fl {
@@ -127,20 +126,18 @@ func PreCommentStart(lns [][]byte, stLn int, comLn, comSt, comEd string, lnBack 
 			}
 		}
 		if bytes.Equal(fl[0], comStb) {
-			stLn = i
-			break
+			return i
 		}
 		if !bytes.Equal(fl[0], comLnb) && !gotEd {
-			stLn = i + 1
-			break
+			return i + 1
 		}
 		nback++
 		if nback > lnBack {
-			stLn = i
-			break
+			return i
 		}
 	}
-	return stLn
+	// the comment lines go back to the first line
+	return 0
 }
 
 // CountWordsLinesRegion counts the number of words (aka Fields, space-separated strings)

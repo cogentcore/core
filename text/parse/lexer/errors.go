@@ -179,20 +179,25 @@ func (p ErrorList) Report(maxN int, basepath string, showSrc, showRule bool) str
 	}
 	cnt := 0
 	lstln := -1
+	lstfn := ""
+	rest := 0 // the number of errors after the last one reported
 	for ei := 0; ei < ne; ei++ {
 		er := p[ei]
-		if er.Pos.Line == lstln {
+		// only one error is reported per line of a file
+		if er.Pos.Line == lstln && er.Filename == lstfn {
 			continue
 		}
 		str += p[ei].Report(basepath, showSrc, showRule) + "<br>\n"
 		lstln = er.Pos.Line
+		lstfn = er.Filename
 		cnt++
-		if cnt > maxN {
+		if cnt == maxN {
+			rest = ne - ei - 1
 			break
 		}
 	}
-	if ne > maxN {
-		str += fmt.Sprintf("... and %v more errors<br>\n", ne-maxN)
+	if rest > 0 {
+		str += fmt.Sprintf("... and %v more errors<br>\n", rest)
 	}
 	return str
 }

@@ -348,10 +348,11 @@ func (sm *SymMap) FindNamePrefixScoped(seed string, matches *SymMap) {
 			sy = sy.Clone()
 			sy.Name = nm
 		}
+		mnm := nm // the lower case name is only for the match
 		if noCase {
-			nm = strings.ToLower(nm)
+			mnm = strings.ToLower(nm)
 		}
-		if strings.HasPrefix(nm, seed) {
+		if strings.HasPrefix(mnm, seed) {
 			if *matches == nil {
 				*matches = make(SymMap)
 			}

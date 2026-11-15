@@ -472,6 +472,8 @@ func (gl *GoLang) CompleteEdit(fss *parse.FileStates, text string, cp int, comp 
 			}
 		}
 	} else {
+		// a paren right after the cursor is the call of the name
+		gotParen = strings.HasPrefix(s2, "(")
 		s2 = ""
 	}
 

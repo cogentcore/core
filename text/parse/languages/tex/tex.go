@@ -95,6 +95,9 @@ func (tl *TexLang) ParseDir(fs *parse.FileState, path string, opts parse.Languag
 // Indent level is in increments of tabSz for spaces, and tabs for tabs.
 // Operates on rune source with markup lex tags per line.
 func (tl *TexLang) IndentLine(fs *parse.FileStates, src [][]rune, tags []lexer.Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Character) {
+	if ln == 0 { // the first line has no previous line to indent from
+		return
+	}
 	pInd, pLn, ichr = lexer.PrevLineIndent(src, tags, ln, tabSz)
 
 	curUnd, _ := lexer.LineStartEndBracket(src[ln], tags[ln])

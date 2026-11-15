@@ -338,10 +338,6 @@ func (gl *GoLang) AddImportsToExts(fss *parse.FileStates, pfs *parse.FileState, 
 	pfs.SymsMu.RLock()
 	pkg.Children.FindKindScoped(token.NameLibrary, &imps)
 	pfs.SymsMu.RUnlock()
-	if len(imps) == 0 {
-		goto reset
-		return
-	}
 	for _, im := range imps {
 		if im.Name == "C" {
 			continue
@@ -353,8 +349,8 @@ func (gl *GoLang) AddImportsToExts(fss *parse.FileStates, pfs *parse.FileState, 
 	if TraceTypes {
 		fmt.Printf("\n#####################\nResolving Types now for: %v\n", pfs.Src.Filename)
 	}
+	// the types are resolved with or without imports
 	gl.ResolveTypes(pfs, pkg, true) // true = do include function-internal scope items
-reset:
 	pfs.SymsMu.Lock()
 	pfs.ClearAST()
 	pkg.ClearAST()

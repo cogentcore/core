@@ -72,7 +72,7 @@ func (tr Region) Contains(ps Pos) bool {
 
 // ContainsLine returns true if line is within region
 func (tr Region) ContainsLine(ln int) bool {
-	return tr.Start.Line >= ln && ln <= tr.End.Line
+	return ln >= tr.Start.Line && ln <= tr.End.Line
 }
 
 // NumLines is the number of lines in this region, based on inclusive end line.
@@ -122,8 +122,8 @@ func (tr Region) ShiftLines(ln int) Region {
 // set to given line.
 func (tr Region) MoveToLine(ln int) Region {
 	nl := tr.NumLines()
-	tr.Start.Line = 0
-	tr.End.Line = nl - 1
+	tr.Start.Line = ln
+	tr.End.Line = ln + nl - 1
 	return tr
 }
 

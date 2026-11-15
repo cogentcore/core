@@ -187,29 +187,48 @@ func (ls *Lines) diffs(ob *Lines) Diffs {
 // according to diff operations (e.g., as generated from DiffBufs).
 func (ls *Lines) patchFrom(ob *Lines, diffs Diffs) bool {
 	ls.undos.NewGroup()
+	blines := ob.strings(false)
 	sz := len(diffs)
 	mods := false
 	for i := sz - 1; i >= 0; i-- { // go in reverse so changes are valid!
 		df := diffs[i]
-		switch df.Tag {
-		case 'r':
-			ls.deleteText(textpos.Pos{Line: df.I1}, textpos.Pos{Line: df.I2})
-			ot := ob.Region(textpos.Pos{Line: df.J1}, textpos.Pos{Line: df.J2})
-			if ot != nil {
-				ls.insertTextLines(textpos.Pos{Line: df.I1}, ot.Text)
-				mods = true
-			}
-		case 'd':
-			ls.deleteText(textpos.Pos{Line: df.I1}, textpos.Pos{Line: df.I2})
-			mods = true
-		case 'i':
-			ot := ob.Region(textpos.Pos{Line: df.J1}, textpos.Pos{Line: df.J2})
-			if ot != nil {
-				ln := min(ls.numLines(), df.I1)
-				ls.insertTextLines(textpos.Pos{Line: ln}, ot.Text)
-				mods = true
+		if df.Tag == 'e' {
+			continue
+		}
+		var nl [][]rune // the new lines, for a replace or insert
+		if df.Tag != 'd' {
+			for _, s := range blines[df.J1:df.J2] {
+				nl = append(nl, []rune(s))
 			}
 		}
+		n := ls.numLines()
+		switch {
+		case df.I2 < n:
+			// the lines and their newlines are replaced by the new lines,
+			// each with a newline.
+			if df.I2 > df.I1 {
+				ls.deleteText(textpos.Pos{Line: df.I1}, textpos.Pos{Line: df.I2})
+			}
+			if len(nl) > 0 {
+				ls.insertTextLines(textpos.Pos{Line: df.I1}, append(nl, []rune{}))
+			}
+		case df.I1 > 0:
+			// through the end, which has no newline: the newline before
+			// the lines goes with them, and comes before each new line.
+			prev := textpos.Pos{Line: df.I1 - 1, Char: len(ls.lines[df.I1-1])}
+			if df.I2 > df.I1 {
+				ls.deleteText(prev, ls.endPos())
+			}
+			if len(nl) > 0 {
+				ls.insertTextLines(ls.endPos(), append([][]rune{{}}, nl...))
+			}
+		default: // all of the text
+			ls.deleteText(textpos.Pos{}, ls.endPos())
+			if len(nl) > 0 {
+				ls.insertTextLines(textpos.Pos{}, nl)
+			}
+		}
+		mods = true
 	}
 	if mods {
 		ls.undos.NewGroup()
