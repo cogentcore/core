@@ -124,6 +124,7 @@ func (c *Config) run(ctx context.Context, sio *StdIO, start bool, cmd string, ar
 			restore := saveConsole(sio.In, sio.Out)
 			err = cm.Run()
 			restore()
+			excmd = cm // for its process state (as in [Config.RunIO])
 		}
 
 		// we must call InitColor after calling a system command

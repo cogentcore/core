@@ -48,8 +48,13 @@ func FileExistsFS(fsys fs.FS, filePath string) (bool, error) {
 	}
 	fp, err := fsys.Open(filePath)
 	if err == nil {
+		// as with Stat above, a directory is not a file
+		fi, serr := fp.Stat()
 		fp.Close()
-		return true, nil
+		if serr != nil {
+			return false, serr
+		}
+		return !fi.IsDir(), nil
 	}
 	if errors.Is(err, fs.ErrNotExist) {
 		return false, nil

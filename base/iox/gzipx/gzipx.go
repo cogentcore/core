@@ -19,10 +19,10 @@ import (
 // and adding an gzip reader if so.
 func Open(filename string, fun func(gzr io.Reader) error) error {
 	fp, err := os.Open(filename)
-	defer fp.Close()
 	if err != nil {
 		return err
 	}
+	defer fp.Close()
 	ext := filepath.Ext(filename)
 	if ext == ".gz" {
 		return Read(fp, fun)
@@ -35,10 +35,10 @@ func Open(filename string, fun func(gzr io.Reader) error) error {
 // and adding a gzip reader if so.
 func OpenFS(fsys fs.FS, filename string, fun func(gzr io.Reader) error) error {
 	fp, err := fsys.Open(filename)
-	defer fp.Close()
 	if err != nil {
 		return err
 	}
+	defer fp.Close()
 	ext := filepath.Ext(filename)
 	if ext == ".gz" {
 		return Read(fp, fun)
@@ -51,10 +51,10 @@ func OpenFS(fsys fs.FS, filename string, fun func(gzr io.Reader) error) error {
 // returning the error from that function.
 func Read(r io.Reader, fun func(gzr io.Reader) error) error {
 	gzr, err := gzip.NewReader(r)
-	defer gzr.Close()
 	if err != nil {
 		return err
 	}
+	defer gzr.Close()
 	return fun(gzr)
 }
 
@@ -63,10 +63,10 @@ func Read(r io.Reader, fun func(gzr io.Reader) error) error {
 // and adding a gzip writer if so.
 func Save(filename string, fun func(gzw io.Writer) error) error {
 	fp, err := os.Create(filename)
-	defer fp.Close()
 	if err != nil {
 		return err
 	}
+	defer fp.Close()
 	ext := filepath.Ext(filename)
 	if ext == ".gz" {
 		return Write(fp, fun)
@@ -79,6 +79,10 @@ func Save(filename string, fun func(gzw io.Writer) error) error {
 // returning the error from that function.
 func Write(w io.Writer, fun func(gzw io.Writer) error) error {
 	gzw := gzip.NewWriter(w)
-	defer gzw.Close()
-	return fun(gzw)
+	err := fun(gzw)
+	// closing writes the end of the gzip data, which can fail
+	if cerr := gzw.Close(); err == nil {
+		err = cerr
+	}
+	return err
 }

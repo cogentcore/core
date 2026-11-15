@@ -321,7 +321,7 @@ func fieldsThroughDelim(flds [][]byte, delim byte, idx int) (int, string) {
 func (gr *GitRepo) Log(fname string, since string) (Log, error) {
 	args := []string{"log", "--all"}
 	if since != "" {
-		args = append(args, `--since="`+since+`"`)
+		args = append(args, "--since="+since) // (no shell to remove quotes)
 	}
 	args = append(args, `--pretty=format:%h %ad} %an} %ae} %s`)
 	if fname != "" {

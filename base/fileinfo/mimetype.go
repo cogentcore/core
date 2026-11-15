@@ -39,7 +39,8 @@ func MimeTop(mime string) string {
 // i.e., the thing after the /  -- returns empty if no /
 // also trims off any charset encoding stuff
 func MimeSub(mime string) string {
-	if sidx := strings.Index(MimeNoChar(mime), "/"); sidx > 0 {
+	mime = MimeNoChar(mime)
+	if sidx := strings.Index(mime, "/"); sidx > 0 {
 		return mime[sidx+1:]
 	}
 	return ""
@@ -65,10 +66,10 @@ func MimeFromFile(fname string) (mtype, ext string, err error) {
 	if fc == '~' || fc == '%' || fc == '#' || lc == '~' || lc == '%' || lc == '#' {
 		return MimeString(Trash), ext, nil
 	}
-	mtypt, err := filetype.MatchFile(fn) // h2non next -- has good coverage
+	mtypt, err := filetype.MatchFile(fname) // h2non next -- has good coverage (the path, not just the name)
 	ptyp := ""
 	isplain := false
-	if err == nil {
+	if err == nil && mtypt.MIME.Value != "" { // (an unknown type has no mime type)
 		mtyp := mtypt.MIME.Value
 		ext = mtypt.Extension
 		if strings.HasPrefix(mtyp, "text/plain") {

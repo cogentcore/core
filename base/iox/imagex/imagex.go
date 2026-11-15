@@ -123,8 +123,10 @@ func Save(im image.Image, filename string) error {
 	}
 	defer file.Close()
 	bw := bufio.NewWriter(file)
-	defer bw.Flush()
-	return Write(im, file, f)
+	if err := Write(im, bw, f); err != nil {
+		return err
+	}
+	return bw.Flush()
 }
 
 // Write writes the image to the given writer using the given foramt.
