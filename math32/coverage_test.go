@@ -243,3 +243,142 @@ func TestQuatOps(t *testing.T) {
 	assert.InDelta(t, 0, v.X, 1e-6)
 	assert.InDelta(t, 1, v.Y, 1e-6)
 }
+
+// TestSphere tests the methods of [Sphere].
+func TestSphere(t *testing.T) {
+	s := NewSphere(Vec3(0, 0, 0), 2)
+	assert.False(t, s.IsEmpty(nil))
+	assert.True(t, s.ContainsPoint(Vec3(1, 1, 1)))
+	assert.False(t, s.ContainsPoint(Vec3(2, 2, 0)))
+	assert.Equal(t, float32(1), s.DistanceToPoint(Vec3(3, 0, 0)))
+	assert.True(t, s.IntersectSphere(Sphere{Center: Vec3(3, 0, 0), Radius: 1}))
+	assert.False(t, s.IntersectSphere(Sphere{Center: Vec3(5, 0, 0), Radius: 1}))
+	assert.Equal(t, Vec3(2, 0, 0), s.ClampPoint(Vec3(5, 0, 0)))
+	assert.Equal(t, Vec3(1, 0, 0), s.ClampPoint(Vec3(1, 0, 0)))
+	assert.Equal(t, B3(-2, -2, -2, 2, 2, 2), s.GetBoundingBox())
+
+	m := Identity4()
+	m.SetScale(3, 1, 1)
+	s.MulMatrix4(m)
+	assert.Equal(t, float32(6), s.Radius, "scaled by the largest scale")
+	s.Translate(Vec3(1, 0, 0))
+	assert.Equal(t, Vec3(1, 0, 0), s.Center)
+
+	s.Set(Vec3(1, 1, 1), 0)
+	assert.True(t, s.IsEmpty(nil))
+	s.SetFromBox(B3(0, 0, 0, 2, 0, 0))
+	assert.Equal(t, Vec3(1, 0, 0), s.Center)
+	assert.Equal(t, float32(1), s.Radius)
+	s.SetFromPoints([]Vector3{{0, 0, 0}, {4, 0, 0}, {2, 1, 0}}, nil)
+	assert.Equal(t, Vec3(2, 0.5, 0), s.Center)
+	c := Vec3(0, 0, 0)
+	s.SetFromPoints([]Vector3{{0, 3, 0}, {4, 0, 0}}, &c)
+	assert.Equal(t, float32(4), s.Radius)
+}
+
+// TestPlaneLine tests the methods of [Plane] and [Line3].
+func TestPlaneLine(t *testing.T) {
+	// the plane z = 1
+	p := NewPlane(Vec3(0, 0, 1), -1)
+	assert.Equal(t, float32(2), p.DistanceToPoint(Vec3(5, 5, 3)))
+	assert.Equal(t, float32(1), p.DistanceToSphere(Sphere{Center: Vec3(0, 0, 3), Radius: 1}))
+	assert.Equal(t, Vec3(0, 0, 1), p.CoplanarPoint())
+
+	l := NewLine3(Vec3(0, 0, 0), Vec3(0, 0, 4))
+	assert.Equal(t, Vec3(0, 0, 2), l.Center())
+	assert.Equal(t, Vec3(0, 0, 4), l.Delta())
+	assert.Equal(t, float32(16), l.DistanceSquared())
+	assert.Equal(t, float32(4), l.Dist())
+	assert.True(t, p.IsIntersectionLine(l))
+	pt, ok := p.IntersectLine(l)
+	assert.True(t, ok)
+	assert.Equal(t, Vec3(0, 0, 1), pt)
+	_, ok = p.IntersectLine(NewLine3(Vec3(0, 0, 2), Vec3(0, 0, 4)))
+	assert.False(t, ok, "beyond the end of the line")
+	_, ok = p.IntersectLine(NewLine3(Vec3(0, 0, 3), Vec3(1, 0, 3)))
+	assert.False(t, ok, "parallel")
+	pt, ok = p.IntersectLine(NewLine3(Vec3(0, 0, 1), Vec3(1, 0, 1)))
+	assert.True(t, ok, "in the plane")
+	assert.Equal(t, Vec3(0, 0, 1), pt)
+	m := Identity4()
+	m.SetTranslation(1, 2, 3)
+	assert.Equal(t, NewLine3(Vec3(1, 2, 3), Vec3(1, 2, 7)), l.MulMatrix4(m))
+	l.Set(Vec3(1, 1, 1), Vec3(1, 1, 1))
+	assert.Equal(t, float32(0), l.Dist())
+
+	p.SetTranslate(Vec3(0, 0, 1))
+	assert.Equal(t, Vec3(0, 0, 2), p.CoplanarPoint(), "moved to z = 2")
+	p.Negate()
+	assert.Equal(t, Vec3(0, 0, -1), p.Norm)
+	p.Set(Vec3(0, 2, 0), 4)
+	p.Normalize()
+	assert.Equal(t, Vec3(0, 1, 0), p.Norm)
+	assert.Equal(t, float32(2), p.Off)
+	p.SetFromNormalAndCoplanarPoint(Vec3(1, 0, 0), Vec3(3, 9, 9))
+	assert.Equal(t, float32(0), p.DistanceToPoint(Vec3(3, 0, 0)))
+	p.SetFromCoplanarPoints(Vec3(0, 0, 0), Vec3(1, 0, 0), Vec3(0, 1, 0))
+	assert.Equal(t, Vec3(0, 0, 1), p.Norm)
+	assert.Equal(t, float32(0), p.Off)
+}
+
+// TestTriangle tests the methods of [Triangle].
+func TestTriangle(t *testing.T) {
+	tr := NewTriangle(Vec3(0, 0, 0), Vec3(2, 0, 0), Vec3(0, 2, 0))
+	assert.Equal(t, float32(2), tr.Area())
+	assert.InDelta(t, 2.0/3, tr.Midpoint().X, 1e-6)
+	assert.Equal(t, Vec3(0, 0, 1), tr.Normal())
+	assert.Equal(t, Vec3(0, 0, 1), Normal(tr.A, tr.B, tr.C))
+	pl := tr.Plane()
+	assert.Equal(t, Vec3(0, 0, 1), pl.Norm)
+	assert.True(t, tr.ContainsPoint(Vec3(0.5, 0.5, 0)))
+	assert.False(t, tr.ContainsPoint(Vec3(2, 2, 0)))
+	assert.True(t, ContainsPoint(Vec3(0.1, 0.1, 0), tr.A, tr.B, tr.C))
+	bc := tr.BarycoordFromPoint(Vec3(0, 0, 0))
+	assert.Equal(t, Vec3(1, 0, 0), bc)
+	assert.Equal(t, Vec3(-2, -1, -1), BarycoordFromPoint(Vec3(1, 1, 0), tr.A, tr.A, tr.A), "degenerate")
+	tr.SetFromPointsAndIndices([]Vector3{{9, 9, 9}, {0, 0, 0}, {0, 1, 0}, {1, 0, 0}}, 1, 3, 2)
+	assert.Equal(t, float32(0.5), tr.Area())
+	tr.Set(Vec3(0, 0, 0), Vec3(1, 0, 0), Vec3(2, 0, 0))
+	assert.Equal(t, Vector3{}, tr.Normal(), "collinear")
+}
+
+// TestArrays tests [ArrayF32] and [ArrayU32].
+func TestArrays(t *testing.T) {
+	a := NewArrayF32(0, 8)
+	a.Append(1)
+	a.AppendVector2(Vec2(2, 3))
+	a.AppendVector3(Vec3(4, 5, 6))
+	a.AppendVector4(Vec4(7, 8, 9, 10))
+	assert.Len(t, a, 10)
+	assert.Equal(t, 40, a.NumBytes())
+	var v2 Vector2
+	a.GetVector2(1, &v2)
+	assert.Equal(t, Vec2(2, 3), v2)
+	var v3 Vector3
+	a.GetVector3(3, &v3)
+	assert.Equal(t, Vec3(4, 5, 6), v3)
+	var v4 Vector4
+	a.GetVector4(6, &v4)
+	assert.Equal(t, Vec4(7, 8, 9, 10), v4)
+	a.Set(0, 11, 12)
+	a.SetVector2(2, Vec2(13, 14))
+	a.SetVector3(4, Vec3(15, 16, 17))
+	a.SetVector4(6, Vec4(18, 19, 20, 21))
+	assert.Equal(t, ArrayF32{11, 12, 13, 14, 15, 16, 18, 19, 20, 21}, a, "the vector4 at 6 overwrites the end of the vector3")
+	var b ArrayF32
+	b.CopyFrom(a)
+	assert.Equal(t, a, b)
+
+	var f32 []float32
+	CopyFloat32s(&f32, []float32{1, 2})
+	assert.Equal(t, []float32{1, 2}, f32)
+	var f64 []float64
+	CopyFloat64s(&f64, []float64{3})
+	assert.Equal(t, []float64{3}, f64)
+
+	u := NewArrayU32(2, 4)
+	u.Append(7)
+	u.Set(0, 5, 6)
+	assert.Equal(t, ArrayU32{5, 6, 7}, u)
+	assert.Equal(t, 12, u.NumBytes())
+}

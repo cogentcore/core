@@ -229,14 +229,15 @@ func (b *Base) CopyStopsFrom(cp *Base) {
 
 // ApplyOpacityToStops multiplies all stop opacities by the given opacity.
 func (b *Base) ApplyOpacityToStops(opacity float32) {
-	for _, s := range b.Stops {
-		s.Opacity *= opacity
+	// the stops are changed in place (not copies of them in a range)
+	for i := range b.Stops {
+		b.Stops[i].Opacity *= opacity
 	}
-	for _, s := range b.stopsRGB {
-		s.Opacity *= opacity
+	for i := range b.stopsRGB {
+		b.stopsRGB[i].Opacity *= opacity
 	}
-	for _, s := range b.stopsRGBSrc {
-		s.Opacity *= opacity
+	for i := range b.stopsRGBSrc {
+		b.stopsRGBSrc[i].Opacity *= opacity
 	}
 }
 

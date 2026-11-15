@@ -157,13 +157,14 @@ func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 // given Context. It handles values of types [color.Color], [image.Image], and string.
 // If no Context is provided, it uses [BaseContext] with [Transparent].
 func FromAny(val any, ctx ...colors.Context) (image.Image, error) {
+	// an image is checked first, as some images (image.Uniform) are colors too
 	switch v := val.(type) {
+	case image.Image:
+		return v, nil
 	case color.Color:
 		return colors.Uniform(v), nil
 	case *color.Color:
 		return colors.Uniform(*v), nil
-	case image.Image:
-		return v, nil
 	case string:
 		return FromString(v, ctx...)
 	case *string:
