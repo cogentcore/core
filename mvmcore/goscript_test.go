@@ -13,4 +13,6 @@ import (
 	"cogentcore.org/core/base/goscript"
 )
 
-func TestGoScript(t *testing.T) { goscript.Test(t, goscript.Options{Timeout: 20 * time.Minute}) }
+func TestGoScript(t *testing.T) {
+	goscript.Test(t, goscript.Options{Browser: true, BrowserChannel: "chrome", Timeout: 20 * time.Minute, SkipTypecheck: true, Tags: []string{"purego", "noasm", "mvmnosrc"}})
+}

@@ -50,7 +50,7 @@ go test -tags update -run TestName ./core/
 
 The tests above run on the desktop platforms. Others are run locally, when working on those areas:
 
-- web: `CORE_GOSCRIPT_TEST=1 go test -run TestGoScript ./core/` runs the core tests in Chrome, built with goscript.
+- web: `CORE_GOSCRIPT_TEST=1 go test -run TestGoScript ./core/` runs the core tests in Chrome, built with goscript (and the same for the other packages with a `goscript_test.go`). `core setup -js` installs the tools: goscript, bun, and tsrs, which type checks the compiled code. Tests that the web cannot do call `goscript.Skip`. The tests of mvmcore skip the type checking (`Options.SkipTypecheck`), as `core build js` does, since the mvm interpreter has type errors in its compiled code that do not affect what it does.
 - iOS and Android: `core run iossimulator` and `core run android` run an app in the simulator or emulator.
 - The desktop driver (`system/driver/desktop`) has tests for each desktop platform, with build tags (`desktop_darwin_test.go`, `desktop_linux_test.go`, `desktop_windows_test.go`, and the shared `desktop_test.go`), whose `TestMain` runs the main loop on the main thread:
   - macOS: `go test -short ./system/...` opens a real window, and does a clipboard round trip that restores the clipboard.

@@ -83,6 +83,11 @@ type Config struct { //types:add
 	// which core run android boots when no Android device is connected.
 	AndroidSim bool `cmd:"setup"`
 
+	// JS installs (setup) the tools of the js platform: GoScript and bun,
+	// which build apps to JavaScript, and tsrs, the TypeScript type checker
+	// that GoScript tests use (as with CORE_GOSCRIPT_TEST).
+	JS bool `cmd:"setup"`
+
 	// the configuration options for the build, install, run, and pack commands
 	Build Build `cmd:"build,install,run,pack"`
 

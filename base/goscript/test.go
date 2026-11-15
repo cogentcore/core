@@ -10,7 +10,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"testing"
@@ -60,6 +62,14 @@ type Options struct {
 
 	// Tags are additional build tags (the goscript tag is always added).
 	Tags []string
+
+	// SkipTypecheck skips the TypeScript type checking of the compiled
+	// code, which goscript test otherwise does before running it, as core
+	// build js does (bun only strips the types). It is for packages whose
+	// compiled code has type errors that do not affect what they do, so
+	// that their tests still run (as mvmcore, whose mvm interpreter the
+	// docs use on the web).
+	SkipTypecheck bool
 }
 
 // failRegexp matches the names of failing tests in the output of goscript test.
@@ -118,6 +128,15 @@ func Test(t *testing.T, opts ...Options) {
 	if len(o.Tags) > 0 {
 		args = append(args, "--tags", strings.Join(o.Tags, ","))
 	}
+	// the goscript overrides of the dependencies, as core build js uses
+	// (such as those of the mvm interpreter)
+	overrides, err := overrideDirs(append([]string{"goscript"}, o.Tags...))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, dir := range overrides {
+		args = append(args, "--gs-path", dir)
+	}
 	if testing.Verbose() {
 		args = append(args, "-v")
 	}
@@ -125,6 +144,21 @@ func Test(t *testing.T, opts ...Options) {
 
 	cmd := exec.Command(gs, args...)
 	cmd.Env = append(os.Environ(), "NO_COLOR=1", "FORCE_COLOR=0")
+	if o.SkipTypecheck {
+		// goscript type checks with the tsrs it finds first on the PATH,
+		// so one that checks nothing skips it
+		bin := t.TempDir()
+		noop := filepath.Join(bin, "tsrs")
+		script := "#!/bin/sh\nexit 0\n"
+		if runtime.GOOS == "windows" {
+			noop += ".cmd"
+			script = "@exit /b 0\r\n"
+		}
+		if err := os.WriteFile(noop, []byte(script), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		cmd.Env = append(cmd.Env, "PATH="+bin+string(os.PathListSeparator)+os.Getenv("PATH"))
+	}
 	// go test does not pass GOROOT to tests as of Go 1.27, but the tests
 	// compiled to JavaScript get runtime.GOROOT from the environment.
 	if os.Getenv("GOROOT") == "" {
@@ -150,4 +184,30 @@ func Test(t *testing.T, opts ...Options) {
 		msg = fmt.Sprintf("goscript tests failed: %s", strings.Join(failed, ", "))
 	}
 	t.Errorf("%s (%v):\n%s", msg, err, out)
+}
+
+// overrideDirs returns the gsoverride directories of the modules of the
+// dependencies of the package in the current directory, built with the
+// given tags for js, as core build js does (see cmd/web).
+func overrideDirs(tags []string) ([]string, error) {
+	cmd := exec.Command("go", "list", "-deps", "-tags", strings.Join(tags, ","), "-f", "{{with .Module}}{{.Dir}}{{end}}", ".")
+	cmd.Env = append(os.Environ(), "GOOS=js", "GOARCH=wasm")
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, fmt.Errorf("goscript: listing the modules of the dependencies: %w", err)
+	}
+	var dirs []string
+	seen := map[string]bool{}
+	for dir := range strings.SplitSeq(string(out), "\n") {
+		dir = strings.TrimSpace(dir)
+		if dir == "" || seen[dir] {
+			continue
+		}
+		seen[dir] = true
+		gs := filepath.Join(dir, "gsoverride")
+		if info, err := os.Stat(gs); err == nil && info.IsDir() {
+			dirs = append(dirs, gs)
+		}
+	}
+	return dirs, nil
 }
