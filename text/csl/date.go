@@ -6,7 +6,8 @@ package csl
 
 import "strings"
 
-// The CSL input model supports two different date representations:
+// Date is a date of the CSL input model, which supports two different
+// date representations:
 // an EDTF string (preferred), and a more structured alternative.
 type Date struct {
 	DateParts [][]any `json:"date-parts,omitempty"`

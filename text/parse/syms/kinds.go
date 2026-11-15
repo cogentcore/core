@@ -201,7 +201,7 @@ const (
 	Interface
 )
 
-// Categories
+// Cats are the categories of the kinds.
 var Cats = []Kinds{
 	Unknown,
 	Primitive,
@@ -210,7 +210,7 @@ var Cats = []Kinds{
 	KindsN,
 }
 
-// Sub-Categories
+// SubCats are the sub-categories of the kinds.
 var SubCats = []Kinds{
 	Unknown,
 	Primitive,
@@ -233,7 +233,7 @@ var SubCats = []Kinds{
 	KindsN,
 }
 
-// Sub2-Categories
+// Sub2Cats are the second-level sub-categories of the kinds.
 var Sub2Cats = []Kinds{
 	Unknown,
 	Primitive,

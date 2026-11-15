@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-// Lexer token.
+// Token is a lexer token.
 type Token int
 
 const (

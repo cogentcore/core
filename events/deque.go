@@ -18,7 +18,7 @@ import (
 // are being compressed to eliminate laggy behavior.
 var TraceEventCompression = false
 
-// Dequer is an infinitely buffered double-ended queue of events.
+// Deque is an infinitely buffered double-ended queue of events.
 // If an event is not marked as Unique, and the last
 // event in the queue is of the same type, then the new one
 // replaces the last one.  This automatically implements

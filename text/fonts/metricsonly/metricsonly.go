@@ -56,6 +56,9 @@ func ExtractMetrics(fname, outfile string, debug bool) error {
 		}
 		tables[i].Tag = tag
 		tables[i].Content, err = font.RawTable(tag)
+		if err != nil {
+			return err
+		}
 		if tag.String() == "name" {
 			fmt.Println("name:", string(tables[i].Content))
 		}
@@ -63,7 +66,7 @@ func ExtractMetrics(fname, outfile string, debug bool) error {
 	if debug {
 		fmt.Println("\t", taglist)
 	}
-	content := opentype.WriteTTF(tables)
+	content := opentype.WriteOpentype(tables, opentype.TrueType)
 	return os.WriteFile(outfile, content, 0666)
 }
 

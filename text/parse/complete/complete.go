@@ -210,7 +210,7 @@ func SeedPath(text string) string {
 	})
 }
 
-// SeedPath returns the text after the last rune for which the given
+// SeedAfter returns the text after the last rune for which the given
 // function returns true, which is typically used for creating a completion
 // seed string.
 func SeedAfter(text string, f func(r rune) bool) string {

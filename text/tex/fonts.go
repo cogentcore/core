@@ -638,11 +638,7 @@ func (f *dviFont) Draw(p *ppath.Path, x, y float32, cid uint32, scale float32) f
 		y += sc * ybb
 	}
 
-	doItal := false
-	if f.italic && f.cmapType == CMMI && cid == 0x40 {
-		// fmt.Printf("italic sym: 0x%X  font: %d\n", cid, f.cmapType)
-		doItal = true
-	}
+	doItal := f.italic && f.cmapType == CMMI && cid == 0x40 // an italic symbol
 	for _, s := range outline.Segments {
 		p0 := math32.Vec2(s.Args[0].X*xsc*sc+x, -s.Args[0].Y*sc+y)
 		if doItal {

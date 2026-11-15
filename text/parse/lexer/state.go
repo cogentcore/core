@@ -178,7 +178,7 @@ func (ls *State) MatchString(off int, s string) bool {
 	return true
 }
 
-// Rune gets the rune at given offset from current position, returns false if out of range
+// RuneAt gets the rune at given offset from current position, returns false if out of range
 func (ls *State) RuneAt(off int) (rune, bool) {
 	idx := ls.Pos + off
 	if idx >= len(ls.Src) {
@@ -212,7 +212,7 @@ func (ls *State) NextRune() bool {
 	return true
 }
 
-// CurRune reads the current rune into Ch and returns false if at end of line
+// CurRuneAt reads the current rune into Ch and returns false if at end of line
 func (ls *State) CurRuneAt() bool {
 	sz := len(ls.Src)
 	if ls.Pos >= sz {

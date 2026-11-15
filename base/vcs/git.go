@@ -247,7 +247,7 @@ func (gr *GitRepo) Delete(fname string) error {
 	return err
 }
 
-// Delete removes the file from the repo
+// DeleteRemote removes the file from the repo
 func (gr *GitRepo) DeleteRemote(fname string) error {
 	_, err := gr.runErr("git", "rm", "--cached", relPath(gr, fname))
 	return err

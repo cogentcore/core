@@ -394,7 +394,7 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 			return nil
 		}
 		ext := filepath.Ext(path)
-		if !(ext == ".md" || ext == ".html") {
+		if ext != ".md" && ext != ".html" {
 			return nil
 		}
 		pg, err := bcontent.NewPage(ct.Source, path)

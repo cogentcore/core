@@ -376,16 +376,17 @@ func (r *dviReader) readInt32() int32 {
 }
 
 func (r *dviReader) readUint32N(n int) uint32 {
-	if n == 1 {
+	switch n {
+	case 1:
 		return uint32(r.readByte())
-	} else if n == 2 {
+	case 2:
 		return uint32(r.readUint16())
-	} else if n == 3 {
+	case 3:
 		a := r.readByte()
 		b := r.readByte()
 		c := r.readByte()
 		return uint32(a)<<16 | uint32(b)<<8 | uint32(c)
-	} else if n == 4 {
+	case 4:
 		return r.readUint32()
 	}
 	r.i += n

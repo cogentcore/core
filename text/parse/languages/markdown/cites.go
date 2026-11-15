@@ -127,7 +127,7 @@ func (ml *MarkdownLang) FindBibliography(pfs *parse.FileState) string {
 		return ""
 	}
 	fln := string(pfs.Src.Lines[0])
-	if !(fln == "---" || fln == "+++") {
+	if fln != "---" && fln != "+++" {
 		return ""
 	}
 	trg := `bibfile`

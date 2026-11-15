@@ -139,7 +139,7 @@ func (pt *PassTwo) PopNest(ts *TwoState, tok token.Tokens) {
 	}
 }
 
-// Perform nesting depth computation
+// NestDepth performs the nesting depth computation.
 func (pt *PassTwo) NestDepth(ts *TwoState) {
 	ts.Init()
 	nlines := ts.Src.NLines()
@@ -178,7 +178,7 @@ func (pt *PassTwo) NestDepth(ts *TwoState) {
 	}
 }
 
-// Perform nesting depth computation on only one line, starting at
+// NestDepthLine performs the nesting depth computation on only one line, starting at
 // given initial depth -- updates the given line
 func (pt *PassTwo) NestDepthLine(line Line, initDepth int) {
 	sz := len(line)
@@ -201,13 +201,13 @@ func (pt *PassTwo) NestDepthLine(line Line, initDepth int) {
 	}
 }
 
-// Perform EOS detection
+// EosDetect performs EOS detection.
 func (pt *PassTwo) EosDetect(ts *TwoState) {
 	nlines := ts.Src.NLines()
 	pt.EosDetectPos(ts, textpos.PosZero, nlines)
 }
 
-// Perform EOS detection at given starting position, for given number of lines
+// EosDetectPos performs EOS detection at given starting position, for given number of lines
 func (pt *PassTwo) EosDetectPos(ts *TwoState, pos textpos.Pos, nln int) {
 	ts.Pos = pos
 	nlines := ts.Src.NLines()

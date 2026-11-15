@@ -26,7 +26,7 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Set GUIActive to true if the gui (parseview) is active -- ensures that the
+// GUIActive is set to true if the gui (parseview) is active -- ensures that the
 // AST tree is updated when nodes are swapped in reverse mode, and maybe
 // other things
 var GUIActive = false
@@ -34,7 +34,7 @@ var GUIActive = false
 // DepthLimit is the infinite recursion prevention cutoff
 var DepthLimit = 10000
 
-// parser.Rule operates on the lexically tokenized input, not the raw source.
+// Rule operates on the lexically tokenized input, not the raw source.
 //
 // The overall strategy is pragmatically based on the current known form of
 // most languages, which are organized around a sequence of statements having
@@ -51,7 +51,7 @@ var DepthLimit = 10000
 // variations for satisfying that rule, with precedence encoded directly in the
 // ordering of the children.  These have empty "Rule" string and Rules.
 // 2. Explicit rules specified in the Rule string.
-
+//
 // The first step is matching which searches in order for matches within the
 // children of parent nodes, and for explicit rule nodes, it looks first
 // through all the explicit tokens in the rule.  If there are no explicit tokens

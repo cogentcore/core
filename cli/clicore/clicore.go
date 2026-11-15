@@ -32,7 +32,7 @@ import (
 //
 // Run uses [os.Args] for its arguments.
 func Run[T any, C cli.CmdOrFunc[T]](opts *cli.Options, cfg T, cmds ...C) error {
-	cs, err := cli.CmdsFromCmdOrFuncs[T, C](cmds)
+	cs, err := cli.CmdsFromCmdOrFuncs[T](cmds)
 	if err != nil {
 		err := fmt.Errorf("error getting commands from given commands: %w", err)
 		if opts.Fatal {

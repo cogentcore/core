@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package shapedjs shapes text on the web, with the shaper of go-text,
+// corrected by the measurements of the text in a browser canvas.
 package shapedjs
 
 import (

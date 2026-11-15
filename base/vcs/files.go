@@ -17,7 +17,7 @@ type Files map[string]FileStatus
 // Status returns the VCS file status associated with given filename,
 // returning Untracked if not found and safe to empty map.
 func (fl *Files) Status(repo Repo, fname string) FileStatus {
-	if *fl == nil || len(*fl) == 0 {
+	if len(*fl) == 0 {
 		return Untracked
 	}
 	st, ok := (*fl)[relPath(repo, fname)]

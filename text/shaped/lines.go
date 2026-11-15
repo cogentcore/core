@@ -201,9 +201,7 @@ func (ls *Lines) Clone() *Lines {
 	nln := len(ls.Lines)
 	if nln > 0 {
 		nln := make([]Line, nln)
-		for i := range ls.Lines {
-			nln[i] = ls.Lines[i]
-		}
+		copy(nln, ls.Lines)
 		nls.Lines = nln
 	}
 	return nls

@@ -455,7 +455,7 @@ func isSubcommand(name string) bool {
 		return false
 	}
 	return !strings.ContainsFunc(name, func(r rune) bool {
-		return !(unicode.IsLower(r) || unicode.IsDigit(r) || r == '-' || r == '_')
+		return !unicode.IsLower(r) && !unicode.IsDigit(r) && r != '-' && r != '_'
 	})
 }
 
@@ -502,7 +502,7 @@ func helpBlocks(lines []string) []block {
 		switch {
 		case text == "" || n == 0:
 			finish()
-		case cur != nil && n > cur.indent && !(strings.HasPrefix(text, "-") && cur.docCol > 0 && n < cur.docCol):
+		case cur != nil && n > cur.indent && (!strings.HasPrefix(text, "-") || cur.docCol <= 0 || n >= cur.docCol):
 			// (a flag indented more than the one before it, but less than its
 			// documentation, is another flag, as of brew: "      --name")
 			if cur.docCol == 0 {

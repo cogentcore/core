@@ -325,7 +325,7 @@ func (cs *Commands) Name(cmdline string) string {
 		words := f[:1]
 		for _, w := range f[1:] {
 			if len(words) == 3 || w[0] == '-' || strings.ContainsFunc(w, func(r rune) bool {
-				return !(unicode.IsLower(r) || unicode.IsDigit(r) || r == '-')
+				return !unicode.IsLower(r) && !unicode.IsDigit(r) && r != '-'
 			}) {
 				break
 			}

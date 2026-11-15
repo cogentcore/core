@@ -987,7 +987,10 @@ func assemble(pkgName, hash string, blocks []*block, pages []*goalPage) []byte {
 	sort.Strings(paths)
 
 	var buf bytes.Buffer
-	buf.WriteString(header + hashPrefix + hash + "\n\n")
+	buf.WriteString(header)
+	buf.WriteString(hashPrefix)
+	buf.WriteString(hash)
+	buf.WriteString("\n\n")
 	fmt.Fprintf(&buf, "package %s\n\nimport (\n", pkgName)
 	for _, p := range paths {
 		fmt.Fprintf(&buf, "\t%q\n", p)
@@ -1060,7 +1063,9 @@ func assemble(pkgName, hash string, blocks []*block, pages []*goalPage) []byte {
 		}
 	}
 	if len(left) > 0 {
-		buf.WriteString("// Code blocks left out:\n" + strings.Join(left, "\n") + "\n")
+		buf.WriteString("// Code blocks left out:\n")
+		buf.WriteString(strings.Join(left, "\n"))
+		buf.WriteString("\n")
 	}
 	return buf.Bytes()
 }

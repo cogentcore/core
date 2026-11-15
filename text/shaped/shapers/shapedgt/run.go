@@ -239,9 +239,9 @@ func (run *Run) clusterRuneBounds(ri int) math32.Box2 {
 	for gi := range run.Glyphs {
 		g := &run.Glyphs[gi]
 		ga := math32.FromFixed(g.Advance)
-		if g.ClusterIndex <= ri && ri < g.ClusterIndex+g.RuneCount {
+		if g.TextIndex() <= ri && ri < g.TextIndex()+g.RunesCount() {
 			adv += ga
-			nr, k = g.RuneCount, ri-g.ClusterIndex
+			nr, k = g.RunesCount(), ri-g.TextIndex()
 			continue
 		}
 		if k >= 0 {

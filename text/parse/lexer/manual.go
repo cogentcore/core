@@ -57,7 +57,7 @@ func FirstWordDigits(str string) string {
 func FirstWordApostrophe(str string) string {
 	rstr := ""
 	for _, s := range str {
-		if !(IsLetterNoUnderbar(s) || s == '\'') {
+		if !IsLetterNoUnderbar(s) && s != '\'' {
 			if len(rstr) == 0 {
 				continue
 			}

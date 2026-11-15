@@ -205,11 +205,7 @@ var TypeToKindMap = map[string]syms.Kinds{
 // ASTTypeName returns the effective type name from ast node
 // dropping the "Lit" for example.
 func (gl *GoLang) ASTTypeName(tyast *parser.AST) string {
-	tnm := tyast.Name
-	if strings.HasPrefix(tnm, "Lit") {
-		tnm = tnm[3:]
-	}
-	return tnm
+	return strings.TrimPrefix(tyast.Name, "Lit")
 }
 
 // TypeFromAST returns type from AST parse -- returns true if successful.

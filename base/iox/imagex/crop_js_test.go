@@ -43,7 +43,7 @@ func assertConsistent(t *testing.T, name string, im image.Image, size image.Poin
 	}
 	assert.Equal(t, image.Rectangle{Max: size}, jim.Underlying().Bounds(), name)
 	back := readBitmapPixels(jim.JS.Bitmap, jim.JS.Bounds)
-	assert.Equal(t, back.Pix, jim.RGBA.Pix, "%s: bitmap and local pixels", name)
+	assert.Equal(t, back.Pix, jim.Pix, "%s: bitmap and local pixels", name)
 }
 
 func TestCropResizeBrowser(t *testing.T) {

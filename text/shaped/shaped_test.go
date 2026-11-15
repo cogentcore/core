@@ -86,7 +86,7 @@ func TestFontMapper(t *testing.T) {
 
 			for li := range lns.Lines {
 				ln := &lns.Lines[li]
-				d := ln.Runs[0].(*shapedgt.Run).Output.Face.Describe()
+				d := ln.Runs[0].(*shapedgt.Run).Face.Describe()
 				// fmt.Println(li, d)
 				assert.Equal(t, fname, d.Family)
 				assert.Equal(t, weights[li], d.Aspect.Weight)
@@ -129,7 +129,7 @@ func TestBasic(t *testing.T) {
 
 		assert.Equal(t, len(sr), lns.RuneFromLinePos(textpos.Pos{Line: 3, Char: 30}))
 
-		for ri, _ := range sr {
+		for ri := range sr {
 			lp := lns.RuneToLinePos(ri)
 			assert.Equal(t, ri, lns.RuneFromLinePos(lp))
 
@@ -301,7 +301,7 @@ func TestEmoji(t *testing.T) {
 		pc.DrawText(lns, pos)
 
 		sr := tx.Join() // as runes
-		for ri, _ := range sr {
+		for ri := range sr {
 			lp := lns.RuneToLinePos(ri)
 			assert.Equal(t, ri, lns.RuneFromLinePos(lp))
 

@@ -53,7 +53,7 @@ type Math struct {
 	BBox math32.Box2
 }
 
-// Run is a span of text with the same font properties, with full rendering information.
+// RunBase is a span of text with the same font properties, with full rendering information.
 type RunBase struct {
 
 	// Font is the [text.Font] compact encoding of the font to use for rendering.

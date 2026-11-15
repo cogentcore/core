@@ -105,7 +105,7 @@ func bindCompiledCode(ed *textcore.Editor, parent *core.Frame, language string, 
 			if CodeKey(src) != key {
 				key = CodeKey(src)
 				f = g
-				runCompiledCode(ed, parent, language, f)
+				runCompiledCode(ed, parent, f)
 			}
 			return
 		}
@@ -117,11 +117,11 @@ func bindCompiledCode(ed *textcore.Editor, parent *core.Frame, language string, 
 		interpreted = true
 		BindTextEditor(ed, parent, language)
 	})
-	runCompiledCode(ed, parent, language, f)
+	runCompiledCode(ed, parent, f)
 }
 
 // runCompiledCode runs f in parent, like the interpreter would.
-func runCompiledCode(ed *textcore.Editor, parent *core.Frame, language string, f CodeFunc) {
+func runCompiledCode(ed *textcore.Editor, parent *core.Frame, f CodeFunc) {
 	runCode(ed, parent, func(out io.Writer) { f(parent, out) })
 }
 

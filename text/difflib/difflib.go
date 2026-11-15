@@ -454,7 +454,7 @@ func (m *SequenceMatcher) GetGroupedOpCodes(n int) [][]OpCode {
 		}
 		group = append(group, OpCode{c.Tag, i1, i2, j1, j2})
 	}
-	if len(group) > 0 && !(len(group) == 1 && group[0].Tag == 'e') {
+	if len(group) > 0 && (len(group) != 1 || group[0].Tag != 'e') {
 		groups = append(groups, group)
 	}
 	return groups
@@ -611,7 +611,7 @@ func (d *Differ) Dump(tag string, x []string, low int, high int) (out []string) 
 }
 
 func (d *Differ) PlainReplace(a []string, alo int, ahi int, b []string, blo int, bhi int) (out []string, err error) {
-	if !(alo < ahi) || !(blo < bhi) { // assertion
+	if (alo >= ahi) || (blo >= bhi) { // assertion
 		return nil, errors.New("low greater than or equal to high")
 	}
 	// dump the shorter block first -- reduces the burden on short-term

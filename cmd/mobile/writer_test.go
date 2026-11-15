@@ -10,7 +10,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"io"
-	"io/ioutil"
+
 	"os"
 	"os/exec"
 	"strings"
@@ -144,7 +144,7 @@ const androidManifest = `
 `
 
 func writeTempFile(data string) (string, error) {
-	f, err := ioutil.TempFile("", "gofmt")
+	f, err := os.CreateTemp("", "gofmt")
 	if err != nil {
 		return "", err
 	}

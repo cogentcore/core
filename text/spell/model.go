@@ -40,7 +40,7 @@ type Model struct {
 	sync.RWMutex
 }
 
-// Create and initialise a new model
+// NewModel creates and initializes a new model
 func NewModel() *Model {
 	md := new(Model)
 	return md.Init()
@@ -127,7 +127,7 @@ func (md *Model) createSuggestKeys(term string) {
 	}
 }
 
-// Edits at any depth for a given term. The depth of the model is used
+// EditsMulti returns the edits at any depth for a given term. The depth of the model is used
 func (md *Model) EditsMulti(term string, depth int) []string {
 	edits := Edits1(term)
 	for {
@@ -137,9 +137,7 @@ func (md *Model) EditsMulti(term string, depth int) []string {
 		}
 		for _, edit := range edits {
 			edits2 := Edits1(edit)
-			for _, edit2 := range edits2 {
-				edits = append(edits, edit2)
-			}
+			edits = append(edits, edits2...)
 		}
 	}
 	return edits
@@ -243,7 +241,7 @@ func (md *Model) suggestPotential(input string) []string {
 	return sord
 }
 
-// Return the most likely corrections in order from best to worst
+// Suggestions returns the most likely corrections in order from best to worst
 func (md *Model) Suggestions(input string, n int) []string {
 	md.RLock()
 	suggestions := md.suggestPotential(input)
@@ -251,7 +249,7 @@ func (md *Model) Suggestions(input string, n int) []string {
 	return suggestions
 }
 
-// Calculate the Levenshtein distance between two strings
+// Levenshtein calculates the Levenshtein distance between two strings
 func Levenshtein(a, b *string) int {
 	la := len(*a)
 	lb := len(*b)

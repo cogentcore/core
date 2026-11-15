@@ -59,6 +59,6 @@ func (p *unixPty) Resize(cols, rows int) error {
 	return pty.Setsize(p.File, &pty.Winsize{Cols: uint16(cols), Rows: uint16(rows)})
 }
 
-func wait(ctx context.Context, cmd *exec.Cmd) error {
+func wait(_ context.Context, cmd *exec.Cmd) error {
 	return cmd.Wait()
 }

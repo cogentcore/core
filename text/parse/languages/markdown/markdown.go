@@ -172,7 +172,7 @@ func (ml *MarkdownLang) ParseDir(fs *parse.FileState, path string, opts parse.La
 	return nil
 }
 
-// List keywords (for indent)
+// ListKeys are the list keywords (for indent).
 var ListKeys = map[string]struct{}{"*": {}, "+": {}, "-": {}}
 
 // IndentLine returns the indentation level for given line based on

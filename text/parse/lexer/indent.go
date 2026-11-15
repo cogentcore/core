@@ -102,7 +102,7 @@ func BracketIndentLine(src [][]rune, tags []Line, ln int, tabSz int) (pInd, delI
 	return
 }
 
-// LastTokenIgnoreComment returns the last token of the tags, ignoring
+// LastLexIgnoreComment returns the last token of the tags, ignoring
 // any final comment at end
 func LastLexIgnoreComment(tags Line) (*Lex, int) {
 	var ll *Lex

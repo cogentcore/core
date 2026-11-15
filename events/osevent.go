@@ -23,7 +23,7 @@ func (ev *OSEvent) String() string {
 	return fmt.Sprintf("%v{Time: %v}", ev.Type(), ev.Time().Format("04:05"))
 }
 
-// osevent.OpenFilesEvent is for OS open files action to open given files
+// OSFiles is for OS open files action to open given files
 type OSFiles struct {
 	OSEvent
 

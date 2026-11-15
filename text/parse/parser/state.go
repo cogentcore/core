@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/text/token"
 )
 
-// parser.State is the state maintained for parsing
+// State is the state maintained for parsing
 type State struct {
 
 	// source and lexed version of source we're parsing

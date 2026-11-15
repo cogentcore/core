@@ -32,7 +32,7 @@ func openTypes(opens []string) ([]fileinfo.MimeType, error) {
 	}
 	var mts []fileinfo.MimeType
 	for _, mt := range fileinfo.StandardMimes {
-		if len(mt.Exts) == 0 || (!slices.Contains(cats, mt.Cat) && !(mt.Known != fileinfo.Unknown && slices.Contains(knowns, mt.Known))) {
+		if len(mt.Exts) == 0 || (!slices.Contains(cats, mt.Cat) && (mt.Known == fileinfo.Unknown || !slices.Contains(knowns, mt.Known))) {
 			continue
 		}
 		if slices.ContainsFunc(mts, func(m fileinfo.MimeType) bool { return m.Mime == mt.Mime }) {

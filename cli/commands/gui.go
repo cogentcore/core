@@ -474,7 +474,7 @@ func (cs *Commands) RunDialog(ctx core.Widget, cmd string, run RunFunc) {
 		root, name := splitCmd(cmd)
 		cm, err := cs.Cmd(root, false)
 		var sc *SubCmd
-		if err == nil && !(name == "" && (cm.HasSubCmds() || len(cm.Macros) > 0 || len(cm.Scripts) > 0)) {
+		if err == nil && (name != "" || !cm.HasSubCmds() && len(cm.Macros) == 0 && len(cm.Scripts) == 0) {
 			sc, err = cs.SubCmd(cmd, false)
 		}
 		cs.updateViews(nil)

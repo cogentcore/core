@@ -23,7 +23,7 @@ import (
 // the locale for initialization.
 var Settings SettingsData
 
-// Settings has standard printer settings.
+// SettingsData has standard printer settings.
 type SettingsData struct {
 	// PageSize specifies a standard page size, or Custom.
 	PageSize PageSizes

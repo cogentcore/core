@@ -145,7 +145,7 @@ func (gl *GoLang) TypeFromASTExpr(fs *parse.FileState, origPkg, pkg *syms.Symbol
 		case "Name":
 			sym, got := fs.FindNameScoped(snm, conts)
 			if got {
-				sty, _, got = gl.TypeFromASTSym(fs, origPkg, pkg, ch, last, sym)
+				sty, _, _ = gl.TypeFromASTSym(fs, origPkg, pkg, ch, last, sym) // (sty is nil if not found)
 			} else {
 				if snm == "true" || snm == "false" {
 					return BuiltinTypes["bool"], nil, true
@@ -380,7 +380,7 @@ func (gl *GoLang) TypeFromASTType(fs *parse.FileState, origPkg, pkg *syms.Symbol
 	return ttp, nxt, true // robust, needed for completion
 }
 
-// TypeFromASTFuncCall gets return type of function call as return value, and returns the sibling node to
+// TypeFromFuncCall gets return type of function call as return value, and returns the sibling node to
 // continue parsing in, skipping over everything in the function call
 func (gl *GoLang) TypeFromFuncCall(fs *parse.FileState, origPkg, pkg *syms.Symbol, tyast, last *parser.AST, ftyp *syms.Type) (*syms.Type, *parser.AST, bool) {
 	nxt := tyast.NextSiblingAST() // skip over everything within method in ast

@@ -21,7 +21,7 @@ func (ll *Line) Add(lx Lex) {
 	*ll = append(*ll, lx)
 }
 
-// Add adds one element to the lex line with given params, returns pointer to that new lex
+// AddLex adds one element to the lex line with given params, returns pointer to that new lex
 func (ll *Line) AddLex(tok token.KeyToken, st, ed int) *Lex {
 	lx := NewLex(tok, st, ed)
 	li := len(*ll)
@@ -56,9 +56,7 @@ func (ll *Line) Clone() Line {
 		return nil
 	}
 	cp := make(Line, len(*ll))
-	for i := range *ll {
-		cp[i] = (*ll)[i]
-	}
+	copy(cp, *ll)
 	return cp
 }
 

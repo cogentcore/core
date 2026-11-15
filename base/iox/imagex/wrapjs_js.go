@@ -90,7 +90,7 @@ func Crop(src image.Image, rect image.Rectangle) image.Image {
 	// Local pixels are cropped in Go, which copies only the cropped region
 	// to JavaScript, and keeps the pixels and the ImageData of the result
 	// consistent with its bitmap.
-	var local image.Image = src
+	local := src
 	if x, ok := src.(*JSRGBA); ok {
 		local = x.RGBA
 	}
@@ -141,7 +141,7 @@ func NewJSRGBA(src image.Image, options map[string]any) *JSRGBA {
 		// todo: get RGBA back from web
 	default:
 		im.RGBA = AsRGBA(src)
-		im.JS.SetImageData(im.RGBA.Pix, im.RGBA.Bounds(), options)
+		im.JS.SetImageData(im.Pix, im.RGBA.Bounds(), options)
 	}
 	return im
 }

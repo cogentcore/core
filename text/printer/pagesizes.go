@@ -9,7 +9,7 @@ import (
 	"cogentcore.org/core/styles/units"
 )
 
-// Sizes are standard physical drawing sizes
+// PageSizes are standard physical drawing sizes
 type PageSizes int32 //enums:enum
 
 const (
