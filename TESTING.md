@@ -48,4 +48,7 @@ The tests above run on the desktop platforms. Others are run locally, when worki
 
 - web: `CORE_GOSCRIPT_TEST=1 go test -run TestGoScript ./core/` runs the core tests in Chrome, built with goscript.
 - iOS and Android: `core run iossimulator` and `core run android` run an app in the simulator or emulator.
-- The desktop driver has tests for each desktop platform, with build tags, which can be run in virtual machines for the other platforms.
+- The desktop driver (`system/driver/desktop`) has tests for each desktop platform, with build tags (`desktop_darwin_test.go`, `desktop_linux_test.go`, `desktop_windows_test.go`, and the shared `desktop_test.go`), whose `TestMain` runs the main loop on the main thread:
+  - macOS: `go test -short ./system/...` opens a real window, and does a clipboard round trip that restores the clipboard.
+  - Linux: `xvfb-run -a go test -short ./system/... ./video/...` (as on the CI), or with a real X or Wayland session. The window and clipboard tests skip without `DISPLAY` or `WAYLAND_DISPLAY`, and the clipboard test only runs with `CI` set (the X11 clipboard cannot tell whether it is safe to overwrite).
+  - Windows: `go test -short ./system/...` in a VM. Set `CORE_NO_GUI_TESTS=1` when running over ssh or in a service, which skips the window tests.
