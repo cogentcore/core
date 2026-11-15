@@ -8,7 +8,6 @@ import (
 	"log/slog"
 	"path/filepath"
 	"runtime"
-	"slices"
 	"strconv"
 	"strings"
 
@@ -112,7 +111,7 @@ func (n *NodeBase) UpdateFromMake() {
 // such as in xyz to update the node.
 func (n *NodeBase) RunUpdaters() {
 	n.Updaters.Do(func(updaters *[]func()) {
-		for i := range slices.Backward(*updaters) {
+		for i := len(*updaters) - 1; i >= 0; i-- {
 			(*updaters)[i]()
 		}
 	})

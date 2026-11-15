@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"cogentcore.org/core/base/goscript"
+
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/colors"
@@ -67,6 +69,7 @@ func TestStyleEntry(t *testing.T) {
 
 // TestStyleFiles tests the CSS of a style, and saving and opening styles.
 func TestStyleFiles(t *testing.T) {
+	goscript.Skip(t, "temporary directories")
 	st := AvailableStyle(DefaultStyle)
 	require.NotNil(t, st)
 	css := st.ToCSS()
@@ -99,6 +102,7 @@ func TestStyleFiles(t *testing.T) {
 // TestChromaMarkup tests the tags of a whole text and of a line with a
 // chroma lexer, and a highlighter that is off.
 func TestChromaMarkup(t *testing.T) {
+	goscript.Skip(t, "HTML escaping")
 	AddLexers(lexers.TOML)
 	fi, err := fileinfo.NewFileInfo("x.toml")
 	_ = err

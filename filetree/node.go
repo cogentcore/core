@@ -8,7 +8,6 @@ package filetree
 //go:generate core generate
 
 import (
-	"cogentcore.org/core/base/dirsort"
 	"fmt"
 	"io/fs"
 	"log"
@@ -19,6 +18,8 @@ import (
 	"runtime"
 	"slices"
 	"strings"
+
+	"cogentcore.org/core/base/dirsort"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
@@ -435,7 +436,8 @@ func (fn *Node) InitFileInfo() error {
 // SelectedFunc runs the given function on all selected nodes in reverse order.
 func (fn *Node) SelectedFunc(fun func(n *Node)) {
 	sels := fn.GetSelectedNodes()
-	for _, sel := range slices.Backward(sels) {
+	for ri := len(sels) - 1; ri >= 0; ri-- {
+		sel := sels[ri]
 		sn := AsNode(sel)
 		if tree.IsNil(sn) {
 			continue

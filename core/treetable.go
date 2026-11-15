@@ -745,7 +745,8 @@ func (tt *TreeTable) movedItems(items []reflect.Value) {
 	tt.updateRows()
 	tt.ResetSelectedIndexes()
 	tt.SelectedIndex = -1
-	for _, item := range slices.Backward(items) {
+	for ri := len(items) - 1; ri >= 0; ri-- {
+		item := items[ri]
 		if idx := tt.rowOf(item); idx >= 0 {
 			tt.SelectIndex(idx)
 			tt.SelectedIndex = idx
@@ -794,7 +795,8 @@ func (tt *TreeTable) OutdentSelected(idx int) {
 		tt.Outdent(idx)
 		return
 	}
-	for _, item := range slices.Backward(items) { // (the last first, for their order)
+	for ri := len(items) - 1; ri >= 0; ri-- { // (the last first, for their order)
+		item := items[ri]
 		r := tt.rowOf(item)
 		if r < 0 || !tt.rows[r].parent.IsValid() {
 			continue

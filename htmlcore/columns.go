@@ -5,7 +5,6 @@
 package htmlcore
 
 import (
-	"slices"
 	"strconv"
 	"strings"
 
@@ -101,7 +100,8 @@ func (c *Context) availableWidth(env *lengthEnv, n *html.Node) float32 {
 	for p := n; p != nil && p.Type == html.ElementNode; p = p.Parent {
 		chain = append(chain, p)
 	}
-	for _, p := range slices.Backward(chain) { // from the top down
+	for ri := len(chain) - 1; ri >= 0; ri-- { // from the top down
+		p := chain[ri]
 
 		// the spaces are outside of the width (of the content box)
 		for _, base := range []string{"padding", "margin"} {

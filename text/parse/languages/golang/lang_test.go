@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 
+	"cogentcore.org/core/base/goscript"
+
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/text/parse"
 	"cogentcore.org/core/text/parse/complete"
@@ -183,6 +185,7 @@ func TestParseFile(t *testing.T) {
 
 // TestCompleteLine tests completing names, fields, and methods.
 func TestCompleteLine(t *testing.T) {
+	goscript.Skip(t, "the sources of the Go standard library")
 	fss, _, _ := parseSync(t, importSrc())
 	inScale := textpos.Pos{Line: 32, Char: 4}   // in Scale
 	inNewRect := textpos.Pos{Line: 50, Char: 4} // in NewRect

@@ -13,7 +13,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -375,7 +374,8 @@ func TestTerminalContextMenu(t *testing.T) {
 	})
 	m := core.NewScene()
 	cms := tm.linesView.ContextMenus
-	for _, cm := range slices.Backward(cms) {
+	for ri := len(cms) - 1; ri >= 0; ri-- {
+		cm := cms[ri]
 		cm(m, image.Point{})
 	}
 	var items []string

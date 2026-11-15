@@ -6,7 +6,6 @@ package paint
 
 import (
 	"image"
-	"slices"
 
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
@@ -71,7 +70,8 @@ func (pc *Painter) StandardBox(st *styles.Style, pos math32.Vector2, size math32
 	// first do any shadow
 	if st.HasBoxShadow() {
 		// CSS effectively goes in reverse order
-		for _, shadow := range slices.Backward(st.BoxShadow) {
+		for ri := len(st.BoxShadow) - 1; ri >= 0; ri-- {
+			shadow := st.BoxShadow[ri]
 
 			pc.Stroke.Color = nil
 			// note: applying 0.5 here does a reasonable job of matching

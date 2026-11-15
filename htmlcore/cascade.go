@@ -325,7 +325,8 @@ func (c *Context) declaration(n *html.Node, prop string) string {
 // declarationIn returns the value of the given property in the given
 // declarations, as [Context.declaration].
 func declarationIn(ds []*cssDecl, prop string) string {
-	for _, d := range slices.Backward(ds) {
+	for ri := len(ds) - 1; ri >= 0; ri-- {
+		d := ds[ri]
 		if d.Property == prop {
 			if d.invalid {
 				return ""
@@ -369,7 +370,8 @@ func legacyDisplay(v string) string {
 // there is none (or it is invalid).
 func (c *Context) lastDeclaration(n *html.Node, props ...string) (prop, value string) {
 	ds := c.declarations(n)
-	for _, d := range slices.Backward(ds) {
+	for ri := len(ds) - 1; ri >= 0; ri-- {
+		d := ds[ri]
 		if slices.Contains(props, d.Property) {
 			if d.invalid {
 				return d.Property, ""
@@ -932,7 +934,8 @@ const minCustomIndex = 32
 // declarations are others (or more).
 func (c *Context) customDecl(n *html.Node, ds []*cssDecl, name string) *cssDecl {
 	if len(ds) < minCustomIndex {
-		for _, d := range slices.Backward(ds) {
+		for ri := len(ds) - 1; ri >= 0; ri-- {
+			d := ds[ri]
 			if d.Property == name {
 				return d
 			}

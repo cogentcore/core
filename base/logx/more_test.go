@@ -16,6 +16,8 @@ import (
 	"testing"
 	"time"
 
+	"cogentcore.org/core/base/goscript"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -41,6 +43,7 @@ func noColor(t *testing.T, level slog.Level) {
 }
 
 func TestPrints(t *testing.T) {
+	goscript.Skip(t, "the source locations and output of logging differ")
 	noColor(t, slog.LevelInfo)
 	out := captureStdout(t, func() {
 		PrintDebug("no ")
@@ -60,6 +63,7 @@ func TestPrints(t *testing.T) {
 }
 
 func TestHandler(t *testing.T) {
+	goscript.Skip(t, "the source locations and output of logging differ")
 	noColor(t, slog.LevelInfo)
 	var b bytes.Buffer
 	h := NewHandler(&b, nil)

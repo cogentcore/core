@@ -7,6 +7,8 @@ package htmltext
 import (
 	"testing"
 
+	"cogentcore.org/core/base/goscript"
+
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/text/rich"
 	"github.com/stretchr/testify/assert"
@@ -112,6 +114,7 @@ func TestHTMLPre(t *testing.T) {
 
 // TestRichToHTML tests converting rich text to HTML, and back.
 func TestRichToHTML(t *testing.T) {
+	goscript.Skip(t, "HTML escaping")
 	plain := rich.NewStyle()
 	bold := plain.Clone().SetWeight(rich.Bold)
 	boldIt := bold.Clone().SetSlant(rich.Italic)

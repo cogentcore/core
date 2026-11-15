@@ -12,6 +12,8 @@ import (
 	"strings"
 	"testing"
 
+	"cogentcore.org/core/base/goscript"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -27,6 +29,7 @@ func quiet() (c *Config, out, errs, echo *bytes.Buffer) {
 // TestOutputEnvDir tests running commands with output, environment
 // variables (expanded in the arguments too), and a directory.
 func TestOutputEnvDir(t *testing.T) {
+	goscript.Skip(t, "runs commands")
 	c, out, errs, echo := quiet()
 	c.SetEnv("CORE_EXEC_TEST", "value")
 	s, err := c.Output("sh", "-c", "echo $CORE_EXEC_TEST; echo err >&2")
@@ -53,6 +56,7 @@ func TestOutputEnvDir(t *testing.T) {
 
 // TestErrors tests the errors and exit codes of commands.
 func TestErrors(t *testing.T) {
+	goscript.Skip(t, "runs commands")
 	c, _, _, _ := quiet()
 	err := c.Run("sh", "-c", "exit 3")
 	require.Error(t, err)
@@ -74,6 +78,7 @@ func TestErrors(t *testing.T) {
 // TestStartAndPrintOnly tests starting commands without waiting, and
 // printing commands without running them.
 func TestStartAndPrintOnly(t *testing.T) {
+	goscript.Skip(t, "runs commands")
 	c, out, _, _ := quiet()
 	cmd, err := c.Start("sh", "-c", "echo started")
 	require.NoError(t, err)
@@ -102,6 +107,7 @@ func TestStartAndPrintOnly(t *testing.T) {
 
 // TestCmdIO tests running commands with their own standard IO state.
 func TestCmdIO(t *testing.T) {
+	goscript.Skip(t, "runs commands")
 	c, _, _, _ := quiet()
 	cio := NewCmdIO(c)
 	assert.Equal(t, "<nil>", cio.String())
@@ -125,6 +131,7 @@ func TestCmdIO(t *testing.T) {
 
 // TestConfigs tests the standard configs and setting them.
 func TestConfigs(t *testing.T) {
+	goscript.Skip(t, "runs commands")
 	for _, get := range []func() *Config{Major, Minor, Verbose, Silent} {
 		c := get()
 		assert.True(t, c.Buffer)
@@ -234,6 +241,7 @@ func TestConfigCopiesEnv(t *testing.T) {
 // TestExpandArgsCopy tests that expanding the variables of the args does
 // not change the caller's args.
 func TestExpandArgsCopy(t *testing.T) {
+	goscript.Skip(t, "runs commands")
 	c := Silent().SetEnv("CORE_EXEC_TEST_VAR", "expanded")
 	args := []string{"$CORE_EXEC_TEST_VAR"}
 	out, err := c.Output("echo", args...)

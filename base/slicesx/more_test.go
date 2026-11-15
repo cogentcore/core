@@ -7,6 +7,8 @@ package slicesx
 import (
 	"testing"
 
+	"cogentcore.org/core/base/goscript"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -73,6 +75,7 @@ func TestSearch(t *testing.T) {
 }
 
 func TestToBytes(t *testing.T) {
+	goscript.Skip(t, "unsafe.Sizeof")
 	assert.Nil(t, ToBytes([]uint32{}))
 	b := ToBytes([]uint16{0x0102, 0x0304})
 	assert.Len(t, b, 4)

@@ -9,6 +9,8 @@ import (
 	"testing"
 	"unsafe"
 
+	"cogentcore.org/core/base/goscript"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -253,6 +255,7 @@ func fieldValue(obj any, fld reflect.StructField) reflect.Value {
 
 // test ability to create an addressable pointer value to fields of a struct
 func TestNewAt(t *testing.T) {
+	goscript.Skip(t, "pointer arithmetic with unsafe.Add")
 	InitPointerTest()
 	typ := reflect.TypeOf(pt)
 	fld, _ := typ.FieldByName("Mbr2")

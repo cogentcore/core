@@ -12,6 +12,8 @@ import (
 	"testing/fstest"
 	"time"
 
+	"cogentcore.org/core/base/goscript"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -121,6 +123,7 @@ func TestFS(t *testing.T) {
 
 // TestPaths tests the path helper functions.
 func TestPaths(t *testing.T) {
+	goscript.Skip(t, "uses the files of the operating system")
 	assert.Equal(t, filepath.Join("b", "c.go"), DirAndFile(filepath.Join("a", "b", "c.go")))
 	assert.Equal(t, filepath.Join("b", "c.go"), RelativeFilePath(filepath.Join("/x", "a", "b", "c.go"), filepath.Join("/x", "a")))
 	assert.Equal(t, filepath.Join("b", "c.go"), RelativeFilePath(filepath.Join("/x", "a", "b", "c.go"), filepath.Join("/y")), "outside the root")

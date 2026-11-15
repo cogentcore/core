@@ -7,6 +7,8 @@ package ppath
 import (
 	"testing"
 
+	"cogentcore.org/core/base/goscript"
+
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/sides"
 	"github.com/stretchr/testify/assert"
@@ -107,6 +109,7 @@ func TestFastBoundsCube(t *testing.T) {
 
 // TestPathAccessors tests the basic queries and copies of paths.
 func TestPathAccessors(t *testing.T) {
+	goscript.Skip(t, "the identity of the memory of slices")
 	defer withArcs()()
 	p := MustParseSVGPath("M0 0Q1 2 2 0C3 -1 4 1 5 0A1 1 0 0 1 7 0L7 3z")
 	assert.Equal(t, 6, p.Len())

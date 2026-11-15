@@ -257,7 +257,8 @@ func (w *pdfWriter) writeVal(i any) {
 		if filter, ok := v.dict["Filter"].(pdfFilter); ok {
 			filters = append(filters, filter)
 		} else if filterArray, ok := v.dict["Filter"].(pdfArray); ok {
-			for _, f := range slices.Backward(filterArray) {
+			for ri := len(filterArray) - 1; ri >= 0; ri-- {
+				f := filterArray[ri]
 				if filter, ok := f.(pdfFilter); ok {
 					filters = append(filters, filter)
 				}

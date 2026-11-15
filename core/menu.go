@@ -6,7 +6,6 @@ package core
 
 import (
 	"image"
-	"slices"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
@@ -141,7 +140,8 @@ func (wb *WidgetBase) AddContextMenu(menu func(m *Scene, pos image.Point)) {
 // context menu function.
 func (wb *WidgetBase) applyContextMenus(m *Scene, pos image.Point) {
 	do := func(cms []func(m *Scene, pos image.Point)) {
-		for _, cm := range slices.Backward(cms) {
+		for ri := len(cms) - 1; ri >= 0; ri-- {
+			cm := cms[ri]
 			if m.NumChildren() > 0 {
 				NewSeparator(m)
 			}

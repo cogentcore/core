@@ -216,7 +216,8 @@ func SeedPath(text string) string {
 func SeedAfter(text string, f func(r rune) bool) string {
 	seedStart := 0
 	runes := []rune(text)
-	for i, r := range slices.Backward(runes) {
+	for i := len(runes) - 1; i >= 0; i-- {
+		r := runes[i]
 
 		if f(r) {
 			seedStart = i + 1

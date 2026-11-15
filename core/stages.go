@@ -59,7 +59,9 @@ func (sm *stages) list() []*Stage {
 	defer sm.Unlock()
 
 	sts := make([]*Stage, 0, sm.stack.Len())
-	sts = append(sts, sm.stack.Values...)
+	for _, st := range sm.stack.Values { // (not append(sts, Values...), which goscript mistypes)
+		sts = append(sts, st)
+	}
 	return sts
 }
 

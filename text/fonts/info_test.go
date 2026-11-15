@@ -10,6 +10,8 @@ import (
 	"testing"
 	"testing/fstest"
 
+	"cogentcore.org/core/base/goscript"
+
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
 	"github.com/cogentcore/typesetting/fontscan"
@@ -53,6 +55,7 @@ func TestDataStyle(t *testing.T) {
 
 // TestUseInMap tests adding the fonts of file systems to a font map.
 func TestUseInMap(t *testing.T) {
+	goscript.Skip(t, "the file system of fonts")
 	b, err := os.ReadFile("noto/NotoSans-Regular.ttf")
 	require.NoError(t, err)
 	fm := fontscan.NewFontMap(nil)

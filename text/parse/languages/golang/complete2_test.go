@@ -7,6 +7,8 @@ package golang
 import (
 	"testing"
 
+	"cogentcore.org/core/base/goscript"
+
 	"cogentcore.org/core/text/parse/complete"
 	"cogentcore.org/core/text/textpos"
 	"github.com/stretchr/testify/assert"
@@ -45,6 +47,7 @@ func TestCompleteTypeNames(t *testing.T) {
 // TestLookupMore tests looking up qualified names, methods through types,
 // and type names after * and [], and that other strings do not panic.
 func TestLookupMore(t *testing.T) {
+	goscript.Skip(t, "the sources of the Go standard library")
 	fss, _, _ := parseSync(t, importSrc())
 	pos := textpos.Pos{Line: 50, Char: 4}
 	tests := []struct {

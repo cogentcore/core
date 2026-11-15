@@ -4,8 +4,6 @@
 
 package tree
 
-import "slices"
-
 // walkStack holds the current child index of each node on the path of a
 // depth-first walk, in place of a map from node to index: the path has few
 // nodes, and the node looked up is nearly always the deepest one, so it is
@@ -21,7 +19,8 @@ type walkEntry struct {
 
 // get returns the child index of n, or 0 if n is not in the stack.
 func (ws walkStack) get(n Node) int {
-	for _, w := range slices.Backward(ws) {
+	for ri := len(ws) - 1; ri >= 0; ri-- {
+		w := ws[ri]
 		if w.node == n {
 			return w.child
 		}
@@ -51,7 +50,8 @@ func (ws *walkStack) push(n Node, child int) {
 // delete removes n from the stack, if it is in it.
 func (ws *walkStack) delete(n Node) {
 	s := *ws
-	for i, v := range slices.Backward(s) {
+	for i := len(s) - 1; i >= 0; i-- {
+		v := s[i]
 		if v.node == n {
 			*ws = append(s[:i], s[i+1:]...)
 			return

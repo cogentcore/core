@@ -12,6 +12,8 @@ import (
 	"strings"
 	"testing"
 
+	"cogentcore.org/core/base/goscript"
+
 	"cogentcore.org/core/base/tolassert"
 	"cogentcore.org/core/math32"
 	"github.com/stretchr/testify/assert"
@@ -411,6 +413,7 @@ func TestPathToSVG(t *testing.T) {
 }
 
 func TestPathToPS(t *testing.T) {
+	goscript.Skip(t, "float32 rounding differs in JavaScript")
 	defer withArcs()() // (as canvas, which keeps arcs)
 	var tts = []struct {
 		p  string

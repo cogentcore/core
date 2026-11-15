@@ -13,7 +13,6 @@ These are largely copied from the strings or bytes packages.
 package runes
 
 import (
-	"slices"
 	"unicode"
 	"unicode/utf8"
 
@@ -568,7 +567,8 @@ func indexFunc(s []rune, f func(r rune) bool, truth bool) int {
 // truth==false, the sense of the predicate function is
 // inverted.
 func lastIndexFunc(s []rune, f func(r rune) bool, truth bool) int {
-	for i, v := range slices.Backward(s) {
+	for i := len(s) - 1; i >= 0; i-- {
+		v := s[i]
 		if f(v) == truth {
 			return i
 		}

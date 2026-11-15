@@ -11,6 +11,8 @@ import (
 	"strings"
 	"testing"
 
+	"cogentcore.org/core/base/goscript"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -88,6 +90,7 @@ func TestPopToStartCloses(t *testing.T) {
 // TestPushOutPipe checks that what is written to the Out of PushOutPipe is
 // read from its PipeIn, until the Out is closed by PopToStart.
 func TestPushOutPipe(t *testing.T) {
+	goscript.Skip(t, "runs commands")
 	var ss StdIOState
 	ss.SetFromOS()
 	ss.StackStart()

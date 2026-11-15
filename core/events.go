@@ -706,7 +706,8 @@ func (em *Events) updateSpriteHovers(hov, prev []*Sprite, e events.Event, enter,
 // topLongHover returns the top-most LongHoverable widget among the Hovers
 func (em *Events) topLongHover() Widget {
 	var deep Widget
-	for _, h := range slices.Backward(em.hovers) {
+	for ri := len(em.hovers) - 1; ri >= 0; ri-- {
+		h := em.hovers[ri]
 
 		if h.AsWidget().AbilityIs(abilities.LongHoverable) {
 			deep = h

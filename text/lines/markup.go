@@ -479,7 +479,8 @@ func (ls *Lines) prevLink(pos textpos.Pos) (*rich.Hyperlink, int) {
 	}
 	// the last link ending at or before pos on its line
 	ll := ls.links[pos.Line]
-	for _, l := range slices.Backward(ll) {
+	for ri := len(ll) - 1; ri >= 0; ri-- {
+		l := ll[ri]
 		if l.Range.End <= pos.Char {
 			return &l, pos.Line
 		}

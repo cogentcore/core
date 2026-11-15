@@ -16,7 +16,6 @@ import (
 	"log/slog"
 	"maps"
 	"os"
-	"slices"
 	"strings"
 
 	"cogentcore.org/core/base/fsx"
@@ -274,11 +273,11 @@ func (se StyleEntry) Sub(e StyleEntry) StyleEntry {
 // Ancestors should be provided from oldest, furthest away to newest, closest.
 func (se StyleEntry) Inherit(ancestors ...StyleEntry) StyleEntry {
 	out := se
-	for _, ancestor := range slices.Backward(ancestors) {
+	for ri := len(ancestors) - 1; ri >= 0; ri-- {
+		ancestor := ancestors[ri]
 		if out.NoInherit {
 			return out
 		}
-		ancestor := ancestor
 		if colors.IsNil(out.themeColor) {
 			out.Color = ancestor.Color
 			out.themeColor = ancestor.themeColor

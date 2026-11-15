@@ -10,6 +10,8 @@ import (
 	"testing"
 	"time"
 
+	"cogentcore.org/core/base/goscript"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,6 +19,7 @@ import (
 // is done, and that one that ignores the interrupt is killed after
 // [InterruptWait].
 func TestRunIOContext(t *testing.T) {
+	goscript.Skip(t, "runs commands")
 	if runtime.GOOS == "windows" {
 		t.Skip("uses sh")
 	}
