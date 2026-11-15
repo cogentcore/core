@@ -5,51 +5,57 @@
 package htmltext
 
 import (
+	"html"
+	"slices"
 	"strings"
 
 	"cogentcore.org/core/text/rich"
 )
 
-// RichToHTML returns an HTML encoded representation of the rich.Text.
+// RichToHTML returns an HTML encoded representation of the rich.Text,
+// with <b>, <i>, and <u> tags for bold, italic, and underlined text,
+// <a> tags for links, and the text escaped.
 func RichToHTML(tx rich.Text) string {
 	var b strings.Builder
-	ns := tx.NumSpans()
-	lsty := rich.NewStyle()
-	for si := range ns {
+	var open []string        // the tags that are open, innermost last
+	closeTo := func(n int) { // closes the tags after the first n
+		for len(open) > n {
+			b.WriteString("</" + open[len(open)-1] + ">")
+			open = open[:len(open)-1]
+		}
+	}
+	for si := range tx.NumSpans() {
 		sty, rs := tx.Span(si)
-		var stags, etags string
 		if sty.Special == rich.Link {
-			b.WriteString(`<a href="` + sty.URL + `">` + string(rs) + `</a>`)
+			closeTo(0)
+			b.WriteString(`<a href="` + html.EscapeString(sty.URL) + `">` + html.EscapeString(string(rs)) + `</a>`)
 			continue
 		}
-		if sty.Weight != rich.Normal && lsty.Weight != sty.Weight {
-			stags += "<" + sty.Weight.HTMLTag() + ">"
-		} else if sty.Weight == rich.Normal && lsty.Weight != sty.Weight {
-			etags += "</" + lsty.Weight.HTMLTag() + ">"
+		var want []string // the tags of this span, in the order they are opened
+		if tag := sty.Weight.HTMLTag(); tag != "" {
+			want = append(want, tag)
 		}
-		if sty.Slant != rich.SlantNormal && lsty.Slant != sty.Slant {
-			stags += "<i>"
-		} else if sty.Slant == rich.SlantNormal && lsty.Slant != sty.Slant {
-			etags += "</i>"
+		if sty.Slant != rich.SlantNormal {
+			want = append(want, "i")
 		}
-		if sty.Decoration.HasFlag(rich.Underline) && !lsty.Decoration.HasFlag(rich.Underline) {
-			stags += "<u>"
-		} else if !sty.Decoration.HasFlag(rich.Underline) && lsty.Decoration.HasFlag(rich.Underline) {
-			etags += "</u>"
+		if sty.Decoration.HasFlag(rich.Underline) {
+			want = append(want, "u")
 		}
-		b.WriteString(etags)
-		b.WriteString(stags)
-		b.WriteString(string(rs))
-		lsty = sty
+		// the open tags that are wanted stay open, up to the first one that
+		// is not, which is closed with the ones in it
+		keep := 0
+		for keep < len(open) && slices.Contains(want, open[keep]) {
+			keep++
+		}
+		closeTo(keep)
+		for _, tag := range want {
+			if !slices.Contains(open, tag) {
+				b.WriteString("<" + tag + ">")
+				open = append(open, tag)
+			}
+		}
+		b.WriteString(html.EscapeString(string(rs)))
 	}
-	if lsty.Slant == rich.Italic {
-		b.WriteString("</i>")
-	}
-	if lsty.Weight != rich.Normal {
-		b.WriteString("</" + lsty.Weight.HTMLTag() + ">")
-	}
-	if lsty.Decoration.HasFlag(rich.Underline) {
-		b.WriteString("</u>")
-	}
+	closeTo(0)
 	return b.String()
 }

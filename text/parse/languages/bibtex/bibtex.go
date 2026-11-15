@@ -71,8 +71,8 @@ func NewBibComposite(s BibString) *BibComposite {
 
 // Append adds a BibString to the composite
 func (c *BibComposite) Append(s BibString) *BibComposite {
-	comp := append(*c, s)
-	return &comp
+	*c = append(*c, s) // the composite itself, as the grammar uses it
+	return c
 }
 
 func (c *BibComposite) String() string {
@@ -90,14 +90,7 @@ func (c *BibComposite) RawString() string {
 		if i > 0 {
 			buf.WriteString(" # ")
 		}
-		switch comp := comp.(type) {
-		case *BibConst:
-			buf.WriteString(comp.RawString())
-		case *BibVar:
-			buf.WriteString(comp.RawString())
-		case *BibComposite:
-			buf.WriteString(comp.RawString())
-		}
+		buf.WriteString(comp.RawString())
 	}
 	return buf.String()
 }

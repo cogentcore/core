@@ -8,10 +8,16 @@ import "cogentcore.org/core/core"
 
 func main() {
 	b := core.NewBody()
+	makeBody(b)
+	b.RunMainWindow()
+}
+
+// makeBody makes the font browser in the given body, and returns it.
+func makeBody(b *core.Body) *Browser {
 	fb := NewBrowser(b)
 	fb.OpenFile("../noto/NotoSans-Regular.ttf")
 	b.AddTopBar(func(bar *core.Frame) {
 		core.NewToolbar(bar).Maker(fb.MakeToolbar)
 	})
-	b.RunMainWindow()
+	return fb
 }

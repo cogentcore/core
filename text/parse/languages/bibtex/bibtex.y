@@ -57,11 +57,11 @@ bibentry : ATSIGN BAREIDENT LBRACE BAREIDENT COMMA tags RBRACE { $$ = NewBibEntr
          ;
 
 commententry : ATSIGN COMMENT LBRACE longstring RBRACE {}
-             | ATSIGN COMMENT LPAREN longstring RBRACE {}
+             | ATSIGN COMMENT LPAREN longstring RPAREN {}
              ;
 
 stringentry : ATSIGN STRING LBRACE BAREIDENT EQUAL longstring RBRACE { $$ = &bibTag{key: $4, val: $6 } }
-            | ATSIGN STRING LPAREN BAREIDENT EQUAL longstring RBRACE { $$ = &bibTag{key: $4, val: $6 } }
+            | ATSIGN STRING LPAREN BAREIDENT EQUAL longstring RPAREN { $$ = &bibTag{key: $4, val: $6 } }
             ;
 
 preambleentry : ATSIGN PREAMBLE LBRACE longstring RBRACE { $$ = $4 }
