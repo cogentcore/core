@@ -834,11 +834,15 @@ func (tf *TextField) cursorDeleteWord(steps int) {
 		tf.deleteSelection()
 		return
 	}
-	// note: no update b/c signal from buf will drive update
-	org := tf.cursorPos
-	tf.cursorForwardWord(steps)
-	tf.editText = append(tf.editText[:tf.cursorPos], tf.editText[org:]...)
+	// the text from the cursor to the end of the word(s) is deleted,
+	// and the cursor stays where it is.
+	end, _ := textpos.ForwardWord(tf.editText, tf.cursorPos, steps)
+	if end <= tf.cursorPos {
+		return
+	}
+	tf.editText = append(tf.editText[:tf.cursorPos], tf.editText[end:]...)
 	tf.textEdited()
+	tf.NeedsRender()
 }
 
 // cursorKill deletes text from cursor to end of text
@@ -1088,9 +1092,8 @@ func (us *textFieldUndos) saveUndo(txt []rune, curpos int) {
 	now := time.Now()
 	ts := now.Sub(us.lastSave)
 	if n > 0 && ts < 250*time.Millisecond {
-		r := us.stack[n-1]
-		r.set(txt, curpos)
-		us.stack[n-1] = r
+		// a quick edit is in the group of the last record, which keeps the
+		// text from before the group, so that undo goes back to it.
 		return
 	}
 	r := textFieldUndoRecord{}
@@ -1107,7 +1110,7 @@ func (tf *TextField) saveUndo() {
 func (us *textFieldUndos) undo(txt []rune, curpos int) *textFieldUndoRecord {
 	n := len(us.stack)
 	if us.pos <= 0 || n == 0 {
-		return &textFieldUndoRecord{}
+		return nil // nothing to undo
 	}
 	if us.pos == n {
 		us.lastSave = time.Time{}

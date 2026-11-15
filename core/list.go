@@ -1239,7 +1239,9 @@ func (lb *ListBase) selectFocusedRow() {
 	}
 	for n := em.focus.AsTree(); n != nil && n.This != lb.This; n = n.Parent.AsTree() {
 		if n.Parent == lb.ListGrid.This {
-			if row, ok := n.Property(ListRowProperty).(int); ok {
+			// a focused row that is selected keeps a multiple selection,
+			// for the keys that act on it, such as copy.
+			if row, ok := n.Property(ListRowProperty).(int); ok && !lb.indexIsSelected(row+lb.StartIndex) {
 				lb.selectIndexQuiet(row + lb.StartIndex)
 			}
 			return
@@ -1378,6 +1380,9 @@ func (lb *ListBase) SelectIndexEvent(idx int, mode events.SelectModes) {
 					cidx = r
 				}
 			}
+			// the moves above change the selected index, which is where
+			// the selection is extended from next, so it goes back to idx.
+			lb.SelectedIndex = idx
 			lb.IndexGrabFocus(idx)
 			lb.Send(events.Select) //  sv.SelectedIndex)
 		}

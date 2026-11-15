@@ -517,7 +517,9 @@ func (tr *Tree) Init() {
 
 func (tr *Tree) OnAdd() {
 	tr.WidgetBase.OnAdd()
-	tr.Text = tr.Name
+	if tr.Text == "" { // a pasted, moved, or duplicated node keeps its text
+		tr.Text = tr.Name
+	}
 	if ptv := AsTree(tr.Parent); ptv != nil {
 		if ptv.Root == nil {
 			// The parent is the root of a tree that has not been added
