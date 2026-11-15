@@ -908,9 +908,8 @@ func (lb *ListBase) IsRowInBounds(row int) bool {
 // rowFirstWidget returns the first widget for given row (could be index or
 // not) -- false if out of range
 func (lb *ListBase) rowFirstWidget(row int) (*WidgetBase, bool) {
-	if !lb.ShowIndexes {
-		return nil, false
-	}
+	// (the first widget of a row is its value without indexes:
+	// see RowWidgetNs)
 	if !lb.IsRowInBounds(row) {
 		return nil, false
 	}
