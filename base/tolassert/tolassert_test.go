@@ -4,6 +4,8 @@
 
 package tolassert
 
+//core:js-test
+
 import (
 	"testing"
 

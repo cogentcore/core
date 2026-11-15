@@ -1,5 +1,7 @@
 package matcolor
 
+//core:js-test
+
 import (
 	"fmt"
 	"image/color"

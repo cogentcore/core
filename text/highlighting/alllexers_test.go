@@ -4,6 +4,8 @@
 
 package highlighting
 
+//core:js-test browser
+
 import "github.com/alecthomas/chroma/v3/lexers"
 
 func init() {

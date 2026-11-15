@@ -4,6 +4,8 @@
 
 package key
 
+//core:js-test
+
 import (
 	"testing"
 

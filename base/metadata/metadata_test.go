@@ -4,6 +4,8 @@
 
 package metadata
 
+//core:js-test
+
 import (
 	"os"
 	"testing"

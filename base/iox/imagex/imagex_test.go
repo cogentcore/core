@@ -4,6 +4,13 @@
 
 package imagex
 
+// The tests are run compiled to JavaScript by core test js in bun, and
+// the tests of decoding, cropping and resizing images with the browser
+// (crop_js_test.go) in Chrome, which has createImageBitmap.
+//
+//core:js-test
+//core:js-test browser run=^(TestDecodeBrowser|TestCropResizeBrowser)$
+
 import (
 	"encoding/json"
 	"image"

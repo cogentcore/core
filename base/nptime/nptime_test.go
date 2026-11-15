@@ -4,6 +4,8 @@
 
 package nptime
 
+//core:js-test
+
 import (
 	"testing"
 	"time"

@@ -4,6 +4,8 @@
 
 package math32
 
+//core:js-test
+
 import (
 	"testing"
 

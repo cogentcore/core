@@ -4,6 +4,8 @@
 
 package drawmatrix
 
+//core:js-test
+
 import (
 	"image"
 	"testing"

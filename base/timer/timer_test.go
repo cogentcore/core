@@ -1,5 +1,7 @@
 package timer
 
+//core:js-test
+
 import (
 	"testing"
 	"time"

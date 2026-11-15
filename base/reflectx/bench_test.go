@@ -4,6 +4,8 @@
 
 package reflectx
 
+//core:js-test
+
 import (
 	"reflect"
 	"testing"

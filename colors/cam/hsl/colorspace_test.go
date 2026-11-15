@@ -4,6 +4,8 @@
 
 package hsl
 
+//core:js-test
+
 import (
 	"image"
 	"image/color"

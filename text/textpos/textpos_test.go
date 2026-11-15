@@ -4,6 +4,8 @@
 
 package textpos
 
+//core:js-test
+
 import (
 	"testing"
 	"time"

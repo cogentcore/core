@@ -8,6 +8,8 @@
 
 package rasterx
 
+//core:js-test
+
 import (
 	"math/rand"
 	"testing"

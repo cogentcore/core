@@ -4,6 +4,8 @@
 
 package plan
 
+//core:js-test
+
 import (
 	"math/rand"
 	"strconv"

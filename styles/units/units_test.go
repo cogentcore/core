@@ -4,6 +4,8 @@
 
 package units
 
+//core:js-test
+
 import (
 	"fmt"
 	"testing"

@@ -4,6 +4,8 @@
 
 package gpu
 
+//core:js-test browser browser-arg=--enable-unsafe-webgpu
+
 import (
 	"image"
 	"image/color"

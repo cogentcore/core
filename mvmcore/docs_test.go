@@ -4,6 +4,8 @@
 
 package mvmcore
 
+//core:js-test browser timeout=20m skip-typecheck
+
 import (
 	"bytes"
 	"fmt"

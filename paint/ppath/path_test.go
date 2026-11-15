@@ -7,6 +7,8 @@
 
 package ppath
 
+//core:js-test
+
 import (
 	"fmt"
 	"strings"

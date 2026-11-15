@@ -4,6 +4,8 @@
 
 package fsx
 
+//core:js-test
+
 import (
 	"io/fs"
 	"os"

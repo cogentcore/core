@@ -6,6 +6,8 @@
 
 package jsfs
 
+//core:js-test browser
+
 import (
 	"io"
 	"os"

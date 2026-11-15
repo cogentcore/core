@@ -4,6 +4,8 @@
 
 package option
 
+//core:js-test
+
 import (
 	"testing"
 

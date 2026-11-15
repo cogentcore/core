@@ -4,6 +4,8 @@
 
 package keylist
 
+//core:js-test
+
 import (
 	"testing"
 

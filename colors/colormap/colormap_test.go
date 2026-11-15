@@ -4,6 +4,8 @@
 
 package colormap
 
+//core:js-test
+
 import (
 	"image"
 	"image/color"

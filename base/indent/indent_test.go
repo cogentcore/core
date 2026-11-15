@@ -4,6 +4,8 @@
 
 package indent
 
+//core:js-test
+
 import (
 	"testing"
 

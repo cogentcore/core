@@ -4,6 +4,8 @@
 
 package elide
 
+//core:js-test
+
 import (
 	"testing"
 	"unicode/utf8"

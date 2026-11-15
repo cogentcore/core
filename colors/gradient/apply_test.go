@@ -4,6 +4,8 @@
 
 package gradient
 
+//core:js-test
+
 import (
 	"image"
 	"image/color"

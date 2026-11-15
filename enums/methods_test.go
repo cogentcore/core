@@ -4,6 +4,8 @@
 
 package enums
 
+//core:js-test
+
 import (
 	"errors"
 	"testing"

@@ -4,6 +4,8 @@
 
 package shape
 
+//core:js-test
+
 import (
 	"testing"
 

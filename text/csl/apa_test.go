@@ -4,6 +4,8 @@
 
 package csl
 
+//core:js-test
+
 import (
 	"bytes"
 	"os"

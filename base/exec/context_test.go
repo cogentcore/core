@@ -4,6 +4,8 @@
 
 package exec
 
+//core:js-test
+
 import (
 	"context"
 	"runtime"

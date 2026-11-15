@@ -1,5 +1,7 @@
 package difflib
 
+//core:js-test
+
 import (
 	"bytes"
 	"fmt"

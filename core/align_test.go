@@ -4,6 +4,13 @@
 
 package core
 
+// The tests are run compiled to JavaScript by core test js, in a browser:
+// on the web, which has one window, the size of a desktop window (see
+// viewport_js_test.go), with its own test images in testdata/js, and the
+// tests that do not apply there skipped (see skipOnWeb).
+//
+//core:js-test browser timeout=20m
+
 import (
 	"testing"
 
@@ -28,10 +35,10 @@ func TestAlignItemsWithGrowingSibling(t *testing.T) {
 	wide.Styler(func(s *styles.Style) { s.Grow.Set(1, 0); s.Min.Y.Dp(10) })
 	small := NewFrame(fr)
 	small.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(100), units.Dp(10)) })
-	RenderImage(b, func() {
+	RenderImage(b, Locked(b, func() {
 		wpos, wsz := wide.Geom.Pos.Total.X, wide.Geom.Size.Actual.Total.X
 		spos, ssz := small.Geom.Pos.Total.X, small.Geom.Size.Actual.Total.X
 		assert.Greater(t, wsz, 2*ssz)
 		assert.InDelta(t, wpos+wsz/2, spos+ssz/2, 1, "centered within the width of the line")
-	})
+	}))
 }

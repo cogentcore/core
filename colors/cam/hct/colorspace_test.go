@@ -4,6 +4,8 @@
 
 package hct
 
+//core:js-test
+
 import (
 	"image"
 	"image/color"

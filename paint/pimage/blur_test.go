@@ -4,6 +4,8 @@
 
 package pimage
 
+//core:js-test
+
 import (
 	"fmt"
 	"image"

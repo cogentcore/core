@@ -6,6 +6,12 @@
 
 package video
 
+// The tests are run compiled to JavaScript by core test js in Chrome
+// (as those of video_js_test.go), which plays the H.264 and AAC of the
+// test video (Chromium does not).
+//
+//core:js-test browser
+
 import (
 	"image"
 	"testing"

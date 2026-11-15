@@ -4,6 +4,8 @@
 
 package xmlx
 
+//core:js-test
+
 import (
 	"encoding/xml"
 	"strings"

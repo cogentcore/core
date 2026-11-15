@@ -4,6 +4,8 @@
 
 package runes
 
+//core:js-test
+
 import (
 	"fmt"
 	"math"

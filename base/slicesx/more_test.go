@@ -4,6 +4,8 @@
 
 package slicesx
 
+//core:js-test
+
 import (
 	"testing"
 

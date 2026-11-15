@@ -4,6 +4,8 @@
 
 package yamlx
 
+//core:js-test
+
 import (
 	"bytes"
 	"os"

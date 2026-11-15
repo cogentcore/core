@@ -4,6 +4,8 @@
 
 package tree
 
+//core:js-test
+
 import (
 	"testing"
 

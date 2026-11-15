@@ -4,6 +4,8 @@
 
 package colors
 
+//core:js-test
+
 import (
 	"image/color"
 	"testing"

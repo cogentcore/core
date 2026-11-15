@@ -4,6 +4,8 @@
 
 package fonts
 
+//core:js-test
+
 import (
 	"bytes"
 	"fmt"

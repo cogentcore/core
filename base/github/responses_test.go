@@ -34,7 +34,8 @@ func (fakeTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 }
 
 // TestResponses tests decoding the responses of the API, which have
-// lowercase names, also in JavaScript (see TestGoScript).
+// lowercase names, also in JavaScript (see the core:js-test directive in
+// github_test.go).
 func TestResponses(t *testing.T) {
 	c := &Client{API: "https://api.example.com", HTTP: &http.Client{Transport: fakeTransport{}}}
 	head, err := c.Head("me/lists", "main")

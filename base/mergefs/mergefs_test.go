@@ -7,6 +7,8 @@
 
 package mergefs
 
+//core:js-test
+
 import (
 	"io/fs"
 	"os"

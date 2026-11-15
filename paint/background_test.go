@@ -4,6 +4,8 @@
 
 package paint_test
 
+//core:js-test browser
+
 import (
 	"testing"
 

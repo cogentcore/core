@@ -4,6 +4,8 @@
 
 package gsbench
 
+//core:js-test
+
 import "testing"
 
 // The Baseline benchmarks use only basic types, operators and control flow,

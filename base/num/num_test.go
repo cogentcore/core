@@ -4,6 +4,8 @@
 
 package num
 
+//core:js-test
+
 import (
 	"testing"
 
