@@ -95,7 +95,7 @@ jobs:
     - name: Test
       env:
         CORE_REQUIRE_GPU: "true"
-      run: xvfb-run -a go test -short -v ./... -coverprofile cover.out -timeout 2m
+      run: xvfb-run -a -s "-screen 0 1280x1024x24" go test -short -v ./... -coverprofile cover.out -timeout 2m
 
     # the images of the snapshots of htmlcore are files of the pages, in the repository
     - name: Upload testdata

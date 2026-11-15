@@ -47,12 +47,30 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-// requireGUI skips the test if the windowing system is not running.
+// requireGUI skips the test if the windowing system is not running,
+// or it has no screens (monitors), as with an X display without RandR
+// outputs.
 func requireGUI(t *testing.T) {
 	t.Helper()
 	if !guiRunning {
 		t.Skip("no display for the windowing system (or CORE_NO_GUI_TESTS is set)")
 	}
+	if TheApp.NScreens() == 0 {
+		t.Skip("the windowing system has no screens")
+	}
+}
+
+// TestNewWindowNoScreens tests that opening a window without screens is
+// an error, not a panic.
+func TestNewWindowNoScreens(t *testing.T) {
+	if !guiRunning {
+		t.Skip("no display for the windowing system")
+	}
+	a := &App{}
+	a.Screens = nil
+	a.guiDone.Store(true) // the GUI is initialized (by TheApp)
+	_, err := a.NewWindow(nil)
+	assert.Error(t, err)
 }
 
 func TestGlfwMods(t *testing.T) {

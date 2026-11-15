@@ -10,6 +10,7 @@
 package desktop
 
 import (
+	"errors"
 	"image"
 	"log"
 	"runtime"
@@ -162,6 +163,10 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 		system.UpdateLogicalDPIScaleFunc()
 	}
 
+	// glfw can find no monitors, as with an X display without RandR outputs
+	if len(a.Screens) == 0 {
+		return nil, errors.New("system/driver/desktop: no screens to open a window on")
+	}
 	sc := a.Screens[0]
 
 	if opts == nil {
