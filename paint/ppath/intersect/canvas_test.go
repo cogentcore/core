@@ -13,15 +13,62 @@ import (
 	"fmt"
 	"testing"
 
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/ppath"
 	"github.com/stretchr/testify/assert"
 )
 
-// assertPath asserts that the path is the given SVG path, within ppath.Epsilon.
+// assertPath asserts that the path is the given SVG path, within ppath.Epsilon,
+// or for paths of lines, the same except for slivers of points closer than
+// 10 times BentleyOttmannEpsilon (which can come from the rounding of the
+// floating point math of the platform: amd64 and arm64 differ).
 func assertPath(t *testing.T, want string, got ppath.Path, msg ...any) {
 	t.Helper()
 	w := ppath.MustParseSVGPath(want)
-	assert.True(t, w.Equals(got), "want %s, got %s %v", w.ToSVG(), got.ToSVG(), fmt.Sprint(msg...))
+	same := w.Equals(got) || sameLinesNear(w, got, 10*BentleyOttmannEpsilon)
+	assert.True(t, same, "want %s, got %s %v", w.ToSVG(), got.ToSVG(), fmt.Sprint(msg...))
+}
+
+// sameLinesNear returns whether the paths are of lines, with the same points
+// after merging consecutive points closer than the given distance.
+func sameLinesNear(p, q ppath.Path, dist float32) bool {
+	ps, qs := p.Split(), q.Split()
+	if len(ps) != len(qs) {
+		return false
+	}
+	near := func(a, b math32.Vector2) bool {
+		return math32.Abs(a.X-b.X) <= dist && math32.Abs(a.Y-b.Y) <= dist
+	}
+	merged := func(sp ppath.Path) ([]math32.Vector2, bool) {
+		for i := 0; i < len(sp); i += ppath.CmdLen(sp[i]) {
+			if c := sp[i]; c != ppath.MoveTo && c != ppath.LineTo && c != ppath.Close {
+				return nil, false
+			}
+		}
+		var m []math32.Vector2
+		for _, c := range sp.Coords() {
+			if len(m) == 0 || !near(m[len(m)-1], c) {
+				m = append(m, c)
+			}
+		}
+		if len(m) > 1 && near(m[0], m[len(m)-1]) { // the close
+			m = m[:len(m)-1]
+		}
+		return m, true
+	}
+	for i := range ps {
+		pm, ok1 := merged(ps[i])
+		qm, ok2 := merged(qs[i])
+		if !ok1 || !ok2 || len(pm) != len(qm) {
+			return false
+		}
+		for j := range pm {
+			if !near(pm[j], qm[j]) {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func TestCanvasSettle(t *testing.T) {

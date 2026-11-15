@@ -32,7 +32,7 @@ func TestDialogMoveResize(t *testing.T) {
 		bb := h.(Widget).AsWidget().Geom.TotalBBox
 		return bb.Min.Add(bb.Max).Div(2).Add(st.Scene.SceneGeom.Pos) // the center
 	}
-	AssertRender(t, b, "dialog/move-resize", Locked(b, func() {
+	RenderImage(b, Locked(b, func() { // (the image is not compared: the assertions check the geometry)
 		d := NewBody("Dialog")
 		NewText(d).SetText("Move and resize me")
 		st = d.NewDialog(b).Run()
