@@ -19,7 +19,6 @@ import (
 	"cogentcore.org/core/htmlcore/tohtml"
 	"cogentcore.org/core/text/highlighting"
 	"cogentcore.org/core/text/token"
-	"cogentcore.org/core/tree"
 )
 
 // generateSite generates the JSON [bcontent.Site] data for the website
@@ -67,18 +66,14 @@ func generateSite(ct *Content) string {
 // not an introduction).
 func pageDescription(ct *Content) string {
 	desc := ""
-	ct.WalkDown(func(n tree.Node) bool {
-		if desc != "" {
-			return tree.Break
-		}
+	for n := range ct.All() {
 		if w, ok := n.(core.Widget); ok {
 			if text, ok := paragraphText(w); ok && !strings.HasPrefix(text, "<em>") {
 				desc = text
-				return tree.Break
+				break
 			}
 		}
-		return tree.Continue
-	})
+	}
 	return desc
 }
 
@@ -86,18 +81,17 @@ func pageDescription(ct *Content) string {
 // consistent with [Content.makeTableOfContents].
 func pageTOC(w *core.Frame) []*bcontent.TOCHeading {
 	var toc []*bcontent.TOCHeading
-	w.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+	for cw, cwb := range w.AllWidgets() {
 		level, text, ok := headingOf(cw)
 		if !ok || cwb.Property("page-title") != nil {
-			return tree.Continue
+			continue
 		}
 		id, ok := cwb.Property("id").(string)
 		if !ok {
 			id = cwb.Name // consistent with [tohtml.Widget]
 		}
 		toc = append(toc, &bcontent.TOCHeading{Level: level, Text: text, ID: id})
-		return tree.Continue
-	})
+	}
 	return toc
 }
 

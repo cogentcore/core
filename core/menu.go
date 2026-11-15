@@ -75,9 +75,9 @@ func newMenuScene(menu func(m *Scene, pos image.Point), pos image.Point, name ..
 	}
 
 	hasSelected := false
-	msc.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+	for cw, cwb := range msc.AllWidgets() {
 		if cw == msc {
-			return tree.Continue
+			continue
 		}
 		if bt := AsButton(cw); bt != nil {
 			if bt.Menu == nil {
@@ -89,8 +89,7 @@ func newMenuScene(menu func(m *Scene, pos image.Point), pos image.Point, name ..
 			msc.Events.SetStartFocus(cwb)
 			hasSelected = true
 		}
-		return tree.Continue
-	})
+	}
 	if !hasSelected && msc.HasChildren() {
 		// fmt.Println("start focus first:", msc.Child(0).(Widget))
 		msc.Events.SetStartFocus(msc.Child(0).(Widget))
@@ -410,21 +409,21 @@ func menuSearchScene(sc *Scene) *Scene {
 // that updates path with context about the original button menu.
 // Consumers of this function should typically set path to "".
 func addButtonItems(items *[]ChooserItem, sc *Scene, parent tree.Node, path string) {
-	parent.AsTree().WalkDown(func(n tree.Node) bool {
+	for n := range parent.AsTree().All() {
 		if ms, ok := n.(MenuSearcher); ok {
 			ms.MenuSearch(items)
 		}
 		bt := AsButton(n)
 		if bt == nil || bt.IsDisabled() {
-			return tree.Continue
+			continue
 		}
 		_, isTb := bt.Parent.(*Toolbar)
 		_, isSc := bt.Parent.(*Scene)
 		if !isTb && !isSc {
-			return tree.Continue
+			continue
 		}
 		if bt.Text == "Menu search" {
-			return tree.Continue
+			continue
 		}
 		label := bt.Text
 		if label == "" {
@@ -441,7 +440,7 @@ func addButtonItems(items *[]ChooserItem, sc *Scene, parent tree.Node, path stri
 				npath += label
 			}
 			addButtonItems(items, sc, tmps, npath)
-			return tree.Continue
+			continue
 		}
 		if path != "" {
 			label = path + " > " + label
@@ -454,6 +453,5 @@ func addButtonItems(items *[]ChooserItem, sc *Scene, parent tree.Node, path stri
 				bt.Send(events.Click)
 			},
 		})
-		return tree.Continue
-	})
+	}
 }

@@ -40,13 +40,12 @@ func (gp *Group) Defaults() {
 
 func (gp *Group) Update() {
 	gp.RunUpdaters()
-	gp.WalkDown(func(n tree.Node) bool {
+	for n := range gp.All() {
 		if n.AsTree().This == gp.This {
-			return tree.Continue
+			continue
 		}
 		n.(Node).Update()
-		return tree.Continue
-	})
+	}
 }
 
 func (gp *Group) RenderClass() RenderClasses {

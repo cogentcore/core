@@ -74,12 +74,11 @@ func (sv *SVG) resolveUses(uses []pendingUse) {
 		} else {
 			pu.group.AddChild(cln)
 		}
-		cln.AsTree().WalkDown(func(n tree.Node) bool {
+		for n := range cln.AsTree().All() {
 			if p, ok := n.(*Path); ok {
 				p.SetData(p.DataStr) // defs don't apply paths
 			}
-			return tree.Continue
-		})
+		}
 	}
 }
 

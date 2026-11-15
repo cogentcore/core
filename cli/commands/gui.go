@@ -893,17 +893,15 @@ func styleFormFields(fm *core.Form, textField func(tf *core.TextField)) {
 func focusForm(d *core.Body, fm *core.Form) {
 	fm.Update() // (makes the fields)
 	var first core.Widget
-	fm.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
-		if first != nil { // (Break only skips the children of a widget)
-			return tree.Break
-		}
+	for cw := range fm.AllWidgets() {
 		switch cw.(type) {
 		case *core.TextField, *core.Switch, *core.Spinner, *core.Chooser:
 			first = cw
-			return tree.Break
 		}
-		return tree.Continue
-	})
+		if first != nil {
+			break
+		}
+	}
 	if first != nil {
 		d.Scene.Events.SetStartFocus(first)
 	}

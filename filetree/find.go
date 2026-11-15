@@ -11,8 +11,6 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/fileinfo"
-	"cogentcore.org/core/core"
-	"cogentcore.org/core/tree"
 )
 
 // FindFile finds first node representing given file (false if not found) --
@@ -49,18 +47,17 @@ func (fn *Node) FindFile(fnm string) (*Node, bool) {
 
 	var ffn *Node
 	found := false
-	fn.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+	for cw := range fn.AllWidgets() {
 		sfn := AsNode(cw)
 		if sfn == nil {
-			return tree.Continue
+			continue
 		}
 		if strings.HasSuffix(string(sfn.Filepath), fneff) {
 			ffn = sfn
 			found = true
-			return tree.Break
+			break
 		}
-		return tree.Continue
-	})
+	}
 	return ffn, found
 }
 
@@ -83,14 +80,14 @@ func NodeNameCountSort(ecs []NodeNameCount) {
 // (e.g., fileinfo.Code to find any code files)
 func (fn *Node) FileExtensionCounts(cat fileinfo.Categories) []NodeNameCount {
 	cmap := make(map[string]int)
-	fn.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+	for cw := range fn.AllWidgets() {
 		sfn := AsNode(cw)
 		if sfn == nil {
-			return tree.Continue
+			continue
 		}
 		if cat != fileinfo.UnknownCategory {
 			if sfn.Info.Cat != cat {
-				return tree.Continue
+				continue
 			}
 		}
 		ext := strings.ToLower(filepath.Ext(sfn.Name))
@@ -99,8 +96,7 @@ func (fn *Node) FileExtensionCounts(cat fileinfo.Categories) []NodeNameCount {
 		} else {
 			cmap[ext] = 1
 		}
-		return tree.Continue
-	})
+	}
 	ecs := make([]NodeNameCount, len(cmap))
 	idx := 0
 	for key, val := range cmap {
@@ -116,21 +112,20 @@ func (fn *Node) FileExtensionCounts(cat fileinfo.Categories) []NodeNameCount {
 // (e.g., fileinfo.Code to find any code files)
 func (fn *Node) LatestFileMod(cat fileinfo.Categories) time.Time {
 	tmod := time.Time{}
-	fn.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+	for cw := range fn.AllWidgets() {
 		sfn := AsNode(cw)
 		if sfn == nil {
-			return tree.Continue
+			continue
 		}
 		if cat != fileinfo.UnknownCategory {
 			if sfn.Info.Cat != cat {
-				return tree.Continue
+				continue
 			}
 		}
 		ft := (time.Time)(sfn.Info.ModTime)
 		if ft.After(tmod) {
 			tmod = ft
 		}
-		return tree.Continue
-	})
+	}
 	return tmod
 }

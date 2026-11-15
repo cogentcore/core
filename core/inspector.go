@@ -227,13 +227,9 @@ func (is *Inspector) selectionMonitor() {
 		// if we can't be found, we are probably a part,
 		// so we keep going up until we find somebody in
 		// the tree
-		sw.AsTree().WalkUpParent(func(k tree.Node) bool {
+		for k := range sw.AsTree().Ancestors() {
 			tv = is.treeWidget.FindSyncNode(k)
-			if tv != nil {
-				return tree.Break
-			}
-			return tree.Continue
-		})
+		}
 		if tv == nil {
 			MessageSnackbar(is, fmt.Sprintf("Inspector: tree node missing: %v", sw))
 			return

@@ -8,7 +8,6 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
-	"cogentcore.org/core/tree"
 )
 
 // StateIs returns whether the widget has the given [states.States] flag set.
@@ -71,12 +70,11 @@ func (wb *WidgetBase) SetReadOnly(ro bool) *WidgetBase {
 // of its children have the given state flag.
 func (wb *WidgetBase) HasStateWithin(state states.States) bool {
 	got := false
-	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+	for _, cwb := range wb.AllWidgets() {
 		if cwb.StateIs(state) {
 			got = true
-			return tree.Break
+			break
 		}
-		return tree.Continue
-	})
+	}
 	return got
 }

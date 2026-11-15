@@ -208,10 +208,10 @@ func (sc *Scene) UpdateMeshBBox() {
 // UpdateWorldMatrix updates the world matrix for node and everything inside it
 func UpdateWorldMatrix(n tree.Node) {
 	idmtx := math32.Identity4()
-	n.AsTree().WalkDown(func(cn tree.Node) bool {
+	for cn := range n.AsTree().All() {
 		ni, _ := AsNode(cn)
 		if ni == nil {
-			return tree.Continue
+			continue
 		}
 		_, pd := AsNode(cn.AsTree().Parent)
 		if pd == nil {
@@ -219,8 +219,7 @@ func UpdateWorldMatrix(n tree.Node) {
 		} else {
 			ni.UpdateWorldMatrix(&pd.Pose.WorldMatrix)
 		}
-		return tree.Continue
-	})
+	}
 }
 
 // UpdateMVPMatrix updates the Model-View-Projection matrix for all scene elements

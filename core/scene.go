@@ -501,10 +501,9 @@ func (sc *Scene) Close() bool {
 	}
 	e := &events.Base{Typ: events.Close}
 	e.Init()
-	sc.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+	for cw := range sc.AllWidgets() {
 		cw.AsWidget().HandleEvent(e)
-		return tree.Continue
-	})
+	}
 	// if they set the event as handled, we do not close the scene
 	if e.IsHandled() {
 		return false

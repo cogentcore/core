@@ -9,6 +9,7 @@ package core
 
 import (
 	"image"
+	"iter"
 	"log/slog"
 
 	"cogentcore.org/core/base/tiered"
@@ -406,10 +407,9 @@ func (wb *WidgetBase) setDescendantScenes(sc *Scene) {
 // This can be necessary when creating widgets outside the usual New* paradigm,
 // e.g., when reading from a JSON file.
 func (wb *WidgetBase) SetScene(sc *Scene) {
-	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+	for _, cwb := range wb.AllWidgets() {
 		cwb.Scene = sc
-		return tree.Continue
-	})
+	}
 }
 
 // AsWidget returns the given [tree.Node] as a [WidgetBase] or nil.
@@ -579,12 +579,29 @@ func (wb *WidgetBase) forVisibleChildren(fun func(i int, cw Widget, cwb *WidgetB
 
 // WidgetWalkDown is a version of [tree.NodeBase.WalkDown] that operates on [Widget] types,
 // calling the given function on the Widget and all of its children in a depth-first manner.
-// Return [tree.Continue] to continue and [tree.Break] to terminate.
+// Return [tree.Continue] to continue into the children of a widget, and [tree.Break]
+// to skip them (the walk continues with the rest of the tree). To visit all of the
+// widgets, or to stop at the first one that matches, range over [WidgetBase.AllWidgets].
 func (wb *WidgetBase) WidgetWalkDown(fun func(cw Widget, cwb *WidgetBase) bool) {
 	wb.WalkDown(func(n tree.Node) bool {
 		cw, cwb := n.(Widget), AsWidget(n)
 		return fun(cw, cwb)
 	})
+}
+
+// AllWidgets returns an iterator over this widget and all of its descendant
+// widgets (including their parts), in depth-first order, as [tree.NodeBase.All]
+// does for nodes. Breaking out of the loop stops the iteration:
+//
+//	for cw, cwb := range wb.AllWidgets() {
+func (wb *WidgetBase) AllWidgets() iter.Seq2[Widget, *WidgetBase] {
+	return func(yield func(Widget, *WidgetBase) bool) {
+		for n := range wb.All() {
+			if !yield(n.(Widget), AsWidget(n)) {
+				return
+			}
+		}
+	}
 }
 
 // widgetNext returns the next widget in the tree,

@@ -28,19 +28,18 @@ func (fn *Node) FirstVCS() (vcs.Repo, *Node) {
 	}
 	var repo vcs.Repo
 	var rnode *Node
-	fn.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+	for cw := range fn.AllWidgets() {
 		sfn := AsNode(cw)
 		if sfn == nil {
-			return tree.Continue
+			continue
 		}
 		sfn.detectVCSRepo()
 		if sfn.DirRepo != nil {
 			repo = sfn.DirRepo
 			rnode = sfn
-			return tree.Break
+			break
 		}
-		return tree.Continue
-	})
+	}
 	return repo, rnode
 }
 
@@ -87,21 +86,20 @@ func (fn *Node) Repo() (vcs.Repo, *Node) {
 	}
 	var repo vcs.Repo
 	var rnode *Node
-	fn.WalkUpParent(func(k tree.Node) bool {
+	for k := range fn.Ancestors() {
 		sfn := AsNode(k)
 		if sfn == nil {
-			return tree.Break
+			break
 		}
 		if sfn.IsIrregular() {
-			return tree.Break
+			break
 		}
 		if sfn.DirRepo != nil {
 			repo = sfn.DirRepo
 			rnode = sfn
-			return tree.Break
+			break
 		}
-		return tree.Continue
-	})
+	}
 	return repo, rnode
 }
 

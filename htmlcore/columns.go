@@ -155,12 +155,11 @@ func (c *Context) arrangeColumns(n *html.Node, fr *core.Frame) {
 	total := 0
 	for i, k := range kids {
 		w := 40
-		k.AsTree().WalkDown(func(d tree.Node) bool {
+		for d := range k.AsTree().All() {
 			if tx, ok := d.(*core.Text); ok {
 				w += len(tx.Text)
 			}
-			return tree.Continue
-		})
+		}
 		weights[i] = w
 		total += w
 	}

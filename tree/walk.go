@@ -14,10 +14,9 @@ package tree
 func Last(n Node) Node {
 	n = lastChild(n)
 	last := n
-	n.AsTree().WalkDown(func(k Node) bool {
+	for k := range n.AsTree().All() {
 		last = k
-		return Continue
-	})
+	}
 	return last
 }
 

@@ -255,26 +255,30 @@ func (em *Events) handleFocusEvent(e events.Event) {
 		}
 	}
 	if !tree.IsNil(em.focus) {
-		em.focus.AsTree().WalkUpParent(func(k tree.Node) bool {
+		for k := range em.focus.AsTree().Ancestors() {
 			wb := AsWidget(k)
 			if !wb.IsDisplayable() {
-				return tree.Break
+				break
 			}
 			wb.firstHandleEvent(e)
-			return !e.IsHandled()
-		})
+			if e.IsHandled() {
+				break
+			}
+		}
 		if !e.IsHandled() {
 			em.focus.AsWidget().HandleEvent(e)
 		}
 		if !e.IsHandled() {
-			em.focus.AsTree().WalkUpParent(func(k tree.Node) bool {
+			for k := range em.focus.AsTree().Ancestors() {
 				wb := AsWidget(k)
 				if !wb.IsDisplayable() {
-					return tree.Break
+					break
 				}
 				wb.finalHandleEvent(e)
-				return !e.IsHandled()
-			})
+				if e.IsHandled() {
+					break
+				}
+			}
 		}
 	}
 	em.managerKeyChordEvents(e)
@@ -1221,10 +1225,9 @@ func (em *Events) dragDrop(drag Widget, e events.Event) {
 	em.dragClearSprite()
 	data := em.dragData
 	em.drag = nil
-	em.scene.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+	for _, cwb := range em.scene.AllWidgets() {
 		cwb.dragStateReset()
-		return tree.Continue
-	})
+	}
 	em.scene.Restyle()
 
 	if len(em.dragHovers) == 0 {

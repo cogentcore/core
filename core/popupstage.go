@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/tree"
 )
 
 // NewPopupStage returns a new PopupStage with given type and scene contents.
@@ -400,13 +399,12 @@ func (pm *stages) menuChain() []*Stage {
 // position in the window, or nil if there is none.
 func menuButtonAt(st *Stage, pos image.Point) *Button {
 	var bt *Button
-	st.Scene.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+	for cw, cwb := range st.Scene.AllWidgets() {
 		if b := AsButton(cw); b != nil && pos.In(cwb.winBBox()) {
 			bt = b
-			return tree.Break
+			break
 		}
-		return tree.Continue
-	})
+	}
 	return bt
 }
 

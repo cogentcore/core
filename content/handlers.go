@@ -533,16 +533,13 @@ func (ct *Content) openID(id, element string) bool {
 		return true
 	}
 	var found *core.WidgetBase
-	ct.pageFrame().WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
-		// if found != nil {
-		// 	return tree.Break
-		// }
+	for _, cwb := range ct.pageFrame().AllWidgets() {
 		if cwb.Name != id {
-			return tree.Continue
+			continue
 		}
 		found = cwb
-		return tree.Break
-	})
+		break
+	}
 	if found == nil {
 		return false
 	}
@@ -576,34 +573,30 @@ func (ct *Content) elementInSpecial(sp *core.WidgetBase, element string) *core.W
 	}
 
 	var found *core.WidgetBase
-	sp.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
-		if found != nil {
-			return tree.Break
-		}
+	for cw, cwb := range sp.AllWidgets() {
 		if !cwb.IsDisplayable() {
-			return tree.Continue
+			continue
 		}
 		if hasPath {
 			pth := cw.AsTree().Path()
 			if strings.Contains(pth, pathPrefix) {
-				return tree.Continue
+				continue
 			}
 		}
 		label := labels.ToLabel(cw)
 		kb := bcontent.SpecialToKebab(label)
 		if !strings.EqualFold(label, element) && kb != element {
-			return tree.Continue
+			continue
 		}
 		if cwb.AbilityIs(abilities.Focusable) {
 			found = cwb
-			return tree.Break
+			break
 		}
 		next := core.AsWidget(tree.Next(cwb))
 		if next.AbilityIs(abilities.Focusable) {
 			found = next
-			return tree.Break
+			break
 		}
-		return tree.Continue
-	})
+	}
 	return found
 }

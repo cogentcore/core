@@ -24,7 +24,6 @@ import (
 	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/shaped"
-	"cogentcore.org/core/tree"
 )
 
 var (
@@ -203,12 +202,11 @@ func (sv *SVG) ImageByURL(url string) image.Image {
 
 func (sv *SVG) Style() {
 	// set isDef
-	sv.Defs.WalkDown(func(n tree.Node) bool {
+	for n := range sv.Defs.All() {
 		sn := n.(Node)
 		sn.AsNodeBase().isDef = true
 		sn.AsNodeBase().Style(sv)
-		return tree.Continue
-	})
+	}
 
 	sv.Root.Paint.Defaults()
 	if sv.DefaultFill != nil {
@@ -217,11 +215,10 @@ func (sv *SVG) Style() {
 	}
 	sv.SetUnitContext(&sv.Root.Paint)
 
-	sv.Root.WalkDown(func(k tree.Node) bool {
+	for k := range sv.Root.All() {
 		sn := k.(Node)
 		sn.AsNodeBase().Style(sv)
-		return tree.Continue
-	})
+	}
 }
 
 // useSharedShaper sets the TextShaper to the shared svgShaper, returning

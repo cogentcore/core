@@ -204,7 +204,7 @@ func (tr *Tree) AsCoreTree() *Tree {
 // It returns the total number of leaves in the tree.
 func (tr *Tree) rootSetViewIndex() int {
 	idx := 0
-	tr.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+	for cw := range tr.AllWidgets() {
 		tvn := AsTree(cw)
 		if tvn != nil {
 			tvn.viewIndex = idx
@@ -213,8 +213,7 @@ func (tr *Tree) rootSetViewIndex() int {
 			}
 			idx++
 		}
-		return tree.Continue
-	})
+	}
 	return idx
 }
 
@@ -1267,14 +1266,14 @@ func (tr *Tree) CloseAll() { //types:add
 // OpenParents opens all the parents of this node
 // so that it will be visible.
 func (tr *Tree) OpenParents() {
-	tr.WalkUpParent(func(k tree.Node) bool {
+	for k := range tr.Ancestors() {
 		tvn := AsTree(k)
 		if tvn != nil {
 			tvn.Open()
-			return tree.Continue
+			continue
 		}
-		return tree.Break
-	})
+		break
+	}
 	tr.NeedsLayout()
 }
 

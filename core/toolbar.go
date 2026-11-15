@@ -140,11 +140,10 @@ func (tb *Toolbar) allItemsToChildren() {
 	// This is like [WidgetBase.Update], but without requesting another
 	// layout, as we are already in one; nothing must be rendered here,
 	// as the geometry of the scene is only partly computed.
-	tb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+	for cw, cwb := range tb.AllWidgets() {
 		cwb.UpdateWidget()
 		cw.Style()
-		return tree.Continue
-	})
+	}
 }
 
 func (tb *Toolbar) parentSize() float32 {

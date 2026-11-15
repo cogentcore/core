@@ -113,10 +113,9 @@ func (bd *Body) RunWindow() *Stage {
 func (bd *Body) handleExternalParent() {
 	ExternalParent.AsWidget().AddChild(bd)
 	// we must set the correct scene for each node
-	bd.WalkDown(func(n tree.Node) bool {
+	for n := range bd.All() {
 		n.(Widget).AsWidget().Scene = bd.Scene
-		return tree.Continue
-	})
+	}
 	// we must not get additional scrollbars here
 	bd.Styler(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowVisible)

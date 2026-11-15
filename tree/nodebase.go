@@ -169,14 +169,13 @@ func (n *NodeBase) IndexInParent() int {
 func (n *NodeBase) ParentLevel(parent Node) int {
 	parLev := -1
 	level := 0
-	n.WalkUpParent(func(k Node) bool {
+	for k := range n.Ancestors() {
 		if k == parent {
 			parLev = level
-			return Break
+			break
 		}
 		level++
-		return Continue
-	})
+	}
 	return parLev
 }
 
@@ -440,7 +439,10 @@ const (
 	Continue = true
 
 	// Break = false can be returned from tree iteration functions to stop processing
-	// this branch of the tree.
+	// this branch of the tree. In the walks down the tree ([NodeBase.WalkDown]),
+	// it skips the children of the node, and the walk continues with the rest
+	// of the tree: to stop at the first node that matches, range over
+	// [NodeBase.All] instead.
 	Break = false
 )
 

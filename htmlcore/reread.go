@@ -974,7 +974,7 @@ func (rc *reconciler) remap(r *html.Node) {
 	// longer in the page
 	root := rootNode(r)
 	for _, w := range rc.removed {
-		w.AsWidget().WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		for cw := range w.AsWidget().AllWidgets() {
 			delete(c.blocks, cw)
 			if n := ownNode(cw); n != nil && rootNode(n) != root {
 				if hasCustomDecls(c.styles[n]) {
@@ -987,8 +987,7 @@ func (rc *reconciler) remap(r *html.Node) {
 				delete(c.hinted, n)
 				delete(c.containers, n)
 			}
-			return tree.Continue
-		})
+		}
 	}
 }
 
@@ -1200,13 +1199,12 @@ func (rc *reconciler) placeKept() {
 		var ph core.Widget
 		for p := n.Parent; p != nil && ph == nil; p = p.Parent {
 			for _, w := range rc.c.elementWidgets[p] {
-				w.AsWidget().WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+				for cw := range w.AsWidget().AllWidgets() {
 					if keptPlaceholderNode(cw) == n {
 						ph = cw
-						return tree.Break
+						break
 					}
-					return tree.Continue
-				})
+				}
 				if ph != nil {
 					break
 				}
@@ -1389,11 +1387,11 @@ func (c *Context) readableRoot(r, root *html.Node, in func(n *html.Node) bool) b
 	if !ok {
 		return false
 	}
-	ws[0].AsWidget().WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+	for cw := range ws[0].AsWidget().AllWidgets() {
 		if n := ownNode(cw); n != nil && rootNode(n) == root && !in(n) {
 			ok = false
+			break
 		}
-		return ok
-	})
+	}
 	return ok
 }

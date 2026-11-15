@@ -646,7 +646,7 @@ func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
 	})
 	// last is the most recent tree node for each heading level, used for nesting.
 	last := map[int]*core.Tree{}
-	w.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+	for cw, cwb := range w.AllWidgets() {
 		num, text, ok := headingOf(cw)
 		if ok {
 			parent := contents
@@ -668,8 +668,7 @@ func (ct *Content) makeTableOfContents(w *core.Frame, pg *bcontent.Page) {
 				ct.OpenEvent(ct.current.Page.URL+"#"+kebab, e)
 			})
 		}
-		return tree.Continue
-	})
+	}
 
 	if contents.NumChildren() == 0 {
 		ct.deleteTableOfContents()
@@ -777,10 +776,9 @@ func (ct *Content) updateCategories(restyle bool) {
 func styleTreeNode(tr *core.Tree) {
 	tr.Style()
 	if tr.Parts != nil {
-		tr.Parts.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+		for cw := range tr.Parts.AllWidgets() {
 			cw.Style()
-			return tree.Continue
-		})
+		}
 	}
 	tr.NeedsRender()
 }

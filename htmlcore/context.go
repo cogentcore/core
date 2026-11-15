@@ -919,10 +919,10 @@ func TextTag(tx *core.Text) string {
 // from the widget of its element (as in a PDF, which styles headings by
 // their tags, and links to their ids).
 func TagTexts(w core.Widget) {
-	w.AsWidget().WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+	for cw, cwb := range w.AsWidget().AllWidgets() {
 		tx, ok := cw.(*core.Text)
 		if !ok {
-			return tree.Continue
+			continue
 		}
 		if el := TextElement(tx); el != cwb {
 			for _, k := range []string{"tag", "id"} {
@@ -931,8 +931,7 @@ func TagTexts(w core.Widget) {
 				}
 			}
 		}
-		return tree.Continue
-	})
+	}
 }
 
 // NodeOf returns the HTML node of the element that the given widget is
@@ -987,8 +986,7 @@ func (c *Context) UnlockStyles() { c.styleMu.Unlock() }
 // lockStylesOf makes the given widget and those in it hold the lock of the
 // styles of the context as they are styled (see [core.StyleLockProperty]).
 func (c *Context) lockStylesOf(root core.Widget) {
-	root.AsWidget().WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
+	for _, cwb := range root.AsWidget().AllWidgets() {
 		cwb.SetProperty(core.StyleLockProperty, &c.styleMu)
-		return tree.Continue
-	})
+	}
 }

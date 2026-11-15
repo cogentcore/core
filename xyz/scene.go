@@ -133,13 +133,12 @@ func NewOffscreenScene() *Scene {
 // Update does the [tree] Maker / Plan updating of nodes.
 func (sc *Scene) Update() {
 	sc.RunUpdaters()
-	sc.WalkDown(func(n tree.Node) bool {
+	for n := range sc.All() {
 		if n.AsTree().This == sc.This {
-			return tree.Continue
+			continue
 		}
 		n.(Node).Update()
-		return tree.Continue
-	})
+	}
 }
 
 // IsLive indicates whether the Phong system is active and we can

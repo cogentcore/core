@@ -317,11 +317,10 @@ const layoutIters = 3
 // for knowing whether the layout has settled.
 func (fr *Frame) sizesSum() float64 {
 	sum := float64(0)
-	fr.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+	for _, cwb := range fr.AllWidgets() {
 		sz := cwb.Geom.Size.Actual.Total
 		sum += float64(sz.X)*1.0001 + float64(sz.Y)
-		return tree.Continue
-	})
+	}
 	return sum
 }
 
@@ -396,10 +395,9 @@ func (wb *WidgetBase) doNeedsRender() {
 		}
 		if rg, ok := cw.(renderGrouper); ok && rg.RenderGroup() {
 			// it is rendered as a whole (see renderGrouper)
-			cwb.WidgetWalkDown(func(dw Widget, dwb *WidgetBase) bool {
+			for _, dwb := range cwb.AllWidgets() {
 				dwb.setFlag(false, widgetChildNeedsRender)
-				return tree.Continue
-			})
+			}
 			// not when it is covered by widgets rendered over it in the
 			// image of the scene, which it would paint over (as a playing
 			// video under an absolute dialog of a page), but it is when they
@@ -809,13 +807,12 @@ func (wb *WidgetBase) Defer(fun func()) {
 
 // runDeferred runs deferred functions on all widgets in the scene.
 func (sc *Scene) runDeferred() {
-	sc.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+	for _, cwb := range sc.AllWidgets() {
 		for _, f := range cwb.Deferred {
 			f()
 		}
 		cwb.Deferred = nil
-		return tree.Continue
-	})
+	}
 }
 
 // DeferShown adds a [WidgetBase.Defer] function to call [WidgetBase.Shown]
@@ -839,10 +836,9 @@ func (wb *WidgetBase) DeferShown() {
 // Shown sends [events.Show] to all widgets from this one down. Also see
 // [WidgetBase.DeferShown].
 func (wb *WidgetBase) Shown() {
-	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+	for _, cwb := range wb.AllWidgets() {
 		cwb.Send(events.Show)
-		return tree.Continue
-	})
+	}
 	wb.Events().activateStartFocus()
 }
 

@@ -123,16 +123,15 @@ func (tr *Tree) selectedSyncNodes() []tree.Node {
 // source [tree.Node] in [Tree.SyncNode] or nil if not found.
 func (tr *Tree) FindSyncNode(n tree.Node) *Tree {
 	var res *Tree
-	tr.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+	for cw := range tr.AllWidgets() {
 		tvn := AsTree(cw)
 		if tvn != nil {
 			if tvn.SyncNode == n {
 				res = tvn
-				return tree.Break
+				break
 			}
 		}
-		return tree.Continue
-	})
+	}
 	return res
 }
 
