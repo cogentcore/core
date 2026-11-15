@@ -8,7 +8,7 @@ The CI (`.github/workflows/go.yml`) runs all of the packages that build on Linux
 go test -short ./...
 ```
 
-On the CI, Mesa's software GPU (lavapipe) is installed for the tests of `gpu` and `xyz`, and the tests run in an Xvfb display. The tests that need a GPU call `gpu.SkipIfNoGPU(t)`, which skips them on a machine without a GPU adapter, unless `CORE_REQUIRE_GPU` is set (as on the CI), which makes them fail instead.
+On the CI, Mesa's software GPU (lavapipe) is installed for the tests of `gpu` and `xyz`, and the tests run in an Xvfb display. The desktop driver is tested first in a display of its own, as glfw can find no screens on a display that the many processes of the other tests are using. The tests that need a GPU call `gpu.SkipIfNoGPU(t)`, which skips them on a machine without a GPU adapter, unless `CORE_REQUIRE_GPU` is set (as on the CI), which makes them fail instead.
 
 The `video` tests need FFmpeg (see go-astiav), which the CI builds.
 

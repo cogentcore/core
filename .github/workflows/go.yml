@@ -92,16 +92,24 @@ jobs:
     # the mobile and web platforms are tested on those platforms: see
     # TESTING.md). CORE_REQUIRE_GPU makes the tests that need a GPU fail
     # instead of skipping when there is none.
+    # The desktop driver has its own display, as glfw can find no screens
+    # on a display that the many processes of the other tests are using.
+    - name: Test desktop driver
+      env:
+        CORE_REQUIRE_GPU: "true"
+      run: xvfb-run -a -s "-screen 0 1280x1024x24" go test -short -v ./system/driver/desktop -coverprofile cover.desktop.out -timeout 2m
+
     - name: Test
       env:
         CORE_REQUIRE_GPU: "true"
-      run: xvfb-run -a -s "-screen 0 1280x1024x24" go test -short -v ./... -coverprofile cover.raw.out -timeout 2m
+      run: xvfb-run -a -s "-screen 0 1280x1024x24" go test -short -v $(go list ./... | grep -v '/system/driver/desktop$') -coverprofile cover.raw.out -timeout 2m
 
     # generated code (files with the standard "Code generated ... DO NOT
     # EDIT." header) is left out of the coverage report
     - name: Filter generated code from coverage
       run: |
         grep -rlE --include='*.go' '^// Code generated .* DO NOT EDIT\.$' . | sed -E 's|^(\./)?|cogentcore.org/core/|; s|$|:|' > generated.txt
+        tail -n +2 cover.desktop.out >> cover.raw.out
         grep -v -F -f generated.txt cover.raw.out > cover.out
         echo "left out $(wc -l < generated.txt) generated files"
 
