@@ -284,7 +284,7 @@ var (
 
 func (a *App) MainLoop() {
 	a.MainQueue = make(chan base.FuncRun)
-	a.MainDone = make(chan struct{})
+	a.InitMainDone()
 	// TODO: maybe merge the RunInputQueue and MainUI functions?
 	go func() {
 		defer func() { system.HandleRecover(recover()) }()

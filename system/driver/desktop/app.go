@@ -123,7 +123,7 @@ func (a *App) SendEmptyEvent() {
 func (a *App) MainLoop() {
 	a.initGUI()
 	a.MainQueue = make(chan base.FuncRun)
-	a.MainDone = make(chan struct{})
+	a.InitMainDone()
 	for {
 		select {
 		case <-a.MainDone:
