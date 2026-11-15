@@ -11,6 +11,7 @@ import (
 	"image/color"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"testing/fstest"
 
@@ -205,4 +206,14 @@ func TestCompare(t *testing.T) {
 		assert.True(t, content, "updated")
 	})
 	assert.Equal(t, updateTestImages, UpdateTestImages, "restored")
+}
+
+// TestBase64SplitLinesExact tests splitting base64 text whose length is a
+// multiple of the line length, which has no empty last line.
+func TestBase64SplitLinesExact(t *testing.T) {
+	b := bytes.Repeat([]byte("a"), 152)
+	lines := strings.Split(string(Base64SplitLines(b)), "\n")
+	assert.Equal(t, []string{strings.Repeat("a", 76), strings.Repeat("a", 76), ""}, lines)
+	short := strings.Split(string(Base64SplitLines([]byte("abc"))), "\n")
+	assert.Equal(t, []string{"abc", ""}, short)
 }

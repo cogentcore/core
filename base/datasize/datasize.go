@@ -77,17 +77,17 @@ func (b Size) EBytes() float64 {
 // String returns a human-readable representation of the data size.
 func (b Size) String() string {
 	switch {
-	case b > EB:
+	case b >= EB:
 		return fmt.Sprintf("%.1f EB", b.EBytes())
-	case b > PB:
+	case b >= PB:
 		return fmt.Sprintf("%.1f PB", b.PBytes())
-	case b > TB:
+	case b >= TB:
 		return fmt.Sprintf("%.1f TB", b.TBytes())
-	case b > GB:
+	case b >= GB:
 		return fmt.Sprintf("%.1f GB", b.GBytes())
-	case b > MB:
+	case b >= MB:
 		return fmt.Sprintf("%.1f MB", b.MBytes())
-	case b > KB:
+	case b >= KB:
 		return fmt.Sprintf("%.1f KB", b.KBytes())
 	default:
 		return fmt.Sprintf("%d B", b)
@@ -197,7 +197,7 @@ ParseLoop:
 		}
 		val *= uint64(PB)
 
-	case "E", "EB", "e", "eb", "eB":
+	case "e", "eb", "exa", "exabyte", "exabytes", "E", "EB", "eB":
 		if val > maxUint64/uint64(EB) {
 			goto Overflow
 		}

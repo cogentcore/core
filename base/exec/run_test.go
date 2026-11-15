@@ -215,3 +215,29 @@ func TestStdIOPrintWrap(t *testing.T) {
 	assert.True(t, ss.ErrIsInOut(&out), "in the stack")
 	ss.PopOut()
 }
+
+// TestConfigCopiesEnv tests that the copies of the set default configs
+// have their own environment variables.
+func TestConfigCopiesEnv(t *testing.T) {
+	sets := []func(c *Config){SetMajor, SetMinor, SetVerbose, SetSilent}
+	gets := []func() *Config{Major, Minor, Verbose, Silent}
+	for i, set := range sets {
+		set(&Config{Env: map[string]string{}})
+		a := gets[i]()
+		a.SetEnv("CORE_EXEC_TEST_COPY", "a")
+		_, has := gets[i]().Env["CORE_EXEC_TEST_COPY"]
+		assert.False(t, has, "the environment of a copy is not shared: %d", i)
+		set(nil)
+	}
+}
+
+// TestExpandArgsCopy tests that expanding the variables of the args does
+// not change the caller's args.
+func TestExpandArgsCopy(t *testing.T) {
+	c := Silent().SetEnv("CORE_EXEC_TEST_VAR", "expanded")
+	args := []string{"$CORE_EXEC_TEST_VAR"}
+	out, err := c.Output("echo", args...)
+	assert.NoError(t, err)
+	assert.Equal(t, "expanded", out)
+	assert.Equal(t, []string{"$CORE_EXEC_TEST_VAR"}, args, "the args are not changed")
+}

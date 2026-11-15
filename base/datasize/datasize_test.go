@@ -170,3 +170,17 @@ func TestUnmarshalTextErrors(t *testing.T) {
 		assert.Equal(t, want, s, in)
 	}
 }
+
+// TestExaAndExactUnits tests the exabyte unit names, and that sizes of
+// exactly a unit are shown in that unit.
+func TestExaAndExactUnits(t *testing.T) {
+	for _, u := range []string{"2exa", "2exabyte", "2 exabytes", "2EB", "2e"} {
+		var s Size
+		assert.NoError(t, s.UnmarshalText([]byte(u)), u)
+		assert.Equal(t, 2*EB, s, u)
+	}
+	assert.Equal(t, "1.0 KB", KB.String())
+	assert.Equal(t, "1.0 MB", MB.String())
+	assert.Equal(t, "1.0 EB", EB.String())
+	assert.Equal(t, "1023 B", Size(1023).String())
+}

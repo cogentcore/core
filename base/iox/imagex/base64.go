@@ -40,6 +40,9 @@ func Base64SplitLines(b []byte) []byte {
 	st := ll * nl
 	rst := ll*nl + nl
 	ln := sz - st
+	if ln == 0 && nl > 0 { // the last full line already ends with a newline
+		return rb[:rst]
+	}
 	copy(rb[rst:rst+ln], b[st:st+ln])
 	rb[rst+ln] = '\n'
 	return rb
