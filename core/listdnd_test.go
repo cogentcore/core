@@ -7,6 +7,7 @@ package core
 import (
 	"image"
 	"testing"
+	"time"
 
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/events"
@@ -136,4 +137,49 @@ func TestTreePasteMenu(t *testing.T) {
 		bb.DragDrop(cde) // shows the menu
 		bb.dropExternal(cmd, events.DropCopy)
 	}))
+}
+
+// dropMenuAfterDrag drags from the value of row 0 to row 2 of the given
+// list, with mouse events in its window, and returns whether the drop menu
+// appeared.
+func dropMenuAfterDrag(t *testing.T, b *Body, lb *ListBase) bool {
+	prev := TimingSettings.DragStartTime
+	TimingSettings.DragStartTime = 0
+	defer func() { TimingSettings.DragStartTime = prev }()
+	got := false
+	RenderImage(b, func() {
+		b.AsyncLock()
+		nw, idx := lb.This.(Lister).RowWidgetNs()
+		from := lb.ListGrid.Child(idx).(Widget).AsWidget().Geom.TotalBBox.Min.Add(image.Pt(3, 3))
+		to := lb.ListGrid.Child(2*nw + idx).(Widget).AsWidget().Geom.TotalBBox.Min.Add(image.Pt(3, 3))
+		b.AsyncUnlock()
+		ev := b.Scene.RenderWindow().SystemWindow.Events()
+		ev.MouseButton(events.MouseDown, events.Left, from, 0)
+		time.Sleep(20 * time.Millisecond)
+		for i := 1; i <= 10; i++ {
+			ev.MouseMove(from.Add(to.Sub(from).Mul(i).Div(10)))
+			time.Sleep(10 * time.Millisecond)
+		}
+		ev.MouseButton(events.MouseUp, events.Left, to, 0)
+	}, Locked(b, func() {
+		for _, st := range b.Scene.Stage.popups.stack.Values {
+			if menuButton(st.Scene, "Insert after") != nil {
+				got = true
+			}
+		}
+	}))
+	return got
+}
+
+// TestListRowDrag tests that dragging a row of a list or a table by its
+// value (not its index, which is not shown by default) drops it, with a
+// menu (#1553).
+func TestListRowDrag(t *testing.T) {
+	b := NewBody()
+	sl := []string{"a", "b", "c", "d"}
+	assert.True(t, dropMenuAfterDrag(t, b, NewList(b).SetSlice(&sl)), "list")
+	b = NewBody()
+	langs := []language{{"Go", 10}, {"Python", 5}, {"C", 3}, {"D", 1}}
+	tb := NewTable(b).SetSlice(&langs)
+	assert.True(t, dropMenuAfterDrag(t, b, &tb.ListBase), "table")
 }

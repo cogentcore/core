@@ -222,18 +222,10 @@ func (is *Inspector) selectionMonitor() {
 	if !ok || sw == nil {
 		return
 	}
-	tv := is.treeWidget.FindSyncNode(sw)
+	tv := is.treeNodeOf(sw)
 	if tv == nil {
-		// if we can't be found, we are probably a part,
-		// so we keep going up until we find somebody in
-		// the tree
-		for k := range sw.AsTree().Ancestors() {
-			tv = is.treeWidget.FindSyncNode(k)
-		}
-		if tv == nil {
-			MessageSnackbar(is, fmt.Sprintf("Inspector: tree node missing: %v", sw))
-			return
-		}
+		MessageSnackbar(is, fmt.Sprintf("Inspector: tree node missing: %v", sw))
+		return
 	}
 	is.AsyncLock() // coming from other tree
 	tv.OpenParents()
@@ -250,6 +242,21 @@ func (is *Inspector) selectionMonitor() {
 	sc.selectedWidgetChan = nil
 	sc.NeedsRender()
 	sc.AsyncUnlock()
+}
+
+// treeNodeOf returns the node of the tree of the inspector for the given
+// widget, or for its nearest ancestor that is in the tree, as for a part
+// of a widget, which is not in the tree; or nil.
+func (is *Inspector) treeNodeOf(w Widget) *Tree {
+	if tv := is.treeWidget.FindSyncNode(w); tv != nil {
+		return tv
+	}
+	for k := range w.AsTree().Ancestors() {
+		if tv := is.treeWidget.FindSyncNode(k); tv != nil {
+			return tv
+		}
+	}
+	return nil
 }
 
 // inspectApp displays [TheApp].

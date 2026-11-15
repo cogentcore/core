@@ -5,6 +5,7 @@
 package core
 
 import (
+	"path/filepath"
 	"testing"
 
 	"cogentcore.org/core/styles"
@@ -43,4 +44,35 @@ func TestInspectorTreeWidth(t *testing.T) {
 		assert.Greater(t, node.Geom.Size.Actual.Total.X, 20*em, "wider than the old limit of 20em")
 		assert.InDelta(t, frame.Geom.Size.Actual.Content.X, node.Geom.Size.Actual.Total.X, float64(frame.Geom.Size.Actual.Content.X/4), "about as wide as its panel")
 	})
+}
+
+// TestInspectorTreeNodeSaveOpen tests finding the tree node of the
+// inspector for a selected widget (for a part, its widget, not the root),
+// toggling the selection mode, and saving and opening the tree.
+func TestInspectorTreeNodeSaveOpen(t *testing.T) {
+	inspected := NewBody()
+	tr := NewTree(inspected).SetText("inspected tree") // a tree has parts
+	NewText(inspected).SetText("text")
+	b := NewBody()
+	is := NewInspector(b)
+	is.SetRoot(inspected)
+	RenderImage(b, Locked(b, func() {
+		tv := is.treeNodeOf(tr)
+		require.NotNil(t, tv)
+		assert.Same(t, tr.This, tv.SyncNode)
+		inspected.Update() // makes the parts of the tree
+		require.NotNil(t, tr.Parts)
+		part := tr.Parts.Child(0).(Widget)
+		tv = is.treeNodeOf(part)
+		require.NotNil(t, tv, "the widget of the part")
+		assert.Same(t, tr.This, tv.SyncNode, "the tree that has the part, not the root")
+		assert.Nil(t, is.treeNodeOf(NewText()), "not in the inspected tree")
+
+		is.toggleSelectionMode() // not a scene: nothing
+		fn := Filename(filepath.Join(t.TempDir(), "tree.json"))
+		require.NoError(t, is.saveAs(fn))
+		assert.Equal(t, fn, is.filename)
+		require.NoError(t, is.save())
+		assert.Error(t, is.open(Filename(filepath.Join(t.TempDir(), "missing.json"))))
+	}))
 }

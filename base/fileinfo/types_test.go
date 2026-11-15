@@ -138,3 +138,14 @@ func TestFileInfoTypes(t *testing.T) {
 	_, err = os.Lstat(lnk)
 	assert.True(t, os.IsNotExist(err))
 }
+
+// TestSetTypeUnknown tests that setting the type to Unknown gives the
+// unknown category, not the zero one (Audio).
+func TestSetTypeUnknown(t *testing.T) {
+	var fi FileInfo
+	fi.SetType(Go)
+	assert.Equal(t, Code, fi.Cat)
+	fi.SetType(Unknown)
+	assert.Equal(t, UnknownCategory, fi.Cat)
+	assert.Equal(t, Unknown, fi.Known)
+}

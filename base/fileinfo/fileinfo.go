@@ -225,6 +225,10 @@ func (fi *FileInfo) SetType(ftyp Known) {
 	fi.Mime = mt.Mime
 	fi.Cat = mt.Cat
 	fi.Known = mt.Known
+	if ftyp == Unknown { // (with no mime type, whose zero category is Audio)
+		fi.Cat = UnknownCategory
+		fi.Known = Unknown
+	}
 	if fi.Name == "" && len(mt.Exts) > 0 {
 		fi.Name = "_fake" + mt.Exts[0]
 		fi.Path = fi.Name
