@@ -30,9 +30,16 @@ const testN = 16_000_000
 
 func TestComputeNative(t *testing.T) {
 	gpu.SkipIfNoGPU(t)
-	nerr := compute(testN)
+	// an adapter with a smaller limit, as the software GPU of the CI
+	// (lavapipe), gets as many items as fit in it (16 bytes each).
+	n := testN
+	gp := gpu.NewComputeGPU()
+	if mx := int(gp.Limits.MaxStorageBufferBindingSize / 16); mx < n {
+		n = mx
+	}
+	nerr := compute(n)
 	if nerr != 0 {
-		t.Errorf("%d items out of %d do not match", nerr, testN)
+		t.Errorf("%d items out of %d do not match", nerr, n)
 	}
 }
 
