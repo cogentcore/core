@@ -6,6 +6,7 @@ package core
 
 import (
 	"image"
+	"sync"
 	"time"
 
 	"cogentcore.org/core/math32"
@@ -13,6 +14,10 @@ import (
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 )
+
+// textCursorMu guards the last widgets of [TextCursor], which are shared by
+// the widgets of a type in all windows, whose event loops are separate.
+var textCursorMu sync.Mutex
 
 // TextCursor implements a blinking text cursor using a [Sprite].
 //   - on determines whether the cursor should be turned on or off,
@@ -29,6 +34,8 @@ func TextCursor(on bool, w *WidgetBase, lastW *tree.Node, name string, width, he
 		return
 	}
 	ms := sc.Stage.Main
+	textCursorMu.Lock()
+	defer textCursorMu.Unlock()
 	ms.Sprites.Lock()
 	defer ms.Sprites.Unlock()
 

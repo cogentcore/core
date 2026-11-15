@@ -47,9 +47,9 @@ func widgetsByID(t *testing.T, src string, fun func(ws map[string]*core.WidgetBa
 		}
 		return tree.Continue
 	})
-	core.RenderImage(bd, func() {}, func() {
+	core.RenderImage(bd, func() {}, core.Locked(bd, func() {
 		fun(ws, bd.Styles.UnitContext.Dots(units.UnitDp))
-	})
+	}))
 }
 
 // TestTableContentWidth tests that a table (with the automatic layout) is
@@ -113,7 +113,7 @@ func TestBoxShadowColor(t *testing.T) {
 		return tree.Continue
 	})
 	var bb image.Rectangle
-	img := core.RenderImage(bd, func() {}, func() { bb = bar.Geom.TotalBBox })
+	img := core.RenderImage(bd, func() {}, core.Locked(bd, func() { bb = bar.Geom.TotalBBox }))
 	r, g, b, _ := img.At(bb.Min.X+10, bb.Max.Y+1).RGBA()
 	assert.Equal(t, [3]uint32{200, 0, 0}, [3]uint32{r >> 8, g >> 8, b >> 8}, "below the box, in its color")
 }
@@ -147,7 +147,7 @@ func TestPseudoBox(t *testing.T) {
 	require.NotNil(t, bar)
 	require.NotNil(t, ic)
 	var bb, ib image.Rectangle
-	img := core.RenderImage(bd, func() {}, func() { bb, ib = bar.Geom.TotalBBox, ic.Geom.TotalBBox })
+	img := core.RenderImage(bd, func() {}, core.Locked(bd, func() { bb, ib = bar.Geom.TotalBBox, ic.Geom.TotalBBox }))
 	r, g, b, _ := img.At(bb.Min.X+50, bb.Max.Y-1).RGBA()
 	assert.Equal(t, [3]uint32{162, 169, 177}, [3]uint32{r >> 8, g >> 8, b >> 8}, "the line at the bottom")
 	r, g, b, _ = img.At(ib.Min.X+5, ib.Min.Y+(ib.Dy()/2)).RGBA()
@@ -187,7 +187,7 @@ func TestBackgroundImage(t *testing.T) {
 	})
 	require.NotNil(t, sp)
 	var bb image.Rectangle
-	rendered := core.RenderImage(bd, func() {}, func() { bb = sp.Geom.TotalBBox })
+	rendered := core.RenderImage(bd, func() {}, core.Locked(bd, func() { bb = sp.Geom.TotalBBox }))
 	at := func(x, y int) [3]uint32 {
 		r, g, b, _ := rendered.At(bb.Min.X+x, bb.Min.Y+y).RGBA()
 		return [3]uint32{r >> 8, g >> 8, b >> 8}
@@ -461,7 +461,7 @@ func TestKeepContainerSizes(t *testing.T) {
 	bd := core.NewBody()
 	require.NoError(t, ReadDocument(ctx, bd, doc))
 	var want float32
-	core.RenderImage(bd, func() {}, func() { want = fontSize(bd) })
+	core.RenderImage(bd, func() {}, core.Locked(bd, func() { want = fontSize(bd) }))
 	require.NotZero(t, want)
 
 	again := ctx.NewPage()
@@ -717,11 +717,11 @@ func TestImageNaturalSizeDp(t *testing.T) {
 		return tree.Continue
 	})
 	require.NotNil(t, img)
-	core.RenderImage(bd, func() {}, func() {
+	core.RenderImage(bd, func() {}, core.Locked(bd, func() {
 		dp := img.Styles.UnitContext.Dots(units.UnitDp)
 		assert.Greater(t, dp, float32(1.5))
 		assert.InDelta(t, 100*dp, img.Geom.Size.Actual.Content.X, 2, "100 pixels in dp")
-	})
+	}))
 }
 
 // firstElement returns the first element of the given tag in the given HTML.
@@ -791,10 +791,10 @@ func TestImageSrcsetDensity(t *testing.T) {
 		return tree.Continue
 	})
 	require.NotNil(t, img, "an img of only a srcset is shown")
-	core.RenderImage(bd, func() {}, func() {
+	core.RenderImage(bd, func() {}, core.Locked(bd, func() {
 		dp := img.Styles.UnitContext.Dots(units.UnitDp)
 		assert.InDelta(t, 50*dp, img.Geom.Size.Actual.Content.X, 2, "100 pixels of 2x in dp")
-	})
+	}))
 }
 
 func TestZeroAreaClip(t *testing.T) {
@@ -864,7 +864,7 @@ func TestGridLonghandsAndColumnStart(t *testing.T) {
 		}
 		return tree.Continue
 	})
-	core.RenderImage(bd, func() {}, func() {
+	core.RenderImage(bd, func() {}, core.Locked(bd, func() {
 		dp := bd.Styles.UnitContext.Dots(units.UnitDp)
 		box := func(id string) image.Rectangle { return ws[id].Geom.TotalBBox }
 		inner := box("inner")
@@ -875,7 +875,7 @@ func TestGridLonghandsAndColumnStart(t *testing.T) {
 		assert.Equal(t, box("intro").Min.Y, box("side").Min.Y, "the sidebar is beside the intro")
 		assert.InDelta(t, float32(inner.Min.X)+float32(9*(col+20))*dp, float32(box("side").Min.X), float64(3*dp), "the sidebar starts at column 10")
 		assert.Greater(t, box("wide").Min.Y, box("intro").Min.Y, "below them")
-	})
+	}))
 }
 
 // TestImageMaxWidthPercentCaps tests that an image with a width attribute
@@ -917,10 +917,10 @@ func TestNegativeMarginOverlapShown(t *testing.T) {
 		return tree.Continue
 	})
 	var bb image.Rectangle
-	img := core.RenderImage(bd, func() {}, func() {
+	img := core.RenderImage(bd, func() {}, core.Locked(bd, func() {
 		require.NotNil(t, head)
 		bb = head.Geom.ContentBBox
-	})
+	}))
 	// the text is dark in the lower half of the box of the header
 	dark := 0
 	for y := (bb.Min.Y + bb.Max.Y) / 2; y < bb.Max.Y; y++ {
@@ -1321,11 +1321,11 @@ func TestViewportHeight(t *testing.T) {
 		}
 		return tree.Continue
 	})
-	core.RenderImage(bd, func() {}, func() {
+	core.RenderImage(bd, func() {}, core.Locked(bd, func() {
 		dp := bd.Styles.UnitContext.Dots(units.UnitDp)
 		assert.InDelta(t, 500*dp, ws["col"].Geom.Size.Actual.Total.Y, 2)
 		assert.InDelta(t, 150*dp, ws["mid"].Geom.Size.Actual.Total.Y, 2, "calc(100% - 560px) of 500, at least 150")
-	})
+	}))
 	assert.True(t, ctx.ViewportHeightUsed())
 
 	plain := NewContext()

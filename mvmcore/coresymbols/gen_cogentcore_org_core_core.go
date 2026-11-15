@@ -407,6 +407,7 @@ func RecycleTabWidget[T tree.NodeValue](ts *Tabs, name string) *T {
 			"ToolbarStyles":                 reflect.ValueOf(p_cogentcore_org_core_core.ToolbarStyles),
 			"TooltipStage":                  reflect.ValueOf(p_cogentcore_org_core_core.TooltipStage),
 			"TopScene":                      reflect.ValueOf(p_cogentcore_org_core_core.TopScene),
+			"TrackWindows":                  reflect.ValueOf(p_cogentcore_org_core_core.TrackWindows),
 			"Tree":                          reflect.ValueOf((*p_cogentcore_org_core_core.Tree)(nil)),
 			"TreeButton":                    reflect.ValueOf((*p_cogentcore_org_core_core.TreeButton)(nil)),
 			"TreeTable":                     reflect.ValueOf((*p_cogentcore_org_core_core.TreeTable)(nil)),

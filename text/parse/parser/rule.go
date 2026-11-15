@@ -15,6 +15,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"text/tabwriter"
 
 	"cogentcore.org/core/base/indent"
@@ -28,8 +29,24 @@ import (
 
 // GUIActive is set to true if the gui (parseview) is active -- ensures that the
 // AST tree is updated when nodes are swapped in reverse mode, and maybe
-// other things
+// other things. It must only be set before any parsing starts: use
+// [SetGUIActive] to set it while files can be parsed in other goroutines.
 var GUIActive = false
+
+// guiActive is set by [SetGUIActive].
+var guiActive atomic.Bool
+
+// SetGUIActive sets whether the gui is active (see [GUIActive]), safely
+// while files are being parsed in other goroutines.
+func SetGUIActive(on bool) {
+	guiActive.Store(on)
+}
+
+// isGUIActive returns whether the gui is active, as set by [GUIActive] or
+// [SetGUIActive].
+func isGUIActive() bool {
+	return GUIActive || guiActive.Load()
+}
 
 // DepthLimit is the infinite recursion prevention cutoff
 var DepthLimit = 10000
@@ -672,7 +689,7 @@ func (pr *Rule) ParseRules(ps *State, parent *Rule, parAST *AST, scope textpos.R
 		if !ok {
 			return nil
 		}
-	} else if GUIActive {
+	} else if isGUIActive() {
 		if scope == textpos.RegionZero {
 			ps.Error(scope.Start, "scope is empty and no EOS in rule -- invalid rules -- starting rules must all have EOS", pr)
 			return nil

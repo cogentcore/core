@@ -29,21 +29,6 @@ func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *Stage {
 	return st
 }
 
-// runPopupAsync runs a popup-style Stage in context widget's popups.
-// This version is for Asynchronous usage outside the main event loop,
-// for example in a delayed callback AfterFunc etc.
-func (st *Stage) runPopupAsync() *Stage {
-	ctx := st.Context.AsWidget()
-	if ctx.Scene.Stage == nil {
-		return st.runPopup()
-	}
-	ms := ctx.Scene.Stage.Main
-	rc := ms.renderContext
-	rc.Lock()
-	defer rc.Unlock()
-	return st.runPopup()
-}
-
 // runPopup runs a popup-style Stage in context widget's popups.
 func (st *Stage) runPopup() *Stage {
 	if !st.getValidContext() { // doesn't even have a scene
@@ -166,16 +151,6 @@ func (st *Stage) runPopup() *Stage {
 	}
 
 	return st
-}
-
-// closePopupAsync closes this stage as a popup.
-// This version is for Asynchronous usage outside the main event loop,
-// for example in a delayed callback AfterFunc etc.
-func (st *Stage) closePopupAsync() {
-	rc := st.Mains.renderContext
-	rc.Lock()
-	defer rc.Unlock()
-	st.ClosePopup()
 }
 
 // ClosePopup closes this stage as a popup, returning whether it was closed.

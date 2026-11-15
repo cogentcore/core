@@ -101,7 +101,7 @@ func testRestyle(t *testing.T, src string, restyled bool, change func(doc *html.
 	}
 	fresh := core.NewBody()
 	require.NoError(t, ReadDocument(NewContext(), fresh, doc))
-	core.RenderImage(fresh, func() {}, func() { want = widgetStates(fresh) })
+	core.RenderImage(fresh, func() {}, core.Locked(fresh, func() { want = widgetStates(fresh) }))
 	assert.Equal(t, want, got)
 	assert.NotEqual(t, before, got, "the change shows")
 }

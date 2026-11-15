@@ -53,7 +53,7 @@ func TestWindowTitle(t *testing.T) {
 		b.AsyncLock()
 		d.Close()
 		b.AsyncUnlock()
-	}, func() {
+	}, Locked(b, func() {
 		waitTitle("App", "back after the dialog")
-	})
+	}))
 }

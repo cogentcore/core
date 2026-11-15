@@ -159,6 +159,9 @@ func (ls *Lines) markupApplyEdits(tags []lexer.Line) []lexer.Line {
 	ls.markupEdits = nil
 	if ls.Highlighter.UsingParse() {
 		pfs := ls.parseState.Done()
+		// The types of the symbols of the file can be resolved from its
+		// source in another goroutine, under the lock of its symbols.
+		pfs.SymsMu.Lock()
 		for _, tbe := range edits {
 			if tbe.Delete {
 				stln := tbe.Region.Start.Line
@@ -173,6 +176,7 @@ func (ls *Lines) markupApplyEdits(tags []lexer.Line) []lexer.Line {
 		for ln := range tags { // todo: something weird about this -- not working in test
 			tags[ln] = pfs.LexLine(ln) // does clone, combines comments too
 		}
+		pfs.SymsMu.Unlock()
 	} else {
 		for _, tbe := range edits {
 			if tbe.Delete {
@@ -300,7 +304,9 @@ func (ls *Lines) insertLineSlices(tbe *textpos.Edit) {
 		}
 		if ls.Highlighter.UsingParse() {
 			pfs := ls.parseState.Done()
+			pfs.SymsMu.Lock() // (see markupApplyEdits)
 			pfs.Src.LinesInserted(stln, nsz)
+			pfs.SymsMu.Unlock()
 		}
 	}
 }
@@ -320,7 +326,9 @@ func (ls *Lines) linesDeleted(tbe *textpos.Edit) {
 		}
 		if ls.Highlighter.UsingParse() {
 			pfs := ls.parseState.Done()
+			pfs.SymsMu.Lock() // (see markupApplyEdits)
 			pfs.Src.LinesDeleted(stln, edln)
+			pfs.SymsMu.Unlock()
 		}
 	}
 	// remarkup of start line:

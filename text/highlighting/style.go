@@ -349,6 +349,8 @@ func (hs Style) Tag(tag token.Tokens) StyleEntry {
 
 // ToCSS generates a CSS style sheet for this style, by token.Tokens tag
 func (hs Style) ToCSS() map[token.Tokens]string {
+	themeMu.RLock() // (the theme colors can be updated in another window)
+	defer themeMu.RUnlock()
 	css := map[token.Tokens]string{}
 	for ht := range token.Names {
 		entry := hs.Tag(ht)
@@ -362,6 +364,8 @@ func (hs Style) ToCSS() map[token.Tokens]string {
 
 // ToProperties generates a list of key-value properties for this style.
 func (hs Style) ToProperties() map[string]any {
+	themeMu.RLock() // (the theme colors can be updated in another window)
+	defer themeMu.RUnlock()
 	pr := map[string]any{}
 	for ht, nm := range token.Names {
 		entry := hs.Tag(ht)

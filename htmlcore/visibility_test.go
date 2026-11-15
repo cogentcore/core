@@ -52,7 +52,7 @@ func TestTranslate(t *testing.T) {
 	assert.NoError(t, ReadHTMLString(ctx, b, `<div class="a" style="width: 100px; height: 40px; transform: translateY(-50%) translateX(10px)">a</div>`+
 		`<div class="b" style="width: 100px; height: 40px; translate: 20px 5px">b</div><div class="c" style="width: 100px; height: 40px">c</div>`))
 	pos := map[string][2]float32{}
-	core.RenderImage(b, func() {
+	core.RenderImage(b, core.Locked(b, func() {
 		b.WalkDown(func(n tree.Node) bool {
 			if wb := core.AsWidget(n); wb != nil {
 				if cl, ok := wb.Property("class").(string); ok {
@@ -62,7 +62,7 @@ func TestTranslate(t *testing.T) {
 			}
 			return tree.Continue
 		})
-	})
+	}))
 	assert.InDelta(t, pos["c"][0]+10, pos["a"][0], 0.5)
 	assert.InDelta(t, pos["c"][1]-80-20, pos["a"][1], 1.5, "up by half of its height, without changing the layout")
 	assert.InDelta(t, pos["c"][0]+20, pos["b"][0], 0.5)
@@ -78,7 +78,7 @@ func TestGridAutoFlowColumn(t *testing.T) {
 	assert.NoError(t, ReadHTMLString(ctx, b, `<ul style="display: grid; grid-auto-flow: column; list-style: none; width: max-content">`+
 		`<li class="a">one</li><li class="b">two</li><li class="c">three</li></ul>`))
 	pos := map[string][2]float32{}
-	core.RenderImage(b, func() {
+	core.RenderImage(b, core.Locked(b, func() {
 		b.WalkDown(func(n tree.Node) bool {
 			if wb := core.AsWidget(n); wb != nil {
 				if cl, ok := wb.Property("class").(string); ok {
@@ -87,7 +87,7 @@ func TestGridAutoFlowColumn(t *testing.T) {
 			}
 			return tree.Continue
 		})
-	})
+	}))
 	assert.Equal(t, pos["a"][1], pos["c"][1], "in one row")
 	assert.Less(t, pos["a"][0], pos["b"][0])
 	assert.Less(t, pos["b"][0], pos["c"][0])

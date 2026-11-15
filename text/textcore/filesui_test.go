@@ -30,6 +30,7 @@ func pressReturn(b *core.Body) func() {
 // first, and closing, which asks first for unsaved changes.
 func TestSaveAsClose(t *testing.T) {
 	dir := t.TempDir()
+	defer core.TrackWindows()() // (the file picker of save as, before dir is removed)
 	newf := filepath.Join(dir, "new.txt")
 	oldf := filepath.Join(dir, "old.txt")
 	require.NoError(t, os.WriteFile(oldf, []byte("old\n"), 0o644))

@@ -87,7 +87,7 @@ func testReread(t *testing.T, src string, reread bool, change rereadChange, kept
 	}
 	fresh := core.NewBody()
 	require.NoError(t, ReadDocument(NewContext(), fresh, doc))
-	core.RenderImage(fresh, func() {}, func() { want, wantTexts = widgetStates(fresh), bodyTexts(fresh) })
+	core.RenderImage(fresh, func() {}, core.Locked(fresh, func() { want, wantTexts = widgetStates(fresh), bodyTexts(fresh) }))
 	assert.Equal(t, want, got)
 	assert.Equal(t, wantTexts, gotTexts)
 	for _, id := range kept {
@@ -494,7 +494,7 @@ func TestPrepareRereadConcurrent(t *testing.T) {
 	var want map[string]string
 	fresh := core.NewBody()
 	require.NoError(t, ReadDocument(NewContext(), fresh, doc))
-	core.RenderImage(fresh, func() {}, func() { want = widgetStates(fresh) })
+	core.RenderImage(fresh, func() {}, core.Locked(fresh, func() { want = widgetStates(fresh) }))
 	assert.Equal(t, want, got)
 }
 
@@ -555,7 +555,7 @@ func TestRereadLinkedSheet(t *testing.T) {
 	require.True(t, ok, ctx.Fallback())
 	fresh := core.NewBody()
 	require.NoError(t, ReadDocument(newCtx(), fresh, doc))
-	core.RenderImage(fresh, func() {}, func() { want = widgetStates(fresh) })
+	core.RenderImage(fresh, func() {}, core.Locked(fresh, func() { want = widgetStates(fresh) }))
 	assert.Equal(t, want, got)
 	assert.Contains(t, got["a"], "bg #0000FF")
 }

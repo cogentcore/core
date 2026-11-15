@@ -200,8 +200,10 @@ func (is *Inspector) toggleSelectionMode() { //types:add
 func (is *Inspector) toggleSelectionModeOf(sc *Scene) {
 	sc.renderBBoxes = !sc.renderBBoxes
 	if sc.renderBBoxes {
-		sc.selectedWidgetChan = make(chan Widget)
-		go is.selectionMonitor()
+		ch := make(chan Widget)
+		sc.selectedWidgetChan = ch
+		sc.Stage.raise() // (here, in the window of the scene, with its lock)
+		go is.selectionMonitor(sc, ch)
 	} else {
 		if sc.selectedWidgetChan != nil {
 			close(sc.selectedWidgetChan)
@@ -211,14 +213,10 @@ func (is *Inspector) toggleSelectionModeOf(sc *Scene) {
 	sc.NeedsLayout()
 }
 
-// selectionMonitor monitors for the selected widget
-func (is *Inspector) selectionMonitor() {
-	sc, ok := is.Root.(*Scene)
-	if !ok {
-		return
-	}
-	sc.Stage.raise()
-	sw, ok := <-sc.selectedWidgetChan
+// selectionMonitor monitors for the widget of the given inspected scene
+// that is selected, sent on the given channel, in its own goroutine.
+func (is *Inspector) selectionMonitor(sc *Scene, ch chan Widget) {
+	sw, ok := <-ch
 	if !ok || sw == nil {
 		return
 	}
@@ -231,8 +229,8 @@ func (is *Inspector) selectionMonitor() {
 	tv.OpenParents()
 	tv.SelectEvent(events.SelectOne)
 	tv.ScrollToThis()
-	is.AsyncUnlock()
 	is.Scene.Stage.raise()
+	is.AsyncUnlock()
 
 	sc.AsyncLock()
 	sc.renderBBoxes = false

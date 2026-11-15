@@ -123,6 +123,7 @@ func TestFileCommands(t *testing.T) {
 // TestVCSSelected tests the version control commands for the selected
 // files: adding, removing, reverting, and the log and blame windows.
 func TestVCSSelected(t *testing.T) {
+	defer core.TrackWindows()()
 	dir, git := newGitRepo(t)
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "b.go"), []byte("package a\n"), 0o644))
 	ft := newVCSTree(t, dir)
@@ -145,13 +146,13 @@ func TestVCSSelected(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "package a\n\nvar A = 1\n", string(got), "reverted")
 
-	nw := len(core.AllRenderWindows)
+	nw := core.AllRenderWindows.Len()
 	ft.AsyncLock()
 	a.Info.VCS = vcs.Stored
 	a.logVCSSelected()
 	a.blameVCSSelected()
 	ft.AsyncUnlock()
-	assert.Eventually(t, func() bool { return len(core.AllRenderWindows) >= nw+2 }, 5*time.Second, 10*time.Millisecond, "the log and blame windows")
+	assert.Eventually(t, func() bool { return core.AllRenderWindows.Len() >= nw+2 }, 5*time.Second, 10*time.Millisecond, "the log and blame windows")
 
 	ft.AsyncLock()
 	a.deleteFromVCSSelected()

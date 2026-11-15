@@ -42,13 +42,13 @@ func TestZIndexFlexItem(t *testing.T) {
 		return tree.Continue
 	})
 	var c image.Point
-	img := core.RenderImage(bd, func() {}, func() {
+	img := core.RenderImage(bd, func() {}, core.Locked(bd, func() {
 		require.NotNil(t, ws["menu"])
 		bb := ws["menu"].Geom.TotalBBox
 		c = bb.Min.Add(bb.Size().Div(2))
 		assert.Equal(t, 20, ws["header"].Styles.ZIndex)
 		assert.Equal(t, 0, ws["block"].Styles.ZIndex, "the z-index of a block in a block has no effect")
-	})
+	}))
 	assert.Equal(t, color.RGBA{255, 0, 0, 255}, color.RGBAModel.Convert(img.At(c.X, c.Y)), "the menu is over the main")
 }
 
@@ -70,7 +70,7 @@ func TestBorderTriangle(t *testing.T) {
 	})
 	require.NotNil(t, tri)
 	var bb image.Rectangle
-	img := core.RenderImage(bd, func() {}, func() { bb = tri.Geom.TotalBBox })
+	img := core.RenderImage(bd, func() {}, core.Locked(bd, func() { bb = tri.Geom.TotalBBox }))
 	red := color.RGBA{255, 0, 0, 255}
 	at := func(fx, fy float32) color.RGBA {
 		x := bb.Min.X + int(fx*float32(bb.Dx()))
@@ -107,7 +107,7 @@ func TestImageBorderRadius(t *testing.T) {
 	})
 	require.NotNil(t, av)
 	var bb image.Rectangle
-	img := core.RenderImage(bd, func() {}, func() { bb = av.Geom.ContentBBox })
+	img := core.RenderImage(bd, func() {}, core.Locked(bd, func() { bb = av.Geom.ContentBBox }))
 	at := func(x, y int) color.RGBA { return color.RGBAModel.Convert(img.At(x, y)).(color.RGBA) }
 	c := bb.Min.Add(bb.Size().Div(2))
 	assert.Equal(t, color.RGBA{255, 0, 0, 255}, at(c.X, c.Y), "the center is red")

@@ -47,10 +47,10 @@ func TestEditorVirtualIME(t *testing.T) {
 	ed := newWideEditor(b)
 	ed.Lines.SetString("hello world\nsecond line\n")
 	pos := textpos.Pos{Line: 0, Char: 6}
-	core.AssertRender(t, b, "virtual/ime", func() {
+	core.AssertRender(t, b, "virtual/ime", core.Locked(b, func() {
 		ed.SetCursorShow(pos)
 		ed.SetVirtualText("ime", lines.VirtualText{Pos: pos, Text: rich.NewText(ed.CompositionStyle(), []rune("compose"))})
-	}, func() {
+	}), core.Locked(b, func() {
 		cw := ed.charSize.X
 		p6 := ed.CharStartPos(pos)
 		p7 := ed.CharStartPos(textpos.Pos{Line: 0, Char: 7})
@@ -64,7 +64,7 @@ func TestEditorVirtualIME(t *testing.T) {
 		assert.Equal(t, textpos.Pos{Line: 0, Char: 7}, ed.PixelToCursor(clickPoint(&ed.Base, p7)))
 		assert.Equal(t, pos, ed.PixelToCursor(clickPoint(&ed.Base, cur)))
 		assert.Equal(t, "hello world\nsecond line\n", ed.Lines.String())
-	})
+	}))
 }
 
 // TestEditorVirtualInlay tests language server inlay hints, which are
@@ -76,12 +76,12 @@ func TestEditorVirtualInlay(t *testing.T) {
 	ed.Lines.SetString("foo(1, 2)\n")
 	twin := newWideEditor(b)
 	twin.SetLines(ed.Lines)
-	core.AssertRender(t, b, "virtual/inlay", func() {
+	core.AssertRender(t, b, "virtual/inlay", core.Locked(b, func() {
 		ed.Lines.SetVirtualText("inlay", -1,
 			lines.VirtualText{Pos: textpos.Pos{Line: 0, Char: 4}, Text: rich.NewText(ed.HintStyle(), []rune("a: "))},
 			lines.VirtualText{Pos: textpos.Pos{Line: 0, Char: 7}, Text: rich.NewText(ed.HintStyle(), []rune("b: "))})
 		ed.SetVirtualText("ime", lines.VirtualText{Pos: textpos.Pos{Line: 0, Char: 9}, Text: rich.NewText(ed.CompositionStyle(), []rune("x"))})
-	}, func() {
+	}), core.Locked(b, func() {
 		end := textpos.Pos{Line: 0, Char: 9}
 		assert.Equal(t, textpos.Pos{Line: 0, Char: 15}, ed.Lines.PosToView(ed.viewID, end))
 		assert.Equal(t, textpos.Pos{Line: 0, Char: 15}, twin.Lines.PosToView(twin.viewID, end))
@@ -93,7 +93,7 @@ func TestEditorVirtualInlay(t *testing.T) {
 		ed.HandleEvent(events.NewKey(events.KeyChord, 'z', 0, 0))
 		assert.Equal(t, "foo(z1, 2)\n", ed.Lines.String())
 		assert.Equal(t, textpos.Pos{Line: 0, Char: 5}, ed.CursorPos)
-	})
+	}))
 }
 
 // TestEditorVirtualSuggestion tests a multi-line suggested completion,
@@ -103,17 +103,17 @@ func TestEditorVirtualSuggestion(t *testing.T) {
 	ed := newWideEditor(b)
 	ed.Lines.SetString("func f() {\n}\n")
 	sug := lines.VirtualText{Pos: textpos.Pos{Line: 0, Char: 10}, Text: rich.NewText(ed.SuggestionStyle(), []rune("\n\ta := 1\n\treturn a"))}
-	core.AssertRender(t, b, "virtual/suggestion", func() {
+	core.AssertRender(t, b, "virtual/suggestion", core.Locked(b, func() {
 		ed.SetCursorShow(sug.Pos)
 		ed.SetVirtualText("suggestion", sug)
-	}, func() {
+	}), core.Locked(b, func() {
 		assert.Equal(t, 4, ed.Lines.ViewLines(ed.viewID))
 		ed.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeDownArrow, 0))
 		assert.Equal(t, 1, ed.CursorPos.Line)
 		ed.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeUpArrow, 0))
 		assert.Equal(t, 0, ed.CursorPos.Line)
 		ed.SetCursorShow(sug.Pos)
-	})
+	}))
 
 	// accept
 	ed.ClearVirtualText("suggestion")

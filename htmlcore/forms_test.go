@@ -178,10 +178,10 @@ func TestDetails(t *testing.T) {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		summaries[0].Send(events.Click)
-	}, func() {
+	}, core.Locked(b, func() {
 		assert.True(t, visible(texts["Hidden text"]), "opened by a click")
 		assert.True(t, summaries[0].Styles.Abilities.IsHoverable(), "for summary:hover")
-	})
+	}))
 }
 
 // TestToggleDetails tests that a click on a summary toggles its details
@@ -204,11 +204,11 @@ func TestToggleDetails(t *testing.T) {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		summary.Send(events.Click)
-	}, func() {
+	}, core.Locked(b, func() {
 		if assert.Len(t, toggled, 1) {
 			assert.Equal(t, "d", GetAttr(toggled[0], "id"))
 		}
-	})
+	}))
 }
 
 // TestRadioGroup tests that radio buttons are switches (as the widgets of
@@ -232,13 +232,13 @@ func TestRadioGroup(t *testing.T) {
 		}
 		return tree.Continue
 	})
-	core.RenderImage(b, func() {
+	core.RenderImage(b, core.Locked(b, func() {
 		sw["b"].Send(events.Click)
-	}, func() {
+	}), core.Locked(b, func() {
 		assert.True(t, sw["b"].IsChecked())
 		assert.False(t, sw["a"].IsChecked(), "unchecked by the other of its group")
 		assert.True(t, sw["c"].IsChecked(), "another group")
-	})
+	}))
 }
 
 // TestPositionedButtonClick tests clicks with the mouse on a button that is
@@ -259,7 +259,7 @@ func TestPositionedButtonClick(t *testing.T) {
 	require.NoError(t, ReadHTMLString(ctx, b, `<ul style="list-style: none; margin-left: 40px"><li style="position: relative; padding-left: 20px">`+
 		`<button style="position: absolute; left: -20px; top: 0; width: 30px; height: 22px"><span>v</span></button><a href="#x">Syntax</a></li></ul>`))
 	require.NotNil(t, button)
-	core.RenderImage(b, func() {
+	core.RenderImage(b, core.Locked(b, func() {
 		ev := b.Scene.RenderWindow().SystemWindow.Events()
 		bb := button.Geom.TotalBBox
 		for _, x := range []int{bb.Min.X + 3, (bb.Min.X + bb.Max.X) / 2, bb.Max.X - 3} { // outside of its parent, on its text, inside
@@ -267,9 +267,9 @@ func TestPositionedButtonClick(t *testing.T) {
 			ev.MouseButton(events.MouseDown, events.Left, pos, 0)
 			ev.MouseButton(events.MouseUp, events.Left, pos, 0)
 		}
-	}, func() {
+	}), core.Locked(b, func() {
 		assert.Equal(t, 3, clicks)
-	})
+	}))
 }
 
 // TestCheckedSelector tests the :checked selector with the state of the
@@ -375,11 +375,11 @@ func TestInputIcon(t *testing.T) {
 	assert.Contains(t, string(tf.LeadingIcon), `fill="currentColor"`, "a mask has the color of the text")
 	assert.Equal(t, 0, spans, "the icon element is not rendered")
 	assert.Equal(t, "Search", tf.Placeholder)
-	core.RenderImage(bd, func() {}, func() {
+	core.RenderImage(bd, func() {}, core.Locked(bd, func() {
 		dp := tf.Styles.UnitContext.Dots(units.UnitDp)
 		assert.InDelta(t, 9*dp, tf.Styles.Padding.Left.Dots, 1, "the space before the icon")
 		assert.False(t, tf.Styles.Text.WhiteSpace.HasWordWrap(), "an input is one line")
-	})
+	}))
 }
 
 // TestInputButtonLabelClick tests that a mouse click on the label of an
@@ -401,13 +401,13 @@ func TestInputButtonLabelClick(t *testing.T) {
 		return tree.Continue
 	})
 	require.NotNil(t, label)
-	core.RenderImage(b, func() {
+	core.RenderImage(b, core.Locked(b, func() {
 		pos := label.Geom.TotalBBox.Min.Add(label.Geom.TotalBBox.Size().Div(2))
 		b.Scene.RenderWindow().SystemWindow.Events().MouseButton(events.MouseDown, events.Left, pos, 0)
 		b.Scene.RenderWindow().SystemWindow.Events().MouseButton(events.MouseUp, events.Left, pos, 0)
-	}, func() {
+	}), core.Locked(b, func() {
 		assert.Equal(t, []string{"https://www.example.com/compare?diff=2"}, opened)
-	})
+	}))
 }
 
 // TestButtonHover tests that buttons (button elements and input buttons,
@@ -424,14 +424,14 @@ func TestButtonHover(t *testing.T) {
 		return tree.Continue
 	})
 	require.Len(t, buttons, 2)
-	core.RenderImage(b, func() {}, func() {
+	core.RenderImage(b, func() {}, core.Locked(b, func() {
 		for _, bt := range buttons {
 			assert.True(t, bt.Styles.Abilities.IsHoverable(), bt.Property("tag"))
 			bt.SetState(true, states.Hovered)
 			bt.Style()
 			assert.Greater(t, bt.Styles.StateLayer, float32(0), "a state layer when hovered")
 		}
-	})
+	}))
 }
 
 // TestTransparentControlHover tests that the element after a transparent
@@ -453,14 +453,14 @@ func TestTransparentControlHover(t *testing.T) {
 	})
 	require.NotNil(t, sw)
 	require.NotNil(t, label)
-	core.RenderImage(b, func() {}, func() {
+	core.RenderImage(b, func() {}, core.Locked(b, func() {
 		sw.Send(events.MouseEnter)
 		assert.True(t, label.StateIs(states.Hovered), "the label shows the hover")
 		label.Style()
 		assert.Greater(t, label.Styles.StateLayer, float32(0))
 		sw.Send(events.MouseLeave)
 		assert.False(t, label.StateIs(states.Hovered))
-	})
+	}))
 }
 
 // TestSelectOneLine tests a select that is a block of 100% width (as the
@@ -522,15 +522,15 @@ func TestPointerEventsNone(t *testing.T) {
 	require.NoError(t, ReadHTMLString(ctx, b, `<div style="position: relative; width: 200px; height: 60px"><button style="width: 120px; height: 40px">Search</button>`+
 		`<div style="position: absolute; inset: 0; pointer-events: none"><div style="position: absolute; inset: 0; background: rgba(0, 0, 0, 0.1)"></div></div></div>`))
 	require.NotNil(t, button)
-	core.RenderImage(b, func() {
+	core.RenderImage(b, core.Locked(b, func() {
 		ev := b.Scene.RenderWindow().SystemWindow.Events()
 		bb := button.Geom.TotalBBox
 		pos := image.Pt((bb.Min.X+bb.Max.X)/2, (bb.Min.Y+bb.Max.Y)/2)
 		ev.MouseButton(events.MouseDown, events.Left, pos, 0)
 		ev.MouseButton(events.MouseUp, events.Left, pos, 0)
-	}, func() {
+	}), core.Locked(b, func() {
 		assert.Equal(t, 1, clicks)
-	})
+	}))
 }
 
 // TestSelectDefaultStyle tests the style of a select with no CSS of its own,
@@ -585,13 +585,13 @@ func TestOpenLink(t *testing.T) {
 	})
 	require.NoError(t, ReadHTMLString(ctx, b, `<a id="first" href="#x" style="display: block">First</a><a id="second" href="#x" style="display: block">Second <i>link</i></a>`))
 	require.NotNil(t, second)
-	core.RenderImage(b, func() {
+	core.RenderImage(b, core.Locked(b, func() {
 		ev := b.Scene.RenderWindow().SystemWindow.Events()
 		bb := second.Geom.TotalBBox
 		pos := image.Pt(bb.Min.X+5, (bb.Min.Y+bb.Max.Y)/2)
 		ev.MouseButton(events.MouseDown, events.Left, pos, 0)
 		ev.MouseButton(events.MouseUp, events.Left, pos, 0)
-	}, func() {
+	}), core.Locked(b, func() {
 		assert.Equal(t, []string{"second #x"}, got)
-	})
+	}))
 }

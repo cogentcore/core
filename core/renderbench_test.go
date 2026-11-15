@@ -30,17 +30,17 @@ func BenchmarkTable(bm *testing.B) {
 	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Dp(1280), units.Dp(720))
 	})
-	AssertRender(bm, b, "table/benchmark", func() {
+	AssertRender(bm, b, "table/benchmark", Locked(b, func() {
 		w := b.Scene.RenderWindow()
 		for range bm.N {
 			b.Scene.NeedsRender()
 			w.renderWindow() // Note: MUST remove "go" in renderwindow.go call to w.renderAsync!
 		}
-	})
+	}))
 	if !profileRenderBench {
 		return
 	}
-	AssertRender(bm, b, "table/profile", func() {
+	AssertRender(bm, b, "table/profile", Locked(b, func() {
 		w := b.Scene.RenderWindow()
 		// startCPUMemoryProfile()
 		startTargetedProfile()
@@ -50,7 +50,7 @@ func BenchmarkTable(bm *testing.B) {
 		}
 		endTargetedProfile()
 		// endCPUMemoryProfile()
-	})
+	}))
 }
 
 // Note: MUST remove "go" in renderwindow.go call to w.renderAsync!
@@ -63,17 +63,17 @@ func BenchmarkForm(bm *testing.B) {
 	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Dp(1280), units.Dp(720))
 	})
-	AssertRender(bm, b, "form/benchmark", func() {
+	AssertRender(bm, b, "form/benchmark", Locked(b, func() {
 		w := b.Scene.RenderWindow()
 		for range bm.N {
 			b.Scene.NeedsRender()
 			w.renderWindow() // Note: MUST remove "go" in renderwindow.go call to w.renderAsync!
 		}
-	})
+	}))
 	if !profileRenderBench {
 		return
 	}
-	AssertRender(bm, b, "form/profile", func() {
+	AssertRender(bm, b, "form/profile", Locked(b, func() {
 		w := b.Scene.RenderWindow()
 		// startCPUMemoryProfile()
 		startTargetedProfile()
@@ -83,7 +83,7 @@ func BenchmarkForm(bm *testing.B) {
 		}
 		endTargetedProfile()
 		// endCPUMemoryProfile()
-	})
+	}))
 }
 
 // profileRenderBench is whether the render benchmarks also profile the

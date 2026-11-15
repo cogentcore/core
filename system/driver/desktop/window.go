@@ -379,10 +379,10 @@ func (w *Window) Minimize() {
 }
 
 func (w *Window) Close() {
-	if w == nil {
+	if w == nil || !w.MarkClosing() {
 		return
 	}
-	w.Window.Close()
+	w.Window.CloseBase()
 
 	w.Mu.Lock()
 	defer w.Mu.Unlock()

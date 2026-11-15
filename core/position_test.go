@@ -128,13 +128,13 @@ func TestPositionEvents(t *testing.T) {
 	var clicked Widget
 	over.OnClick(func(e events.Event) { clicked = over })
 	under.OnClick(func(e events.Event) { clicked = under })
-	AssertRender(t, b, "position/events", func() {
+	AssertRender(t, b, "position/events", Locked(b, func() {
 		pos := over.Geom.TotalBBox.Min.Add(image.Pt(10, 10))
 		b.Scene.RenderWindow().SystemWindow.Events().MouseButton(events.MouseDown, events.Left, pos, 0)
 		b.Scene.RenderWindow().SystemWindow.Events().MouseButton(events.MouseUp, events.Left, pos, 0)
-	}, func() {
+	}), Locked(b, func() {
 		assert.Equal(t, Widget(over), clicked)
-	})
+	}))
 }
 
 // TestPositionSticky tests a sticky widget at the top of a section of a
@@ -210,15 +210,15 @@ func TestPositionRaised(t *testing.T) {
 	menu.OnClick(func(e events.Event) { clicked = menu })
 	after.OnClick(func(e events.Event) { clicked = after })
 	var pos image.Point
-	img := RenderImage(b, func() {
+	img := RenderImage(b, Locked(b, func() {
 		assert.Equal(t, b.Scene.AsWidget(), menu.raisedTo(), "raised to the scene")
 		pos = menu.Geom.TotalBBox.Max.Sub(image.Pt(5, 5))
 		assert.True(t, pos.In(after.Geom.TotalBBox), "over the widget after")
 		b.Scene.RenderWindow().SystemWindow.Events().MouseButton(events.MouseDown, events.Left, pos, 0)
 		b.Scene.RenderWindow().SystemWindow.Events().MouseButton(events.MouseUp, events.Left, pos, 0)
-	}, func() {
+	}), Locked(b, func() {
 		assert.Equal(t, Widget(menu), clicked)
-	})
+	}))
 	r, g, bl, _ := img.At(pos.X, pos.Y).RGBA()
 	assert.Equal(t, [3]uint32{0xffff, 0, 0}, [3]uint32{r, g, bl}, "rendered over the widget after")
 }
@@ -250,14 +250,14 @@ func TestPositionHiddenEvents(t *testing.T) {
 	var clicked Widget
 	item.OnClick(func(e events.Event) { clicked = item })
 	after.OnClick(func(e events.Event) { clicked = after })
-	RenderImage(b, func() {
+	RenderImage(b, Locked(b, func() {
 		pos := menu.Geom.TotalBBox.Max.Sub(image.Pt(5, 5))
 		assert.True(t, pos.In(after.Geom.TotalBBox))
 		b.Scene.RenderWindow().SystemWindow.Events().MouseButton(events.MouseDown, events.Left, pos, 0)
 		b.Scene.RenderWindow().SystemWindow.Events().MouseButton(events.MouseUp, events.Left, pos, 0)
-	}, func() {
+	}), Locked(b, func() {
 		assert.Equal(t, Widget(after), clicked)
-	})
+	}))
 }
 
 // TestPositionCoveredEvents tests that a widget under a raised widget that
@@ -284,7 +284,7 @@ func TestPositionCoveredEvents(t *testing.T) {
 	clicked := false
 	under.OnClick(func(e events.Event) { clicked = true })
 	var pos image.Point
-	RenderImage(b, func() {
+	RenderImage(b, Locked(b, func() {
 		pos = menu.Geom.TotalBBox.Max.Sub(image.Pt(5, 5))
 		assert.True(t, pos.In(under.Geom.TotalBBox), "over the widget under it")
 		ev := b.Scene.RenderWindow().SystemWindow.Events()
@@ -292,15 +292,15 @@ func TestPositionCoveredEvents(t *testing.T) {
 		ev.MouseMove(pos)
 		ev.MouseButton(events.MouseDown, events.Left, pos, 0)
 		ev.MouseButton(events.MouseUp, events.Left, pos, 0)
-	}, func() {
+	}), Locked(b, func() {
 		assert.False(t, under.StateIs(states.Hovered), "not hovered under the menu")
 		assert.False(t, clicked, "not clicked under the menu")
 		// and outside of the menu, it is
 		out := under.Geom.TotalBBox.Max.Sub(image.Pt(5, 5))
 		b.Scene.RenderWindow().SystemWindow.Events().MouseMove(out)
-	}, func() {
+	}), Locked(b, func() {
 		assert.True(t, under.StateIs(states.Hovered), "hovered outside of the menu")
-	})
+	}))
 }
 
 // TestPositionTransparentContent tests that the widgets in an absolute
@@ -323,7 +323,7 @@ func TestPositionTransparentContent(t *testing.T) {
 	tx := NewText(over).SetText("  ")
 	tx.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(200), units.Dp(40)) })
 	var pos image.Point
-	img := RenderImage(b, func() { pos = tx.Geom.TotalBBox.Min.Add(image.Pt(5, 5)) })
+	img := RenderImage(b, Locked(b, func() { pos = tx.Geom.TotalBBox.Min.Add(image.Pt(5, 5)) }))
 	r, g, bl, _ := img.At(pos.X, pos.Y).RGBA()
 	assert.Equal(t, [3]uint32{0, 0x80, 0}, [3]uint32{r >> 8, g >> 8, bl >> 8}, "the fill under the text")
 }
@@ -347,7 +347,7 @@ func TestPositionTranslucentBackground(t *testing.T) {
 		s.Background = colors.Uniform(color.RGBA{0, 0, 0, 64}) // (premultiplied: 25% black)
 	})
 	var pos image.Point
-	img := RenderImage(b, func() { pos = fill.Geom.TotalBBox.Min.Add(image.Pt(5, 5)) })
+	img := RenderImage(b, Locked(b, func() { pos = fill.Geom.TotalBBox.Min.Add(image.Pt(5, 5)) }))
 	r, g, bl, _ := img.At(pos.X, pos.Y).RGBA()
 	assert.InDelta(t, 191, r>>8, 2, "the red fill, darkened")
 	assert.Equal(t, [2]uint32{0, 0}, [2]uint32{g >> 8, bl >> 8})
@@ -429,11 +429,11 @@ func TestPositionStatic(t *testing.T) {
 		s.Inset.Left = units.Dp(0)
 		s.InsetSet.Left = true
 	})
-	RenderImage(b, func() {
+	RenderImage(b, Locked(b, func() {
 		bb, pb := button.Geom.TotalBBox, panel.Geom.Pos.Total
 		assert.InDelta(t, float32(bb.Max.Y), pb.Y, 1, "below the button")
 		assert.InDelta(t, col.Geom.Pos.Content.X, pb.X, 1, "at the left of its containing block")
-	})
+	}))
 }
 
 // TestPositionEmptyParentRendered tests that the positioned children of a
@@ -462,10 +462,10 @@ func TestPositionEmptyParentRendered(t *testing.T) {
 		s.Background = colors.Uniform(colors.Red)
 	})
 	var pos image.Point
-	img := RenderImage(b, func() {
+	img := RenderImage(b, Locked(b, func() {
 		assert.True(t, holder.Geom.TotalBBox.Empty(), "the holder has no size")
 		pos = banner.Geom.TotalBBox.Min.Add(image.Pt(5, 5))
-	})
+	}))
 	r, g, bl, _ := img.At(pos.X, pos.Y).RGBA()
 	assert.Equal(t, [3]uint32{0xff, 0, 0}, [3]uint32{r >> 8, g >> 8, bl >> 8}, "the banner over the fill")
 }
@@ -530,13 +530,13 @@ func TestRoundedNoClipBorder(t *testing.T) {
 			}
 		})
 		var pos image.Point
-		img := RenderImage(b, func() {
+		img := RenderImage(b, Locked(b, func() {
 			bb := box.Geom.TotalBBox
 			// on the top left corner of the border, at 45 degrees
 			r := float32(bb.Dy()) / 2
 			d := r - (r-1)*0.7071
 			pos = image.Pt(bb.Min.X+int(d), bb.Min.Y+int(d))
-		})
+		}))
 		r, g, bl, _ := img.At(pos.X, pos.Y).RGBA()
 		assert.Less(t, (r+g+bl)/3>>8, uint32(128), "the corner of the border is shown (child background %v)", childBg)
 	}

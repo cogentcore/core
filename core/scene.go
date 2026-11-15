@@ -135,6 +135,10 @@ type Scene struct { //core:no-new
 	// render context.
 	hasShown atomic.Bool
 
+	// shown is closed when the scene has been shown (with hasShown), for
+	// [WidgetBase.AsyncLock] to wait on.
+	shown chan struct{}
+
 	// asyncLocked is the render context locked by [WidgetBase.AsyncLock]
 	// (or [WidgetBase.AsyncLockIfShown]), which [WidgetBase.AsyncUnlock]
 	// unlocks. The render context of the scene can be nil in between, as
@@ -220,6 +224,7 @@ func NewScene(name ...string) *Scene {
 
 func (sc *Scene) Init() {
 	sc.Scene = sc
+	sc.shown = make(chan struct{})
 	sc.Frame.Init()
 	sc.AddContextMenu(sc.standardContextMenu)
 	sc.Styler(func(s *styles.Style) {

@@ -1050,14 +1050,17 @@ func (em *Events) startRepeatClickTimer() {
 		delay *= 8
 	}
 	em.repeatClickTimer = time.AfterFunc(delay, func() {
+		// We are not in the event loop here, so the state of the events
+		// is only accessed with the lock (as the event loop can cancel the
+		// repeat click at the same time).
+		if !em.scene.AsyncLockIfShown() {
+			return
+		}
+		defer em.scene.AsyncUnlock()
 		if tree.IsNil(em.repeatClick) || !em.repeatClick.AsWidget().IsVisible() {
 			return
 		}
-		// note: we are not in event loop here anymore!
-		rw := em.repeatClick.AsWidget()
-		rw.AsyncLock()
-		rw.Send(events.Click)
-		rw.AsyncUnlock()
+		em.repeatClick.AsWidget().Send(events.Click)
 		em.startRepeatClickTimer()
 	})
 }

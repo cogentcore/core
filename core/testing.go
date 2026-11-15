@@ -7,6 +7,7 @@ package core
 import (
 	"fmt"
 	"image"
+	"slices"
 	"time"
 
 	"cogentcore.org/core/base/iox/imagex"
@@ -118,16 +119,50 @@ func (bd *Body) waitNoEvents(rw *renderWindow) {
 }
 
 // Locked returns a function that calls the given function with the
-// AsyncLock of the given body held, for use as one of the functions passed
-// to [AssertRender] or [RenderImage], which are called from outside of the
-// event loop:
+// AsyncLock of the given widget (typically the body) held, for use as one
+// of the functions passed to [AssertRender] or [RenderImage], which are
+// called from outside of the event loop:
 //
 //	AssertRender(t, b, "name", Locked(b, func() { w.Send(events.Click) }))
-func Locked(b *Body, fun func()) func() {
+//
+// A function that uses the widgets of another window (such as one that a
+// dialog opened in a new window) needs the lock of that window, so it is
+// given a widget in that window.
+func Locked(w Widget, fun func()) func() {
 	return func() {
-		b.AsyncLock()
-		defer b.AsyncUnlock()
+		wb := w.AsWidget()
+		wb.AsyncLock()
+		defer wb.AsyncUnlock()
 		fun()
+	}
+}
+
+// TrackWindows returns a function that closes the windows that have been
+// opened since TrackWindows was called (as by dialogs in new windows) and
+// waits until they are closed, so that the windows of a test do not render
+// while other tests change global state (as the color scheme). It must be
+// called without the lock of any window held:
+//
+//	defer TrackWindows()()
+func TrackWindows() func() {
+	before := AllRenderWindows.windows()
+	return func() {
+		var opened []*renderWindow
+		for _, w := range AllRenderWindows.windows() {
+			if !slices.Contains(before, w) {
+				opened = append(opened, w)
+				w.SystemWindow.CloseReq()
+			}
+		}
+		for range 500 {
+			open := slices.ContainsFunc(AllRenderWindows.windows(), func(w *renderWindow) bool {
+				return slices.Contains(opened, w)
+			})
+			if !open {
+				return
+			}
+			time.Sleep(10 * time.Millisecond)
+		}
 	}
 }
 

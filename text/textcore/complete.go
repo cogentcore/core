@@ -194,7 +194,7 @@ func completeParse(data any, text string, posLine, posChar int) (md complete.Mat
 
 	// note: must have this set to ture to allow viewing of AST
 	// must set it in pi/parse directly -- so it is changed in the fileparse too
-	parser.GUIActive = true // note: this is key for debugging -- runs slower but makes the tree unique
+	parser.SetGUIActive(true) // note: this is key for debugging -- runs slower but makes the tree unique
 
 	md = lp.Lang.CompleteLine(sfs, text, textpos.Pos{Line: posLine, Char: posChar})
 	return md
@@ -230,7 +230,7 @@ func lookupParse(data any, txt string, posLine, posChar int) (ld complete.Lookup
 
 	// note: must have this set to ture to allow viewing of AST
 	// must set it in pi/parse directly -- so it is changed in the fileparse too
-	parser.GUIActive = true // note: this is key for debugging -- runs slower but makes the tree unique
+	parser.SetGUIActive(true) // note: this is key for debugging -- runs slower but makes the tree unique
 
 	ld = lp.Lang.Lookup(sfs, txt, textpos.Pos{Line: posLine, Char: posChar})
 	if len(ld.Text) > 0 {

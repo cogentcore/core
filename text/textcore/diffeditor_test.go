@@ -61,18 +61,23 @@ func TestDiffFiles(t *testing.T) {
 	require.NoError(t, os.WriteFile(fa, []byte("one\ntwo\n"), 0644))
 	require.NoError(t, os.WriteFile(fb, []byte("one\nthree\n"), 0644))
 	b := core.NewBody()
+	var de *DiffEditor
 	core.RenderImage(b, core.Locked(b, func() {
-		de, err := DiffFiles(b, fa, fb)
+		var err error
+		de, err = DiffFiles(b, fa, fb)
 		require.NoError(t, err)
+		_, err = DiffFiles(b, fa, filepath.Join(dir, "none"))
+		assert.Error(t, err)
+	}), func() {
+		de.AsyncLock() // (it is in the window of the dialog)
+		defer de.AsyncUnlock()
 		assert.Contains(t, de.linesB.String(), "three")
 		fc := filepath.Join(dir, "c.txt")
 		de.saveAs(true, core.Filename(fc))
 		got, err := os.ReadFile(fc)
 		require.NoError(t, err)
 		assert.Equal(t, "one\nthree\n", string(got), "true saves B")
-		_, err = DiffFiles(b, fa, filepath.Join(dir, "none"))
-		assert.Error(t, err)
-	}))
+	})
 }
 
 // TestTwinEditors tests the twin editors, whose cursors are synced.

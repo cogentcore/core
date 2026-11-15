@@ -355,7 +355,12 @@ func (wb *WidgetBase) OnAdd() {
 			// external parent, leaves the scenes of the descendants alone.
 			wb.setDescendantScenes(pwb.Scene)
 		}
-		wb.Scene = pwb.Scene
+		if wb.Scene != pwb.Scene {
+			// (not written when it is the same, as for a body added to its
+			// scene when its window is run, while another goroutine can
+			// wait in [WidgetBase.AsyncLock] for the scene to be shown)
+			wb.Scene = pwb.Scene
+		}
 		if wb.hasFlag(widgetNeedsRender) || wb.hasFlag(widgetChildNeedsRender) {
 			wb.setParentsChildNeedsRender()
 		}

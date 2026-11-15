@@ -301,28 +301,28 @@ func TestTextFieldWidths(t *testing.T) {
 	}
 	t.Run("short", func(t *testing.T) {
 		tf, b := field(0, short)
-		RenderImage(b, func() {}, func() {
+		RenderImage(b, func() {}, Locked(b, func() {
 			assert.InDelta(t, 1, lines(tf), 0.3, "one line")
 			assert.Greater(t, tf.Geom.Size.Actual.Total.X, tf.styleMinDots().X, "wider than its Min, for its text")
-		})
+		}))
 	})
 	t.Run("max", func(t *testing.T) {
 		tf, b := field(0, long)
-		RenderImage(b, func() {}, func() {
+		RenderImage(b, func() {}, Locked(b, func() {
 			// as wide as its Max (the window is sized to it), wrapping in it
 			// (the width of its lines, which wrap within it)
 			assert.InDelta(t, tf.Geom.Size.Max.X, tf.Geom.Size.Actual.Content.X, 8)
 			assert.LessOrEqual(t, lines(tf), float32(4.3), "a few lines at its Max")
-		})
+		}))
 	})
 	t.Run("narrow", func(t *testing.T) {
 		tf, b := field(120, words)
-		RenderImage(b, func() {}, func() {
+		RenderImage(b, func() {}, Locked(b, func() {
 			w := tf.Geom.Size.Actual.Content.X
 			assert.Less(t, w, tf.styleMinDots().X, "narrower than its Min")
 			assert.GreaterOrEqual(t, w, tf.minContentWidth(), "not narrower than its longest word")
 			assert.Greater(t, lines(tf), float32(2.5), "wrapped")
-		})
+		}))
 	})
 	t.Run("form", func(t *testing.T) {
 		// as in the settings window, which is sized to its content
@@ -330,7 +330,7 @@ func TestTextFieldWidths(t *testing.T) {
 		b := NewBody()
 		st := &struct{ UserAgent string }{long}
 		NewForm(b).SetStruct(st)
-		RenderImage(b, func() {}, func() {
+		RenderImage(b, func() {}, Locked(b, func() {
 			var tf *TextField
 			b.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
 				if x, ok := cw.(*TextField); ok {
@@ -348,14 +348,11 @@ func TestTextFieldWidths(t *testing.T) {
 				m.ToDots(&tf.Styles.UnitContext)
 				// (as wide as the measure, within which its text wraps, not as
 				// wide as the screen, as it is offered)
-				// (under the lock, as the window is updated by its event loop)
-				b.AsyncLock()
 				csz := float32(b.Scene.contentSize(image.Pt(4000, 4000)).X)
-				b.AsyncUnlock()
 				assert.Greater(t, csz, m.Dots, "as wide as a readable measure")
 				assert.Less(t, csz, m.Dots+200, "within a readable measure")
 			}
-		})
+		}))
 	})
 }
 
@@ -366,10 +363,10 @@ func TestTextFieldWidthsRow(t *testing.T) {
 	fr := NewFrame(b)
 	a := NewTextField(fr).SetText("MacStandard")
 	d := NewTextField(fr).SetText("Standard Mac KeyMap")
-	RenderImage(b, func() {}, func() {
+	RenderImage(b, func() {}, Locked(b, func() {
 		assert.InDelta(t, 1, d.Geom.Size.Actual.Content.Y/d.lineHeight, 0.3, "one line")
 		assert.Less(t, a.Geom.Size.Actual.Total.X, d.Geom.Size.Actual.Total.X, "the one with the shorter text is narrower")
-	})
+	}))
 }
 
 // TestTextFieldSetCursorPos tests that the cursor of a text field is put at

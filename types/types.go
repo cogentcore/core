@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"slices"
 	"strings"
+	"sync"
 	"sync/atomic"
 
 	"cogentcore.org/core/base/reflectx"
@@ -21,6 +22,10 @@ var (
 	// can be added with [AddType]. The key is the long type name: package/path.Type,
 	// e.g., cogentcore.org/core/core.Button.
 	Types = map[string]*Type{}
+
+	// typesMu guards [Types], as types (such as the types of new tree nodes)
+	// can be added in any goroutine, as in the event loops of windows.
+	typesMu sync.RWMutex
 
 	// typeIDCounter is an atomically incremented uint64 used
 	// for assigning new [Type.ID] numbers.
@@ -55,6 +60,8 @@ func addBuiltin[T any](name string) {
 
 // TypeByName returns a Type by name (package/path.Type, e.g., cogentcore.org/core/core.Button),
 func TypeByName(name string) *Type {
+	typesMu.RLock()
+	defer typesMu.RUnlock()
 	return Types[name]
 }
 
@@ -83,7 +90,9 @@ func For[T any]() *Type {
 // and returns it. This sets the ID.
 func AddType(typ *Type) *Type {
 	typ.ID = typeIDCounter.Add(1)
+	typesMu.Lock()
 	Types[typ.Name] = typ
+	typesMu.Unlock()
 	return typ
 }
 

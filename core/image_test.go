@@ -82,7 +82,7 @@ func TestImageAspectRatio(t *testing.T) {
 		s.Min.X = units.Dot(200)
 		s.AspectRatio = 2
 	})
-	RenderImage(b, func() {}, func() {
+	RenderImage(b, func() {}, Locked(b, func() {
 		assert.Equal(t, math32.Vec2(200, 100), img.Geom.Size.Actual.Content)
-	})
+	}))
 }

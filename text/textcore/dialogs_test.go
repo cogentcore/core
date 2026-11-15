@@ -38,7 +38,9 @@ func TestDiffEditorSaveApply(t *testing.T) {
 	var de *DiffEditor
 	core.RenderImage(b, core.Locked(b, func() {
 		de = DiffEditorDialog(b, "diff", []string{"one", "two"}, []string{"one", "three"}, "a.txt", "b.txt", "", "")
-	}), core.Locked(b, func() {
+	}), func() {
+		de.AsyncLock() // (it is in the window of the dialog)
+		defer de.AsyncUnlock()
 		fa := filepath.Join(dir, "a.txt")
 		de.saveFileA(core.Filename(fa))
 		got, err := os.ReadFile(fa)
@@ -60,7 +62,7 @@ func TestDiffEditorSaveApply(t *testing.T) {
 		ev.SetLocalOff(image.Point{})
 		ta.HandleEvent(ev)
 		_ = tb
-	}))
+	})
 }
 
 // TestCodeErrorsRender tests rendering the backgrounds of code errors,

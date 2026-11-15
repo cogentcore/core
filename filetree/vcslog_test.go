@@ -22,6 +22,7 @@ import (
 // selecting commits and in its context menu, copying a revision id, and
 // viewing the file at a revision.
 func TestVCSLogWidget(t *testing.T) {
+	defer core.TrackWindows()()
 	dir, git := newGitRepo(t)
 	fn := filepath.Join(dir, "a.go")
 	require.NoError(t, os.WriteFile(fn, []byte("package a\n\nvar A = 2\n"), 0o644))
@@ -37,7 +38,7 @@ func TestVCSLogWidget(t *testing.T) {
 
 	b := core.NewBody()
 	lv := NewVCSLog(b).SetRepo(repo).SetLog(lg).SetFile(fn)
-	nw := len(core.AllRenderWindows)
+	nw := core.AllRenderWindows.Len()
 	core.RenderImage(b, core.Locked(b, func() {
 		assert.Equal(t, "HEAD", lv.revisionA)
 		tb := lv.ChildByName("log").(*core.Table)
@@ -68,21 +69,22 @@ func TestVCSLogWidget(t *testing.T) {
 		core.ButtonByText(lv, "View A").Send(events.Click)
 		core.ButtonByText(menu(), "View Revision").Send(events.Click)
 	}))
-	assert.Eventually(t, func() bool { return len(core.AllRenderWindows) >= nw+2 }, 5*time.Second, 10*time.Millisecond, "the windows of the file at the revisions")
+	assert.Eventually(t, func() bool { return core.AllRenderWindows.Len() >= nw+2 }, 5*time.Second, 10*time.Millisecond, "the windows of the file at the revisions")
 }
 
 // TestFileInfoDiffWindows tests the windows of the file info of the
 // selected files and of their diffs with the repository.
 func TestFileInfoDiffWindows(t *testing.T) {
+	defer core.TrackWindows()()
 	dir, _ := newGitRepo(t)
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "a.go"), []byte("package a\n\nvar A = 3\n"), 0o644))
 	ft := newVCSTree(t, dir)
 	a := vcsNode(t, ft, dir, "a.go")
-	nw := len(core.AllRenderWindows)
+	nw := core.AllRenderWindows.Len()
 	ft.AsyncLock()
 	a.SelectEvent(events.SelectOne)
 	a.showFileInfo()
 	a.diffVCSSelected("", "")
 	ft.AsyncUnlock()
-	assert.Eventually(t, func() bool { return len(core.AllRenderWindows) >= nw+2 }, 5*time.Second, 10*time.Millisecond, "the info and diff windows")
+	assert.Eventually(t, func() bool { return core.AllRenderWindows.Len() >= nw+2 }, 5*time.Second, 10*time.Millisecond, "the info and diff windows")
 }

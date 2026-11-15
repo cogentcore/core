@@ -71,13 +71,14 @@ func TestInspectorSelectElement(t *testing.T) {
 // TestInspectorWindowProfile tests opening an inspector window, which is
 // recycled for the same tree, and toggling profiling.
 func TestInspectorWindowProfile(t *testing.T) {
+	defer TrackWindows()()
 	b := NewBody("inspected")
 	NewText(b).SetText("Inspect me")
 	// inspectors returns the number of inspector windows of the body (by
 	// title, as other windows can open and close meanwhile)
 	inspectors := func() int {
 		n := 0
-		for _, w := range AllRenderWindows {
+		for _, w := range AllRenderWindows.windows() {
 			if w.title == "Inspector: inspected" {
 				n++
 			}

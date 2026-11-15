@@ -279,12 +279,12 @@ func TestSVGMaxWidth(t *testing.T) {
 	if !assert.NotNil(t, sv) {
 		return
 	}
-	core.RenderImage(b, func() {
+	core.RenderImage(b, core.Locked(b, func() {
 		dp := sv.Styles.UnitContext.Dots(units.UnitDp)
 		sz := sv.Geom.Size.Actual.Content
 		assert.InDelta(t, 96*dp, sz.X, 2, "it is as wide as its max-width")
 		assert.InDelta(t, 48*dp, sz.Y, 2, "and keeps its aspect")
-	})
+	}))
 }
 
 // TestInlineBlocksExactFit tests inline blocks whose widths add up exactly
@@ -314,13 +314,13 @@ func TestInlineBlocksExactFit(t *testing.T) {
 	if !assert.NotNil(t, logo) || !assert.NotNil(t, link) {
 		return
 	}
-	core.RenderImage(b, func() {
+	core.RenderImage(b, core.Locked(b, func() {
 		assert.Equal(t, logo.Geom.Cell.Y, link.Geom.Cell.Y, "they are on the same line")
 		assert.Greater(t, link.Geom.Pos.Total.X, logo.Geom.Pos.Total.X, "the link is after the logo")
 		lc := logo.Geom.Pos.Total.Y + logo.Geom.Size.Actual.Total.Y/2
 		kc := link.Geom.Pos.Total.Y + link.Geom.Size.Actual.Total.Y/2
 		assert.InDelta(t, lc, kc, 2, "the link is in the middle of the line")
-	})
+	}))
 }
 
 // TestColumnsOfList tests columns of an element with only one child, a
@@ -351,10 +351,10 @@ func TestColumnsOfList(t *testing.T) {
 	if !assert.NotNil(t, first) || !assert.NotNil(t, last) {
 		return
 	}
-	core.RenderImage(b, func() {
+	core.RenderImage(b, core.Locked(b, func() {
 		assert.Greater(t, last.Geom.Pos.Total.X, first.Geom.Pos.Total.X+100, "the last item is in a column to the right")
 		assert.Less(t, last.Geom.Pos.Total.Y, first.Geom.Pos.Total.Y+100, "near the top")
-	})
+	}))
 }
 
 func TestMediaRange(t *testing.T) {
@@ -591,11 +591,11 @@ func TestTableCellWidthMinimum(t *testing.T) {
 	if !assert.NotNil(t, th) || !assert.NotNil(t, tx) {
 		return
 	}
-	core.RenderImage(b, func() {
+	core.RenderImage(b, core.Locked(b, func() {
 		right := th.Geom.Pos.Total.X + th.Geom.Size.Actual.Total.X
 		assert.LessOrEqual(t, tx.Geom.Pos.Total.X+tx.Geom.Size.Actual.Total.X, right+1, "the text is within its cell")
 		assert.Greater(t, th.Geom.Size.Actual.Total.X, float32(100), "the cell is as wide as its text")
-	})
+	}))
 }
 
 // TestLayoutSettles tests that the layout of a page in a frame that
@@ -633,7 +633,7 @@ func TestLayoutSettles(t *testing.T) {
 		return getURL(u)
 	}
 	assert.NoError(t, ReadHTMLString(ctx, scroller, string(src)))
-	core.RenderImage(b, func() {
+	core.RenderImage(b, core.Locked(b, func() {
 		var text, output *core.WidgetBase
 		scroller.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
 			switch {
@@ -649,7 +649,7 @@ func TestLayoutSettles(t *testing.T) {
 		}
 		blank := (text.Geom.Pos.Total.Y + text.Geom.Size.Actual.Total.Y) - (output.Geom.Pos.Total.Y + output.Geom.Size.Actual.Total.Y)
 		assert.Less(t, blank, float32(100), "no blank space after the content of the article")
-	})
+	}))
 }
 
 // TestReadDocument tests reading a parsed document, changing it (as the
@@ -782,7 +782,7 @@ func TestUnset(t *testing.T) {
 	ctx := NewContext()
 	b := core.NewBody()
 	assert.NoError(t, ReadHTMLString(ctx, b, `<html><body style="color: rgb(0, 128, 0)"><p style="color: unset; padding: 10px; padding: unset">Text</p></body></html>`))
-	core.RenderImage(b, func() {
+	core.RenderImage(b, core.Locked(b, func() {
 		var p *core.WidgetBase
 		b.WalkDown(func(n tree.Node) bool {
 			if wb := core.AsWidget(n); wb != nil && wb.Property("tag") == "p" && p == nil {
@@ -794,7 +794,7 @@ func TestUnset(t *testing.T) {
 			assert.Equal(t, "#008000", colors.AsHex(colors.ToUniform(p.Styles.Color)), "the color is inherited")
 			assert.Zero(t, p.Styles.Padding.Top.Value, "the padding is initial")
 		}
-	})
+	}))
 }
 
 // TestStrayCSS tests that style sheets with semicolons and blocks where
@@ -852,7 +852,7 @@ func TestFloatColumns(t *testing.T) {
 	if !assert.NotNil(t, c1) || !assert.NotNil(t, c2) || !assert.NotNil(t, after) || !assert.NotNil(t, main) || !assert.NotNil(t, rail) {
 		return
 	}
-	core.RenderImage(b, func() {
+	core.RenderImage(b, core.Locked(b, func() {
 		w := core.AsWidget(c1.Parent).Geom.Size.Actual.Content.X
 		assert.InDelta(t, 0.23*w, c1.Geom.Size.Actual.Total.X, 2, "a column is 23% wide")
 		assert.InDelta(t, c1.Geom.Pos.Total.Y, c2.Geom.Pos.Total.Y, 1, "the columns are beside each other")
@@ -861,7 +861,7 @@ func TestFloatColumns(t *testing.T) {
 		rp := core.AsWidget(rail.Parent).Geom
 		assert.InDelta(t, rp.Pos.Content.X+rp.Size.Actual.Content.X, rail.Geom.Pos.Content.X+rail.Geom.Size.Actual.Content.X, 2, "at the right")
 		assert.False(t, rail.Geom.TotalBBox.Empty(), "and visible")
-	})
+	}))
 }
 
 // TestBlockLinkClick tests that clicking on the text of links that are
@@ -888,7 +888,7 @@ func TestBlockLinkClick(t *testing.T) {
 	if !assert.Len(t, links, 4) {
 		return
 	}
-	core.RenderImage(b, func() {
+	core.RenderImage(b, core.Locked(b, func() {
 		ev := b.Scene.RenderWindow().SystemWindow.Events()
 		for _, l := range links {
 			bb := l.Geom.TotalBBox
@@ -896,9 +896,9 @@ func TestBlockLinkClick(t *testing.T) {
 			ev.MouseButton(events.MouseDown, events.Left, pos, 0)
 			ev.MouseButton(events.MouseUp, events.Left, pos, 0)
 		}
-	}, func() {
+	}), core.Locked(b, func() {
 		assert.Equal(t, []string{"/auburn", "/bham", "/bn", "/block"}, opened)
-	})
+	}))
 }
 
 // TestSVGVars tests that the var() functions in the attributes of an svg
@@ -949,10 +949,10 @@ func TestZoom(t *testing.T) {
 			}
 			return tree.Continue
 		})
-		core.RenderImage(b, func() {
+		core.RenderImage(b, core.Locked(b, func() {
 			box = w.Geom.Size.Actual.Total.X
 			font = w.Styles.Font.Size.Dots
-		})
+		}))
 		return
 	}
 	box1, font1 := sizes(0)
@@ -1016,14 +1016,14 @@ func TestGridColumnSpan(t *testing.T) {
 	require.NoError(t, ReadHTMLString(NewContext(), b, `<div style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); width: 1200px">`+
 		fmt.Sprintf(cell+cell+cell+cell+cell, 6, 6, 4, 4, 4)+`</div>`))
 	var secs []*core.WidgetBase
-	core.RenderImage(b, func() {
+	core.RenderImage(b, core.Locked(b, func() {
 		b.WalkDown(func(k tree.Node) bool {
 			if wb := core.AsWidget(k); wb != nil && wb.Property("tag") == "section" {
 				secs = append(secs, wb)
 			}
 			return tree.Continue
 		})
-	})
+	}))
 	require.Len(t, secs, 5)
 	dp := b.Styles.UnitContext.Dots(units.UnitDp)
 	assert.InDelta(t, 600*dp, secs[0].Geom.Size.Actual.Total.X, 3, "half")

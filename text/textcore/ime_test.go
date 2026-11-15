@@ -24,12 +24,12 @@ func TestEditorCompose(t *testing.T) {
 	compose := func(text string, start, end int) {
 		ed.HandleEvent(events.NewTextComposition(text, start, end))
 	}
-	core.AssertRender(t, b, "ime/compose", func() {
+	core.AssertRender(t, b, "ime/compose", core.Locked(b, func() {
 		ed.SetFocus()
 		ed.SetCursorShow(pos)
 		compose("にほん", 3, 3)
 		compose("日本", 0, 2) // converted, with the clause selected
-	}, func() {
+	}), core.Locked(b, func() {
 		assert.Equal(t, "hello world\n", ed.Lines.String())
 		vts := ed.VirtualText(imeLayer)
 		if assert.Len(t, vts, 1) {
@@ -42,7 +42,7 @@ func TestEditorCompose(t *testing.T) {
 		cur, ok := ed.VirtualCharStartPos(imeLayer, pos, 2)
 		assert.True(t, ok)
 		assert.Equal(t, ed.CharStartPos(pos).X+4*ed.charSize.X, cur.X)
-	}, func() {
+	}), core.Locked(b, func() {
 		// commit
 		compose("", 0, 0)
 		for _, r := range "日本" {
@@ -64,5 +64,5 @@ func TestEditorCompose(t *testing.T) {
 		compose("", 0, 0)
 		assert.Equal(t, " 日本world\n", ed.Lines.String())
 		assert.Nil(t, ed.VirtualText(imeLayer))
-	})
+	}))
 }

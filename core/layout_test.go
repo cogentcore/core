@@ -641,13 +641,13 @@ func TestLayoutContentSizingMeasure(t *testing.T) {
 	skipOnWeb(t, "the window is the size of the page, not of its content")
 	b := NewBody()
 	tx := NewText(b).SetText(wrapText)
-	RenderImage(b, func() {
+	RenderImage(b, Locked(b, func() {
 		measure := units.Ch(contentSizingMeasure)
 		measure.ToDots(&tx.Styles.UnitContext)
 		w := b.Scene.Geom.Size.Actual.Total.X
 		assert.LessOrEqual(t, w, measure.Dots+b.Styles.BoxSpace().Size().X+b.Scene.Styles.BoxSpace().Size().X+2, "the window is within the measure")
 		assert.Greater(t, len(tx.paintText.Lines), 2, "the text wraps in it")
-	})
+	}))
 }
 
 // TestLayoutTextScrollbar is for text in a frame that only gets a vertical
@@ -1080,9 +1080,9 @@ func TestLayoutGridSpanPercentMax(t *testing.T) {
 			wide = f
 		}
 	}
-	RenderImage(b, func() {
+	RenderImage(b, Locked(b, func() {
 		assert.InDelta(t, g.Geom.Size.Actual.Content.X, wide.Geom.Size.Actual.Total.X, 1, "as wide as the grid")
-	})
+	}))
 }
 
 // TestLayoutPercentPaddingFirst tests that a percentage padding is of the
@@ -1165,8 +1165,8 @@ func TestLayoutGridSpanGrowFlexible(t *testing.T) {
 	desc := NewFrame(g)
 	desc.Styler(func(s *styles.Style) { s.ColSpan = 3; s.Grow.Set(1, 0) })
 	NewText(desc).SetText("a description that is wider than the title of this grid")
-	RenderImage(b, func() {
+	RenderImage(b, Locked(b, func() {
 		assert.Equal(t, float32(0), first.Geom.Size.Actual.Total.X, "the empty column")
 		assert.InDelta(t, g.Geom.Size.Actual.Content.X, title.Geom.Size.Actual.Total.X, 1, "the title is as wide as the grid")
-	})
+	}))
 }

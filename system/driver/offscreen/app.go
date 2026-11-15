@@ -53,7 +53,6 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 
 	a.Mu.Lock()
 	a.Windows = append(a.Windows, w)
-	a.GetScreens()
 	a.Mu.Unlock()
 
 	w.Event.WindowResize()

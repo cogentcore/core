@@ -303,6 +303,7 @@ func (sm *stages) runDeferred() {
 			sc.showIter++
 			if !sc.hasShown.Load() {
 				sc.hasShown.Store(true)
+				close(sc.shown)
 				sc.Shown()
 			}
 		}

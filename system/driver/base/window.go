@@ -40,6 +40,9 @@ type Window[A system.App] struct {
 	// window should close.
 	WinClose chan struct{} `display:"-"`
 
+	// closing is set when the window starts closing (see [Window.MarkClosing]).
+	closing atomic.Bool
+
 	// CloseReqFunc is the function to call on a close request
 	CloseReqFunc func(win system.Window)
 
@@ -288,7 +291,26 @@ func (w *Window[A]) CloseClean() {
 	}
 }
 
+// Close closes the window, once: it does nothing if the window is already
+// closing, as it can be asked to close again then (as by
+// [Window.CloseReq] from another goroutine).
 func (w *Window[A]) Close() {
+	if !w.MarkClosing() {
+		return
+	}
+	w.CloseBase()
+}
+
+// MarkClosing marks the window as closing, returning false if it was
+// already closing, so that a Close method of a platform does its closing
+// only once, and then calls [Window.CloseBase].
+func (w *Window[A]) MarkClosing() bool {
+	return w.closing.CompareAndSwap(false, true)
+}
+
+// CloseBase does the closing of the window by the base implementation,
+// for [Window.Close] after [Window.MarkClosing].
+func (w *Window[A]) CloseBase() {
 	// base implementation doesn't actually close any system windows,
 	// but platform-specific implementations can
 	w.This.Events().Window(events.WinClose)

@@ -57,7 +57,7 @@ func TestLayoutDump(t *testing.T) {
 		core.DebugSettings.LayoutTrace = true
 		defer func() { core.DebugSettings.LayoutTrace = false }()
 	}
-	img := core.RenderImage(b, func() {
+	img := core.RenderImage(b, core.Locked(b, func() {
 		fmt.Println("scene", b.Scene.Geom.Size.Actual.Total)
 		b.WalkDown(func(n tree.Node) bool {
 			w, ok := n.(core.Widget)
@@ -81,6 +81,6 @@ func TestLayoutDump(t *testing.T) {
 				wb.Geom.Pos.Total, wb.Geom.Size.Actual.Total, wb.Geom.Size.Alloc.Total, s.Grow, s.Shrink.X, s.GrowWrap, s.Min.Dots(), s.Max.Dots(), s.Margin.Dots(), s.Padding.Dots(), s.Display, s.Direction, s.Overflow, s.Opacity, s.Color)
 			return tree.Continue
 		})
-	})
+	}))
 	fmt.Println("img", img.Bounds())
 }

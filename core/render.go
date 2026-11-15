@@ -36,31 +36,27 @@ import (
 // If the widget has been deleted, or if the [Scene] has been shown but the render
 // context is not available, then this will block forever. Enable
 // [DebugSettingsData.UpdateTrace] in [DebugSettings] to see when that happens.
-// If the scene has not been shown yet and the render context is nil, it will wait
-// until the scene is shown before trying again.
+// If the scene has not been shown yet, it waits until the scene is shown.
 func (wb *WidgetBase) AsyncLock() {
-	rc := wb.Scene.renderContext()
-	if rc == nil {
-		if wb.Scene.hasShown.Load() {
-			// If the scene has been shown but there is no render context,
-			// we are probably being deleted, so we just block forever.
-			if DebugSettings.UpdateTrace {
-				fmt.Println("AsyncLock: scene shown but no render context; blocking forever:", wb)
-			}
-			select {}
-		}
-		// Otherwise, if we haven't been shown yet, we just wait until we are
-		// and then try again.
+	sc := wb.Scene
+	// A scene that has not been shown can be in the process of being run,
+	// in another goroutine without the lock, so its stage is only read
+	// once it has been shown (except for an offscreen scene, which is
+	// never shown).
+	if !sc.hasShown.Load() && sc.offscreen == nil {
 		if DebugSettings.UpdateTrace {
 			fmt.Println("AsyncLock: waiting for scene to be shown:", wb)
 		}
-		onShow := make(chan struct{})
-		wb.OnShow(func(e events.Event) {
-			onShow <- struct{}{}
-		})
-		<-onShow
-		wb.AsyncLock() // try again
-		return
+		<-sc.shown
+	}
+	rc := sc.renderContext()
+	if rc == nil {
+		// If the scene has been shown but there is no render context,
+		// we are probably being deleted, so we just block forever.
+		if DebugSettings.UpdateTrace {
+			fmt.Println("AsyncLock: scene shown but no render context; blocking forever:", wb)
+		}
+		select {}
 	}
 	rc.Lock()
 	if wb.This == nil {

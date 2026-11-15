@@ -76,9 +76,11 @@ func runTestWindow(t *testing.T, b *core.Body) {
 	b.RunWindow()
 	<-showed
 	t.Cleanup(func() {
-		b.AsyncLock()
-		b.Close()
-		b.AsyncUnlock()
+		// (it can be closed already, as by core.TrackWindows)
+		if b.AsyncLockIfShown() {
+			b.Close()
+			b.AsyncUnlock()
+		}
 	})
 }
 
