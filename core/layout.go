@@ -617,23 +617,24 @@ func (ls *layoutState) rowHeight(row, col int) (float32, error) {
 		if row >= n {
 			return 0, fmt.Errorf("Layout.RowHeight: row: %d > number of rows: %d", row, n)
 		}
-		return ls.cell(math32.Y, 0, row).Size.Y, nil
+		return ls.cell(math32.Y, row, 0).Size.Y, nil
 	}
 	nw := len(ls.Wraps)
-	if ls.MainAxis == math32.Y {
+	if ls.MainAxis == math32.Y { // the columns wrap
 		if col >= nw {
 			return 0, fmt.Errorf("Layout.RowHeight: col: %d > number of columns: %d", col, nw)
 		}
-		wn := ls.Wraps[row]
-		if col >= wn {
+		wn := ls.Wraps[col]
+		if row >= wn {
 			return 0, fmt.Errorf("Layout.RowHeight: row: %d > number of rows: %d", row, wn)
 		}
-		return ls.cell(math32.Y, col, row).Size.Y, nil
+		return ls.cell(math32.Y, row, col).Size.Y, nil
 	}
+	// the rows wrap
 	if row >= nw {
 		return 0, fmt.Errorf("Layout.RowHeight: row: %d > number of rows: %d", row, nw)
 	}
-	wn := ls.Wraps[col]
+	wn := ls.Wraps[row]
 	if col >= wn {
 		return 0, fmt.Errorf("Layout.RowHeight: col: %d > number of columns: %d", col, wn)
 	}
