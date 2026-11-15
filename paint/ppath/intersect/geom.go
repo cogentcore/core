@@ -77,21 +77,26 @@ func Curvature(p ppath.Path, seg int, t float32) float32 {
 		return 0.0
 	}
 
+	// segments are the commands, including each ppath.MoveTo, and the curvature
+	// is found in the subpath that has the segment.
 	curSeg := 0
-	iStart, iSeg, iEnd := 0, 0, 0
+	iStart, iSeg := 0, -1
 	for i := 0; i < len(p); {
 		cmd := p[i]
-		if cmd == ppath.MoveTo {
-			if seg < curSeg {
-				pi := p[iStart:iEnd]
-				return curvature(pi, iSeg-iStart, t)
+		if cmd == ppath.MoveTo && 0 < i {
+			if 0 <= iSeg {
+				return curvature(p[iStart:i], iSeg-iStart, t)
 			}
 			iStart = i
 		}
 		if seg == curSeg {
 			iSeg = i
 		}
+		curSeg++
 		i += ppath.CmdLen(cmd)
+	}
+	if 0 <= iSeg {
+		return curvature(p[iStart:], iSeg-iStart, t)
 	}
 	return 0.0 // if segment doesn't exist
 }

@@ -295,7 +295,7 @@ func (p *Path) Grid(w, h float32, nx, ny int, r float32) *Path {
 		for i := 0; i < nx; i++ {
 			x := r + float32(i)*(r+dx)
 			y := r + float32(j)*(r+dy)
-			*p = p.Append(cell.Translate(x, y))
+			*p = p.Append(cell.Clone().Translate(x, y)) // Translate is in place
 		}
 	}
 	return p

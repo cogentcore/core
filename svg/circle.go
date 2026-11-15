@@ -22,6 +22,7 @@ type Circle struct {
 func (g *Circle) SVGName() string { return "circle" }
 
 func (g *Circle) Init() {
+	g.NodeBase.Init()
 	g.Radius = 1
 }
 

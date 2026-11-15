@@ -224,6 +224,20 @@ func (sv *SVG) Style() {
 	})
 }
 
+// useSharedShaper sets the TextShaper to the shared svgShaper, returning
+// a function that sets it back to nil.
+func (sv *SVG) useSharedShaper() func() {
+	shaperMu.Lock()
+	if svgShaper == nil {
+		svgShaper = shaped.NewShaper()
+	}
+	sv.TextShaper = svgShaper
+	shaperMu.Unlock()
+	return func() {
+		sv.TextShaper = nil
+	}
+}
+
 // Render renders the SVG to given Painter, which can be nil
 // to have a new one created. Returns the painter used.
 // Set the TextShaper prior to calling to use an existing one,
@@ -240,15 +254,7 @@ func (sv *SVG) Render(pc *paint.Painter) *paint.Painter {
 		pc = sv.painter
 	}
 	if sv.TextShaper == nil {
-		shaperMu.Lock()
-		if svgShaper == nil {
-			svgShaper = shaped.NewShaper()
-		}
-		sv.TextShaper = svgShaper
-		shaperMu.Unlock()
-		defer func() {
-			sv.TextShaper = nil
-		}()
+		defer sv.useSharedShaper()()
 	}
 
 	sv.Style()
@@ -327,6 +333,9 @@ func (sv *SVG) FillViewport() {
 // UpdateBBoxes updates the bounding boxes for all nodes
 // using current transform settings.
 func (sv *SVG) UpdateBBoxes() {
+	if sv.TextShaper == nil { // text needs a shaper for its bounding box
+		defer sv.useSharedShaper()()
+	}
 	sv.setRootTransform()
 	sv.Root.BBoxes(sv, math32.Identity2())
 }

@@ -213,11 +213,11 @@ func (g *NodeBase) Init() {
 
 // SetColorProperties sets color property from a string representation.
 // It breaks color alpha out as opacity.  prop is either "stroke" or "fill"
-func (g *NodeBase) SetColorProperties(prop, color string) {
-	if NameFromURL(color) != "" {
+func (g *NodeBase) SetColorProperties(prop, value string) {
+	if NameFromURL(value) != "" {
 		return
 	}
-	if color == "none" || color == "" {
+	if value == "none" || value == "" {
 		g.SetProperty(prop, "none")
 		g.DeleteProperty(prop + "-opacity")
 		if prop == "stroke" {
@@ -225,11 +225,13 @@ func (g *NodeBase) SetColorProperties(prop, color string) {
 		}
 		return
 	}
-	clr, _ := colors.FromString(color)
+	clr, _ := colors.FromString(value)
 	g.SetProperty(prop+"-opacity", fmt.Sprintf("%g", float32(clr.A)/255))
-	// we have consumed the A via opacity, so we reset it to 255
-	clr.A = 255
-	g.SetProperty(prop, colors.AsHex(clr))
+	// we have consumed the A via opacity, so we reset it to 255, after
+	// un-premultiplying the color by it
+	nclr := color.NRGBAModel.Convert(clr).(color.NRGBA)
+	nclr.A = 255
+	g.SetProperty(prop, colors.AsHex(nclr))
 }
 
 // ParentTransform returns the full compounded 2D transform matrix for all

@@ -190,6 +190,9 @@ func (sv *SVG) GradientDeleteForNode(n Node, grnm string) bool {
 		return false
 	}
 	unm := NameFromURL(grnm)
+	if unm == "" { // a bare name
+		unm = grnm
+	}
 	sv.Defs.DeleteChildByName(unm)
 	return true
 }
@@ -312,7 +315,7 @@ func (sv *SVG) GradientDuplicateNode(n Node) {
 		}
 		gr := gri.(*Gradient)
 		_, ngu := sv.GradientNewForNode(n, prop, gr.IsRadial(), gr.StopsName)
-		nb.Properties["fill"] = ngu
+		nb.Properties[prop] = ngu
 	}
 	setGr("fill")
 	setGr("stroke")
