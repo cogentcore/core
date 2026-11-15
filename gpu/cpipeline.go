@@ -100,15 +100,21 @@ func (pl *ComputePipeline) Dispatch1D(ce *wgpu.ComputePassEncoder, n, threads in
 	return pl.Dispatch(ce, nx, ny, 1)
 }
 
+// MaxWorkgroupsPerDimension is the maximum number of work groups per
+// dimension of a dispatch, which is the default limit of WebGPU
+// (maxComputeWorkgroupsPerDimension), and that of many adapters,
+// as the software GPU of the CI (lavapipe).
+const MaxWorkgroupsPerDimension = 65535
+
 // NumWorkgroups1D() returns the number of work groups of compute threads
 // that is sufficient to compute n total elements, given specified number
 // of threads in the x dimension, subject to constraint that no more than
-// 65536 work groups can be deployed per dimension.
+// [MaxWorkgroupsPerDimension] work groups can be deployed per dimension.
 func NumWorkgroups1D(n, threads int) (nx, ny int) {
-	mxn := 65536
+	mxn := MaxWorkgroupsPerDimension
 	ny = 1
 	nx = int(math.Ceil(float64(n) / float64(threads)))
-	if nx <= 65536 {
+	if nx <= mxn {
 		return
 	}
 	xsz := mxn * threads
@@ -120,13 +126,13 @@ func NumWorkgroups1D(n, threads int) (nx, ny int) {
 // NumWorkgroups2D() returns the number of work groups of compute threads
 // that is sufficient to compute n total elements, given specified number
 // of threads per x, y dimension, subject to constraint that no more than
-// 65536 work groups can be deployed per dimension.
+// [MaxWorkgroupsPerDimension] work groups can be deployed per dimension.
 func NumWorkgroups2D(n, x, y int) (nx, ny int) {
-	mxn := 65536
+	mxn := MaxWorkgroupsPerDimension
 	sz := x * y
 	ny = 1
 	nx = int(math.Ceil(float64(n) / float64(sz)))
-	if nx <= 65536 {
+	if nx <= mxn {
 		return
 	}
 	xsz := mxn * x // size of full x chunk
