@@ -40,7 +40,7 @@ func (pc *Path) fromProperties(parent *Path, properties map[string]any, cc color
 				} else if init {
 					pc.Display = true
 				}
-				return
+				continue
 			}
 			sval := reflectx.ToString(val)
 			switch sval {

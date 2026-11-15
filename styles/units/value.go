@@ -56,6 +56,7 @@ func (v *Value) Zero() {
 	v.Value = 0
 	v.Unit = UnitDot
 	v.Dots = 0
+	v.Custom = nil
 }
 
 // Dot returns a new dots value.
@@ -70,6 +71,7 @@ func (v *Value) Dot(val float32) {
 	v.Value = val
 	v.Unit = UnitDot
 	v.Dots = val
+	v.Custom = nil
 }
 
 // Custom returns a new custom value that has the dots

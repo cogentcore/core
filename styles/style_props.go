@@ -428,6 +428,7 @@ var styleFontFuncs = map[string]styleprops.Func{
 		if inh, init := styleprops.InhInit(val, parent); inh || init {
 			if inh {
 				fs.Family = parent.(*Font).Family
+				fs.CustomFont = parent.(*Font).CustomFont
 			} else if init {
 				fs.Family = rich.SansSerif // font has defaults
 			}

@@ -51,7 +51,7 @@ func (mr *F32) IsLow(val float32) bool {
 
 // IsHigh tests whether value is higher than the maximum
 func (mr *F32) IsHigh(val float32) bool {
-	return (val > mr.Min)
+	return (val > mr.Max)
 }
 
 // Range returns Max - Min

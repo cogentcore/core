@@ -46,7 +46,7 @@ func (mr *F64) IsLow(val float64) bool {
 
 // IsHigh tests whether value is higher than the maximum.
 func (mr *F64) IsHigh(val float64) bool {
-	return (val > mr.Min)
+	return (val > mr.Max)
 }
 
 // Range returns Max - Min.

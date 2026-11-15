@@ -81,12 +81,6 @@ func (am *AvgMax32) String() string {
 // UpdateFrom updates these values from other AvgMax32 values
 func (am *AvgMax32) UpdateFrom(oth *AvgMax32) {
 	am.UpdateFromOther(oth.Sum, oth.Max, oth.N, oth.MaxIndex)
-	am.Sum += oth.Sum
-	am.N += oth.N
-	if oth.Max > am.Max {
-		am.Max = oth.Max
-		am.MaxIndex = oth.MaxIndex
-	}
 }
 
 // CopyFrom copies from other AvgMax32

@@ -41,7 +41,7 @@ func (mr *Int) IsLow(val int) bool {
 
 // IsHigh tests whether value is higher than the maximum
 func (mr *Int) IsHigh(val int) bool {
-	return (val > mr.Min)
+	return (val > mr.Max)
 }
 
 // Range returns Max - Min

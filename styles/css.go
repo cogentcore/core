@@ -235,7 +235,7 @@ func decorationToCSS(d rich.Decorations) string {
 	var parts []string
 	for _, f := range []rich.Decorations{rich.Underline, rich.Overline, rich.LineThrough} {
 		if d.HasFlag(f) {
-			parts = append(parts, f.String())
+			parts = append(parts, f.BitIndexString())
 		}
 	}
 	if d.HasFlag(rich.DottedUnderline) {
