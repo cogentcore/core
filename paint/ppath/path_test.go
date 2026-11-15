@@ -393,16 +393,19 @@ func TestPathToSVG(t *testing.T) {
 		{"L10 0Q15 10 20 0M20 10C20 20 30 20 30 10z", "M0 0H10Q15 10 20 0M20 10C20 20 30 20 30 10z"},
 		{"L10 0M20 0L30 0", "M0 0H10M20 0H30"},
 		{"L0 0L0 10L20 20", "M0 0V10L20 20"},
-		// todo: fix
 		{"A5 5 0 0 1 10 0", "M0 0A5 5 0 0110 0"},
-		{"A10 5 90 0 0 10 0", "M0 0A5 10 .3555031e-5 0010 0"},
-		{"A10 5 90 1 0 10 0", "M0 0A5 10 .3555031e-5 1010 0"},
+		// (the rotation is .3555031e-5 instead of 0 on arm64, from rounding)
+		{"A10 5 90 0 0 10 0", "M0 0A5 10 0 0010 0"},
+		{"A10 5 90 1 0 10 0", "M0 0A5 10 0 1010 0"},
 		{"M20 0L20 0", ""},
 	}
 	for _, tt := range tts {
 		t.Run(tt.p, func(t *testing.T) {
 			p := MustParseSVGPath(tt.p)
-			assert.Equal(t, tt.svg, p.ToSVG())
+			svg := p.ToSVG()
+			if svg != tt.svg { // the same path except for rounding
+				assert.InDeltaSlice(t, MustParseSVGPath(tt.svg), MustParseSVGPath(svg), 1e-4, "want %s, got %s", tt.svg, svg)
+			}
 		})
 	}
 }
