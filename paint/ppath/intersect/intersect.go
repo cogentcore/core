@@ -10,6 +10,7 @@ package intersect
 import (
 	"fmt"
 	"io"
+	"log"
 	"slices"
 	"sort"
 	"strings"
@@ -19,10 +20,18 @@ import (
 	"cogentcore.org/core/paint/ppath"
 )
 
+// DebugPathIntersection enables debugging mode for path intersection edge-cases. Please send us the test cases generated as temporary files.
+var DebugPathIntersection = false
+
 // BentleyOttmannEpsilon is the snap rounding grid used by the Bentley-Ottmann algorithm.
 // This prevents numerical issues. It must be larger than Epsilon since we use that to calculate
 // intersections between segments. It is the number of binary digits to keep.
-var BentleyOttmannEpsilon = float32(1e-8)
+// It is 1e-6 here, instead of the 1e-8 of canvas in float64: float32 only
+// has about 7 significant digits, and with a finer grid, nearly coincident
+// points (as of shared edges computed in different ways) are not merged,
+// which gives wrong results or panics; it is 10 times [ppath.Epsilon] (1e-7),
+// as canvas's is 100 times its Epsilon (1e-10).
+var BentleyOttmannEpsilon = float32(1e-6)
 
 // RayIntersections returns the intersections of a path with a ray starting at (x,y) to (∞,y).
 // An intersection is tangent only when it is at (x,y), i.e. the start of the ray. The parameter T
@@ -124,89 +133,100 @@ var boInitPoolsOnce = sync.OnceFunc(func() {
 	boSquarePool = &sync.Pool{New: func() any { return &toleranceSquare{} }}
 })
 
-// Settle returns the "settled" path. It removes all self-intersections, orients all filling paths
-// CCW and all holes CW, and tries to split into subpaths if possible. Note that path p is
-// flattened unless q is already flat. ppath.Path q is implicitly closed. It runs in O((n + k) log n),
-// with n the sum of the number of segments, and k the number of intersections.
+// Settle returns the "settled"/flattened path, a visually identical version of the original.
+// It removes all self-intersections and overlapping areas, orients all filling paths CCW and all
+// holes CW, and tries to separate paths as much as possible. Paths are grouped by the
+// filling/outer ring followed by the corresponding holes/inner rings; the outer rings are ordered
+// from left-to-right and secondly from bottom-to-top. Note that path p is flattened unless q is
+// already flat. It runs in O((n + k) log n), with n the number of segments, and k the number of
+// intersections.
 func Settle(p ppath.Path, fillRule ppath.FillRules) ppath.Path {
-	return bentleyOttmann(p.Split(), nil, opSettle, fillRule)
+	return mergePaths(bentleyOttmann(p.Split(), nil, opSettle, fillRule))
 }
 
 // SettlePaths is the same as [Settle], but faster if paths are already split.
 func SettlePaths(ps ppath.Paths, fillRule ppath.FillRules) ppath.Path {
+	return mergePaths(bentleyOttmann(ps, nil, opSettle, fillRule))
+}
+
+// SettleRings is the same as [SettlePaths], but returns each filling path
+// followed by its holes as subpaths, as a separate path.
+func SettleRings(ps ppath.Paths, fillRule ppath.FillRules) ppath.Paths {
 	return bentleyOttmann(ps, nil, opSettle, fillRule)
 }
 
-// And returns the boolean path operation of path p AND q, i.e. the intersection of both. It
-// removes all self-intersections, orients all filling paths CCW and all holes CW, and tries to
-// split into subpaths if possible. Note that path p is flattened unless q is already flat. ppath.Path
-// q is implicitly closed. It runs in O((n + k) log n), with n the sum of the number of segments,
-// and k the number of intersections.
+// And returns the boolean path operation of path p AND q, i.e. the intersection of both.
+// It removes all self-intersections and overlapping areas, orients all filling paths CCW and all
+// holes CW, and tries to separate paths as much as possible (see [Settle]). Note that path p is
+// flattened unless q is already flat. Path q is implicitly closed. It runs in O((n + k) log n),
+// with n the number of segments, and k the number of intersections.
 func And(p ppath.Path, q ppath.Path) ppath.Path {
-	return bentleyOttmann(p.Split(), q.Split(), opAND, ppath.NonZero)
+	return mergePaths(bentleyOttmann(p.Split(), q.Split(), opAND, ppath.NonZero))
 }
 
 // AndPaths is the same as [And], but faster if paths are already split.
 func AndPaths(ps ppath.Paths, qs ppath.Paths) ppath.Path {
-	return bentleyOttmann(ps, qs, opAND, ppath.NonZero)
+	return mergePaths(bentleyOttmann(ps, qs, opAND, ppath.NonZero))
 }
 
-// Or returns the boolean path operation of path p OR q, i.e. the union of both. It
-// removes all self-intersections, orients all filling paths CCW and all holes CW, and tries to
-// split into subpaths if possible. Note that path p is flattened unless q is already flat. ppath.Path
-// q is implicitly closed. It runs in O((n + k) log n), with n the sum of the number of segments,
-// and k the number of intersections.
+// Or returns the boolean path operation of path p OR q, i.e. the union of both.
+// See [And] for the details.
 func Or(p ppath.Path, q ppath.Path) ppath.Path {
-	return bentleyOttmann(p.Split(), q.Split(), opOR, ppath.NonZero)
+	return mergePaths(bentleyOttmann(p.Split(), q.Split(), opOR, ppath.NonZero))
 }
 
-// OrPaths is the same as ppath.Path.Or, but faster if paths are already split.
+// OrPaths is the same as [Or], but faster if paths are already split.
 func OrPaths(ps ppath.Paths, qs ppath.Paths) ppath.Path {
-	return bentleyOttmann(ps, qs, opOR, ppath.NonZero)
+	return mergePaths(bentleyOttmann(ps, qs, opOR, ppath.NonZero))
 }
 
 // Xor returns the boolean path operation of path p XOR q, i.e. the symmetric difference of both.
-// It removes all self-intersections, orients all filling paths CCW and all holes CW, and tries to
-// split into subpaths if possible. Note that path p is flattened unless q is already flat. ppath.Path
-// q is implicitly closed. It runs in O((n + k) log n), with n the sum of the number of segments,
-// and k the number of intersections.
+// See [And] for the details.
 func Xor(p ppath.Path, q ppath.Path) ppath.Path {
-	return bentleyOttmann(p.Split(), q.Split(), opXOR, ppath.NonZero)
+	return mergePaths(bentleyOttmann(p.Split(), q.Split(), opXOR, ppath.NonZero))
 }
 
 // XorPaths is the same as [Xor], but faster if paths are already split.
 func XorPaths(ps ppath.Paths, qs ppath.Paths) ppath.Path {
-	return bentleyOttmann(ps, qs, opXOR, ppath.NonZero)
+	return mergePaths(bentleyOttmann(ps, qs, opXOR, ppath.NonZero))
 }
 
 // Not returns the boolean path operation of path p NOT q, i.e. the difference of both.
-// It removes all self-intersections, orients all filling paths CCW and all holes CW, and tries to
-// split into subpaths if possible. Note that path p is flattened unless q is already flat. ppath.Path
-// q is implicitly closed. It runs in O((n + k) log n), with n the sum of the number of segments,
-// and k the number of intersections.
+// See [And] for the details.
 func Not(p ppath.Path, q ppath.Path) ppath.Path {
-	return bentleyOttmann(p.Split(), q.Split(), opNOT, ppath.NonZero)
+	return mergePaths(bentleyOttmann(p.Split(), q.Split(), opNOT, ppath.NonZero))
 }
 
-// NotPaths is the same as ppath.Path.Not, but faster if paths are already split.
+// NotPaths is the same as [Not], but faster if paths are already split.
 func NotPaths(ps ppath.Paths, qs ppath.Paths) ppath.Path {
-	return bentleyOttmann(ps, qs, opNOT, ppath.NonZero)
+	return mergePaths(bentleyOttmann(ps, qs, opNOT, ppath.NonZero))
 }
 
 // DivideBy returns the boolean path operation of path p DIV q, i.e. p divided by q.
-// It removes all self-intersections, orients all filling paths CCW and all holes CW, and tries to
-// split into subpaths if possible. Note that path p is flattened unless q is already flat. ppath.Path
-// q is implicitly closed. It runs in O((n + k) log n), with n the sum of the number of segments,
-// and k the number of intersections.
+// See [And] for the details.
 func DivideBy(p ppath.Path, q ppath.Path) ppath.Path {
-	return bentleyOttmann(p.Split(), q.Split(), opDIV, ppath.NonZero)
+	return mergePaths(bentleyOttmann(p.Split(), q.Split(), opDIV, ppath.NonZero))
 }
 
 // DivideByPaths is the same as [DivideBy] but faster if paths are already split.
 func DivideByPaths(ps ppath.Paths, qs ppath.Paths) ppath.Path {
-	return bentleyOttmann(ps, qs, opDIV, ppath.NonZero)
+	return mergePaths(bentleyOttmann(ps, qs, opDIV, ppath.NonZero))
 }
 
+// mergePaths returns the paths appended as one path.
+func mergePaths(ps ppath.Paths) ppath.Path {
+	n := 0
+	for _, pi := range ps {
+		n += len(pi)
+	}
+	p := make(ppath.Path, 0, n)
+	for _, pi := range ps {
+		p = p.Append(pi)
+	}
+	return p
+}
+
+// SweepPoint is of size 88 bytes on 64-bit architectures
 type SweepPoint struct {
 	// initial data
 	math32.Vector2             // position of this endpoint
@@ -217,24 +237,27 @@ type SweepPoint struct {
 	node *SweepNode // used for fast accessing btree node in O(1) (instead of Find in O(log n))
 
 	// computing sweep fields
-	windings          int         // windings of the same polygon (excluding this segment)
-	otherWindings     int         // windings of the other polygon
-	selfWindings      int         // positive if segment goes left-right (or bottom-top when vertical)
-	otherSelfWindings int         // used when merging overlapping segments
 	prev              *SweepPoint // segment below
+	windings          int16       // windings of the same polygon (excluding this segment)
+	otherWindings     int16       // windings of the other polygon
+	selfWindings      int16       // positive if segment goes left-right (or bottom-top when vertical)
+	otherSelfWindings int16       // used when merging overlapping segments
 
 	// building the polygon
-	index          int // index into result array
-	resultWindings int // windings of the resulting polygon
+	square         int   // index into tolerance squares
+	index          int   // index into resulting paths' array
+	inResult       uint8 // in final result polygon (1 is once, 2 is twice for opDIV)
+	resultWindings int16 // windings above the segment of the resulting polygon
 
 	// bools at the end to optimize memory layout of struct
-	clipping   bool  // is clipping path (otherwise is subject path)
-	open       bool  // path is not closed (only for subject paths)
-	left       bool  // point is left-end of segment
-	vertical   bool  // segment is vertical
-	increasing bool  // original direction is left-right (or bottom-top)
-	overlapped bool  // segment's overlapping was handled
-	inResult   uint8 // in final result polygon (1 is once, 2 is twice for opDIV)
+	clipping   bool // is clipping path (otherwise is subject path)
+	open       bool // path is not closed
+	end        bool // event is path endpoint (only for open paths)
+	left       bool // point is left-end of segment
+	vertical   bool // segment is vertical
+	increasing bool // original direction is left-right (or bottom-top)
+	overlapped bool // segment's overlapping was handled
+	swept      bool // sweep fields have been computed for this left-endpoint
 }
 
 func (s *SweepPoint) InterpolateY(x float32) float32 {
@@ -247,6 +270,15 @@ func (s *SweepPoint) InterpolateY(x float32) float32 {
 func (s *SweepPoint) ToleranceEdgeY(xLeft, xRight float32) (float32, float32) {
 	if !s.left {
 		s = s.other
+	}
+	if s.X == s.other.X {
+		// Vertical segments have no x-extent: both endpoints lie in this column and the
+		// y-values at the tolerance edges are simply the endpoints. Interpolating would divide
+		// by zero and yield NaN whenever floating-point rounding puts the segment's x a ulp
+		// outside [xLeft, xRight), which then fails every below/above test and leaves the
+		// segment unbroken across the squares it passes through.
+		// (from https://github.com/tdewolff/canvas/pull/394)
+		return s.Y, s.other.Y
 	}
 
 	y0 := s.Y
@@ -266,6 +298,8 @@ func (s *SweepPoint) SplitAt(z math32.Vector2) (*SweepPoint, *SweepPoint) {
 	l := boPointPool.Get().(*SweepPoint)
 	*r, *l = *s.other, *s
 	r.Vector2, l.Vector2 = z, z
+	r.end, l.end = false, false
+	r.swept, l.swept = false, false
 
 	// update references
 	r.other, s.other.other = s, l
@@ -302,6 +336,8 @@ func (q SweepEvents) Swap(i, j int) {
 	q[i], q[j] = q[j], q[i]
 }
 
+// AddPathEndpoints adds all line segments of p to the queue q. The first command is converted to a ppath.MoveTo and any ppath.Close that
+// is not at the end is converted to a ppath.LineTo.
 func (q *SweepEvents) AddPathEndpoints(p ppath.Path, seg int, clipping bool) int {
 	if len(p) == 0 {
 		return seg
@@ -320,23 +356,42 @@ func (q *SweepEvents) AddPathEndpoints(p ppath.Path, seg int, clipping bool) int
 	start := math32.Vector2{p[1], p[2]}
 	if math32.IsNaN(start.X) || math32.IsInf(start.X, 0.0) || math32.IsNaN(start.Y) || math32.IsInf(start.Y, 0.0) {
 		panic("path has NaN or Inf")
+	} else if open && p[len(p)-3] == p[1] && p[len(p)-2] == p[2] {
+		open = false // start and end points coincide, consider path closed
 	}
 	for i := 4; i < len(p); {
-		if p[i] != ppath.LineTo && p[i] != ppath.Close {
+		cmd := p[i]
+		if cmd != ppath.LineTo && cmd != ppath.Close {
 			panic("non-flat paths not supported")
 		}
 
-		n := ppath.CmdLen(p[i])
+		n := ppath.CmdLen(cmd)
 		end := math32.Vector2{p[i+n-3], p[i+n-2]}
+		if cmd == ppath.Close {
+			// a close ends exactly at the start of the subpath, also when its coordinates
+			// differ from it within ppath.Epsilon (as [ppath.Path.Close] allows); canvas
+			// panics here as its Close sets them exactly
+			end = math32.Vector2{p[1], p[2]}
+		}
 		if math32.IsNaN(end.X) || math32.IsInf(end.X, 0.0) || math32.IsNaN(end.Y) || math32.IsInf(end.Y, 0.0) {
 			panic("path has NaN or Inf")
 		}
 		i += n
 		seg++
 
+		// The sweep decides verticality with an exact comparison, but only snaps coordinates to
+		// the grid after the intersection phase. A segment whose endpoints share a grid column is
+		// therefore driven through the sweep as left-to-right, and turns vertical the moment it
+		// is split; a piece that becomes vertical while pointing downwards has to be reversed to
+		// keep left-endpoints at the bottom, which is impossible once its left-endpoint is in the
+		// sweep status. Make it vertical up front, which moves a point no further than the
+		// snapping that follows the sweep would. (from https://github.com/tdewolff/canvas/pull/394)
+		if start.X != end.X && snap(start.X, BentleyOttmannEpsilon) == snap(end.X, BentleyOttmannEpsilon) {
+			end.X = start.X
+		}
+
 		if start == end {
 			// skip zero-length lineTo or close command
-			start = end
 			continue
 		}
 
@@ -351,6 +406,7 @@ func (q *SweepEvents) AddPathEndpoints(p ppath.Path, seg int, clipping bool) int
 			Vector2:    start,
 			clipping:   clipping,
 			open:       open,
+			end:        open && i == 4+n,
 			segment:    seg,
 			left:       increasing,
 			increasing: increasing,
@@ -360,6 +416,7 @@ func (q *SweepEvents) AddPathEndpoints(p ppath.Path, seg int, clipping bool) int
 			Vector2:    end,
 			clipping:   clipping,
 			open:       open,
+			end:        open && i == len(p),
 			segment:    seg,
 			left:       !increasing,
 			increasing: increasing,
@@ -399,11 +456,11 @@ func (q *SweepEvents) Pop() *SweepPoint {
 	return items
 }
 
-func (q *SweepEvents) Fix(i int) {
-	if !q.down(i, len(*q)) {
-		q.up(i)
-	}
-}
+//func (q *SweepEvents) Fix(i int) {
+//	if !q.down(i, len(*q)) {
+//		q.up(i)
+//	}
+//}
 
 // from container/heap
 func (q SweepEvents) up(j int) {
@@ -504,10 +561,10 @@ func (n *SweepNode) Next() *SweepNode {
 	return n.parent // can be nil
 }
 
-func (a *SweepNode) swap(b *SweepNode) {
-	a.SweepPoint, b.SweepPoint = b.SweepPoint, a.SweepPoint
-	a.SweepPoint.node, b.SweepPoint.node = a, b
-}
+//func (a *SweepNode) swap(b *SweepNode) {
+//	a.SweepPoint, b.SweepPoint = b.SweepPoint, a.SweepPoint
+//	a.SweepPoint.node, b.SweepPoint.node = a, b
+//}
 
 //func (n *SweepNode) fix() (*SweepNode, int) {
 //	move := 0
@@ -645,6 +702,7 @@ func (n *SweepNode) Print(w io.Writer) {
 }
 
 // TODO: test performance versus (2,4)-tree (current LEDA implementation), (2,16)-tree (as proposed by S. Naber/Näher in "Comparison of search-tree data structures in LEDA. Personal communication" apparently), RB-tree (likely a good candidate), and an AA-tree (simpler implementation may be faster). Perhaps an unbalanced (e.g. Treap) works well due to the high number of insertions/deletions.
+// In any case, measure the amount of finds and inserts/deletes. If finds >> inserts probably AVL is better, if somewhat similar or inserts > finds then perhaps an RB tree (store color in sign bit of node's height).
 type SweepStatus struct {
 	root *SweepNode
 }
@@ -681,10 +739,10 @@ func (s *SweepStatus) find(item *SweepPoint) (*SweepNode, int) {
 			}
 			n = n.right
 		} else {
-			break
+			break // should never happen
 		}
 	}
-	return n, 0
+	return n, 0 // should never happen
 }
 
 func (s *SweepStatus) rebalance(n *SweepNode) {
@@ -740,36 +798,36 @@ func (s *SweepStatus) String() string {
 	return str
 }
 
-func (s *SweepStatus) First() *SweepNode {
-	if s.root == nil {
-		return nil
-	}
-	n := s.root
-	for n.left != nil {
-		n = n.left
-	}
-	return n
-}
+//func (s *SweepStatus) First() *SweepNode {
+//	if s.root == nil {
+//		return nil
+//	}
+//	n := s.root
+//	for n.left != nil {
+//		n = n.left
+//	}
+//	return n
+//}
 
-func (s *SweepStatus) Last() *SweepNode {
-	if s.root == nil {
-		return nil
-	}
-	n := s.root
-	for n.right != nil {
-		n = n.right
-	}
-	return n
-}
+//func (s *SweepStatus) Last() *SweepNode {
+//	if s.root == nil {
+//		return nil
+//	}
+//	n := s.root
+//	for n.right != nil {
+//		n = n.right
+//	}
+//	return n
+//}
 
 // Find returns the node equal to item. May return nil.
-func (s *SweepStatus) Find(item *SweepPoint) *SweepNode {
-	n, cmp := s.find(item)
-	if cmp == 0 {
-		return n
-	}
-	return nil
-}
+//func (s *SweepStatus) Find(item *SweepPoint) *SweepNode {
+//	n, cmp := s.find(item)
+//	if cmp == 0 {
+//		return n
+//	}
+//	return nil
+//}
 
 func (s *SweepStatus) FindPrevNext(item *SweepPoint) (*SweepNode, *SweepNode) {
 	if s.root == nil {
@@ -782,47 +840,47 @@ func (s *SweepStatus) FindPrevNext(item *SweepPoint) (*SweepNode, *SweepNode) {
 	} else if 0 < cmp {
 		return n, n.Next()
 	} else {
-		return n.Prev(), n.Next()
+		return n.Prev(), n.Next() // should never happen
 	}
 }
 
-func (s *SweepStatus) Insert(item *SweepPoint) *SweepNode {
-	if s.root == nil {
-		s.root = s.newNode(item)
-		return s.root
-	}
-
-	rebalance := false
-	n, cmp := s.find(item)
-	if cmp < 0 {
-		// lower
-		n.left = s.newNode(item)
-		n.left.parent = n
-		rebalance = n.right == nil
-	} else if 0 < cmp {
-		// higher
-		n.right = s.newNode(item)
-		n.right.parent = n
-		rebalance = n.left == nil
-	} else {
-		// equal, replace
-		n.SweepPoint.node = nil
-		n.SweepPoint = item
-		n.SweepPoint.node = n
-		return n
-	}
-
-	if rebalance && n.parent != nil {
-		n.height++
-		s.rebalance(n.parent)
-	}
-
-	if cmp < 0 {
-		return n.left
-	} else {
-		return n.right
-	}
-}
+//func (s *SweepStatus) Insert(item *SweepPoint) *SweepNode {
+//	if s.root == nil {
+//		s.root = s.newNode(item)
+//		return s.root
+//	}
+//
+//	rebalance := false
+//	n, cmp := s.find(item)
+//	if cmp < 0 {
+//		// lower
+//		n.left = s.newNode(item)
+//		n.left.parent = n
+//		rebalance = n.right == nil
+//	} else if 0 < cmp {
+//		// higher
+//		n.right = s.newNode(item)
+//		n.right.parent = n
+//		rebalance = n.left == nil
+//	} else {
+//		// equal, replace
+//		n.SweepPoint.node = nil
+//		n.SweepPoint = item
+//		n.SweepPoint.node = n
+//		return n
+//	}
+//
+//	if rebalance && n.parent != nil {
+//		n.height++
+//		s.rebalance(n.parent)
+//	}
+//
+//	if cmp < 0 {
+//		return n.left
+//	} else {
+//		return n.right
+//	}
+//}
 
 func (s *SweepStatus) InsertAfter(n *SweepNode, item *SweepPoint) *SweepNode {
 	var cur *SweepNode
@@ -896,7 +954,7 @@ func (s *SweepStatus) Remove(n *SweepNode) {
 		}
 		succ.parent.swapChild(succ, succ.right)
 
-		// swap succesor with deleted node
+		// swap successor with deleted node
 		succ.parent, succ.left, succ.right = n.parent, n.left, n.right
 		if n.parent != nil {
 			n.parent.swapChild(n, succ)
@@ -919,15 +977,15 @@ func (s *SweepStatus) Remove(n *SweepNode) {
 	return
 }
 
-func (s *SweepStatus) Clear() {
-	n := s.First()
-	for n != nil {
-		cur := n
-		n = n.Next()
-		s.returnNode(cur)
-	}
-	s.root = nil
-}
+//func (s *SweepStatus) Clear() {
+//	n := s.First()
+//	for n != nil {
+//		cur := n
+//		n = n.Next()
+//		s.returnNode(cur)
+//	}
+//	s.root = nil
+//}
 
 func (a *SweepPoint) LessH(b *SweepPoint) bool {
 	// used for sweep queue
@@ -944,18 +1002,18 @@ func (a *SweepPoint) LessH(b *SweepPoint) bool {
 }
 
 func (a *SweepPoint) CompareH(b *SweepPoint) int {
-	// used for sweep queue
+	// used for nodes in tolerance square so that a.X==b.X and a.Y==b.Y
 	// sort left-to-right, then bottom-to-top, then right-endpoints before left-endpoints, and then
 	// sort upwards to ensure a CCW orientation of the result
-	if a.X < b.X {
-		return -1
-	} else if b.X < a.X {
-		return 1
-	} else if a.Y < b.Y {
-		return -1
-	} else if b.Y < a.Y {
-		return 1
-	} else if !a.left && b.left {
+	//if a.X < b.X {
+	//	return -1
+	//} else if b.X < a.X {
+	//	return 1
+	//} else if a.Y < b.Y {
+	//	return -1
+	//} else if b.Y < a.Y {
+	//	return 1
+	if !a.left && b.left {
 		return -1
 	} else if a.left && !b.left {
 		return 1
@@ -966,7 +1024,7 @@ func (a *SweepPoint) CompareH(b *SweepPoint) int {
 func (a *SweepPoint) compareOverlapsV(b *SweepPoint) int {
 	// compare segments vertically that overlap (ie. are the same)
 	if a.clipping != b.clipping {
-		// for equal segments, clipping path is virtually on top (or left if vertical) of subject
+		// clipping path is virtually on top (or left if vertical) of subject
 		if b.clipping {
 			return -1
 		} else {
@@ -974,7 +1032,7 @@ func (a *SweepPoint) compareOverlapsV(b *SweepPoint) int {
 		}
 	}
 
-	// equal segment on same path, sort by segment index
+	// higher segment index is virtually on top
 	if a.segment != b.segment {
 		if a.segment < b.segment {
 			return -1
@@ -995,14 +1053,9 @@ func (a *SweepPoint) compareTangentsV(b *SweepPoint) int {
 	if a.vertical {
 		// a is vertical
 		if b.vertical {
-			// a and b are vertical
-			if a.Y == b.Y {
-				return sign * a.compareOverlapsV(b)
-			} else if a.Y < b.Y {
-				return -1
-			} else {
-				return 1
-			}
+			// a and b are vertical, a.X == b.X
+			// this implies a.Y == b.Y, otherwise we never arrive here
+			return sign * a.compareOverlapsV(b)
 		}
 		return 1
 	} else if b.vertical {
@@ -1035,19 +1088,20 @@ func (a *SweepPoint) compareTangentsV(b *SweepPoint) int {
 
 func (a *SweepPoint) compareV(b *SweepPoint) int {
 	// compare segments vertically at a.X and b.X < a.X
-	// note that by may be infinite/large for fully/nearly vertical segments
+	// note that by is never very large, +/- infinity, or NaN as a result of both segments being in SweepStatus
 	by := b.InterpolateY(a.X) // b's y at a's left
-	if a.Y == by {
-		return a.compareTangentsV(b)
+	if by < a.Y {
+		return 1
 	} else if a.Y < by {
 		return -1
 	} else {
-		return 1
+		return a.compareTangentsV(b)
 	}
 }
 
 func (a *SweepPoint) CompareV(b *SweepPoint) int {
 	// used for sweep status, a is the point to be inserted / found
+	// note that both points must be in SweepStatus: a.X <= b.other.X and b.X <= a.other.X
 	if a.X == b.X {
 		// left-point at same X
 		if a.Y == b.Y {
@@ -1073,7 +1127,7 @@ func (a *SweepPoint) CompareV(b *SweepPoint) int {
 //	return SweepPointPair{pair[1], pair[0]}
 //}
 
-func addIntersections(zs []math32.Vector2, queue *SweepEvents, event *SweepPoint, prev, next *SweepNode) bool {
+func addIntersections(zs []math32.Vector2, queue *SweepEvents, event, a, b *SweepPoint) bool {
 	// a and b are always left-endpoints and a is below b
 	//pair := SweepPointPair{a, b}
 	//if _, ok := handled[pair]; ok {
@@ -1083,18 +1137,18 @@ func addIntersections(zs []math32.Vector2, queue *SweepEvents, event *SweepPoint
 	//}
 	//handled[pair] = struct{}{}
 
-	var a, b *SweepPoint
-	if prev == nil {
-		a, b = event, next.SweepPoint
-	} else if next == nil {
-		a, b = prev.SweepPoint, event
-	} else {
-		a, b = prev.SweepPoint, next.SweepPoint
-	}
+	//var a, b *SweepPoint
+	//if prev == nil {
+	//	a, b = event, next.SweepPoint
+	//} else if next == nil {
+	//	a, b = prev.SweepPoint, event
+	//} else {
+	//	a, b = prev.SweepPoint, next.SweepPoint
+	//}
 
 	// find all intersections between segment pair
 	// this returns either no intersections, or one or more secant/tangent intersections,
-	// or exactly two "same" intersections which occurs when the segments overlap.
+	// or exactly two endpoint intersections which occurs when the segments overlap.
 	zs = intersectionLineLineBentleyOttmann(zs[:0], a.Vector2, a.other.Vector2, b.Vector2, b.other.Vector2)
 
 	// no (valid) intersections
@@ -1131,9 +1185,11 @@ func addIntersections(zs []math32.Vector2, queue *SweepEvents, event *SweepPoint
 	if !event.left {
 		// intersection may be to the left (or below) the current event due to floating-point
 		// precision which would interfere with the sequence in queue, this is a problem when
-		// handling right-endpoints
+		// handling right-endpoints. New intersections must be at, or to the right/above the
+		// current event.
 		for i := range zs {
-			zold := zs[i]
+			//zold := zs[i]
+			// NOTE: an intersections _may_ move to the right/above the current segments
 			z := &zs[i]
 			if z.X < event.X {
 				z.X = event.X
@@ -1141,16 +1197,19 @@ func addIntersections(zs []math32.Vector2, queue *SweepEvents, event *SweepPoint
 				z.Y = event.Y
 			}
 
-			aMaxY := math32.Max(a.Y, a.other.Y)
-			bMaxY := math32.Max(b.Y, b.other.Y)
-			if a.other.X < z.X || b.other.X < z.X || aMaxY < z.Y || bMaxY < z.Y {
-				fmt.Println("WARNING: intersection moved outside of segment:", zold, "=>", z)
-			}
+			//aMaxY := math32.Max(a.Y, a.other.Y)
+			//bMaxY := math32.Max(b.Y, b.other.Y)
+			//if a.other.X < z.X || b.other.X < z.X || aMaxY < z.Y || bMaxY < z.Y {
+			//	// TODO: handle/check this case, apparently a and b are both _below_ the event
+			//	log.Println("WARNING: intersection moved outside of segment:", zold, "=>", z)
+			//}
 		}
 	}
 
-	// split segments a and b, but first find overlapping segments above and below and split them at the same point
-	// this prevents a case that causes alternating intersections between overlapping segments and thus slowdown significantly
+	// TODO: if we _did_ combine overlapping segments here, it might save us a lot of work after in finding intersections
+	// in the tolerance squares.
+	//// split segments a and b, but first find overlapping segments above and below and split them at the same point
+	//// this prevents a case that causes alternating intersections between overlapping segments and thus slowdown significantly
 	//if a.node != nil {
 	//	splitOverlappingAtIntersections(zs, queue, a, true)
 	//}
@@ -1206,8 +1265,8 @@ func splitAtIntersections(zs []math32.Vector2, queue *SweepEvents, s *SweepPoint
 			right.vertical, right.other.vertical = true, true
 			if right.Y < right.other.Y {
 				// reverse first segment
-				if isA {
-					fmt.Println("WARNING: reversing first segment of A")
+				if DebugPathIntersection && isA {
+					log.Println("WARNING: reversing first segment of A")
 				}
 				if right.other.node != nil {
 					// panic("impossible: first segment became vertical and needs reversal, but was already in the sweep status")
@@ -1378,7 +1437,7 @@ func (squares *toleranceSquares) Add(x float32, event *SweepPoint, refNode *Swee
 //
 //	sorted := sort.IsSorted(eventSliceH(*events))
 //	if !sorted {
-//		fmt.Println("WARNING: H not sorted")
+//		log.Println("WARNING: H not sorted")
 //		for i, event := range *events {
 //			fmt.Println(i, event, event.Angle())
 //		}
@@ -1387,7 +1446,7 @@ func (squares *toleranceSquares) Add(x float32, event *SweepPoint, refNode *Swee
 //	copy((*events)[lo+1:], (*events)[lo:])
 //	(*events)[lo] = event
 //	if sorted && !sort.IsSorted(eventSliceH(*events)) {
-//		fmt.Println("ERROR: not sorted after inserting into events:", *events)
+//		log.Println("ERROR: not sorted after inserting into events:", *events)
 //	}
 //}
 
@@ -1400,7 +1459,7 @@ func (event *SweepPoint) breakupSegment(events *[]*SweepPoint, index int, x, y f
 
 	// original segment should be kept in-place to not alter the queue or status
 	r, l := event.SplitAt(math32.Vector2{x, y})
-	r.index, l.index = index, index
+	r.square, l.square = index, index
 
 	// reverse
 	//if r.other.X == r.X {
@@ -1450,7 +1509,7 @@ func (squares toleranceSquares) breakupCrossingSegments(n int, x float32) {
 				square.Lower, square.Upper = square.Node, square.Node
 			}
 
-			// find upper node
+			// reference node is in or below, find upper node
 			if !above {
 				for next := square.Node.Next(); next != nil; next = next.Next() {
 					y0, y1 := next.ToleranceEdgeY(x0, x1)
@@ -1470,7 +1529,7 @@ func (squares toleranceSquares) breakupCrossingSegments(n int, x float32) {
 				}
 			}
 
-			// find lower node and set reference node to the node completely below the square
+			// reference node is in or above, find lower node and set reference node to the node completely below the square
 			if !below {
 				prev := square.Node.Prev()
 				for ; prev != nil; prev = prev.Prev() {
@@ -1485,7 +1544,9 @@ func (squares toleranceSquares) breakupCrossingSegments(n int, x float32) {
 					}
 					square.Lower = prev
 					if square.Upper == nil {
-						// this is set if the reference node is above the square
+						if DebugPathIntersection {
+							log.Println("NOTE: square without a segment above it")
+						}
 						square.Upper = prev
 					}
 				}
@@ -1555,21 +1616,43 @@ func (a eventSliceV) Swap(i, j int) {
 	a[i], a[j] = a[j], a[i]
 }
 
-type eventSliceH []*SweepPoint
+//type eventSliceH []*SweepPoint
+//
+//func (a eventSliceH) Len() int {
+//	return len(a)
+//}
+//
+//func (a eventSliceH) Less(i, j int) bool {
+//	return a[i].LessH(a[j])
+//}
+//
+//func (a eventSliceH) Swap(i, j int) {
+//	a[i], a[j] = a[j], a[i]
+//}
 
-func (a eventSliceH) Len() int {
-	return len(a)
-}
-
-func (a eventSliceH) Less(i, j int) bool {
-	return a[i].LessH(a[j])
-}
-
-func (a eventSliceH) Swap(i, j int) {
-	a[i], a[j] = a[j], a[i]
+// computeSweepFieldsInOrder computes the sweep fields of a non-vertical left-endpoint from the
+// segment below it in the sweep status, computing that segment first when it starts in the same
+// point and has not been computed yet. Left-endpoints of a tolerance square are visited in
+// CompareH order, but windings propagate bottom-up along the sweep status, and for overlapping
+// segments starting in the same point the two orders need not agree: a segment would then read
+// the windings of a neighbour that has not been computed yet.
+// (from https://github.com/tdewolff/canvas/pull/394)
+func (cur *SweepPoint) computeSweepFieldsInOrder(op pathOp, fillRule ppath.FillRules) {
+	if cur.swept {
+		return
+	}
+	var prev *SweepPoint
+	if node := cur.node.Prev(); node != nil {
+		prev = node.SweepPoint
+		if !prev.swept && prev.node != nil && prev.Vector2 == cur.Vector2 {
+			prev.computeSweepFieldsInOrder(op, fillRule)
+		}
+	}
+	cur.computeSweepFields(prev, op, fillRule)
 }
 
 func (cur *SweepPoint) computeSweepFields(prev *SweepPoint, op pathOp, fillRule ppath.FillRules) {
+	cur.swept = true
 	// cur is left-endpoint
 	if !cur.open {
 		cur.selfWindings = 1
@@ -1603,8 +1686,8 @@ func (cur *SweepPoint) computeSweepFields(prev *SweepPoint, op pathOp, fillRule 
 }
 
 func (s *SweepPoint) InResult(op pathOp, fillRule ppath.FillRules) uint8 {
-	lowerWindings, lowerOtherWindings := s.windings, s.otherWindings
-	upperWindings, upperOtherWindings := s.windings+s.selfWindings, s.otherWindings+s.otherSelfWindings
+	lowerWindings, lowerOtherWindings := int(s.windings), int(s.otherWindings)
+	upperWindings, upperOtherWindings := int(s.windings+s.selfWindings), int(s.otherWindings+s.otherSelfWindings)
 	if s.clipping {
 		lowerWindings, lowerOtherWindings = lowerOtherWindings, lowerWindings
 		upperWindings, upperOtherWindings = upperOtherWindings, upperWindings
@@ -1712,9 +1795,8 @@ func (s *SweepPoint) mergeOverlapping(op pathOp, fillRule ppath.FillRules) {
 	s.prev = prev
 }
 
-func bentleyOttmann(ps, qs ppath.Paths, op pathOp, fillRule ppath.FillRules) ppath.Path {
-	// TODO: make public and add grid spacing argument
-	// TODO: support OpDIV, keeping only subject, or both subject and clipping subpaths
+func bentleyOttmann(ps, qs ppath.Paths, op pathOp, fillRule ppath.FillRules) ppath.Paths {
+	// TODO: add grid spacing argument
 	// TODO: add Intersects/Touches functions (return bool)
 	// TODO: add Intersections function (return []Point)
 	// TODO: support Cut to cut a path in subpaths between intersections (not polygons)
@@ -1725,6 +1807,8 @@ func bentleyOttmann(ps, qs ppath.Paths, op pathOp, fillRule ppath.FillRules) ppa
 	// TODO: optimize path data by removing commands, set number of same command (50% less memory)
 	// TODO: can we get idempotency (same result after second time) by tracing back each snapped
 	//       right-endpoint for the squares it may now intersect? (Hershberger 2013)
+	// TODO: if overlapping segments can be detected earlier, we can just process left-events
+	//       and make the code simpler
 
 	// Implementation of the Bentley-Ottmann algorithm by reducing the complexity of finding
 	// intersections to O((n + k) log n), with n the number of segments and k the number of
@@ -1785,11 +1869,11 @@ func bentleyOttmann(ps, qs ppath.Paths, op pathOp, fillRule ppath.FillRules) ppa
 	//
 	// The difference with Hobby's steps is that we advance Bentley-Ottmann for the entire column,
 	// and only then do we calculate crossing segments. I'm not sure what reason Hobby has to do
-	// this in two fases. Also, Hobby uses a shadow sweep line status structure which contains the
+	// this in two phases. Also, Hobby uses a shadow sweep line status structure which contains the
 	// segments sorted after snapping. Instead of using two sweep status structures (the original
 	// Bentley-Ottmann and the shadow with snapped segments), we sort the status after each column.
 	// Additionally, we need to keep the sweep line queue structure ordered as well for the result
-	// polygon (instead of the queue we gather the events for each sqaure, and sort those), and we
+	// polygon (instead of the queue we gather the events for each square, and sort those), and we
 	// need to calculate the sweep fields for the result polygon.
 	//
 	// It is best to think of processing the tolerance squares, one at a time moving bottom-to-top,
@@ -1828,20 +1912,20 @@ func bentleyOttmann(ps, qs ppath.Paths, op pathOp, fillRule ppath.FillRules) ppa
 
 	boInitPoolsOnce() // use pools for SweepPoint and SweepNode to amortize repeated calls to BO
 
-	// return in case of one path is empty
+	// return when one path is empty
 	if op == opSettle {
 		qs = nil
 	} else if qs.Empty() {
 		if op == opAND {
-			return ppath.Path{}
+			return []ppath.Path{}
 		}
-		return SettlePaths(ps, fillRule)
+		return SettleRings(ps, fillRule)
 	}
 	if ps.Empty() {
 		if qs != nil && (op == opOR || op == opXOR) {
-			return SettlePaths(qs, fillRule)
+			return SettleRings(qs, fillRule)
 		}
-		return ppath.Path{}
+		return []ppath.Path{}
 	}
 
 	// ensure that X-monotone property holds for Béziers and arcs by breaking them up at their
@@ -1875,76 +1959,55 @@ func bentleyOttmann(ps, qs ppath.Paths, op pathOp, fillRule ppath.FillRules) ppa
 	// check for path bounding boxes to overlap
 	// TODO: cluster paths that overlap and treat non-overlapping clusters separately, this
 	// makes the algorithm "more linear"
-	R := ppath.Path{}
-	var pOverlaps, qOverlaps []bool
-	if qs != nil {
-		pBounds := make([]math32.Box2, len(ps))
-		qBounds := make([]math32.Box2, len(qs))
-		for i := range ps {
-			pBounds[i] = ps[i].FastBounds()
-		}
-		for i := range qs {
-			qBounds[i] = qs[i].FastBounds()
-		}
-		pOverlaps = make([]bool, len(ps))
-		qOverlaps = make([]bool, len(qs))
-		for i := range ps {
-			for j := range qs {
-				if touches(pBounds[i], qBounds[j]) {
-					pOverlaps[i] = true
-					qOverlaps[j] = true
-				}
-			}
-		}
-		// subpaths that are kept in the result and touch others of the same
-		// path may overlap them, so they must be settled together with them
-		touchesOwn := func(bounds []math32.Box2, overlaps []bool) {
-			for i := range bounds {
-				for j := i + 1; j < len(bounds); j++ {
-					if touches(bounds[i], bounds[j]) {
-						overlaps[i] = true
-						overlaps[j] = true
-					}
-				}
-			}
-		}
-		if op == opOR || op == opXOR || op == opNOT {
-			touchesOwn(pBounds, pOverlaps)
-		}
-		if op == opOR || op == opXOR {
-			touchesOwn(qBounds, qOverlaps)
-		}
-		for i := range ps {
-			if !pOverlaps[i] && (op == opOR || op == opXOR || op == opNOT) {
-				// path bounding boxes do not overlap, thus no intersections
-				R = R.Append(Settle(ps[i], fillRule))
-			}
-		}
-		for j := range qs {
-			if !qOverlaps[j] && (op == opOR || op == opXOR) {
-				// path bounding boxes do not overlap, thus no intersections
-				R = R.Append(Settle(qs[j], fillRule))
-			}
-		}
-	}
+	Rs := []ppath.Path{}
+	//var pOverlaps, qOverlaps []bool
+	//if qs != nil {
+	//	pBounds := make([]math32.Box2, len(ps))
+	//	qBounds := make([]math32.Box2, len(qs))
+	//	for i := range ps {
+	//		pBounds[i] = ps[i].FastBounds()
+	//	}
+	//	for i := range qs {
+	//		qBounds[i] = qs[i].FastBounds()
+	//	}
+	//	pOverlaps = make([]bool, len(ps))
+	//	qOverlaps = make([]bool, len(qs))
+	//	for i := range ps {
+	//		for j := range qs {
+	//			if pBounds[i].Touches(qBounds[j]) {
+	//				pOverlaps[i] = true
+	//				qOverlaps[j] = true
+	//			}
+	//		}
+	//		if !pOverlaps[i] && (op == opOR || op == opXOR || op == opNOT) {
+	//			// path bounding boxes do not overlap, thus no intersections
+	//			pOverlaps[i] = true
+	//			//Rs = append(Rs, ps[i].Settle(fillRule))
+	//		}
+	//	}
+	//	for j := range qs {
+	//		if !qOverlaps[j] && (op == opOR || op == opXOR) {
+	//			// path bounding boxes do not overlap, thus no intersections
+	//			qOverlaps[j] = true
+	//			//Rs = append(Rs, qs[j].Settle(fillRule))
+	//		}
+	//	}
+	//}
 
 	// construct the priority queue of sweep events
 	pSeg, qSeg := 0, 0
 	queue := &SweepEvents{}
 	for i := range ps {
-		if qs == nil || pOverlaps[i] {
-			pSeg = queue.AddPathEndpoints(ps[i], pSeg, false)
-		}
+		//if qs == nil || pOverlaps[i] {
+		pSeg = queue.AddPathEndpoints(ps[i], pSeg, false)
+		//}
 	}
 	if qs != nil {
 		for i := range qs {
-			if qOverlaps[i] {
-				// implicitly close all subpaths on Q
-				if !qs[i].Closed() {
-					qs[i].Close()
-				}
-				qSeg = queue.AddPathEndpoints(qs[i], qSeg, true)
-			}
+			//if qOverlaps[i] {
+			qs[i].Close() // implicitly close all subpaths on Q
+			qSeg = queue.AddPathEndpoints(qs[i], qSeg, true)
+			//}
 		}
 	}
 	queue.Init() // sort from left to right
@@ -1971,6 +2034,11 @@ func bentleyOttmann(ps, qs ppath.Paths, op pathOp, fillRule ppath.FillRules) ppa
 		// process all events of the current column
 		n := len(squares)
 		x := snap(queue.Top().X, BentleyOttmannEpsilon)
+		//fmt.Println()
+		//fmt.Println("---")
+		//fmt.Println("X", x)
+		//fmt.Println(queue)
+		//fmt.Println(status)
 	BentleyOttmannLoop:
 		for 0 < len(*queue) && snap(queue.Top().X, BentleyOttmannEpsilon) == x {
 			event := queue.Top()
@@ -2000,7 +2068,7 @@ func bentleyOttmann(ps, qs ppath.Paths, op pathOp, fillRule ppath.FillRules) ppa
 				prev := n.Prev()
 				next := n.Next()
 				if prev != nil && next != nil {
-					addIntersections(zs, queue, event, prev, next)
+					addIntersections(zs, queue, event, prev.SweepPoint, next.SweepPoint)
 				}
 
 				// add event to tolerance square
@@ -2017,10 +2085,10 @@ func bentleyOttmann(ps, qs ppath.Paths, op pathOp, fillRule ppath.FillRules) ppa
 				// add intersections to queue
 				prev, next := status.FindPrevNext(event)
 				if prev != nil {
-					addIntersections(zs, queue, event, prev, nil)
+					addIntersections(zs, queue, event, prev.SweepPoint, event)
 				}
 				if next != nil {
-					addIntersections(zs, queue, event, nil, next)
+					addIntersections(zs, queue, event, event, next.SweepPoint)
 				}
 				if queue.Top() != event {
 					// check if the queue order was changed, this happens if the current event
@@ -2052,7 +2120,7 @@ func bentleyOttmann(ps, qs ppath.Paths, op pathOp, fillRule ppath.FillRules) ppa
 			square := squares[j] // pointer
 			for i := 0; i < len(square.Events); i++ {
 				event := square.Events[i]
-				event.index = j
+				event.square = j
 				event.X, event.Y = x, square.Y
 
 				other := Gridsnap(event.other.Vector2, BentleyOttmannEpsilon)
@@ -2136,10 +2204,10 @@ func bentleyOttmann(ps, qs ppath.Paths, op pathOp, fillRule ppath.FillRules) ppa
 				has := false
 				centre.Vector2 = math32.Vector2{square.X, square.Y}
 				if prev := square.Lower.Prev(); prev != nil {
-					has = addIntersections(zs, queue, centre, prev, square.Lower)
+					has = addIntersections(zs, queue, centre, prev.SweepPoint, square.Lower.SweepPoint)
 				}
 				if next := square.Upper.Next(); next != nil {
-					has = has || addIntersections(zs, queue, centre, square.Upper, next)
+					has = has || addIntersections(zs, queue, centre, square.Upper.SweepPoint, next.SweepPoint)
 				}
 
 				// find intersections between new neighbours in status after sorting
@@ -2153,13 +2221,16 @@ func bentleyOttmann(ps, qs ppath.Paths, op pathOp, fillRule ppath.FillRules) ppa
 
 						if next := n.Next(); next != nil && (j == 0 || next.SweepPoint != origEvents[j-1]) && (j+1 == len(origEvents) || next.SweepPoint != origEvents[j+1]) {
 							// segment changed order and the segment above was not its neighbour
-							has = has || addIntersections(zs, queue, centre, n, next)
+							has = has || addIntersections(zs, queue, centre, n.SweepPoint, next.SweepPoint)
 						}
 					}
 				}
 
 				if 0 < len(*queue) && snap(queue.Top().X, BentleyOttmannEpsilon) == x {
-					//fmt.Println("WARNING: new intersections in this column!")
+					// TODO: find a test to cover this case
+					if DebugPathIntersection {
+						log.Println("WARNING: new intersections in this column!")
+					}
 					goto BentleyOttmannLoop // TODO: is this correct? seems to work
 					// TODO: almost parallel combined with overlapping segments may create many intersections considering order of
 					//       of overlapping segments and snapping after each column
@@ -2197,46 +2268,62 @@ func bentleyOttmann(ps, qs ppath.Paths, op pathOp, fillRule ppath.FillRules) ppa
 						event.computeSweepFields(s, op, fillRule)
 					}
 				} else {
-					var s *SweepPoint
-					if event.node.Prev() != nil {
-						s = event.node.Prev().SweepPoint
-					}
-					event.computeSweepFields(s, op, fillRule)
+					event.computeSweepFieldsInOrder(op, fillRule)
 				}
 			}
 		}
 	}
-	status.Clear() // release all nodes (but not SweepPoints)
+	//status.Clear() // release all nodes (but not SweepPoints) // already cleared!
+
+	//for _, square := range squares {
+	//	for _, event := range square.Events {
+	//		if event.left {
+	//			fmt.Println(event, event.prev, event.inResult, "--", event.windings, event.selfWindings)
+	//		}
+	//	}
+	//}
 
 	// build resulting polygons
 	var Ropen ppath.Path
 	for _, square := range squares {
 		for _, cur := range square.Events {
-			if cur.inResult == 0 {
+			if !cur.left || cur.inResult == 0 {
+				// skip
 				continue
 			}
 
 		BuildPath:
-			windings := 0
-			prev := cur.prev
-			if op != opDIV && prev != nil {
-				windings = prev.resultWindings
+			windings := int16(0) // windings (outside) of the current polygon
+			index := len(Rs) + 1 // index into Rs + 1 to group (outer) filling with (inner) holes, 0 means resultWindings is invalid
+			if op != opDIV {
+				prev := cur.prev
+				for prev != nil && prev.index == 0 {
+					prev = prev.prev
+				}
+				if prev != nil {
+					windings = prev.resultWindings
+					if windings%2 != 0 {
+						// current ring is a hole
+						index = prev.index
+					}
+				}
 			}
 
 			first := cur
-			indexR := len(R)
+			R := ppath.Path{}
 			R.MoveTo(cur.X, cur.Y)
+			cur.index = index
 			cur.resultWindings = windings
 			if !first.open {
-				// we go to the right/top
+				// TODO: should be += selfWindings? test with open paths
 				cur.resultWindings++
 			}
-			cur.other.resultWindings = cur.resultWindings
+
 			for {
 				// find segments starting from other endpoint, find the other segment amongst
 				// them, the next segment should be the next going CCW
 				i0 := 0
-				nodes := squares[cur.other.index].Events
+				nodes := squares[cur.other.square].Events
 				for i := range nodes {
 					if nodes[i] == cur.other {
 						i0 = i
@@ -2259,7 +2346,7 @@ func bentleyOttmann(ps, qs ppath.Paths, op pathOp, fillRule ppath.FillRules) ppa
 					}
 				}
 				if next == nil {
-					if first.open {
+					if first.open || !DebugPathIntersection {
 						R.LineTo(cur.other.X, cur.other.Y)
 					} else {
 						// fmt.Println(ps)
@@ -2269,46 +2356,55 @@ func bentleyOttmann(ps, qs ppath.Paths, op pathOp, fillRule ppath.FillRules) ppa
 					}
 					break
 				} else if next == first {
-					break // contour is done
+					first.open = false // open path encloses area
+					break              // contour is done
 				}
 				cur = next
 
 				R.LineTo(cur.X, cur.Y)
-				cur.resultWindings = windings
-				if cur.left && !first.open {
+				if cur.left {
 					// we go to the right/top
-					cur.resultWindings++
+					cur.inResult--
+					cur.index = index
+					cur.resultWindings = windings
+					if !first.open {
+						// TODO: should be += selfWindings? test with open paths
+						cur.resultWindings++
+					}
+				} else {
+					cur.other.inResult--
+					cur.other.index = index
+					cur.other.resultWindings = windings
 				}
-				cur.other.resultWindings = cur.resultWindings
-				cur.other.inResult--
-				cur.inResult--
 			}
-			first.other.inResult--
 			first.inResult--
 
 			if first.open {
+				// open path, merge separate parts
+				// TODO: relevant?
 				if Ropen != nil {
-					start := (R[indexR:]).Reverse()
-					R = append(R[:indexR], start...)
-					R = append(R, Ropen...)
+					R = R.Reverse()
+					R = append(R, Ropen[4:]...)
 					Ropen = nil
 				} else {
 					for _, cur2 := range square.Events {
 						if 0 < cur2.inResult && cur2.open {
 							cur = cur2
-							Ropen = make(ppath.Path, len(R)-indexR-4)
-							copy(Ropen, R[indexR+4:])
-							R = R[:indexR]
+							Ropen = R
 							goto BuildPath
 						}
 					}
 				}
+				Rs = append(Rs, R)
 			} else {
 				R.Close()
 				if windings%2 != 0 {
-					// orient holes clockwise
-					hole := R[indexR:].Reverse()
-					R = append(R[:indexR], hole...)
+					// orient holes clockwise and put together with outer filling ring
+					R = R.Reverse()
+					Rs[index-1] = Rs[index-1].Append(R)
+				} else {
+					// filling ring
+					Rs = append(Rs, R)
 				}
 			}
 		}
@@ -2321,5 +2417,5 @@ func bentleyOttmann(ps, qs ppath.Paths, op pathOp, fillRule ppath.FillRules) ppa
 		}
 		boSquarePool.Put(square)
 	}
-	return R
+	return Rs
 }

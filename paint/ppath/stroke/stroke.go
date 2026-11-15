@@ -20,6 +20,15 @@ func ellipseNormal(rx, ry, phi float32, sweep bool, theta, d float32) math32.Vec
 	return ppath.EllipseDeriv(rx, ry, phi, sweep, theta).Rot90CW().Normal().MulScalar(d)
 }
 
+// FastStroke skips "settling" the resulting paths of [Offset] and [Stroke],
+// which ensures a well-formed path without overlaps or holes. Settling fixes
+// overlapping strokes and the inner bends of corners. Inner bends are already
+// fixed for two line segments, but otherwise leave a hole. Overlapping
+// strokes may not be a problem when they are drawn with the NonZero fill
+// rule. Strokes that are much wider than the path itself may be drawn wrong
+// with this, but it can be much faster for most (simple) paths.
+var FastStroke = false
+
 // NOTE: implementation inspired from github.com/golang/freetype/raster/stroke.go
 
 // Stroke converts a path into a stroke of width w and returns a new path.
@@ -38,23 +47,13 @@ func Stroke(p ppath.Path, w float32, cr Capper, jr Joiner, tolerance float32) pp
 	halfWidth := math32.Abs(w) / 2.0
 	for _, pi := range p.Split() {
 		rhs, lhs := offset(pi, halfWidth, cr, jr, true, tolerance)
-		if rhs == nil {
-			continue
-		} else if lhs == nil {
-			// open path
-			q = q.Append(intersect.Settle(rhs, ppath.Positive))
-		} else {
-			// closed path
-			// inner path should go opposite direction to cancel the outer path
-			if intersect.CCW(pi) {
-				q = q.Append(intersect.Settle(rhs, ppath.Positive))
-				q = q.Append(intersect.Settle(lhs, ppath.Positive).Reverse())
-			} else {
-				// outer first, then inner
-				q = q.Append(intersect.Settle(lhs, ppath.Negative))
-				q = q.Append(intersect.Settle(rhs, ppath.Negative).Reverse())
-			}
+		if rhs != nil {
+			q = q.Append(rhs).Append(lhs.Reverse())
 		}
+	}
+	if !FastStroke {
+		// fix overlapping and spilled parts
+		q = intersect.Settle(q, ppath.Positive)
 	}
 	return q
 }
@@ -783,28 +782,20 @@ func Offset(p ppath.Path, w float32, tolerance float32) ppath.Path {
 		return p
 	}
 
-	positive := 0.0 < w
-	w = math32.Abs(w)
-
 	q := ppath.Path{}
+	if !FastStroke {
+		// make sure all filling paths are CCW
+		p = intersect.Settle(p, ppath.NonZero)
+	}
 	for _, pi := range p.Split() {
-		r := ppath.Path{}
-		rhs, lhs := offset(pi, w, ButtCap, RoundJoin, false, tolerance)
-		if rhs == nil {
-			continue
-		} else if positive {
-			r = rhs
-		} else {
-			r = lhs
+		rhs, _ := offset(pi, w, ButtCap, RoundJoin, false, tolerance)
+		if rhs != nil {
+			q = q.Append(rhs)
 		}
-		if pi.Closed() {
-			if intersect.CCW(pi) {
-				r = intersect.Settle(r, ppath.Positive)
-			} else {
-				r = intersect.Settle(r, ppath.Negative).Reverse()
-			}
-		}
-		q = q.Append(r)
+	}
+	if !FastStroke {
+		// fix overlapping and spilled parts
+		q = intersect.Settle(q, ppath.Positive)
 	}
 	return q
 }

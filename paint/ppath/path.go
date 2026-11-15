@@ -582,9 +582,12 @@ func (p *Path) Close() {
 
 	end := p.StartPos()
 	if (*p)[len(*p)-1] == LineTo && Equal((*p)[len(*p)-3], end.X) && Equal((*p)[len(*p)-2], end.Y) {
-		// replace LineTo by Close if equal
-		(*p)[len(*p)-1] = Close
+		// replace LineTo by Close if equal (with the coordinates of the start,
+		// so that they match exactly)
 		(*p)[len(*p)-CmdLen(LineTo)] = Close
+		(*p)[len(*p)-3] = end.X
+		(*p)[len(*p)-2] = end.Y
+		(*p)[len(*p)-1] = Close
 		return
 	} else if (*p)[len(*p)-1] == LineTo {
 		// replace LineTo by Close if equidirectional extension

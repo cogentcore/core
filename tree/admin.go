@@ -100,9 +100,14 @@ func ParentByType[T Node](n Node) T {
 }
 
 // ChildByType returns the first child of the given node that is
-// of the given type, if any such node exists.
+// of the given type, if any such node exists. If a start index is
+// given, the search starts there and goes in both directions (see
+// [slicesx.Search]), finding the nearest one.
 func ChildByType[T Node](n Node, startIndex ...int) T {
 	nb := n.AsTree()
+	if len(startIndex) == 0 {
+		startIndex = []int{0} // the first one
+	}
 	idx := slicesx.Search(nb.Children, func(ch Node) bool {
 		_, ok := ch.(T)
 		return ok

@@ -164,8 +164,8 @@ func (n *NodeBase) IndexInParent() int {
 }
 
 // ParentLevel finds a given potential parent node recursively up the
-// hierarchy, returning the level above the current node that the parent was
-// found, and -1 if not found.
+// hierarchy, returning the number of levels between this node and the parent
+// (0 for its direct parent, 1 for the parent of that, etc), and -1 if not found.
 func (n *NodeBase) ParentLevel(parent Node) int {
 	parLev := -1
 	level := 0
@@ -297,10 +297,14 @@ func findPathChild(n Node, child string) int {
 	if child[0] == '[' && child[len(child)-1] == ']' {
 		idx, err := strconv.Atoi(child[1 : len(child)-1])
 		if err != nil {
-			return idx
+			return -1
 		}
+		nc := len(n.AsTree().Children)
 		if idx < 0 { // from end
-			idx = len(n.AsTree().Children) + idx
+			idx = nc + idx
+		}
+		if idx < 0 || idx >= nc {
+			return -1
 		}
 		return idx
 	}

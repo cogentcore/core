@@ -84,10 +84,11 @@ func (md *Model) AddWord(term string) {
 	md.createSuggestKeys(term)
 }
 
-// Delete removes given word from dictionary -- undoes learning
+// Delete removes given word from the dictionary and the user dictionary,
+// which undoes learning it.
 func (md *Model) Delete(term string) {
 	md.Lock()
-	edits := md.EditsMulti(term, 1)
+	edits := md.EditsMulti(term, md.Depth) // the keys that it was added for
 	for _, edit := range edits {
 		sug := md.Suggest[edit]
 		ns := len(sug)
@@ -104,6 +105,7 @@ func (md *Model) Delete(term string) {
 		}
 	}
 	delete(md.Dict, term)
+	delete(md.UserDict, term) // so that it is not saved as learned
 	md.Unlock()
 }
 
