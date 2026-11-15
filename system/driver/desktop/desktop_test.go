@@ -141,7 +141,9 @@ func TestAppScreens(t *testing.T) {
 	assert.Greater(t, sc.PixelSize.Y, 0)
 	assert.Greater(t, sc.DevicePixelRatio, float32(0))
 	assert.Greater(t, sc.LogicalDPI, float32(0))
-	if runtime.GOOS == "darwin" { // (it is only known on macOS)
+	// (the main thread is known on these platforms; the screens being found
+	// here depends on it, as other goroutines wait for the initialization)
+	if runtime.GOOS == "darwin" || runtime.GOOS == "linux" || runtime.GOOS == "windows" {
 		assert.False(t, onMainThread(), "the tests run off the main thread")
 	}
 	assert.NotPanics(t, func() { TheApp.IsDark() })

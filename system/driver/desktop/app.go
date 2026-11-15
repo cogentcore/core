@@ -31,6 +31,7 @@ import (
 func Init() {
 	// some operating systems require us to be on the main thread
 	runtime.LockOSThread()
+	setMainThread()
 
 	base.Init(TheApp, &TheApp.App)
 }

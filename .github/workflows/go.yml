@@ -92,8 +92,8 @@ jobs:
     # the mobile and web platforms are tested on those platforms: see
     # TESTING.md). CORE_REQUIRE_GPU makes the tests that need a GPU fail
     # instead of skipping when there is none.
-    # The desktop driver has its own display, as glfw can find no screens
-    # on a display that the many processes of the other tests are using.
+    # The desktop driver is tested in a display of its own, which no other
+    # test process uses, so that its window tests do not depend on them.
     - name: Test desktop driver
       env:
         CORE_REQUIRE_GPU: "true"
