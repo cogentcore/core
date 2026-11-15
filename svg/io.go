@@ -457,8 +457,8 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 							} else {
 								img.SetImage(im, 0, 0)
 							}
-						} else { // url
-
+						} else { // a url, which is kept to be written
+							img.Filename = attr.Value
 						}
 					default:
 						img.SetProperty(attr.Name.Local, attr.Value)
@@ -667,7 +667,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						szx, err = math32.ParseFloat32(attr.Value)
 					case "markerHeight":
 						szy, err = math32.ParseFloat32(attr.Value)
-					case "matrixUnits":
+					case "markerUnits", "matrixUnits": // (the latter was read before)
 						if attr.Value == "strokeWidth" {
 							mrk.Units = StrokeWidth
 						} else {
@@ -1135,7 +1135,8 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "y", fmt.Sprintf("%g", nd.Pos.Y))
 		text = nd.Text
 	case *Image:
-		if nd.Pixels == nil || nd.Pixels.Image == nil {
+		hasPixels := nd.Pixels != nil && nd.Pixels.Image != nil
+		if !hasPixels && nd.Filename == "" {
 			return ""
 		}
 		nm = "image"
@@ -1144,6 +1145,10 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "width", fmt.Sprintf("%g", nd.Size.X))
 		XMLAddAttr(&se.Attr, "height", fmt.Sprintf("%g", nd.Size.Y))
 		XMLAddAttr(&se.Attr, "preserveAspectRatio", nd.ViewBox.PreserveAspectRatio.String())
+		if !hasPixels { // a link to an image that is not loaded
+			XMLAddAttr(&se.Attr, "href", nd.Filename)
+			break
+		}
 		ib, fmt := imagex.ToBase64(nd.Pixels.Image, imagex.PNG)
 		XMLAddAttr(&se.Attr, "href", "data:"+fmt+";base64,"+string(imagex.Base64SplitLines(ib)))
 	case *MetaData:
@@ -1162,6 +1167,9 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "orient", nd.Orient)
 		XMLAddAttr(&se.Attr, "markerWidth", fmt.Sprintf("%g", nd.Size.X))
 		XMLAddAttr(&se.Attr, "markerHeight", fmt.Sprintf("%g", nd.Size.Y))
+		if nd.Units == UserSpaceOnUse { // (strokeWidth is the default)
+			XMLAddAttr(&se.Attr, "markerUnits", "userSpaceOnUse")
+		}
 		addXMLViewBox(&se.Attr, &nd.ViewBox)
 	case *Symbol:
 		nm = "symbol"

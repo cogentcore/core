@@ -39,6 +39,7 @@ func TestMain(m *testing.M) {
 	}
 	Init() // locks the main thread
 	guiRunning = true
+	hideNewWindows = true // (not popping up on the screen)
 	code := 0
 	go func() {
 		code = m.Run()

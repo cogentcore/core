@@ -170,12 +170,19 @@ func TopScene(b *Body) *Scene {
 	return top.Scene
 }
 
-// ButtonByText returns the first button with the given text in the given
+// ButtonByText returns the first button (or function button) with the given text in the given
 // widget and its descendants (such as a menu or dialog scene from
 // [Popups]), or nil if there is none.
 func ButtonByText(w Widget, text string) *Button {
 	for cw := range w.AsWidget().AllWidgets() {
-		if bt, ok := cw.(*Button); ok && bt.Text == text {
+		var bt *Button
+		switch x := cw.(type) {
+		case *Button:
+			bt = x
+		case *FuncButton: // (as in context menus)
+			bt = &x.Button
+		}
+		if bt != nil && bt.Text == text {
 			return bt
 		}
 	}
@@ -187,12 +194,14 @@ func ButtonByText(w Widget, text string) *Button {
 // events of its system window, so that the events are handled as those of
 // a real mouse, including drag and drop. It must be called without the
 // AsyncLock held, typically in a function passed to [AssertRender] or
-// [RenderImage]; [TimingSettings].DragStartTime may need to be shorter
-// for a drag to start.
+// [RenderImage]. It waits for the time it takes for a drag or slide to
+// start after the press.
 func DragMouse(b *Body, from, to image.Point) {
 	ev := b.Scene.RenderWindow().SystemWindow.Events()
 	ev.MouseButton(events.MouseDown, events.Left, from, 0)
-	time.Sleep(20 * time.Millisecond)
+	// a drag or slide starts after its time ([TimingSettings], which the
+	// settings of a window set again when it is opened)
+	time.Sleep(max(TimingSettings.DragStartTime, TimingSettings.SlideStartTime) + 20*time.Millisecond)
 	for i := 1; i <= 10; i++ {
 		ev.MouseMove(from.Add(to.Sub(from).Mul(i).Div(10)))
 		time.Sleep(10 * time.Millisecond)

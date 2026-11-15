@@ -35,34 +35,42 @@ var (
 // MonitorChange is called when a monitor is connected to or
 // disconnected from the system.
 func (a *App) MonitorChange(monitor *glfw.Monitor, event glfw.PeripheralEvent) {
-	go func() {
-		if ScreenDebug {
-			enm := "Unknown"
-			if event == glfw.Connected {
-				enm = "Connected"
-			} else {
-				enm = "Disconnected"
-			}
-			log.Printf("ScreenDebug: monitorChange: %v event: %v\n", monitor.GetName(), enm)
-		}
-		a.GetScreens()
-		if len(a.Windows) > 0 {
-			if ScreenDebug {
-				log.Println("ScreenDebug: monitorChange: sending screen update")
-			}
-			for _, w := range a.Windows {
-				sc := w.Screen()
-				if sc != nil {
-					w.SetLogicalDPI(sc.LogicalDPI)
-				}
-			}
-			fw := a.Windows[0]
-			fw.Event.Window(events.ScreenUpdate)
+	if ScreenDebug {
+		enm := "Unknown"
+		if event == glfw.Connected {
+			enm = "Connected"
 		} else {
+			enm = "Disconnected"
+		}
+		name := ""
+		if monitor != nil {
+			name = monitor.GetName()
+		}
+		log.Printf("ScreenDebug: monitorChange: %v event: %v\n", name, enm)
+	}
+	// glfw is used on the main thread, where this callback runs
+	a.GetScreens()
+	// the windows are updated on another goroutine, as they lock App.Mu
+	go func() {
+		a.Mu.Lock()
+		wins := slices.Clone(a.Windows) // (windows can close meanwhile)
+		a.Mu.Unlock()
+		if len(wins) == 0 {
 			if ScreenDebug {
 				log.Println("ScreenDebug: monitorChange: no windows, NOT sending screen update")
 			}
+			return
 		}
+		if ScreenDebug {
+			log.Println("ScreenDebug: monitorChange: sending screen update")
+		}
+		for _, w := range wins {
+			sc := w.Screen()
+			if sc != nil {
+				w.SetLogicalDPI(sc.LogicalDPI)
+			}
+		}
+		wins[0].Event.Window(events.ScreenUpdate)
 	}()
 }
 

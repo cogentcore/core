@@ -36,6 +36,10 @@ func Init() {
 	base.Init(TheApp, &TheApp.App)
 }
 
+// hideNewWindows is whether new windows are not shown, which the tests set,
+// so that they do not pop up on the screen of the user running them.
+var hideNewWindows bool
+
 // TheApp is the single [system.App] for the desktop platform
 var TheApp = &App{AppMulti: base.NewAppMulti[*Window]()}
 
@@ -232,7 +236,9 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 	w.Glw.SetDropCallback(w.DropEvent)
 	w.Glw.SetInputMode(glfw.LockKeyMods, glfw.True)
 
-	w.Show()
+	if !hideNewWindows {
+		w.Show()
+	}
 	a.RunOnMain(func() {
 		w.updateGeometry()
 		w.ConstrainFrame(false) // constrain full frame on open

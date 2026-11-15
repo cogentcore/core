@@ -9,10 +9,10 @@ import (
 	"image/color"
 	"maps"
 	"reflect"
+	"slices"
 	"strings"
 
 	"cogentcore.org/core/base/reflectx"
-	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
@@ -522,9 +522,9 @@ func BitCopyFrom(to, fm any) {
 	switch x := to.(type) {
 	case *Path:
 		x.Data = fm.(*Path).Data.Clone()
-	case *Polyline:
-		slicesx.CopyFrom(x.Points, fm.(*Polyline).Points)
+	case *Polyline: // (the copy of the fields shares the points)
+		x.Points = slices.Clone(fm.(*Polyline).Points)
 	case *Polygon:
-		slicesx.CopyFrom(x.Points, fm.(*Polygon).Points)
+		x.Points = slices.Clone(fm.(*Polygon).Points)
 	}
 }
