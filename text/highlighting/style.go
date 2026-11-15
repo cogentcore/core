@@ -153,7 +153,7 @@ func (se StyleEntry) String() string {
 		out = append(out, se.Underline.Prefix("underline"))
 	}
 	if se.DottedUnderline != Pass {
-		out = append(out, se.Underline.Prefix("dotted-underline"))
+		out = append(out, se.DottedUnderline.Prefix("dotted-underline"))
 	}
 	if se.NoInherit {
 		out = append(out, "noinherit")
@@ -211,7 +211,7 @@ func (se StyleEntry) ToProperties() map[string]any {
 	}
 	if se.Underline == Yes {
 		pr["text-decoration"] = 1 << uint32(rich.Underline)
-	} else if se.Underline == Yes {
+	} else if se.DottedUnderline == Yes {
 		pr["text-decoration"] = 1 << uint32(rich.DottedUnderline)
 	}
 	return pr
@@ -378,14 +378,14 @@ func (hs Style) ToProperties() map[string]any {
 }
 
 // Open hi style from a JSON-formatted file.
-func (hs Style) OpenJSON(filename fsx.Filename) error {
+func (hs *Style) OpenJSON(filename fsx.Filename) error {
 	b, err := os.ReadFile(string(filename))
 	if err != nil {
 		// PromptDialog(nil, "File Not Found", err.Error(), true, false, nil, nil, nil)
 		slog.Error(err.Error())
 		return err
 	}
-	return json.Unmarshal(b, &hs)
+	return json.Unmarshal(b, hs)
 }
 
 // Save hi style to a JSON-formatted file.

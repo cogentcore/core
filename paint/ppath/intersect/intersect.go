@@ -1895,6 +1895,26 @@ func bentleyOttmann(ps, qs ppath.Paths, op pathOp, fillRule ppath.FillRules) ppa
 					qOverlaps[j] = true
 				}
 			}
+		}
+		// subpaths that are kept in the result and touch others of the same
+		// path may overlap them, so they must be settled together with them
+		touchesOwn := func(bounds []math32.Box2, overlaps []bool) {
+			for i := range bounds {
+				for j := i + 1; j < len(bounds); j++ {
+					if touches(bounds[i], bounds[j]) {
+						overlaps[i] = true
+						overlaps[j] = true
+					}
+				}
+			}
+		}
+		if op == opOR || op == opXOR || op == opNOT {
+			touchesOwn(pBounds, pOverlaps)
+		}
+		if op == opOR || op == opXOR {
+			touchesOwn(qBounds, qOverlaps)
+		}
+		for i := range ps {
 			if !pOverlaps[i] && (op == opOR || op == opXOR || op == opNOT) {
 				// path bounding boxes do not overlap, thus no intersections
 				R = R.Append(Settle(ps[i], fillRule))

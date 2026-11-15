@@ -158,10 +158,11 @@ func (sld *Solid) Config() {
 
 // ParentMaterial returns parent's material or nil if not avail
 func (sld *Solid) ParentMaterial() *Material {
-	if sld.Parent == nil {
+	pn, ok := sld.Parent.(Node) // (the scene is not a node)
+	if !ok {
 		return nil
 	}
-	psi := sld.Parent.(Node).AsSolid()
+	psi := pn.AsSolid()
 	if psi == nil {
 		return nil
 	}

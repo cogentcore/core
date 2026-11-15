@@ -5,7 +5,6 @@
 package shapedgt
 
 import (
-	"fmt"
 	"slices"
 
 	"cogentcore.org/core/math32"
@@ -52,7 +51,6 @@ func (run *Run) GlyphBounds(g *shaping.Glyph) fixed.Rectangle26_6 {
 	}
 	if run.Direction.IsVertical() {
 		if run.Direction.IsSideways() {
-			fmt.Println("sideways")
 			return fixed.Rectangle26_6{Min: fixed.Point26_6{X: g.XBearing, Y: -g.YBearing}, Max: fixed.Point26_6{X: g.XBearing + g.Width, Y: -g.YBearing - g.Height}}
 		}
 		return fixed.Rectangle26_6{Min: fixed.Point26_6{X: -g.XBearing - g.Width/2, Y: g.Height - g.YOffset}, Max: fixed.Point26_6{X: g.XBearing + g.Width/2, Y: -(g.YBearing + g.Height) - g.YOffset}}
@@ -77,7 +75,6 @@ func (run *Run) GlyphLineBounds(g *shaping.Glyph) fixed.Rectangle26_6 {
 	rb := run.Bounds()
 	if run.Direction.IsVertical() { // todo: fixme
 		if run.Direction.IsSideways() {
-			fmt.Println("sideways")
 			return fixed.Rectangle26_6{Min: fixed.Point26_6{X: g.XBearing, Y: -g.YBearing}, Max: fixed.Point26_6{X: g.XBearing + g.Width, Y: -g.YBearing - g.Height}}
 		}
 		return fixed.Rectangle26_6{Min: fixed.Point26_6{X: -g.XBearing - g.Width/2, Y: g.Height - g.YOffset}, Max: fixed.Point26_6{X: g.XBearing + g.Width/2, Y: -(g.YBearing + g.Height) - g.YOffset}}

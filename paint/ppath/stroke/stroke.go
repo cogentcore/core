@@ -518,14 +518,18 @@ func optimizeClose(p *ppath.Path) {
 	}
 }
 
-func optimizeInnerBend(p ppath.Path, i int) {
+// optimizeInnerBend removes the join segment at index i of the inner bend
+// of a path (connecting both edges), when the edges intersect, by moving
+// the end of the previous segment to the intersection, and returns the
+// resulting path.
+func optimizeInnerBend(p ppath.Path, i int) ppath.Path {
 	// i is the index of the line segment in the inner bend connecting both edges
 	ai := i - ppath.CmdLen(p[i-1])
 	if ai == 0 {
-		return
+		return p
 	}
 	if i >= len(p) {
-		return
+		return p
 	}
 	bi := i + ppath.CmdLen(p[i])
 
@@ -552,7 +556,7 @@ func optimizeInnerBend(p ppath.Path, i int) {
 						p[ai] = ppath.Close
 						p[ai+3] = ppath.Close
 					} else {
-						p = append(p, ppath.Close, zs[0].X, zs[1].Y, ppath.Close)
+						p = append(p, ppath.Close, zs[0].X, zs[0].Y, ppath.Close)
 					}
 				}
 				p = p[:i]
@@ -563,6 +567,7 @@ func optimizeInnerBend(p ppath.Path, i int) {
 			}
 		}
 	}
+	return p
 }
 
 type pathStrokeState struct {
@@ -714,9 +719,9 @@ func offset(p ppath.Path, halfWidth float32, cr Capper, jr Joiner, strokeOpen bo
 			prev := states[i-1]
 			cw := 0.0 <= prev.n1.Rot90CW().Dot(cur.n0)
 			if cw && rhsJoinIndex != -1 {
-				optimizeInnerBend(rhs, rhsJoinIndex)
+				rhs = optimizeInnerBend(rhs, rhsJoinIndex)
 			} else if !cw && lhsJoinIndex != -1 {
-				optimizeInnerBend(lhs, lhsJoinIndex)
+				lhs = optimizeInnerBend(lhs, lhsJoinIndex)
 			}
 		}
 		rhsJoinIndex = -1
@@ -744,9 +749,9 @@ func offset(p ppath.Path, halfWidth float32, cr Capper, jr Joiner, strokeOpen bo
 		if 1 < len(states) {
 			cw := 0.0 <= states[len(states)-1].n1.Rot90CW().Dot(states[0].n0)
 			if cw && rhsJoinIndex != -1 {
-				optimizeInnerBend(rhs, rhsJoinIndex)
+				rhs = optimizeInnerBend(rhs, rhsJoinIndex)
 			} else if !cw && lhsJoinIndex != -1 {
-				optimizeInnerBend(lhs, lhsJoinIndex)
+				lhs = optimizeInnerBend(lhs, lhsJoinIndex)
 			}
 		}
 

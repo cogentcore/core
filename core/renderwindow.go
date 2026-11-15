@@ -444,14 +444,6 @@ func (w *renderWindow) goStartEventLoop() {
 	go w.eventLoop()
 }
 
-// todo: fix or remove
-// sendWinFocusEvent sends the RenderWinFocusEvent to widgets
-func (w *renderWindow) sendWinFocusEvent(act events.WinActions) {
-	// se := window.NewEvent(act)
-	// se.Init()
-	// w.Mains.HandleEvent(se)
-}
-
 // eventLoop runs the event processing loop for the RenderWindow -- grabs system
 // events for the window and dispatches them to receiving nodes, and manages
 // other state etc (popups, etc).
@@ -597,7 +589,6 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			AllRenderWindows.moveToEnd(w)
 			if !w.flags.HasFlag(winGotFocus) {
 				w.flags.SetFlag(true, winGotFocus)
-				w.sendWinFocusEvent(events.WinFocus)
 				if DebugSettings.WindowEventTrace {
 					fmt.Printf("Win: %v got focus\n", w.name)
 				}
@@ -612,7 +603,6 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 				fmt.Printf("Win: %v lost focus\n", w.name)
 			}
 			w.flags.SetFlag(false, winGotFocus)
-			w.sendWinFocusEvent(events.WinFocusLost)
 		case events.ScreenUpdate:
 			if DebugSettings.WindowEventTrace {
 				log.Println("Win: ScreenUpdate", w.name, screenConfig())

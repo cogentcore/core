@@ -150,8 +150,8 @@ func (a Matrix2) MulPoint(v Vector2) Vector2 {
 
 // MulFixedPoint multiplies the fixed point as a point, including adding translations.
 func (a Matrix2) MulFixedPoint(fp fixed.Point26_6) fixed.Point26_6 {
-	x := fixed.Int26_6((float32(fp.X)*a.XX + float32(fp.Y)*a.XY) + a.X0*32)
-	y := fixed.Int26_6((float32(fp.X)*a.YX + float32(fp.Y)*a.YY) + a.Y0*32)
+	x := fixed.Int26_6((float32(fp.X)*a.XX + float32(fp.Y)*a.XY) + a.X0*64) // 64 per unit
+	y := fixed.Int26_6((float32(fp.X)*a.YX + float32(fp.Y)*a.YY) + a.Y0*64)
 	return fixed.Point26_6{x, y}
 }
 
@@ -528,19 +528,19 @@ func (a *Matrix2) SetString(str string) error {
 			if err := PointsCheckN(pts, 2, errmsg); err != nil {
 				errors.Log(err)
 			} else {
-				*a = a.Skew(pts[0], pts[1])
+				*a = a.Skew(DegToRad(pts[0]), DegToRad(pts[1])) // in degrees, as rotate
 			}
 		case "skewx":
 			if err := PointsCheckN(pts, 1, errmsg); err != nil {
 				errors.Log(err)
 			} else {
-				*a = a.Skew(pts[0], 0)
+				*a = a.Skew(DegToRad(pts[0]), 0)
 			}
 		case "skewy":
 			if err := PointsCheckN(pts, 1, errmsg); err != nil {
 				errors.Log(err)
 			} else {
-				*a = a.Skew(0, pts[0])
+				*a = a.Skew(0, DegToRad(pts[0]))
 			}
 		default:
 			return fmt.Errorf("unknown command %q", cmd)

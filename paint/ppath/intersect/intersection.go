@@ -675,7 +675,7 @@ func intersectionLineEllipse(zs Intersections, l0, l1, center, radius math32.Vec
 			t1 = l1.Y
 		}
 
-		tangent := ppath.Equal(root, 0.0)
+		tangent := len(roots) == 1 // (a root of 0 is only where it is)
 		angle := math32.Atan2(y*radius.X, x*radius.Y)
 		if inInterval(root, t0, t1) && ppath.IsAngleBetween(angle, theta0, theta1) {
 			pos := math32.Vector2{x, y}.Rot(phi, ppath.Origin).Add(center)
