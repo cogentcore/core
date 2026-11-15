@@ -20,7 +20,7 @@ func TestTree(t *testing.T) {
 	NewButton(NewFrame(fr))
 
 	NewTree(b).SyncTree(fr)
-	b.AssertRender(t, "tree/basic")
+	AssertRender(t, b, "tree/basic")
 }
 
 func TestTreeReadOnly(t *testing.T) {
@@ -32,7 +32,7 @@ func TestTreeReadOnly(t *testing.T) {
 	NewButton(NewFrame(fr))
 
 	NewTree(b).SyncTree(fr).SetReadOnly(true)
-	b.AssertRender(t, "tree/read-only")
+	AssertRender(t, b, "tree/read-only")
 }
 
 func TestTreeDuplicate(t *testing.T) {
@@ -46,7 +46,7 @@ func TestTreeDuplicate(t *testing.T) {
 
 	// The duplicate is checked once its events are handled, before the
 	// window is closed and the tree destroyed.
-	b.AssertRender(t, "tree/duplicate", func() {
+	AssertRender(t, b, "tree/duplicate", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		a.Duplicate()
@@ -93,7 +93,7 @@ func TestTreeNewNodeType(t *testing.T) {
 	root := NewTree(b).SetText("root")
 	a := NewTree(root).SetText("a")
 	root.NewNodeType = types.For[Tree]()
-	b.AssertRender(t, "tree/new-node-type", func() {
+	AssertRender(t, b, "tree/new-node-type", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		AsTree(st.Child(0)).InsertAfter()

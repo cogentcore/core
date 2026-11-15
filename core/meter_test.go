@@ -20,7 +20,7 @@ func TestMeter(t *testing.T) {
 	m.SetTooltip("Rating")
 	tt, _ = m.WidgetTooltip(image.Point{})
 	assert.Equal(t, "Rating (value: 0.5, minimum: 0, maximum: 1)", tt)
-	b.AssertRender(t, "meter/basic")
+	AssertRender(t, b, "meter/basic")
 }
 
 func TestMeterValue(t *testing.T) {
@@ -28,7 +28,7 @@ func TestMeterValue(t *testing.T) {
 	m := NewMeter(b).SetValue(0.7)
 	tt, _ := m.WidgetTooltip(image.Point{})
 	assert.Equal(t, "(value: 0.7, minimum: 0, maximum: 1)", tt)
-	b.AssertRender(t, "meter/value")
+	AssertRender(t, b, "meter/value")
 }
 
 func TestMeterBounds(t *testing.T) {
@@ -36,7 +36,7 @@ func TestMeterBounds(t *testing.T) {
 	m := NewMeter(b).SetMin(5.7).SetMax(18).SetValue(10.2)
 	tt, _ := m.WidgetTooltip(image.Point{})
 	assert.Equal(t, "(value: 10.2, minimum: 5.7, maximum: 18)", tt)
-	b.AssertRender(t, "meter/bounds")
+	AssertRender(t, b, "meter/bounds")
 }
 
 func TestMeterColumn(t *testing.T) {
@@ -44,29 +44,29 @@ func TestMeterColumn(t *testing.T) {
 	NewMeter(b).Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-	b.AssertRender(t, "meter/column")
+	AssertRender(t, b, "meter/column")
 }
 
 func TestMeterCircle(t *testing.T) {
 	b := NewBody()
 	NewMeter(b).SetType(MeterCircle)
-	b.AssertRender(t, "meter/circle")
+	AssertRender(t, b, "meter/circle")
 }
 
 func TestMeterSemicircle(t *testing.T) {
 	b := NewBody()
 	NewMeter(b).SetType(MeterSemicircle)
-	b.AssertRender(t, "meter/semicircle")
+	AssertRender(t, b, "meter/semicircle")
 }
 
 func TestMeterCircleText(t *testing.T) {
 	b := NewBody()
 	NewMeter(b).SetType(MeterCircle).SetText("50%")
-	b.AssertRender(t, "meter/circle-text")
+	AssertRender(t, b, "meter/circle-text")
 }
 
 func TestMeterSemicircleText(t *testing.T) {
 	b := NewBody()
 	NewMeter(b).SetType(MeterSemicircle).SetText("50%")
-	b.AssertRender(t, "meter/semicircle-text")
+	AssertRender(t, b, "meter/semicircle-text")
 }

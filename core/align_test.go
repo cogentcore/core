@@ -28,7 +28,7 @@ func TestAlignItemsWithGrowingSibling(t *testing.T) {
 	wide.Styler(func(s *styles.Style) { s.Grow.Set(1, 0); s.Min.Y.Dp(10) })
 	small := NewFrame(fr)
 	small.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(100), units.Dp(10)) })
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		wpos, wsz := wide.Geom.Pos.Total.X, wide.Geom.Size.Actual.Total.X
 		spos, ssz := small.Geom.Pos.Total.X, small.Geom.Size.Actual.Total.X
 		assert.Greater(t, wsz, 2*ssz)

@@ -56,7 +56,7 @@ func TestSVGPageStyles(t *testing.T) {
 		return
 	}
 	var bb image.Rectangle
-	img := b.RenderImage(func() { bb = sw.Geom.ContentBBox })
+	img := core.RenderImage(b, func() { bb = sw.Geom.ContentBBox })
 	// at returns the color at the given fraction of the svg
 	at := func(x, y float32) color.RGBA {
 		p := image.Pt(bb.Min.X+int(x*float32(bb.Dx())), bb.Min.Y+int(y*float32(bb.Dy())))

@@ -30,7 +30,7 @@ func BenchmarkTable(bm *testing.B) {
 	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Dp(1280), units.Dp(720))
 	})
-	b.AssertRender(bm, "table/benchmark", func() {
+	AssertRender(bm, b, "table/benchmark", func() {
 		w := b.Scene.RenderWindow()
 		for range bm.N {
 			b.Scene.NeedsRender()
@@ -38,7 +38,7 @@ func BenchmarkTable(bm *testing.B) {
 		}
 	})
 	return // comment to do profile too
-	b.AssertRender(bm, "table/profile", func() {
+	AssertRender(bm, b, "table/profile", func() {
 		w := b.Scene.RenderWindow()
 		// startCPUMemoryProfile()
 		startTargetedProfile()
@@ -61,7 +61,7 @@ func BenchmarkForm(bm *testing.B) {
 	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Dp(1280), units.Dp(720))
 	})
-	b.AssertRender(bm, "form/benchmark", func() {
+	AssertRender(bm, b, "form/benchmark", func() {
 		w := b.Scene.RenderWindow()
 		for range bm.N {
 			b.Scene.NeedsRender()
@@ -69,7 +69,7 @@ func BenchmarkForm(bm *testing.B) {
 		}
 	})
 	return // comment to do profile too
-	b.AssertRender(bm, "form/profile", func() {
+	AssertRender(bm, b, "form/profile", func() {
 		w := b.Scene.RenderWindow()
 		// startCPUMemoryProfile()
 		startTargetedProfile()

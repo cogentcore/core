@@ -14,7 +14,7 @@ import (
 func TestSwitches(t *testing.T) {
 	b := NewBody()
 	NewSwitches(b).SetStrings("Go", "Python", "C++")
-	b.AssertRender(t, "switches/basic")
+	AssertRender(t, b, "switches/basic")
 }
 
 func TestSwitchesItems(t *testing.T) {
@@ -24,7 +24,7 @@ func TestSwitchesItems(t *testing.T) {
 		SwitchItem{Value: "Python", Tooltip: "Slow and duck-typed"},
 		SwitchItem{Value: "C++", Tooltip: "Hard to use and slow to compile"},
 	)
-	b.AssertRender(t, "switches/items", func() {
+	AssertRender(t, b, "switches/items", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		assert.Equal(t, "Slow and duck-typed", sw.Child(1).(Widget).AsWidget().Tooltip)
@@ -34,7 +34,7 @@ func TestSwitchesItems(t *testing.T) {
 func TestSwitchesMutex(t *testing.T) {
 	b := NewBody()
 	sw := NewSwitches(b).SetMutex(true).SetStrings("Go", "Python", "C++")
-	b.AssertRender(t, "switches/mutex", func() {
+	AssertRender(t, b, "switches/mutex", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		sw.Child(0).(Widget).AsWidget().Send(events.Click)
@@ -48,25 +48,25 @@ func TestSwitchesMutex(t *testing.T) {
 func TestSwitchesChips(t *testing.T) {
 	b := NewBody()
 	NewSwitches(b).SetType(SwitchChip).SetStrings("Go", "Python", "C++")
-	b.AssertRender(t, "switches/chips")
+	AssertRender(t, b, "switches/chips")
 }
 
 func TestSwitchesCheckboxes(t *testing.T) {
 	b := NewBody()
 	NewSwitches(b).SetType(SwitchCheckbox).SetStrings("Go", "Python", "C++")
-	b.AssertRender(t, "switches/checkboxes")
+	AssertRender(t, b, "switches/checkboxes")
 }
 
 func TestSwitchesRadioButtons(t *testing.T) {
 	b := NewBody()
 	NewSwitches(b).SetType(SwitchRadioButton).SetStrings("Go", "Python", "C++")
-	b.AssertRender(t, "switches/radio-buttons")
+	AssertRender(t, b, "switches/radio-buttons")
 }
 
 func TestSwitchesSegmentedButtons(t *testing.T) {
 	b := NewBody()
 	NewSwitches(b).SetType(SwitchSegmentedButton).SetStrings("Go", "Python", "C++")
-	b.AssertRender(t, "switches/segmented-buttons")
+	AssertRender(t, b, "switches/segmented-buttons")
 }
 
 func TestSwitchesChange(t *testing.T) {
@@ -76,7 +76,7 @@ func TestSwitchesChange(t *testing.T) {
 	sw.OnChange(func(e events.Event) {
 		selected = sw.SelectedItems()
 	})
-	b.AssertRender(t, "switches/change", func() {
+	AssertRender(t, b, "switches/change", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		sw.Child(0).(Widget).AsWidget().Send(events.Click)

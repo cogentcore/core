@@ -76,7 +76,7 @@ func TestLayerRenderGroup(t *testing.T) {
 	sc := b.Scene
 	var videoRenders, dialogRenders, layerRenders int
 	var vbb, dbb image.Rectangle
-	img := b.RenderImage(func() {
+	img := RenderImage(b, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		assert.True(t, sc.layer.active, "the scene has a layer")
@@ -102,7 +102,7 @@ func TestLayerRenderGroup(t *testing.T) {
 	// the same as one image of the whole scene
 	layersEnabled = false
 	b2, _, _ := layerTestScene(blue)
-	img2 := b2.RenderImage()
+	img2 := RenderImage(b2)
 	layersEnabled = true
 	if assert.NotNil(t, img2) {
 		assertSameImage(t, img2, img)
@@ -110,7 +110,7 @@ func TestLayerRenderGroup(t *testing.T) {
 
 	// a change in the dialog renders the layer, not the video
 	b3, video3, dialog3 := layerTestScene(red)
-	img3 := b3.RenderImage(func() {
+	img3 := RenderImage(b3, func() {
 		b3.AsyncLock()
 		defer b3.AsyncUnlock()
 		videoRenders, layerRenders = video3.renders, b3.Scene.layer.renders
@@ -176,7 +176,7 @@ func TestLayerEvents(t *testing.T) {
 			})
 		}
 		sc := b.Scene
-		b.RenderImage(func() {
+		RenderImage(b, func() {
 			b.AsyncLock()
 			defer b.AsyncUnlock()
 			em := &sc.Events

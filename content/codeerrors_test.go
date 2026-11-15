@@ -69,7 +69,7 @@ func TestShowCodeErrors(t *testing.T) {
 	ed.Style()
 	assert.True(t, ed.Styles.Abilities.HasFlag(abilities.LongHoverable))
 
-	b.AssertRender(t, "code-errors", func() {
+	core.AssertRender(t, b, "code-errors", func() {
 		// the tooltip at the error, and none elsewhere
 		reg := errs[0].Region
 		pos := ed.CharStartPos(reg.Start).ToPoint().Add(image.Pt(2, 2))

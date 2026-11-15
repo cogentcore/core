@@ -42,7 +42,7 @@ func TestFilterSVGImage(t *testing.T) {
 		return tree.Continue
 	})
 	require.NotNil(t, im, "an image of the filtered svg")
-	img := b.RenderImage()
+	img := core.RenderImage(b)
 	bb := im.Geom.TotalBBox
 	c := bb.Min.Add(bb.Size().Div(2))
 	assert.Equal(t, color.RGBA{255, 255, 255, 255}, color.RGBAModel.Convert(img.At(c.X, c.Y)), "white")

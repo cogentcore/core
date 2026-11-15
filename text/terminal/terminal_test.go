@@ -265,7 +265,7 @@ func renderTerminal(t *testing.T, name, cmds string, ready func(tm *Terminal) bo
 	tm.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Ch(50), units.Em(12))
 	})
-	b.AssertRender(t, name, func() {
+	core.AssertRender(t, b, name, func() {
 		waitFor(t, b, "the output", func() bool { return ready(tm) })
 	})
 }

@@ -23,7 +23,7 @@ func TestImage(t *testing.T) {
 	b := NewBody()
 	img := NewImage(b)
 	assert.NoError(t, img.Open(testImagePath))
-	b.AssertRender(t, "image/basic")
+	AssertRender(t, b, "image/basic")
 }
 
 func TestImageSize(t *testing.T) {
@@ -33,7 +33,7 @@ func TestImageSize(t *testing.T) {
 	img.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Dp(256))
 	})
-	b.AssertRender(t, "image/size")
+	AssertRender(t, b, "image/size")
 }
 
 func TestImageDirect(t *testing.T) {
@@ -43,7 +43,7 @@ func TestImageDirect(t *testing.T) {
 	draw.Draw(img, image.Rect(20, 20, 60, 50), colors.Scheme.Success.Base, image.Point{}, draw.Src)
 	draw.Draw(img, image.Rect(60, 70, 80, 100), colors.Scheme.Error.Base, image.Point{}, draw.Src)
 	NewImage(b).SetImage(img)
-	b.AssertRender(t, "image/direct")
+	AssertRender(t, b, "image/direct")
 }
 
 func TestImageCropped(t *testing.T) {
@@ -54,7 +54,7 @@ func TestImageCropped(t *testing.T) {
 	})
 	img := NewImage(b)
 	assert.NoError(t, img.Open(testImagePath))
-	b.AssertRender(t, "image/cropped")
+	AssertRender(t, b, "image/cropped")
 }
 
 func TestImageScrolled(t *testing.T) {
@@ -65,7 +65,7 @@ func TestImageScrolled(t *testing.T) {
 	})
 	img := NewImage(b)
 	assert.NoError(t, img.Open(testImagePath))
-	b.AssertRender(t, "image/scrolled", func() {
+	AssertRender(t, b, "image/scrolled", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		b.SystemEvents().Scroll(image.Pt(10, 10), math32.Vec2(2, 3))
@@ -82,7 +82,7 @@ func TestImageAspectRatio(t *testing.T) {
 		s.Min.X = units.Dot(200)
 		s.AspectRatio = 2
 	})
-	b.RenderImage(func() {}, func() {
+	RenderImage(b, func() {}, func() {
 		assert.Equal(t, math32.Vec2(200, 100), img.Geom.Size.Actual.Content)
 	})
 }

@@ -26,5 +26,5 @@ func TestSceneInit(t *testing.T) {
 	}()
 	b := NewBody()
 	NewButton(b).SetText("Test")
-	b.AssertRender(t, "app/scene-init")
+	AssertRender(t, b, "app/scene-init")
 }

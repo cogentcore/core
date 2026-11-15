@@ -47,7 +47,7 @@ func TestEditorVirtualIME(t *testing.T) {
 	ed := newWideEditor(b)
 	ed.Lines.SetString("hello world\nsecond line\n")
 	pos := textpos.Pos{Line: 0, Char: 6}
-	b.AssertRender(t, "virtual/ime", func() {
+	core.AssertRender(t, b, "virtual/ime", func() {
 		ed.SetCursorShow(pos)
 		ed.SetVirtualText("ime", lines.VirtualText{Pos: pos, Text: rich.NewText(ed.CompositionStyle(), []rune("compose"))})
 	}, func() {
@@ -76,7 +76,7 @@ func TestEditorVirtualInlay(t *testing.T) {
 	ed.Lines.SetString("foo(1, 2)\n")
 	twin := newWideEditor(b)
 	twin.SetLines(ed.Lines)
-	b.AssertRender(t, "virtual/inlay", func() {
+	core.AssertRender(t, b, "virtual/inlay", func() {
 		ed.Lines.SetVirtualText("inlay", -1,
 			lines.VirtualText{Pos: textpos.Pos{Line: 0, Char: 4}, Text: rich.NewText(ed.HintStyle(), []rune("a: "))},
 			lines.VirtualText{Pos: textpos.Pos{Line: 0, Char: 7}, Text: rich.NewText(ed.HintStyle(), []rune("b: "))})
@@ -103,7 +103,7 @@ func TestEditorVirtualSuggestion(t *testing.T) {
 	ed := newWideEditor(b)
 	ed.Lines.SetString("func f() {\n}\n")
 	sug := lines.VirtualText{Pos: textpos.Pos{Line: 0, Char: 10}, Text: rich.NewText(ed.SuggestionStyle(), []rune("\n\ta := 1\n\treturn a"))}
-	b.AssertRender(t, "virtual/suggestion", func() {
+	core.AssertRender(t, b, "virtual/suggestion", func() {
 		ed.SetCursorShow(sug.Pos)
 		ed.SetVirtualText("suggestion", sug)
 	}, func() {

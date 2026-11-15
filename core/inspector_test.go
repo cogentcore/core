@@ -23,7 +23,7 @@ func TestInspectorTreeWidth(t *testing.T) {
 	b.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(1200), units.Dp(600)) })
 	is := NewInspector(b)
 	is.SetRoot(inspected)
-	b.RenderImage(func() {}, func() {
+	RenderImage(b, func() {}, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		var frame *Frame

@@ -83,7 +83,7 @@ func TestOpenWith(t *testing.T) {
 	// the file picker, for files only
 	b := NewBody()
 	fp := NewFilePicker(b).SetFilename(dir + string(filepath.Separator))
-	b.RenderImage(func() {}, func() {
+	RenderImage(b, func() {}, func() {
 		tb := fp.filesTable
 		index := func(name string) int {
 			return slices.IndexFunc(fp.files, func(fi *fileinfo.FileInfo) bool { return fi.Name == name })

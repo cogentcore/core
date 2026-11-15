@@ -24,7 +24,7 @@ func TestCallFuncArgs(t *testing.T) {
 	b := NewBody()
 	myFunc := func(a int, b string) {}
 	CallFunc(b, myFunc)
-	b.AssertRender(t, "func-button/args")
+	AssertRender(t, b, "func-button/args")
 }
 
 // callFuncItem is a struct type, so that a slice of it ([callFuncItems],

@@ -28,6 +28,6 @@ func TestHTML(t *testing.T) {
 	for nm, s := range tests {
 		b := core.NewBody()
 		assert.NoError(t, ReadHTMLString(NewContext(), b, s))
-		b.AssertRender(t, "html/"+nm)
+		core.AssertRender(t, b, "html/"+nm)
 	}
 }

@@ -46,7 +46,7 @@ func TestWebFonts(t *testing.T) {
 	assert.False(t, fonts.HasWebFont("Test Web Cyrillic"), "only fonts with Latin letters are loaded")
 	bboxes := map[string]image.Rectangle{}
 	families := map[string]rich.Family{}
-	img := b.RenderImage(func() {
+	img := core.RenderImage(b, func() {
 		b.WalkDown(func(n tree.Node) bool {
 			if tx, ok := n.(*core.Text); ok {
 				cl := tx.Parent.AsTree().Property("class")
@@ -85,7 +85,7 @@ func TestChUnit(t *testing.T) {
 	assert.NoError(t, ReadHTMLString(ctx, b, `<div class="sans" style="width: 10ch; font-size: 20px; height: 5px"></div>`+
 		`<div class="mono" style="width: 10ch; font-size: 20px; font-family: monospace; height: 5px"></div>`))
 	widths := map[string]float32{}
-	b.RenderImage(func() {
+	core.RenderImage(b, func() {
 		b.WalkDown(func(n tree.Node) bool {
 			if wb := core.AsWidget(n); wb != nil {
 				if cl, ok := wb.Property("class").(string); ok {

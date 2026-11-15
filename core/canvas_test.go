@@ -26,5 +26,5 @@ func TestCanvas(t *testing.T) {
 		pc.Circle(0.4, 0.5, 0.15)
 		pc.Draw()
 	})
-	b.AssertRender(t, "canvas/basic")
+	AssertRender(t, b, "canvas/basic")
 }

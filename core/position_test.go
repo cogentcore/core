@@ -128,7 +128,7 @@ func TestPositionEvents(t *testing.T) {
 	var clicked Widget
 	over.OnClick(func(e events.Event) { clicked = over })
 	under.OnClick(func(e events.Event) { clicked = under })
-	b.AssertRender(t, "position/events", func() {
+	AssertRender(t, b, "position/events", func() {
 		pos := over.Geom.TotalBBox.Min.Add(image.Pt(10, 10))
 		b.Scene.RenderWindow().SystemWindow.Events().MouseButton(events.MouseDown, events.Left, pos, 0)
 		b.Scene.RenderWindow().SystemWindow.Events().MouseButton(events.MouseUp, events.Left, pos, 0)
@@ -166,7 +166,7 @@ func TestPositionSticky(t *testing.T) {
 	})
 	fixedFrame(section, 100, 500)
 	fixedFrame(scroller, 100, 1000) // after the section
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		b.AsyncLock() // (it is rendered meanwhile)
 		defer b.AsyncUnlock()
 		dp := scroller.Styles.UnitContext.Dots(units.UnitDp)
@@ -210,7 +210,7 @@ func TestPositionRaised(t *testing.T) {
 	menu.OnClick(func(e events.Event) { clicked = menu })
 	after.OnClick(func(e events.Event) { clicked = after })
 	var pos image.Point
-	img := b.RenderImage(func() {
+	img := RenderImage(b, func() {
 		assert.Equal(t, b.Scene.AsWidget(), menu.raisedTo(), "raised to the scene")
 		pos = menu.Geom.TotalBBox.Max.Sub(image.Pt(5, 5))
 		assert.True(t, pos.In(after.Geom.TotalBBox), "over the widget after")
@@ -250,7 +250,7 @@ func TestPositionHiddenEvents(t *testing.T) {
 	var clicked Widget
 	item.OnClick(func(e events.Event) { clicked = item })
 	after.OnClick(func(e events.Event) { clicked = after })
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		pos := menu.Geom.TotalBBox.Max.Sub(image.Pt(5, 5))
 		assert.True(t, pos.In(after.Geom.TotalBBox))
 		b.Scene.RenderWindow().SystemWindow.Events().MouseButton(events.MouseDown, events.Left, pos, 0)
@@ -284,7 +284,7 @@ func TestPositionCoveredEvents(t *testing.T) {
 	clicked := false
 	under.OnClick(func(e events.Event) { clicked = true })
 	var pos image.Point
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		pos = menu.Geom.TotalBBox.Max.Sub(image.Pt(5, 5))
 		assert.True(t, pos.In(under.Geom.TotalBBox), "over the widget under it")
 		ev := b.Scene.RenderWindow().SystemWindow.Events()
@@ -323,7 +323,7 @@ func TestPositionTransparentContent(t *testing.T) {
 	tx := NewText(over).SetText("  ")
 	tx.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(200), units.Dp(40)) })
 	var pos image.Point
-	img := b.RenderImage(func() { pos = tx.Geom.TotalBBox.Min.Add(image.Pt(5, 5)) })
+	img := RenderImage(b, func() { pos = tx.Geom.TotalBBox.Min.Add(image.Pt(5, 5)) })
 	r, g, bl, _ := img.At(pos.X, pos.Y).RGBA()
 	assert.Equal(t, [3]uint32{0, 0x80, 0}, [3]uint32{r >> 8, g >> 8, bl >> 8}, "the fill under the text")
 }
@@ -347,7 +347,7 @@ func TestPositionTranslucentBackground(t *testing.T) {
 		s.Background = colors.Uniform(color.RGBA{0, 0, 0, 64}) // (premultiplied: 25% black)
 	})
 	var pos image.Point
-	img := b.RenderImage(func() { pos = fill.Geom.TotalBBox.Min.Add(image.Pt(5, 5)) })
+	img := RenderImage(b, func() { pos = fill.Geom.TotalBBox.Min.Add(image.Pt(5, 5)) })
 	r, g, bl, _ := img.At(pos.X, pos.Y).RGBA()
 	assert.InDelta(t, 191, r>>8, 2, "the red fill, darkened")
 	assert.Equal(t, [2]uint32{0, 0}, [2]uint32{g >> 8, bl >> 8})
@@ -401,7 +401,7 @@ func TestPositionNegativeZIndex(t *testing.T) {
 	surface.Styler(func(s *styles.Style) { s.Background = colors.Uniform(colors.White) })
 	b.Styler(func(s *styles.Style) { s.NoClip = true })
 	fixedFrame(b, 200, 50) // room below the box for its shadow
-	img := b.RenderImage()
+	img := RenderImage(b)
 	c := surface.Geom.TotalBBox.Min.Add(surface.Geom.TotalBBox.Size().Div(2))
 	r, g, bl, _ := img.At(c.X, c.Y).RGBA()
 	assert.Equal(t, [3]uint32{0xffff, 0xffff, 0xffff}, [3]uint32{r, g, bl}, "the surface over the shadow")
@@ -429,7 +429,7 @@ func TestPositionStatic(t *testing.T) {
 		s.Inset.Left = units.Dp(0)
 		s.InsetSet.Left = true
 	})
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		bb, pb := button.Geom.TotalBBox, panel.Geom.Pos.Total
 		assert.InDelta(t, float32(bb.Max.Y), pb.Y, 1, "below the button")
 		assert.InDelta(t, col.Geom.Pos.Content.X, pb.X, 1, "at the left of its containing block")
@@ -462,7 +462,7 @@ func TestPositionEmptyParentRendered(t *testing.T) {
 		s.Background = colors.Uniform(colors.Red)
 	})
 	var pos image.Point
-	img := b.RenderImage(func() {
+	img := RenderImage(b, func() {
 		assert.True(t, holder.Geom.TotalBBox.Empty(), "the holder has no size")
 		pos = banner.Geom.TotalBBox.Min.Add(image.Pt(5, 5))
 	})
@@ -491,7 +491,7 @@ func TestSceneWidgetAt(t *testing.T) {
 		s.Opacity = 0
 		s.Abilities = 0
 	})
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		at := func(w *Frame) Widget {
@@ -530,7 +530,7 @@ func TestRoundedNoClipBorder(t *testing.T) {
 			}
 		})
 		var pos image.Point
-		img := b.RenderImage(func() {
+		img := RenderImage(b, func() {
 			bb := box.Geom.TotalBBox
 			// on the top left corner of the border, at 45 degrees
 			r := float32(bb.Dy()) / 2
@@ -566,7 +566,7 @@ func TestPositionFixedContainer(t *testing.T) {
 		s.Inset.Set(units.Zero())
 		s.InsetSet.Set(true)
 	})
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		assert.Equal(t, vp.Geom.Pos.Total, fixed.Geom.Pos.Total, "at the viewport")

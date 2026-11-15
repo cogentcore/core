@@ -144,6 +144,16 @@ func Assert(t TestingT, img image.Image, filename string, tols ...int) {
 	diffFilename := strings.TrimSuffix(filename, ext) + ".diff" + ext
 
 	if UpdateTestImages {
+		// an existing image with exactly the same pixels is kept, so that
+		// its file only changes when the image does, not when the png
+		// encoding does (as with a different version of Go).
+		if fimg, _, err := Open(filename); err == nil {
+			if bounds, content, _, _, _, _ := ImagesEqual(fimg, img, 0); bounds && content {
+				os.RemoveAll(failFilename)
+				os.RemoveAll(diffFilename)
+				return
+			}
+		}
 		err := Save(img, filename)
 		if err != nil {
 			t.Errorf("AssertImage: error saving updated image: %v", err)

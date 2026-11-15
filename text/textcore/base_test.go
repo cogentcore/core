@@ -22,7 +22,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// waitMarkup returns a function to pass to [core.Body.AssertRender] that
+// waitMarkup returns a function to pass to [core.AssertRender] that
 // does the background syntax highlighting of the given editor again and
 // waits for its input event, so that the highlighting is always rendered.
 // Otherwise it is done after a delay, which can be before or after the
@@ -48,13 +48,13 @@ func waitMarkup(t *testing.T, ed *Base) func() {
 func TestBase(t *testing.T) {
 	b := core.NewBody()
 	NewBase(b)
-	b.AssertRender(t, "basic")
+	core.AssertRender(t, b, "basic")
 }
 
 func TestBaseSetText(t *testing.T) {
 	b := core.NewBody()
 	NewBase(b).Lines.SetString("Hello, world!")
-	b.AssertRender(t, "set-text")
+	core.AssertRender(t, b, "set-text")
 }
 
 func TestBaseLayout(t *testing.T) {
@@ -68,7 +68,7 @@ func TestBaseLayout(t *testing.T) {
 	ed.Styler(func(s *styles.Style) {
 		s.Min.X.Em(25)
 	})
-	b.AssertRender(t, "layout", waitMarkup(t, ed))
+	core.AssertRender(t, b, "layout", waitMarkup(t, ed))
 }
 
 func TestBaseTabs(t *testing.T) {
@@ -78,7 +78,7 @@ func TestBaseTabs(t *testing.T) {
 	ed.Styler(func(s *styles.Style) {
 		s.Min.X.Em(25)
 	})
-	b.AssertRender(t, "tabs1", waitMarkup(t, ed))
+	core.AssertRender(t, b, "tabs1", waitMarkup(t, ed))
 }
 
 func TestBaseSetLanguage(t *testing.T) {
@@ -93,7 +93,7 @@ func main() {
 	ed.Styler(func(s *styles.Style) {
 		s.Min.X.Em(29)
 	})
-	b.AssertRender(t, "set-lang", waitMarkup(t, ed))
+	core.AssertRender(t, b, "set-lang", waitMarkup(t, ed))
 }
 
 // testFile is the file opened by the tests, which is a copy of an older
@@ -108,7 +108,7 @@ func TestBaseOpenFS(t *testing.T) {
 	b := core.NewBody()
 	ed := NewBase(b)
 	errors.Log(ed.Lines.OpenFS(myFile, testFile))
-	b.AssertRender(t, "open-fs", waitMarkup(t, ed))
+	core.AssertRender(t, b, "open-fs", waitMarkup(t, ed))
 }
 
 func TestBaseOpen(t *testing.T) {
@@ -118,7 +118,7 @@ func TestBaseOpen(t *testing.T) {
 		s.Min.X.Em(40)
 	})
 	errors.Log(ed.Lines.Open(testFile))
-	b.AssertRender(t, "open", waitMarkup(t, ed))
+	core.AssertRender(t, b, "open", waitMarkup(t, ed))
 }
 
 func TestBaseScroll(t *testing.T) {
@@ -128,15 +128,15 @@ func TestBaseScroll(t *testing.T) {
 		s.Min.X.Em(40)
 	})
 	errors.Log(ed.Lines.Open(testFile))
-	b.AssertRender(t, "scroll-40", waitMarkup(t, ed), func() {
+	core.AssertRender(t, b, "scroll-40", waitMarkup(t, ed), func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		ed.scrollToCenterIfHidden(textpos.Pos{Line: 40})
 	})
 	// ed.scrollToCenterIfHidden(textpos.Pos{Line: 42})
-	// b.AssertRender(t, "scroll-42")
+	// core.AssertRender(t, b, "scroll-42")
 	// ed.scrollToCenterIfHidden(textpos.Pos{Line: 20})
-	// b.AssertRender(t, "scroll-20")
+	// core.AssertRender(t, b, "scroll-20")
 }
 
 func TestBaseMulti(t *testing.T) {
@@ -144,7 +144,7 @@ func TestBaseMulti(t *testing.T) {
 	tb := lines.NewLines().SetString("Hello, world!")
 	NewBase(b).SetLines(tb)
 	NewBase(b).SetLines(tb)
-	b.AssertRender(t, "multi")
+	core.AssertRender(t, b, "multi")
 }
 
 // The views of a shared Lines get the updates of the background markup
@@ -161,7 +161,7 @@ func TestBaseMultiNotShown(t *testing.T) {
 	ed.OnInput(func(e events.Event) {
 		inputs <- struct{}{}
 	})
-	b.AssertRender(t, "multi-not-shown", func() {
+	core.AssertRender(t, b, "multi-not-shown", func() {
 		b.AsyncLock()
 		tb.SetLanguage(fileinfo.Go).SetString("package main\n\nfunc main() {\n}\n")
 		b.AsyncUnlock()
@@ -185,7 +185,7 @@ func TestEditorChange(t *testing.T) {
 		n++
 		text = ed.Lines.String()
 	})
-	b.AssertRender(t, "change", func() {
+	core.AssertRender(t, b, "change", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		ed.SetFocus()
@@ -215,7 +215,7 @@ func TestEditorInput(t *testing.T) {
 		n++
 		text = ed.Lines.String()
 	})
-	b.AssertRender(t, "input", func() {
+	core.AssertRender(t, b, "input", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		ed.SetFocus()
@@ -239,7 +239,7 @@ func TestReadOnlyClear(t *testing.T) {
 	ed := NewEditor(b)
 	ed.Lines.SetString("some output\nmore output\n")
 	ed.SetReadOnly(true)
-	b.AssertRender(t, "read-only-clear", func() {
+	core.AssertRender(t, b, "read-only-clear", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		m := core.NewScene()

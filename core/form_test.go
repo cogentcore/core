@@ -38,25 +38,25 @@ func (mp *morePerson) FieldWidget(field string) Value {
 func TestForm(t *testing.T) {
 	b := NewBody()
 	NewForm(b).SetStruct(&person{Name: "Go", Age: 35})
-	b.AssertRender(t, "form/basic")
+	AssertRender(t, b, "form/basic")
 }
 
 func TestFormInline(t *testing.T) {
 	b := NewBody()
 	NewForm(b).SetInline(true).SetStruct(&person{Name: "Go", Age: 35})
-	b.AssertRender(t, "form/inline")
+	AssertRender(t, b, "form/inline")
 }
 
 func TestFormReadOnly(t *testing.T) {
 	b := NewBody()
 	NewForm(b).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
-	b.AssertRender(t, "form/read-only")
+	AssertRender(t, b, "form/read-only")
 }
 
 func TestFormFieldValue(t *testing.T) {
 	b := NewBody()
 	NewForm(b).SetStruct(&morePerson{Name: "Go", Age: 35})
-	b.AssertRender(t, "form/field-value")
+	AssertRender(t, b, "form/field-value")
 }
 
 func TestFormChange(t *testing.T) {
@@ -70,7 +70,7 @@ func TestFormChange(t *testing.T) {
 		n++
 		value = p
 	})
-	b.AssertRender(t, "form/change", func() {
+	AssertRender(t, b, "form/change", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		// [3] is value of second row, which is Age
@@ -87,7 +87,7 @@ func TestFormStyle(t *testing.T) {
 	s.SetState(true, states.Active)
 	s.SetAbilities(true, abilities.Checkable)
 	NewForm(b).SetStruct(s)
-	b.AssertRender(t, "form/style")
+	AssertRender(t, b, "form/style")
 }
 
 type giveUpParams struct {
@@ -113,7 +113,7 @@ func TestFormAddFields(t *testing.T) {
 	NewForm(b).SetStruct(&addFields{}).Styler(func(s *styles.Style) {
 		s.Background = colors.Scheme.SurfaceContainerLow
 	})
-	b.AssertRender(t, "form/addfields")
+	AssertRender(t, b, "form/addfields")
 }
 
 // TestFormTree tests a form of a tree, as in the demo, which has fields
@@ -123,7 +123,7 @@ func TestFormTree(t *testing.T) {
 	tr := NewTree(b).SetText("Root")
 	child := NewTree(tr).SetText("Child")
 	fm := NewForm(b).SetStruct(tr)
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		b.AsyncLock() // (it is rendered meanwhile)
 		defer b.AsyncUnlock()
 		fm.SetStruct(child).Update()
@@ -142,7 +142,7 @@ func TestFormTextFieldWidth(t *testing.T) {
 		Count int
 	}{Name: "name"}
 	fm := NewForm(b).SetStruct(st)
-	b.AssertRender(t, "form/text-field-width", func() {
+	AssertRender(t, b, "form/text-field-width", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		var tf *TextField

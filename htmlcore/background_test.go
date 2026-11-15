@@ -26,7 +26,7 @@ func TestBackgroundShorthand(t *testing.T) {
 	assert.NoError(t, ReadHTMLString(ctx, b, "<style>.reset{background:0 0}.grad{background:#336699;background:linear-gradient(red, blue)}</style>"+
 		"<button class=\"reset\">reset</button><button class=\"plain\">plain</button><div class=\"grad\">grad</div>"))
 	bg := map[string]string{}
-	b.RenderImage(func() {
+	core.RenderImage(b, func() {
 		b.WalkDown(func(n tree.Node) bool {
 			if wb := core.AsWidget(n); wb != nil {
 				if cl := fmt.Sprint(wb.Property("class")); cl == "reset" || cl == "plain" || cl == "grad" {

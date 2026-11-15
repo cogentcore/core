@@ -30,7 +30,7 @@ func (dw *Drawer) End() {} // no-op
 func (dw *Drawer) Redraw() {} // no-op
 
 // GetImage returns the rendered image. It is called through an interface
-// in core.Body.AssertRender.
+// in core.AssertRender.
 func (dw *Drawer) GetImage() *image.RGBA {
 	return dw.Image
 }

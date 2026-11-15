@@ -47,7 +47,7 @@ func widgetsByID(t *testing.T, src string, fun func(ws map[string]*core.WidgetBa
 		}
 		return tree.Continue
 	})
-	bd.RenderImage(func() {}, func() {
+	core.RenderImage(bd, func() {}, func() {
 		fun(ws, bd.Styles.UnitContext.Dots(units.UnitDp))
 	})
 }
@@ -113,7 +113,7 @@ func TestBoxShadowColor(t *testing.T) {
 		return tree.Continue
 	})
 	var bb image.Rectangle
-	img := bd.RenderImage(func() {}, func() { bb = bar.Geom.TotalBBox })
+	img := core.RenderImage(bd, func() {}, func() { bb = bar.Geom.TotalBBox })
 	r, g, b, _ := img.At(bb.Min.X+10, bb.Max.Y+1).RGBA()
 	assert.Equal(t, [3]uint32{200, 0, 0}, [3]uint32{r >> 8, g >> 8, b >> 8}, "below the box, in its color")
 }
@@ -147,7 +147,7 @@ func TestPseudoBox(t *testing.T) {
 	require.NotNil(t, bar)
 	require.NotNil(t, ic)
 	var bb, ib image.Rectangle
-	img := bd.RenderImage(func() {}, func() { bb, ib = bar.Geom.TotalBBox, ic.Geom.TotalBBox })
+	img := core.RenderImage(bd, func() {}, func() { bb, ib = bar.Geom.TotalBBox, ic.Geom.TotalBBox })
 	r, g, b, _ := img.At(bb.Min.X+50, bb.Max.Y-1).RGBA()
 	assert.Equal(t, [3]uint32{162, 169, 177}, [3]uint32{r >> 8, g >> 8, b >> 8}, "the line at the bottom")
 	r, g, b, _ = img.At(ib.Min.X+5, ib.Min.Y+(ib.Dy()/2)).RGBA()
@@ -187,7 +187,7 @@ func TestBackgroundImage(t *testing.T) {
 	})
 	require.NotNil(t, sp)
 	var bb image.Rectangle
-	rendered := bd.RenderImage(func() {}, func() { bb = sp.Geom.TotalBBox })
+	rendered := core.RenderImage(bd, func() {}, func() { bb = sp.Geom.TotalBBox })
 	at := func(x, y int) [3]uint32 {
 		r, g, b, _ := rendered.At(bb.Min.X+x, bb.Min.Y+y).RGBA()
 		return [3]uint32{r >> 8, g >> 8, b >> 8}
@@ -461,7 +461,7 @@ func TestKeepContainerSizes(t *testing.T) {
 	bd := core.NewBody()
 	require.NoError(t, ReadDocument(ctx, bd, doc))
 	var want float32
-	bd.RenderImage(func() {}, func() { want = fontSize(bd) })
+	core.RenderImage(bd, func() {}, func() { want = fontSize(bd) })
 	require.NotZero(t, want)
 
 	again := ctx.NewPage()
@@ -684,7 +684,7 @@ func TestFloatOfBlockOfFloats(t *testing.T) {
 		}
 		return tree.Continue
 	})
-	bd.RenderImage(func() {}, func() {
+	core.RenderImage(bd, func() {}, func() {
 		// laid out again, as a page is when its scripts change it
 		bd.AsyncLock()
 		bd.Scene.LayoutScene()
@@ -717,7 +717,7 @@ func TestImageNaturalSizeDp(t *testing.T) {
 		return tree.Continue
 	})
 	require.NotNil(t, img)
-	bd.RenderImage(func() {}, func() {
+	core.RenderImage(bd, func() {}, func() {
 		dp := img.Styles.UnitContext.Dots(units.UnitDp)
 		assert.Greater(t, dp, float32(1.5))
 		assert.InDelta(t, 100*dp, img.Geom.Size.Actual.Content.X, 2, "100 pixels in dp")
@@ -791,7 +791,7 @@ func TestImageSrcsetDensity(t *testing.T) {
 		return tree.Continue
 	})
 	require.NotNil(t, img, "an img of only a srcset is shown")
-	bd.RenderImage(func() {}, func() {
+	core.RenderImage(bd, func() {}, func() {
 		dp := img.Styles.UnitContext.Dots(units.UnitDp)
 		assert.InDelta(t, 50*dp, img.Geom.Size.Actual.Content.X, 2, "100 pixels of 2x in dp")
 	})
@@ -864,7 +864,7 @@ func TestGridLonghandsAndColumnStart(t *testing.T) {
 		}
 		return tree.Continue
 	})
-	bd.RenderImage(func() {}, func() {
+	core.RenderImage(bd, func() {}, func() {
 		dp := bd.Styles.UnitContext.Dots(units.UnitDp)
 		box := func(id string) image.Rectangle { return ws[id].Geom.TotalBBox }
 		inner := box("inner")
@@ -917,7 +917,7 @@ func TestNegativeMarginOverlapShown(t *testing.T) {
 		return tree.Continue
 	})
 	var bb image.Rectangle
-	img := bd.RenderImage(func() {}, func() {
+	img := core.RenderImage(bd, func() {}, func() {
 		require.NotNil(t, head)
 		bb = head.Geom.ContentBBox
 	})
@@ -1000,7 +1000,7 @@ func TestAbsoluteOverInFlow(t *testing.T) {
 <div class="media"><picture><img src="` + u + `"></picture></div>`
 	bd := core.NewBody()
 	require.NoError(t, ReadHTMLString(NewContext(), bd, src))
-	img := bd.RenderImage()
+	img := core.RenderImage(bd)
 	n := 0
 	for y := 0; y < img.Bounds().Dy(); y++ {
 		for x := 0; x < img.Bounds().Dx(); x++ {
@@ -1321,7 +1321,7 @@ func TestViewportHeight(t *testing.T) {
 		}
 		return tree.Continue
 	})
-	bd.RenderImage(func() {}, func() {
+	core.RenderImage(bd, func() {}, func() {
 		dp := bd.Styles.UnitContext.Dots(units.UnitDp)
 		assert.InDelta(t, 500*dp, ws["col"].Geom.Size.Actual.Total.Y, 2)
 		assert.InDelta(t, 150*dp, ws["mid"].Geom.Size.Actual.Total.Y, 2, "calc(100% - 560px) of 500, at least 150")
@@ -1559,7 +1559,7 @@ func TestPercentBars(t *testing.T) {
 		}
 		return tree.Continue
 	})
-	img := bd.RenderImage()
+	img := core.RenderImage(bd)
 	dp := bd.Styles.UnitContext.Dots(units.UnitDp)
 	assert.InDelta(t, 220*dp, ws["dem"].Geom.Size.Actual.Total.X, 2, "55%")
 	assert.InDelta(t, 0, ws["oth"].Geom.Size.Actual.Total.X, 0.5, "0%")

@@ -13,11 +13,11 @@ import (
 func TestIcon(t *testing.T) {
 	b := NewBody()
 	NewIcon(b).SetIcon(icons.Home)
-	b.AssertRender(t, "icon/basic")
+	AssertRender(t, b, "icon/basic")
 }
 
 func TestIconFilled(t *testing.T) {
 	b := NewBody()
 	NewIcon(b).SetIcon(icons.HomeFill)
-	b.AssertRender(t, "icon/filled")
+	AssertRender(t, b, "icon/filled")
 }

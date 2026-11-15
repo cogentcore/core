@@ -16,31 +16,31 @@ var testTime = time.Date(2021, 1, 4, 11, 16, 0, 0, time.UTC)
 func TestTimeInput(t *testing.T) {
 	b := NewBody()
 	NewTimeInput(b).SetTime(testTime)
-	b.AssertRender(t, "time-input/basic")
+	AssertRender(t, b, "time-input/basic")
 }
 
 func TestTimeInputDate(t *testing.T) {
 	b := NewBody()
 	NewTimeInput(b).SetTime(testTime).SetDisplayTime(false)
-	b.AssertRender(t, "time-input/date")
+	AssertRender(t, b, "time-input/date")
 }
 
 func TestTimeInputTime(t *testing.T) {
 	b := NewBody()
 	NewTimeInput(b).SetTime(testTime).SetDisplayDate(false)
-	b.AssertRender(t, "time-input/time")
+	AssertRender(t, b, "time-input/time")
 }
 
 func TestDurationInput(t *testing.T) {
 	b := NewBody()
 	NewDurationInput(b).SetDuration(2 * time.Minute)
-	b.AssertRender(t, "duration-input/basic")
+	AssertRender(t, b, "duration-input/basic")
 }
 
 func TestDurationInputReadOnly(t *testing.T) {
 	b := NewBody()
 	NewDurationInput(b).SetDuration(2 * time.Minute).SetReadOnly(true)
-	b.AssertRender(t, "duration-input/read-only")
+	AssertRender(t, b, "duration-input/read-only")
 }
 
 // TestTimeInputZero tests that the zero time is blank, and that clearing
@@ -48,7 +48,7 @@ func TestDurationInputReadOnly(t *testing.T) {
 func TestTimeInputZero(t *testing.T) {
 	b := NewBody()
 	ti := NewTimeInput(b)
-	b.AssertRender(t, "time-input/zero", func() {
+	AssertRender(t, b, "time-input/zero", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		date, tm := ti.Child(0).(*TextField), ti.Child(1).(*TextField)

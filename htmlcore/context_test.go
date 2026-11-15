@@ -279,7 +279,7 @@ func TestSVGMaxWidth(t *testing.T) {
 	if !assert.NotNil(t, sv) {
 		return
 	}
-	b.RenderImage(func() {
+	core.RenderImage(b, func() {
 		dp := sv.Styles.UnitContext.Dots(units.UnitDp)
 		sz := sv.Geom.Size.Actual.Content
 		assert.InDelta(t, 96*dp, sz.X, 2, "it is as wide as its max-width")
@@ -314,7 +314,7 @@ func TestInlineBlocksExactFit(t *testing.T) {
 	if !assert.NotNil(t, logo) || !assert.NotNil(t, link) {
 		return
 	}
-	b.RenderImage(func() {
+	core.RenderImage(b, func() {
 		assert.Equal(t, logo.Geom.Cell.Y, link.Geom.Cell.Y, "they are on the same line")
 		assert.Greater(t, link.Geom.Pos.Total.X, logo.Geom.Pos.Total.X, "the link is after the logo")
 		lc := logo.Geom.Pos.Total.Y + logo.Geom.Size.Actual.Total.Y/2
@@ -351,7 +351,7 @@ func TestColumnsOfList(t *testing.T) {
 	if !assert.NotNil(t, first) || !assert.NotNil(t, last) {
 		return
 	}
-	b.RenderImage(func() {
+	core.RenderImage(b, func() {
 		assert.Greater(t, last.Geom.Pos.Total.X, first.Geom.Pos.Total.X+100, "the last item is in a column to the right")
 		assert.Less(t, last.Geom.Pos.Total.Y, first.Geom.Pos.Total.Y+100, "near the top")
 	})
@@ -591,7 +591,7 @@ func TestTableCellWidthMinimum(t *testing.T) {
 	if !assert.NotNil(t, th) || !assert.NotNil(t, tx) {
 		return
 	}
-	b.RenderImage(func() {
+	core.RenderImage(b, func() {
 		right := th.Geom.Pos.Total.X + th.Geom.Size.Actual.Total.X
 		assert.LessOrEqual(t, tx.Geom.Pos.Total.X+tx.Geom.Size.Actual.Total.X, right+1, "the text is within its cell")
 		assert.Greater(t, th.Geom.Size.Actual.Total.X, float32(100), "the cell is as wide as its text")
@@ -633,7 +633,7 @@ func TestLayoutSettles(t *testing.T) {
 		return getURL(u)
 	}
 	assert.NoError(t, ReadHTMLString(ctx, scroller, string(src)))
-	b.RenderImage(func() {
+	core.RenderImage(b, func() {
 		var text, output *core.WidgetBase
 		scroller.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {
 			switch {
@@ -782,7 +782,7 @@ func TestUnset(t *testing.T) {
 	ctx := NewContext()
 	b := core.NewBody()
 	assert.NoError(t, ReadHTMLString(ctx, b, `<html><body style="color: rgb(0, 128, 0)"><p style="color: unset; padding: 10px; padding: unset">Text</p></body></html>`))
-	b.RenderImage(func() {
+	core.RenderImage(b, func() {
 		var p *core.WidgetBase
 		b.WalkDown(func(n tree.Node) bool {
 			if wb := core.AsWidget(n); wb != nil && wb.Property("tag") == "p" && p == nil {
@@ -852,7 +852,7 @@ func TestFloatColumns(t *testing.T) {
 	if !assert.NotNil(t, c1) || !assert.NotNil(t, c2) || !assert.NotNil(t, after) || !assert.NotNil(t, main) || !assert.NotNil(t, rail) {
 		return
 	}
-	b.RenderImage(func() {
+	core.RenderImage(b, func() {
 		w := core.AsWidget(c1.Parent).Geom.Size.Actual.Content.X
 		assert.InDelta(t, 0.23*w, c1.Geom.Size.Actual.Total.X, 2, "a column is 23% wide")
 		assert.InDelta(t, c1.Geom.Pos.Total.Y, c2.Geom.Pos.Total.Y, 1, "the columns are beside each other")
@@ -888,7 +888,7 @@ func TestBlockLinkClick(t *testing.T) {
 	if !assert.Len(t, links, 4) {
 		return
 	}
-	b.RenderImage(func() {
+	core.RenderImage(b, func() {
 		ev := b.Scene.RenderWindow().SystemWindow.Events()
 		for _, l := range links {
 			bb := l.Geom.TotalBBox
@@ -949,7 +949,7 @@ func TestZoom(t *testing.T) {
 			}
 			return tree.Continue
 		})
-		b.RenderImage(func() {
+		core.RenderImage(b, func() {
 			box = w.Geom.Size.Actual.Total.X
 			font = w.Styles.Font.Size.Dots
 		})
@@ -1016,7 +1016,7 @@ func TestGridColumnSpan(t *testing.T) {
 	require.NoError(t, ReadHTMLString(NewContext(), b, `<div style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); width: 1200px">`+
 		fmt.Sprintf(cell+cell+cell+cell+cell, 6, 6, 4, 4, 4)+`</div>`))
 	var secs []*core.WidgetBase
-	b.RenderImage(func() {
+	core.RenderImage(b, func() {
 		b.WalkDown(func(k tree.Node) bool {
 			if wb := core.AsWidget(k); wb != nil && wb.Property("tag") == "section" {
 				secs = append(secs, wb)
@@ -1522,7 +1522,7 @@ func TestLineHeightHalfLeading(t *testing.T) {
 		b := core.NewBody()
 		b.Scene.Styler(func(s *styles.Style) { s.Padding.Zero() })
 		require.NoError(t, ReadHTMLString(NewContext(), b, `<body style="margin: 0"><div style="font: 14px sans-serif; line-height: `+lh+`">Sign Up</div></body>`))
-		img := b.RenderImage()
+		img := core.RenderImage(b)
 		top, bottom = -1, -1
 		for y := range img.Bounds().Dy() {
 			for x := range img.Bounds().Dx() {

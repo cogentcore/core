@@ -15,25 +15,25 @@ import (
 func TestKeyedList(t *testing.T) {
 	b := NewBody()
 	NewKeyedList(b).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})
-	b.AssertRender(t, "keyed-list/basic")
+	AssertRender(t, b, "keyed-list/basic")
 }
 
 func TestKeyedListInline(t *testing.T) {
 	b := NewBody()
 	NewKeyedList(b).SetInline(true).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})
-	b.AssertRender(t, "keyed-list/inline")
+	AssertRender(t, b, "keyed-list/inline")
 }
 
 func TestKeyedListReadOnly(t *testing.T) {
 	b := NewBody()
 	NewKeyedList(b).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5}).SetReadOnly(true)
-	b.AssertRender(t, "keyed-list/read-only")
+	AssertRender(t, b, "keyed-list/read-only")
 }
 
 func TestKeyedListAny(t *testing.T) {
 	b := NewBody()
 	NewKeyedList(b).SetMap(&map[string]any{"Go": 1, "C++": "C-like", "Python": true})
-	b.AssertRender(t, "keyed-list/any")
+	AssertRender(t, b, "keyed-list/any")
 }
 
 func TestKeyedListChange(t *testing.T) {
@@ -47,7 +47,7 @@ func TestKeyedListChange(t *testing.T) {
 		n++
 		maps.Copy(value, m)
 	})
-	b.AssertRender(t, "keyed-list/change", func() {
+	AssertRender(t, b, "keyed-list/change", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		// [3] is value of second row, which is "Go" since it is sorted alphabetically
@@ -69,7 +69,7 @@ func TestKeyedListChangeKey(t *testing.T) {
 		n++
 		maps.Copy(value, m)
 	})
-	b.AssertRender(t, "keyed-list/change-key", func() {
+	AssertRender(t, b, "keyed-list/change-key", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		// [4] is key of third row, which is "Python" since it is sorted alphabetically

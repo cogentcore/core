@@ -25,7 +25,7 @@ func TestRenderOneSideBorder(t *testing.T) {
 		s.Border.Width.Bottom.Dp(10)
 		s.Background = colors.Scheme.SurfaceContainerHigh
 	})
-	b.AssertRender(t, "render/one-side-border")
+	AssertRender(t, b, "render/one-side-border")
 }
 
 // For https://github.com/cogentcore/core/issues/660
@@ -34,7 +34,7 @@ func TestRenderParentBorderRadius(t *testing.T) {
 	NewButton(b).SetText("Test").Styler(func(s *styles.Style) {
 		s.Padding.Zero()
 	})
-	b.AssertRender(t, "render/parent-border-radius")
+	AssertRender(t, b, "render/parent-border-radius")
 }
 
 // For https://github.com/cogentcore/core/issues/989
@@ -56,7 +56,7 @@ func TestRenderParentBorderRadiusVerticalToolbar(t *testing.T) {
 			s.Border.Radius.Zero()
 		})
 	})
-	b.AssertRender(t, "render/parent-border-radius-vertical-toolbar")
+	AssertRender(t, b, "render/parent-border-radius-vertical-toolbar")
 }
 
 // For https://github.com/cogentcore/core/issues/989
@@ -78,7 +78,7 @@ func TestRenderParentBorderRadiusHorizontalToolbar(t *testing.T) {
 			s.Border.Radius.Zero()
 		})
 	})
-	b.AssertRender(t, "render/parent-border-radius-horizontal-toolbar")
+	AssertRender(t, b, "render/parent-border-radius-horizontal-toolbar")
 }
 
 func TestRenderBorderLeak(t *testing.T) {
@@ -99,7 +99,7 @@ func TestRenderBorderLeak(t *testing.T) {
 		s.Border.Width.Set(units.Dp(4))
 		s.Border.Color.Set(colors.Scheme.Outline)
 	})
-	b.AssertRender(t, "render/border-leak")
+	AssertRender(t, b, "render/border-leak")
 }
 
 // For https://github.com/cogentcore/core/issues/810
@@ -111,7 +111,7 @@ func TestRenderButtonAlignment(t *testing.T) {
 		s.Border = styles.Border{}
 		s.MaxBorder = styles.Border{}
 	})
-	b.AssertRender(t, "render/button-alignment")
+	AssertRender(t, b, "render/button-alignment")
 }
 
 // For https://github.com/cogentcore/core/issues/810
@@ -128,7 +128,7 @@ func TestRenderFrameAlignment(t *testing.T) {
 		s.Background = colors.Uniform(colors.Blue)
 		s.Grow.Set(1, 1)
 	})
-	b.AssertRender(t, "render/frame-alignment")
+	AssertRender(t, b, "render/frame-alignment")
 }
 
 // For https://github.com/cogentcore/core/issues/810
@@ -146,7 +146,7 @@ func TestRenderFrameAlignmentCenter(t *testing.T) {
 		s.Background = colors.Uniform(colors.Blue)
 		s.Min.Set(units.Dp(15))
 	})
-	b.AssertRender(t, "render/frame-alignment-center")
+	AssertRender(t, b, "render/frame-alignment-center")
 }
 
 // For https://github.com/cogentcore/core/issues/808
@@ -158,7 +158,7 @@ func TestOverflowAutoDefinedMax(t *testing.T) {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
 	NewText(fr).SetText("This is long text that I have written for the purpose of demonstrating an issue with overflow auto on elements with a defined max")
-	b.AssertRender(t, "render/overflow-auto-defined-max")
+	AssertRender(t, b, "render/overflow-auto-defined-max")
 }
 
 // For https://github.com/cogentcore/core/issues/615
@@ -185,7 +185,7 @@ func TestRenderNestedScroll(t *testing.T) {
 		s.Background = colors.Uniform(colors.Purple)
 		s.Min.Set(units.Dp(300))
 	})
-	b.AssertRender(t, "render/nested-scroll")
+	AssertRender(t, b, "render/nested-scroll")
 }
 
 // For https://github.com/cogentcore/core/issues/1011
@@ -201,7 +201,7 @@ func TestRenderElementCutOff(t *testing.T) {
 		s.Max.X.Zero()
 	})
 	NewButton(fr).SetIcon(icons.Send)
-	b.AssertRender(t, "render/element-cut-off")
+	AssertRender(t, b, "render/element-cut-off")
 }
 
 // For https://github.com/cogentcore/core/issues/1012
@@ -231,7 +231,7 @@ func TestRenderGridCenteredFrame(t *testing.T) {
 	tx.Styler(func(s *styles.Style) {
 		s.SetTextWrap(false)
 	})
-	b.AssertRender(t, "render/grid-centered-frame")
+	AssertRender(t, b, "render/grid-centered-frame")
 }
 
 // For https://github.com/cogentcore/core/issues/1034
@@ -246,7 +246,7 @@ func TestRenderParentGradient(t *testing.T) {
 			s.Min.Set(units.Em(2))
 		})
 	}
-	b.AssertRender(t, "render/parent-gradient")
+	AssertRender(t, b, "render/parent-gradient")
 }
 
 func TestNeedsRenderChild(t *testing.T) {

@@ -40,7 +40,7 @@ func BenchmarkLayoutDocsPage(b *testing.B) {
 					return text, text
 				})
 				assert.NoError(b, ReadMDString(ctx, body, s))
-				body.AssertRender(b, "layout/"+page, func() {
+				core.AssertRender(b, body, "layout/"+page, func() {
 					sc := body.Scene
 					reset, _ := sc.TextShaper().(interface{ ResetCache() })
 					size := math32.FromPoint(sc.SceneGeom.Size)

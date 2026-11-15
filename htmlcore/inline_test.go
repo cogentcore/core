@@ -37,7 +37,7 @@ func TestSpaceBetweenInlineBlocks(t *testing.T) {
 	if sp == nil {
 		return
 	}
-	b.RenderImage(func() {
+	core.RenderImage(b, func() {
 		assert.Greater(t, sp.Geom.Size.Actual.Total.X, float32(5), "as wide as a space")
 	})
 }

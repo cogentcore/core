@@ -22,7 +22,7 @@ func TestTextFieldCompose(t *testing.T) {
 	compose := func(text string, start, end int) {
 		tf.HandleEvent(events.NewTextComposition(text, start, end))
 	}
-	b.AssertRender(t, "text-field/compose", func() {
+	AssertRender(t, b, "text-field/compose", func() {
 		b.AsyncLock() // (it is rendered meanwhile)
 		defer b.AsyncUnlock()
 		tf.SetFocus()

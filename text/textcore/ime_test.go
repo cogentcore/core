@@ -24,7 +24,7 @@ func TestEditorCompose(t *testing.T) {
 	compose := func(text string, start, end int) {
 		ed.HandleEvent(events.NewTextComposition(text, start, end))
 	}
-	b.AssertRender(t, "ime/compose", func() {
+	core.AssertRender(t, b, "ime/compose", func() {
 		ed.SetFocus()
 		ed.SetCursorShow(pos)
 		compose("にほん", 3, 3)

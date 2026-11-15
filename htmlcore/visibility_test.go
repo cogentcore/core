@@ -26,7 +26,7 @@ func TestHiddenOverContent(t *testing.T) {
 		assert.NoError(t, ReadHTMLString(ctx, b, `<div style="position: relative; width: 200px; height: 100px">`+
 			`<div style="background: blue; width: 200px; height: 100px"></div>`+
 			`<div style="position: absolute; top: 0; left: 0; width: 200px; height: 100px; background: red; `+hide+`">hidden</div></div>`))
-		img := b.RenderImage()
+		img := core.RenderImage(b)
 		// the body has a margin of 8px
 		c := color.RGBAModel.Convert(img.At(int(50*b.Styles.UnitContext.Dots(1)), int(50*b.Styles.UnitContext.Dots(1)))).(color.RGBA)
 		assert.Equal(t, color.RGBA{0, 0, 255, 255}, c, hide)
@@ -52,7 +52,7 @@ func TestTranslate(t *testing.T) {
 	assert.NoError(t, ReadHTMLString(ctx, b, `<div class="a" style="width: 100px; height: 40px; transform: translateY(-50%) translateX(10px)">a</div>`+
 		`<div class="b" style="width: 100px; height: 40px; translate: 20px 5px">b</div><div class="c" style="width: 100px; height: 40px">c</div>`))
 	pos := map[string][2]float32{}
-	b.RenderImage(func() {
+	core.RenderImage(b, func() {
 		b.WalkDown(func(n tree.Node) bool {
 			if wb := core.AsWidget(n); wb != nil {
 				if cl, ok := wb.Property("class").(string); ok {
@@ -78,7 +78,7 @@ func TestGridAutoFlowColumn(t *testing.T) {
 	assert.NoError(t, ReadHTMLString(ctx, b, `<ul style="display: grid; grid-auto-flow: column; list-style: none; width: max-content">`+
 		`<li class="a">one</li><li class="b">two</li><li class="c">three</li></ul>`))
 	pos := map[string][2]float32{}
-	b.RenderImage(func() {
+	core.RenderImage(b, func() {
 		b.WalkDown(func(n tree.Node) bool {
 			if wb := core.AsWidget(n); wb != nil {
 				if cl, ok := wb.Property("class").(string); ok {

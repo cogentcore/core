@@ -23,19 +23,19 @@ import (
 func TestButtonText(t *testing.T) {
 	b := NewBody()
 	NewButton(b).SetText("Download")
-	b.AssertRender(t, "button/text")
+	AssertRender(t, b, "button/text")
 }
 
 func TestButtonIcon(t *testing.T) {
 	b := NewBody()
 	NewButton(b).SetIcon(icons.Download)
-	b.AssertRender(t, "button/icon")
+	AssertRender(t, b, "button/icon")
 }
 
 func TestButtonTextIcon(t *testing.T) {
 	b := NewBody()
 	NewButton(b).SetText("Download").SetIcon(icons.Download)
-	b.AssertRender(t, "button/text-icon")
+	AssertRender(t, b, "button/text-icon")
 }
 
 func TestButtonClick(t *testing.T) {
@@ -55,7 +55,7 @@ func TestButtonMenu(t *testing.T) {
 		NewButton(m).SetText("Copy link")
 		NewButton(m).SetText("Send message")
 	})
-	b.AssertRender(t, "button/menu")
+	AssertRender(t, b, "button/menu")
 }
 
 func TestButtonMenuClick(t *testing.T) {
@@ -67,7 +67,7 @@ func TestButtonMenuClick(t *testing.T) {
 		NewButton(m).SetText("Copy link")
 		NewButton(m).SetText("Send message")
 	})
-	b.AssertRender(t, "button/menu-click", func() {
+	AssertRender(t, b, "button/menu-click", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		bt.Send(events.Click)
@@ -99,14 +99,14 @@ func TestButtonShortcutKey(t *testing.T) {
 func TestButtonShortcutMenu(t *testing.T) {
 	b := NewBody()
 	NewButton(b).SetText("Save").SetShortcut("Command+S").SetType(ButtonMenu)
-	b.AssertRender(t, "button/shortcut-menu")
+	AssertRender(t, b, "button/shortcut-menu")
 }
 
 func TestButtonTypes(t *testing.T) {
 	for _, typ := range ButtonTypesValues() {
 		b := NewBody()
 		NewButton(b).SetType(typ).SetText(typ.String())
-		b.AssertRender(t, "button/type-"+strings.ToLower(typ.String()))
+		AssertRender(t, b, "button/type-"+strings.ToLower(typ.String()))
 	}
 }
 
@@ -116,7 +116,7 @@ func TestButtonFontSize(t *testing.T) {
 	bt.Styler(func(s *styles.Style) {
 		s.Font.Size.Dp(48)
 	})
-	b.AssertRender(t, "button/font-size")
+	AssertRender(t, b, "button/font-size")
 }
 
 // TestButtonShortcutFocus tests that triggering a button with its shortcut
@@ -127,7 +127,7 @@ func TestButtonShortcutFocus(t *testing.T) {
 	clicked := 0
 	bt := NewButton(b).SetText("Action").SetShortcut(key.Chord("Command+Shift+L").PlatformChord())
 	bt.OnClick(func(e events.Event) { clicked++ })
-	b.AssertRender(t, "button/shortcut-focus", func() {
+	AssertRender(t, b, "button/shortcut-focus", func() {
 		b.AsyncLock()
 		tf.SetFocus()
 		b.AsyncUnlock()

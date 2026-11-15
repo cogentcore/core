@@ -20,7 +20,7 @@ var testSVGPath = Filename(filepath.Join("..", "icon.svg"))
 func TestSVG(t *testing.T) {
 	b := NewBody()
 	errors.Log(NewSVG(b).Open(testSVGPath))
-	b.AssertRender(t, "svg/basic")
+	AssertRender(t, b, "svg/basic")
 }
 
 func TestSVGSize(t *testing.T) {
@@ -30,13 +30,13 @@ func TestSVGSize(t *testing.T) {
 	svg.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Dp(128))
 	})
-	b.AssertRender(t, "svg/size")
+	AssertRender(t, b, "svg/size")
 }
 
 func TestSVGString(t *testing.T) {
 	b := NewBody()
 	errors.Log(NewSVG(b).ReadString(`<rect width="100" height="100" fill="red"/>`))
-	b.AssertRender(t, "svg/string")
+	AssertRender(t, b, "svg/string")
 }
 
 // For https://github.com/cogentcore/core/issues/729
@@ -49,5 +49,5 @@ func TestSVGZoom(t *testing.T) {
 	sv.SVG.Root.ViewBox.Size.SetScalar(1000)
 	sv.SVG.Scale = 100
 	svg.NewText(sv.SVG.Root).SetText("Hello, world!").SetPos(math32.Vec2(0, 10))
-	b.AssertRender(t, "svg/zoom")
+	AssertRender(t, b, "svg/zoom")
 }

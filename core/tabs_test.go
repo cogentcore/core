@@ -22,7 +22,7 @@ func TestTabs(t *testing.T) {
 	ts := NewTabs(b)
 	ts.NewTab("First")
 	ts.NewTab("Second")
-	b.AssertRender(t, "tabs/basic")
+	AssertRender(t, b, "tabs/basic")
 }
 
 func TestTabsWidgets(t *testing.T) {
@@ -32,7 +32,7 @@ func TestTabsWidgets(t *testing.T) {
 	NewText(first).SetText("I am first!")
 	second, _ := ts.NewTab("Second")
 	NewText(second).SetText("I am second!")
-	b.AssertRender(t, "tabs/widgets")
+	AssertRender(t, b, "tabs/widgets")
 }
 
 func TestTabsClick(t *testing.T) {
@@ -42,7 +42,7 @@ func TestTabsClick(t *testing.T) {
 	NewText(first).SetText("I am first!")
 	second, _ := ts.NewTab("Second")
 	NewText(second).SetText("I am second!")
-	b.AssertRender(t, "tabs/click", func() {
+	AssertRender(t, b, "tabs/click", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		ts.getTabs().Child(1).(Widget).AsWidget().Send(events.Click)
@@ -61,7 +61,7 @@ func TestTabsUpdateSelected(t *testing.T) {
 		updates++
 		text.SetText("I am second!")
 	})
-	b.AssertRender(t, "tabs/click", func() {
+	AssertRender(t, b, "tabs/click", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		// The content of a tab is updated when it is selected, not before.
@@ -85,7 +85,7 @@ func TestTabsLazy(t *testing.T) {
 	})
 	// Only the content of the selected tab is made, and only once.
 	assert.Equal(t, 1, builds)
-	b.AssertRender(t, "tabs/click", func() {
+	AssertRender(t, b, "tabs/click", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		assert.Equal(t, 1, builds)
@@ -104,7 +104,7 @@ func TestTabsMany(t *testing.T) {
 	ts.NewTab("Second")
 	ts.NewTab("Third")
 	ts.NewTab("Fourth")
-	b.AssertRender(t, "tabs/many")
+	AssertRender(t, b, "tabs/many")
 }
 
 func TestTabsIcons(t *testing.T) {
@@ -114,7 +114,7 @@ func TestTabsIcons(t *testing.T) {
 	tb.SetIcon(icons.Home)
 	_, tb = ts.NewTab("Second")
 	tb.SetIcon(icons.Explore)
-	b.AssertRender(t, "tabs/icons")
+	AssertRender(t, b, "tabs/icons")
 }
 
 func TestTabsFunctional(t *testing.T) {
@@ -123,7 +123,7 @@ func TestTabsFunctional(t *testing.T) {
 	ts.NewTab("First")
 	ts.NewTab("Second")
 	ts.NewTab("Third")
-	b.AssertRender(t, "tabs/functional")
+	AssertRender(t, b, "tabs/functional")
 }
 
 func TestTabsNavigation(t *testing.T) {
@@ -135,7 +135,7 @@ func TestTabsNavigation(t *testing.T) {
 	tb.SetIcon(icons.Explore)
 	_, tb = ts.NewTab("Third")
 	tb.SetIcon(icons.History)
-	b.AssertRender(t, "tabs/navigation")
+	AssertRender(t, b, "tabs/navigation")
 }
 
 func TestTabsNew(t *testing.T) {
@@ -143,7 +143,7 @@ func TestTabsNew(t *testing.T) {
 	ts := NewTabs(b).SetNewTabButton(true)
 	ts.NewTab("First")
 	ts.NewTab("Second")
-	b.AssertRender(t, "tabs/new")
+	AssertRender(t, b, "tabs/new")
 }
 
 func TestTabsNewClick(t *testing.T) {
@@ -151,7 +151,7 @@ func TestTabsNewClick(t *testing.T) {
 	ts := NewTabs(b).SetNewTabButton(true)
 	ts.NewTab("First")
 	ts.NewTab("Second")
-	b.AssertRender(t, "tabs/new-click", func() {
+	AssertRender(t, b, "tabs/new-click", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		AsWidget(ts.getTabs().ChildByName("new-tab-button")).Send(events.Click)
@@ -179,7 +179,7 @@ func TestTabsShowBeforeShown(t *testing.T) {
 		}
 	})
 	ts.SelectTabIndex(1)
-	b.RenderImage()
+	RenderImage(b)
 	assert.Equal(t, 0, early, "shown before its scene was")
 	assert.GreaterOrEqual(t, shows, 1)
 }
@@ -210,7 +210,7 @@ func TestTabsKeys(t *testing.T) {
 		_, idx := ts.CurrentTab()
 		return idx
 	}
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		ts.SelectTabIndex(1)

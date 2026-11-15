@@ -28,7 +28,7 @@ func TestOutputBuffer(t *testing.T) {
 	})
 	r, w := io.Pipe()
 	ob := &OutputBuffer{Output: r, Lines: tb, Batch: time.Millisecond}
-	b.AssertRender(t, "output-buffer", func() {
+	core.AssertRender(t, b, "output-buffer", func() {
 		done := make(chan struct{})
 		go func() {
 			ob.MonitorOutput()

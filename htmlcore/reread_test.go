@@ -70,7 +70,7 @@ func testReread(t *testing.T, src string, reread bool, change rereadChange, kept
 	var before, after map[string]core.Widget
 	var got, want map[string]string
 	var gotTexts, wantTexts string
-	bd.RenderImage(func() {
+	core.RenderImage(bd, func() {
 		bd.AsyncLock()
 		before = widgetsByElement(bd)
 		ok = ctx.Reread(change(doc))
@@ -87,7 +87,7 @@ func testReread(t *testing.T, src string, reread bool, change rereadChange, kept
 	}
 	fresh := core.NewBody()
 	require.NoError(t, ReadDocument(NewContext(), fresh, doc))
-	fresh.RenderImage(func() {}, func() { want, wantTexts = widgetStates(fresh), bodyTexts(fresh) })
+	core.RenderImage(fresh, func() {}, func() { want, wantTexts = widgetStates(fresh), bodyTexts(fresh) })
 	assert.Equal(t, want, got)
 	assert.Equal(t, wantTexts, gotTexts)
 	for _, id := range kept {
@@ -299,7 +299,7 @@ func TestRereadFallback(t *testing.T) {
 	require.NoError(t, err)
 	bd := core.NewBody()
 	require.NoError(t, ReadDocument(ctx, bd, doc))
-	bd.RenderImage(func() {
+	core.RenderImage(bd, func() {
 		bd.AsyncLock()
 		defer bd.AsyncUnlock()
 		big := elementByID(doc, "big")
@@ -456,7 +456,7 @@ func TestPrepareRereadConcurrent(t *testing.T) {
 	bd := core.NewBody()
 	require.NoError(t, ReadDocument(ctx, bd, doc))
 	var got map[string]string
-	bd.RenderImage(func() {
+	core.RenderImage(bd, func() {
 		wrap := elementByID(doc, "wrap")
 		for i := range 20 {
 			done := make(chan func())
@@ -494,7 +494,7 @@ func TestPrepareRereadConcurrent(t *testing.T) {
 	var want map[string]string
 	fresh := core.NewBody()
 	require.NoError(t, ReadDocument(NewContext(), fresh, doc))
-	fresh.RenderImage(func() {}, func() { want = widgetStates(fresh) })
+	core.RenderImage(fresh, func() {}, func() { want = widgetStates(fresh) })
 	assert.Equal(t, want, got)
 }
 
@@ -540,7 +540,7 @@ func TestRereadLinkedSheet(t *testing.T) {
 	require.NoError(t, ReadDocument(ctx, bd, doc))
 	var got, want map[string]string
 	var ok bool
-	bd.RenderImage(func() {
+	core.RenderImage(bd, func() {
 		bd.AsyncLock()
 		head := elementByID(doc, "a").Parent.Parent.Parent.FirstChild
 		head.AppendChild(&html.Node{Type: html.ElementNode, Data: "link", DataAtom: atom.Link,
@@ -555,7 +555,7 @@ func TestRereadLinkedSheet(t *testing.T) {
 	require.True(t, ok, ctx.Fallback())
 	fresh := core.NewBody()
 	require.NoError(t, ReadDocument(newCtx(), fresh, doc))
-	fresh.RenderImage(func() {}, func() { want = widgetStates(fresh) })
+	core.RenderImage(fresh, func() {}, func() { want = widgetStates(fresh) })
 	assert.Equal(t, want, got)
 	assert.Contains(t, got["a"], "bg #0000FF")
 }
@@ -812,7 +812,7 @@ func TestNoscriptImages(t *testing.T) {
 		return tree.Continue
 	})
 	require.NotNil(t, im)
-	bd.RenderImage(func() {
+	core.RenderImage(bd, func() {
 		assert.Eventually(t, func() bool {
 			bd.AsyncLock()
 			defer bd.AsyncUnlock()

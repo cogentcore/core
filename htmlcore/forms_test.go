@@ -171,7 +171,7 @@ func TestDetails(t *testing.T) {
 		}
 		return true
 	}
-	b.RenderImage(func() {
+	core.RenderImage(b, func() {
 		assert.False(t, visible(texts["Hidden text"]))
 		assert.True(t, visible(texts["Shown text"]))
 		assert.NotNil(t, texts["▸ "], "a closed marker")
@@ -200,7 +200,7 @@ func TestToggleDetails(t *testing.T) {
 		}
 		return tree.Continue
 	})
-	b.RenderImage(func() {
+	core.RenderImage(b, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		summary.Send(events.Click)
@@ -232,7 +232,7 @@ func TestRadioGroup(t *testing.T) {
 		}
 		return tree.Continue
 	})
-	b.RenderImage(func() {
+	core.RenderImage(b, func() {
 		sw["b"].Send(events.Click)
 	}, func() {
 		assert.True(t, sw["b"].IsChecked())
@@ -259,7 +259,7 @@ func TestPositionedButtonClick(t *testing.T) {
 	require.NoError(t, ReadHTMLString(ctx, b, `<ul style="list-style: none; margin-left: 40px"><li style="position: relative; padding-left: 20px">`+
 		`<button style="position: absolute; left: -20px; top: 0; width: 30px; height: 22px"><span>v</span></button><a href="#x">Syntax</a></li></ul>`))
 	require.NotNil(t, button)
-	b.RenderImage(func() {
+	core.RenderImage(b, func() {
 		ev := b.Scene.RenderWindow().SystemWindow.Events()
 		bb := button.Geom.TotalBBox
 		for _, x := range []int{bb.Min.X + 3, (bb.Min.X + bb.Max.X) / 2, bb.Max.X - 3} { // outside of its parent, on its text, inside
@@ -375,7 +375,7 @@ func TestInputIcon(t *testing.T) {
 	assert.Contains(t, string(tf.LeadingIcon), `fill="currentColor"`, "a mask has the color of the text")
 	assert.Equal(t, 0, spans, "the icon element is not rendered")
 	assert.Equal(t, "Search", tf.Placeholder)
-	bd.RenderImage(func() {}, func() {
+	core.RenderImage(bd, func() {}, func() {
 		dp := tf.Styles.UnitContext.Dots(units.UnitDp)
 		assert.InDelta(t, 9*dp, tf.Styles.Padding.Left.Dots, 1, "the space before the icon")
 		assert.False(t, tf.Styles.Text.WhiteSpace.HasWordWrap(), "an input is one line")
@@ -401,7 +401,7 @@ func TestInputButtonLabelClick(t *testing.T) {
 		return tree.Continue
 	})
 	require.NotNil(t, label)
-	b.RenderImage(func() {
+	core.RenderImage(b, func() {
 		pos := label.Geom.TotalBBox.Min.Add(label.Geom.TotalBBox.Size().Div(2))
 		b.Scene.RenderWindow().SystemWindow.Events().MouseButton(events.MouseDown, events.Left, pos, 0)
 		b.Scene.RenderWindow().SystemWindow.Events().MouseButton(events.MouseUp, events.Left, pos, 0)
@@ -424,7 +424,7 @@ func TestButtonHover(t *testing.T) {
 		return tree.Continue
 	})
 	require.Len(t, buttons, 2)
-	b.RenderImage(func() {}, func() {
+	core.RenderImage(b, func() {}, func() {
 		for _, bt := range buttons {
 			assert.True(t, bt.Styles.Abilities.IsHoverable(), bt.Property("tag"))
 			bt.SetState(true, states.Hovered)
@@ -453,7 +453,7 @@ func TestTransparentControlHover(t *testing.T) {
 	})
 	require.NotNil(t, sw)
 	require.NotNil(t, label)
-	b.RenderImage(func() {}, func() {
+	core.RenderImage(b, func() {}, func() {
 		sw.Send(events.MouseEnter)
 		assert.True(t, label.StateIs(states.Hovered), "the label shows the hover")
 		label.Style()
@@ -522,7 +522,7 @@ func TestPointerEventsNone(t *testing.T) {
 	require.NoError(t, ReadHTMLString(ctx, b, `<div style="position: relative; width: 200px; height: 60px"><button style="width: 120px; height: 40px">Search</button>`+
 		`<div style="position: absolute; inset: 0; pointer-events: none"><div style="position: absolute; inset: 0; background: rgba(0, 0, 0, 0.1)"></div></div></div>`))
 	require.NotNil(t, button)
-	b.RenderImage(func() {
+	core.RenderImage(b, func() {
 		ev := b.Scene.RenderWindow().SystemWindow.Events()
 		bb := button.Geom.TotalBBox
 		pos := image.Pt((bb.Min.X+bb.Max.X)/2, (bb.Min.Y+bb.Max.Y)/2)
@@ -585,7 +585,7 @@ func TestOpenLink(t *testing.T) {
 	})
 	require.NoError(t, ReadHTMLString(ctx, b, `<a id="first" href="#x" style="display: block">First</a><a id="second" href="#x" style="display: block">Second <i>link</i></a>`))
 	require.NotNil(t, second)
-	b.RenderImage(func() {
+	core.RenderImage(b, func() {
 		ev := b.Scene.RenderWindow().SystemWindow.Events()
 		bb := second.Geom.TotalBBox
 		pos := image.Pt(bb.Min.X+5, (bb.Min.Y+bb.Max.Y)/2)

@@ -18,7 +18,7 @@ import (
 func TestChooser(t *testing.T) {
 	b := NewBody()
 	NewChooser(b).SetStrings("macOS", "Windows", "Linux")
-	b.AssertRender(t, "chooser/basic")
+	AssertRender(t, b, "chooser/basic")
 }
 
 func TestChooserClick(t *testing.T) {
@@ -27,7 +27,7 @@ func TestChooserClick(t *testing.T) {
 		s.Min.Set(units.Em(20), units.Em(10))
 	})
 	ch := NewChooser(b).SetStrings("macOS", "Windows", "Linux")
-	b.AssertRender(t, "chooser/click", func() {
+	AssertRender(t, b, "chooser/click", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		ch.Send(events.Click)
@@ -40,7 +40,7 @@ func TestChooserItems(t *testing.T) {
 		ChooserItem{Value: "Computer", Icon: icons.Computer, Tooltip: "Use a computer"},
 		ChooserItem{Value: "Phone", Icon: icons.Smartphone, Tooltip: "Use a phone"},
 	)
-	b.AssertRender(t, "chooser/items", func() {
+	AssertRender(t, b, "chooser/items", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		assert.Equal(t, "", ch.Tooltip)
@@ -52,7 +52,7 @@ func TestChooserItems(t *testing.T) {
 func TestChooserPlaceholder(t *testing.T) {
 	b := NewBody()
 	NewChooser(b).SetPlaceholder("Choose a platform").SetStrings("macOS", "Windows", "Linux")
-	b.AssertRender(t, "chooser/placeholder")
+	AssertRender(t, b, "chooser/placeholder")
 }
 
 func TestChooserCurrentValue(t *testing.T) {
@@ -60,25 +60,25 @@ func TestChooserCurrentValue(t *testing.T) {
 	ch := NewChooser(b).SetStrings("Apple", "Orange", "Strawberry").SetCurrentValue("Orange")
 	assert.Equal(t, 1, ch.CurrentIndex)
 	assert.Equal(t, ChooserItem{Value: "Orange"}, ch.CurrentItem)
-	b.AssertRender(t, "chooser/current-value")
+	AssertRender(t, b, "chooser/current-value")
 }
 
 func TestChooserOutlined(t *testing.T) {
 	b := NewBody()
 	NewChooser(b).SetType(ChooserOutlined).SetStrings("Apple", "Orange", "Strawberry")
-	b.AssertRender(t, "chooser/outlined")
+	AssertRender(t, b, "chooser/outlined")
 }
 
 func TestChooserIcon(t *testing.T) {
 	b := NewBody()
 	NewChooser(b).SetIcon(icons.Sort).SetStrings("Newest", "Oldest", "Popular")
-	b.AssertRender(t, "chooser/icon")
+	AssertRender(t, b, "chooser/icon")
 }
 
 func TestChooserEditable(t *testing.T) {
 	b := NewBody()
 	NewChooser(b).SetEditable(true).SetStrings("Newest", "Oldest", "Popular")
-	b.AssertRender(t, "chooser/editable")
+	AssertRender(t, b, "chooser/editable")
 }
 
 func TestChooserEditableClick(t *testing.T) {
@@ -87,7 +87,7 @@ func TestChooserEditableClick(t *testing.T) {
 		s.Min.Set(units.Em(20), units.Em(10))
 	})
 	ch := NewChooser(b).SetEditable(true).SetStrings("Newest", "Oldest", "Popular")
-	b.AssertRender(t, "chooser/editable-click", func() {
+	AssertRender(t, b, "chooser/editable-click", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		ch.Send(events.Click)
@@ -100,7 +100,7 @@ func TestChooserEditableTextFieldClick(t *testing.T) {
 		s.Min.Set(units.Em(20), units.Em(10))
 	})
 	ch := NewChooser(b).SetEditable(true).SetStrings("Newest", "Oldest", "Popular")
-	b.AssertRender(t, "chooser/editable-text-field-click", func() {
+	AssertRender(t, b, "chooser/editable-text-field-click", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		ch.textField.Send(events.Click)
@@ -113,7 +113,7 @@ func TestChooserAllowNewClick(t *testing.T) {
 		s.Min.Set(units.Em(20), units.Em(10))
 	})
 	ch := NewChooser(b).SetAllowNew(true).SetStrings("Newest", "Oldest", "Popular")
-	b.AssertRender(t, "chooser/allow-new-click", func() {
+	AssertRender(t, b, "chooser/allow-new-click", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		ch.Send(events.Click)
@@ -126,7 +126,7 @@ func TestChooserEditableAllowNewClick(t *testing.T) {
 		s.Min.Set(units.Em(20), units.Em(10))
 	})
 	ch := NewChooser(b).SetEditable(true).SetAllowNew(true).SetStrings("Newest", "Oldest", "Popular")
-	b.AssertRender(t, "chooser/editable-allow-new-click", func() {
+	AssertRender(t, b, "chooser/editable-allow-new-click", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		ch.Send(events.Click)
@@ -139,7 +139,7 @@ func TestChooserEditableAllowNewTextFieldClick(t *testing.T) {
 		s.Min.Set(units.Em(20), units.Em(10))
 	})
 	ch := NewChooser(b).SetEditable(true).SetAllowNew(true).SetStrings("Newest", "Oldest", "Popular")
-	b.AssertRender(t, "chooser/editable-allow-new-text-field-click", func() {
+	AssertRender(t, b, "chooser/editable-allow-new-text-field-click", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		ch.textField.HandleEvent(events.NewKey(events.KeyChord, 'O', 0, 0))
@@ -159,7 +159,7 @@ func TestChooserChange(t *testing.T) {
 		index = ch.CurrentIndex
 		item = ch.CurrentItem
 	})
-	b.AssertRender(t, "chooser/change", func() {
+	AssertRender(t, b, "chooser/change", func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		ch.selectItemEvent(1)

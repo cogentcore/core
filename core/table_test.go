@@ -34,13 +34,13 @@ func (l *language) FieldWidget(field string) Value {
 func TestTable(t *testing.T) {
 	b := NewBody()
 	NewTable(b).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
-	b.AssertRender(t, "table/basic")
+	AssertRender(t, b, "table/basic")
 }
 
 func TestTableReadOnly(t *testing.T) {
 	b := NewBody()
 	NewTable(b).SetSlice(&[]language{{"Go", 10}, {"Python", 5}}).SetReadOnly(true)
-	b.AssertRender(t, "table/read-only")
+	AssertRender(t, b, "table/read-only")
 }
 
 // TestTableReadOnlyFocus tests that a read-only table takes the focus when
@@ -51,7 +51,7 @@ func TestTableReadOnlyFocus(t *testing.T) {
 	tf := NewTextField(b)
 	tb := NewTable(b).SetSlice(&[]language{{"Go", 10}, {"Python", 5}, {"C", 3}})
 	tb.SetReadOnly(true)
-	b.AssertRender(t, "table/read-only-focus", func() {
+	AssertRender(t, b, "table/read-only-focus", func() {
 		b.AsyncLock()
 		tf.SetFocus()
 		assert.True(t, tb.CanFocus())
@@ -87,7 +87,7 @@ func TestTableColumnWidths(t *testing.T) {
 	changes := 0
 	tb.OnChange(func(e events.Event) { changes++ })
 	imagex.UpdateTestImagesFor(t) // the image is not compared
-	b.AssertRender(t, "table/column-widths", func() {
+	AssertRender(t, b, "table/column-widths", func() {
 		src := b.Scene.RenderWindow().SystemWindow.Events()
 		dp := func(dots float32) float32 { return dots / tb.Styles.UnitContext.Dots(units.UnitDp) }
 		b.AsyncLock()
@@ -136,7 +136,7 @@ func TestTableContextMenuSelect(t *testing.T) {
 	tb := NewTable(b).SetSlice(&[]language{{"Go", 10}, {"Python", 5}, {"C", 3}})
 	tb.SetReadOnly(true)
 	tb.ReadOnlyMultiSelect = true
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		tb.SelectIndexEvent(0, events.SelectOne)
@@ -193,7 +193,7 @@ func TestTableFocusShrink(t *testing.T) {
 		return idx
 	}
 	last := 0
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		last = tb.StartIndex + tb.VisibleRows - 2 // the last fully visible one
@@ -241,7 +241,7 @@ func TestTableRowButtonBackground(t *testing.T) {
 	b := NewBody()
 	tb := NewTable(b).SetSlice(&items)
 	tb.SetRowButton(icons.Edit, "Edit", func(item any) {})
-	b.RenderImage(func() {
+	RenderImage(b, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		tb.SelectIndex(0)
@@ -275,7 +275,7 @@ func TestTableEmptyHeader(t *testing.T) {
 	headWidth := func(fli int) float32 {
 		return AsWidget(tb.header.Child(2 * fli)).Geom.Size.Actual.Total.X
 	}
-	b.AssertRender(t, "table/empty-header", func() {
+	AssertRender(t, b, "table/empty-header", func() {
 		b.AsyncLock() // (it is rendered meanwhile)
 		defer b.AsyncUnlock()
 		for fli := range 2 {
