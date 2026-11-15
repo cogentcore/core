@@ -20,18 +20,18 @@ func TestToString(t *testing.T) {
 		want string
 	}{
 		{"s", "s"},
-		{ptr("s"), "s"},
+		{new("s"), "s"},
 		{[]byte("b"), "b"},
-		{ptr([]byte("b")), "b"},
+		{new([]byte("b")), "b"},
 		{time.Duration(0), "0s"}, // a Stringer
 		{int(3), "3"}, {int8(-3), "-3"}, {int16(3), "3"}, {int32(3), "3"}, {int64(3), "3"},
 		{uint(3), "3"}, {uint8('A'), "A"}, {uint16(3), "3"}, {uint32(3), "3"}, {uint64(3), "3"}, {uintptr(3), "0x3"},
-		{ptr(int(3)), "3"}, {ptr(int8(3)), "3"}, {ptr(int16(3)), "3"}, {ptr(int32(3)), "3"}, {ptr(int64(3)), "3"},
-		{ptr(uint(3)), "3"}, {ptr(uint8('A')), "A"}, {ptr(uint16(3)), "3"}, {ptr(uint32(3)), "3"}, {ptr(uint64(3)), "3"}, {ptr(uintptr(3)), "0x3"},
-		{true, "true"}, {ptr(false), "false"},
-		{1.5, "1.5"}, {float32(1.5), "1.5"}, {ptr(1.5), "1.5"}, {ptr(float32(1.5)), "1.5"},
+		{new(int(3)), "3"}, {new(int8(3)), "3"}, {new(int16(3)), "3"}, {new(int32(3)), "3"}, {new(int64(3)), "3"},
+		{new(uint(3)), "3"}, {new(uint8('A')), "A"}, {new(uint16(3)), "3"}, {new(uint32(3)), "3"}, {new(uint64(3)), "3"}, {new(uintptr(3)), "0x3"},
+		{true, "true"}, {new(false), "false"},
+		{1.5, "1.5"}, {float32(1.5), "1.5"}, {new(1.5), "1.5"}, {new(float32(1.5)), "1.5"},
 		{complex(1, 2), "1,2"}, {complex64(complex(1, 2)), "1,2"},
-		{ptr(complex(1, 2)), "1,2"}, {ptr(complex64(complex(1, 2))), "1,2"},
+		{new(complex(1, 2)), "1,2"}, {new(complex64(complex(1, 2))), "1,2"},
 		{myInt(4), "4"}, {myString("m"), "m"},
 		{[]int{1, 2}, "[1 2]"},
 		{(*int)(nil), "nil"},
@@ -48,13 +48,13 @@ func TestToStringPrec(t *testing.T) {
 	}{
 		{1.0 / 3, "0.333"},
 		{float32(1.0 / 3), "0.333"},
-		{ptr(1.0 / 3), "0.333"},
-		{ptr(float32(1.0 / 3)), "0.333"},
+		{new(1.0 / 3), "0.333"},
+		{new(float32(1.0 / 3)), "0.333"},
 		{complex(1.0/3, 2), "0.333,2"},
 		{complex64(complex(1.0/3, 2)), "0.333,2"},
-		{ptr(complex(1.0/3, 2)), "0.333,2"},
-		{ptr(complex64(complex(1.0/3, 2))), "0.333,2"},
-		{"s", "s"}, {ptr("s"), "s"}, {[]byte("b"), "b"}, {ptr([]byte("b")), "b"},
+		{new(complex(1.0/3, 2)), "0.333,2"},
+		{new(complex64(complex(1.0/3, 2))), "0.333,2"},
+		{"s", "s"}, {new("s"), "s"}, {[]byte("b"), "b"}, {new([]byte("b")), "b"},
 		{time.Second, "1s"},
 		{7, "7"},
 		{(*complex64)(nil), "nil"},
@@ -88,20 +88,20 @@ func TestKinds(t *testing.T) {
 }
 
 func TestTypeNames(t *testing.T) {
-	pt := reflect.TypeOf(&image.Point{})
+	pt := reflect.TypeFor[*image.Point]()
 	assert.Equal(t, "image.Point", LongTypeName(pt))
 	assert.Equal(t, "image.Point", ShortTypeName(pt))
-	tt := reflect.TypeOf(time.Duration(0))
+	tt := reflect.TypeFor[time.Duration]()
 	assert.Equal(t, "time.Duration", LongTypeName(tt))
-	vt := reflect.TypeOf(myInt(0))
+	vt := reflect.TypeFor[myInt]()
 	assert.Equal(t, "cogentcore.org/core/base/reflectx.myInt", LongTypeName(vt))
 	assert.Equal(t, "reflectx.myInt", ShortTypeName(vt))
-	assert.Equal(t, "int", LongTypeName(reflect.TypeOf(0)))
-	assert.Equal(t, "int", ShortTypeName(reflect.TypeOf(0)))
-	assert.Equal(t, "[]int", LongTypeName(reflect.TypeOf([]int{})))
-	assert.Equal(t, "[]int", ShortTypeName(reflect.TypeOf([]int{})))
+	assert.Equal(t, "int", LongTypeName(reflect.TypeFor[int]()))
+	assert.Equal(t, "int", ShortTypeName(reflect.TypeFor[int]()))
+	assert.Equal(t, "[]int", LongTypeName(reflect.TypeFor[[]int]()))
+	assert.Equal(t, "[]int", ShortTypeName(reflect.TypeFor[[]int]()))
 
-	cl := CloneToType(reflect.TypeOf(0), "5")
+	cl := CloneToType(reflect.TypeFor[int](), "5")
 	assert.Equal(t, 5, cl.Elem().Interface())
 }
 
@@ -376,7 +376,7 @@ func TestStructTags(t *testing.T) {
 	assert.Nil(t, StructTags(""))
 	tags := StructTags(`json:"a" default:"5" x:`)
 	assert.Equal(t, map[string]string{"json": "a", "default": "5"}, tags)
-	f, _ := reflect.TypeOf(fieldsOuter{}).FieldByName("C")
+	f, _ := reflect.TypeFor[fieldsOuter]().FieldByName("C")
 	assert.Equal(t, "1.5", StructTags(f.Tag)["default"])
 }
 

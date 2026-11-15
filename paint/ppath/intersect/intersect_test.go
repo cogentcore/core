@@ -45,88 +45,88 @@ func TestPathCrossingsWindings(t *testing.T) {
 		boundary  bool
 	}{
 		// within bbox of segment
-		{"L10 10", math32.Vector2{2.0, 5.0}, 1, 1, false},
-		{"L-10 10", math32.Vector2{-2.0, 5.0}, 0, 0, false},
-		{"Q10 5 0 10", math32.Vector2{2.0, 5.0}, 1, 1, false},
-		{"Q-10 5 0 10", math32.Vector2{-2.0, 5.0}, 0, 0, false},
-		{"C10 0 10 10 0 10", math32.Vector2{2.0, 5.0}, 1, 1, false},
-		{"C-10 0 -10 10 0 10", math32.Vector2{-2.0, 5.0}, 0, 0, false},
-		{"A5 5 0 0 1 0 10", math32.Vector2{2.0, 5.0}, 1, 1, false},
-		{"A5 5 0 0 0 0 10", math32.Vector2{-2.0, 5.0}, 0, 0, false},
-		{"L10 0L10 10L0 10z", math32.Vector2{5.0, 5.0}, 1, 1, false},  // mid
-		{"L0 10L10 10L10 0z", math32.Vector2{5.0, 5.0}, 1, -1, false}, // mid
+		{"L10 10", math32.Vec2(2.0, 5.0), 1, 1, false},
+		{"L-10 10", math32.Vec2(-2.0, 5.0), 0, 0, false},
+		{"Q10 5 0 10", math32.Vec2(2.0, 5.0), 1, 1, false},
+		{"Q-10 5 0 10", math32.Vec2(-2.0, 5.0), 0, 0, false},
+		{"C10 0 10 10 0 10", math32.Vec2(2.0, 5.0), 1, 1, false},
+		{"C-10 0 -10 10 0 10", math32.Vec2(-2.0, 5.0), 0, 0, false},
+		{"A5 5 0 0 1 0 10", math32.Vec2(2.0, 5.0), 1, 1, false},
+		{"A5 5 0 0 0 0 10", math32.Vec2(-2.0, 5.0), 0, 0, false},
+		{"L10 0L10 10L0 10z", math32.Vec2(5.0, 5.0), 1, 1, false},  // mid
+		{"L0 10L10 10L10 0z", math32.Vec2(5.0, 5.0), 1, -1, false}, // mid
 
 		// on boundary
-		{"L10 0L10 10L0 10z", math32.Vector2{0.0, 5.0}, 1, 0, true},   // left
-		{"L10 0L10 10L0 10z", math32.Vector2{10.0, 5.0}, 0, 0, true},  // right
-		{"L10 0L10 10L0 10z", math32.Vector2{0.0, 0.0}, 0, 0, true},   // bottom-left
-		{"L10 0L10 10L0 10z", math32.Vector2{5.0, 0.0}, 0, 0, true},   // bottom
-		{"L10 0L10 10L0 10z", math32.Vector2{10.0, 0.0}, 0, 0, true},  // bottom-right
-		{"L10 0L10 10L0 10z", math32.Vector2{0.0, 10.0}, 0, 0, true},  // top-left
-		{"L10 0L10 10L0 10z", math32.Vector2{5.0, 10.0}, 0, 0, true},  // top
-		{"L10 0L10 10L0 10z", math32.Vector2{10.0, 10.0}, 0, 0, true}, // top-right
-		{"L0 10L10 10L10 0z", math32.Vector2{0.0, 5.0}, 1, 0, true},   // left
-		{"L0 10L10 10L10 0z", math32.Vector2{10.0, 5.0}, 0, 0, true},  // right
-		{"L0 10L10 10L10 0z", math32.Vector2{0.0, 0.0}, 0, 0, true},   // bottom-left
-		{"L0 10L10 10L10 0z", math32.Vector2{5.0, 0.0}, 0, 0, true},   // bottom
-		{"L0 10L10 10L10 0z", math32.Vector2{10.0, 0.0}, 0, 0, true},  // bottom-right
-		{"L0 10L10 10L10 0z", math32.Vector2{0.0, 10.0}, 0, 0, true},  // top-left
-		{"L0 10L10 10L10 0z", math32.Vector2{5.0, 10.0}, 0, 0, true},  // top
-		{"L0 10L10 10L10 0z", math32.Vector2{10.0, 10.0}, 0, 0, true}, // top-right
+		{"L10 0L10 10L0 10z", math32.Vec2(0.0, 5.0), 1, 0, true},   // left
+		{"L10 0L10 10L0 10z", math32.Vec2(10.0, 5.0), 0, 0, true},  // right
+		{"L10 0L10 10L0 10z", math32.Vec2(0.0, 0.0), 0, 0, true},   // bottom-left
+		{"L10 0L10 10L0 10z", math32.Vec2(5.0, 0.0), 0, 0, true},   // bottom
+		{"L10 0L10 10L0 10z", math32.Vec2(10.0, 0.0), 0, 0, true},  // bottom-right
+		{"L10 0L10 10L0 10z", math32.Vec2(0.0, 10.0), 0, 0, true},  // top-left
+		{"L10 0L10 10L0 10z", math32.Vec2(5.0, 10.0), 0, 0, true},  // top
+		{"L10 0L10 10L0 10z", math32.Vec2(10.0, 10.0), 0, 0, true}, // top-right
+		{"L0 10L10 10L10 0z", math32.Vec2(0.0, 5.0), 1, 0, true},   // left
+		{"L0 10L10 10L10 0z", math32.Vec2(10.0, 5.0), 0, 0, true},  // right
+		{"L0 10L10 10L10 0z", math32.Vec2(0.0, 0.0), 0, 0, true},   // bottom-left
+		{"L0 10L10 10L10 0z", math32.Vec2(5.0, 0.0), 0, 0, true},   // bottom
+		{"L0 10L10 10L10 0z", math32.Vec2(10.0, 0.0), 0, 0, true},  // bottom-right
+		{"L0 10L10 10L10 0z", math32.Vec2(0.0, 10.0), 0, 0, true},  // top-left
+		{"L0 10L10 10L10 0z", math32.Vec2(5.0, 10.0), 0, 0, true},  // top
+		{"L0 10L10 10L10 0z", math32.Vec2(10.0, 10.0), 0, 0, true}, // top-right
 
 		// outside
-		{"L10 0L10 10L0 10z", math32.Vector2{-1.0, 0.0}, 0, 0, false},    // bottom-left
-		{"L10 0L10 10L0 10z", math32.Vector2{-1.0, 5.0}, 2, 0, false},    // left
-		{"L10 0L10 10L0 10z", math32.Vector2{-1.0, 10.0}, 0, 0, false},   // top-left
-		{"L10 0L10 10L0 10z", math32.Vector2{11.0, 0.0}, 0, 0, false},    // bottom-right
-		{"L10 0L10 10L0 10z", math32.Vector2{11.0, 5.0}, 0, 0, false},    // right
-		{"L10 0L10 10L0 10z", math32.Vector2{11.0, 10.0}, 0, 0, false},   // top-right
-		{"L0 10L10 10L10 0z", math32.Vector2{-1.0, 0.0}, 0, 0, false},    // bottom-left
-		{"L0 10L10 10L10 0z", math32.Vector2{-1.0, 5.0}, 2, 0, false},    // left
-		{"L0 10L10 10L10 0z", math32.Vector2{-1.0, 10.0}, 0, 0, false},   // top-left
-		{"L0 10L10 10L10 0z", math32.Vector2{11.0, 0.0}, 0, 0, false},    // bottom-right
-		{"L0 10L10 10L10 0z", math32.Vector2{11.0, 5.0}, 0, 0, false},    // right
-		{"L0 10L10 10L10 0z", math32.Vector2{11.0, 10.0}, 0, 0, false},   // top-right
-		{"L10 0L10 10L0 10L1 5z", math32.Vector2{0.0, 5.0}, 2, 0, false}, // left over endpoints
+		{"L10 0L10 10L0 10z", math32.Vec2(-1.0, 0.0), 0, 0, false},    // bottom-left
+		{"L10 0L10 10L0 10z", math32.Vec2(-1.0, 5.0), 2, 0, false},    // left
+		{"L10 0L10 10L0 10z", math32.Vec2(-1.0, 10.0), 0, 0, false},   // top-left
+		{"L10 0L10 10L0 10z", math32.Vec2(11.0, 0.0), 0, 0, false},    // bottom-right
+		{"L10 0L10 10L0 10z", math32.Vec2(11.0, 5.0), 0, 0, false},    // right
+		{"L10 0L10 10L0 10z", math32.Vec2(11.0, 10.0), 0, 0, false},   // top-right
+		{"L0 10L10 10L10 0z", math32.Vec2(-1.0, 0.0), 0, 0, false},    // bottom-left
+		{"L0 10L10 10L10 0z", math32.Vec2(-1.0, 5.0), 2, 0, false},    // left
+		{"L0 10L10 10L10 0z", math32.Vec2(-1.0, 10.0), 0, 0, false},   // top-left
+		{"L0 10L10 10L10 0z", math32.Vec2(11.0, 0.0), 0, 0, false},    // bottom-right
+		{"L0 10L10 10L10 0z", math32.Vec2(11.0, 5.0), 0, 0, false},    // right
+		{"L0 10L10 10L10 0z", math32.Vec2(11.0, 10.0), 0, 0, false},   // top-right
+		{"L10 0L10 10L0 10L1 5z", math32.Vec2(0.0, 5.0), 2, 0, false}, // left over endpoints
 
 		// subpath
-		{"L10 0L10 10L0 10zM2 2L8 2L8 8L2 8z", math32.Vector2{1.0, 1.0}, 1, 1, false},
-		{"L10 0L10 10L0 10zM2 2L8 2L8 8L2 8z", math32.Vector2{3.0, 3.0}, 2, 2, false},
-		{"L10 0L10 10L0 10zM2 2L2 8L8 8L8 2z", math32.Vector2{3.0, 3.0}, 2, 0, false},
-		{"L10 0L10 10L0 10zM2 2L2 8L8 8L8 2z", math32.Vector2{0.0, 0.0}, 0, 0, true},
-		{"L10 0L10 10L0 10zM2 2L2 8L8 8L8 2z", math32.Vector2{2.0, 2.0}, 1, 1, true},
-		{"L10 0L10 10L0 10zM2 2L8 2L8 8L2 8z", math32.Vector2{2.0, 2.0}, 1, 1, true},
-		{"L10 0L10 10L0 10zM5 5L15 5L15 15L5 15z", math32.Vector2{7.5, 5.0}, 1, 1, true},
+		{"L10 0L10 10L0 10zM2 2L8 2L8 8L2 8z", math32.Vec2(1.0, 1.0), 1, 1, false},
+		{"L10 0L10 10L0 10zM2 2L8 2L8 8L2 8z", math32.Vec2(3.0, 3.0), 2, 2, false},
+		{"L10 0L10 10L0 10zM2 2L2 8L8 8L8 2z", math32.Vec2(3.0, 3.0), 2, 0, false},
+		{"L10 0L10 10L0 10zM2 2L2 8L8 8L8 2z", math32.Vec2(0.0, 0.0), 0, 0, true},
+		{"L10 0L10 10L0 10zM2 2L2 8L8 8L8 2z", math32.Vec2(2.0, 2.0), 1, 1, true},
+		{"L10 0L10 10L0 10zM2 2L8 2L8 8L2 8z", math32.Vec2(2.0, 2.0), 1, 1, true},
+		{"L10 0L10 10L0 10zM5 5L15 5L15 15L5 15z", math32.Vec2(7.5, 5.0), 1, 1, true},
 
 		// on segment end
-		{"L5 -5L10 0L5 5z", math32.Vector2{5.0, 0.0}, 1, 1, false},                      // mid
-		{"L5 -5L10 0L5 5z", math32.Vector2{0.0, 0.0}, 1, 0, true},                       // left
-		{"L5 -5L10 0L5 5z", math32.Vector2{10.0, 0.0}, 0, 0, true},                      // right
-		{"L5 -5L10 0L5 5z", math32.Vector2{5.0, 5.0}, 0, 0, true},                       // top
-		{"L5 -5L10 0L5 5z", math32.Vector2{5.0, -5.0}, 0, 0, true},                      // bottom
-		{"L5 5L10 0L5 -5z", math32.Vector2{5.0, 0.0}, 1, -1, false},                     // mid
-		{"L5 5L10 0L5 -5z", math32.Vector2{0.0, 0.0}, 1, 0, true},                       // left
-		{"L5 5L10 0L5 -5z", math32.Vector2{10.0, 0.0}, 0, 0, true},                      // right
-		{"L5 5L10 0L5 -5z", math32.Vector2{5.0, 5.0}, 0, 0, true},                       // top
-		{"L5 5L10 0L5 -5z", math32.Vector2{5.0, -5.0}, 0, 0, true},                      // bottom
-		{"M10 0A5 5 0 0 0 0 0A5 5 0 0 0 10 0z", math32.Vector2{5.0, 0.0}, 1, -1, false}, // mid
+		{"L5 -5L10 0L5 5z", math32.Vec2(5.0, 0.0), 1, 1, false},                      // mid
+		{"L5 -5L10 0L5 5z", math32.Vec2(0.0, 0.0), 1, 0, true},                       // left
+		{"L5 -5L10 0L5 5z", math32.Vec2(10.0, 0.0), 0, 0, true},                      // right
+		{"L5 -5L10 0L5 5z", math32.Vec2(5.0, 5.0), 0, 0, true},                       // top
+		{"L5 -5L10 0L5 5z", math32.Vec2(5.0, -5.0), 0, 0, true},                      // bottom
+		{"L5 5L10 0L5 -5z", math32.Vec2(5.0, 0.0), 1, -1, false},                     // mid
+		{"L5 5L10 0L5 -5z", math32.Vec2(0.0, 0.0), 1, 0, true},                       // left
+		{"L5 5L10 0L5 -5z", math32.Vec2(10.0, 0.0), 0, 0, true},                      // right
+		{"L5 5L10 0L5 -5z", math32.Vec2(5.0, 5.0), 0, 0, true},                       // top
+		{"L5 5L10 0L5 -5z", math32.Vec2(5.0, -5.0), 0, 0, true},                      // bottom
+		{"M10 0A5 5 0 0 0 0 0A5 5 0 0 0 10 0z", math32.Vec2(5.0, 0.0), 1, -1, false}, // mid
 		// (the crossings at the joint of the arcs on the left depend on the platform)
 		// {"M10 0A5 5 0 0 0 0 0A5 5 0 0 0 10 0z", math32.Vector2{0.0, 0.0}, 1, 0, true},  // left // (gives different results on amd64 and arm64)
-		{"M10 0A5 5 0 0 0 0 0A5 5 0 0 0 10 0z", math32.Vector2{10.0, 0.0}, 0, 0, true}, // right
+		{"M10 0A5 5 0 0 0 0 0A5 5 0 0 0 10 0z", math32.Vec2(10.0, 0.0), 0, 0, true}, // right
 		// {"M10 0A5 5 0 0 1 0 0A5 5 0 0 1 10 0z", math32.Vector2{5.0, 0.0}, 1, 0, false},  // mid // (fails: the ray through the joint of the arcs counts 2 crossings)
 		// {"M10 0A5 5 0 0 1 0 0A5 5 0 0 1 10 0z", math32.Vector2{0.0, 0.0}, 2, 0, true},  // left // (gives different results on amd64 and arm64)
-		{"M10 0A5 5 0 0 1 0 0A5 5 0 0 1 10 0z", math32.Vector2{10.0, 0.0}, 0, 0, true}, // right
+		{"M10 0A5 5 0 0 1 0 0A5 5 0 0 1 10 0z", math32.Vec2(10.0, 0.0), 0, 0, true}, // right
 
 		// cross twice
-		{"L10 10L10 -10L-10 10L-10 -10z", math32.Vector2{0.0, 0.0}, 1, 0, true},
-		{"L10 10L10 -10L-10 10L-10 -10z", math32.Vector2{-1.0, 0.0}, 3, 1, false},
-		{"L10 10L10 -10L-10 10L20 40L20 -40L-10 -10z", math32.Vector2{0.0, 0.0}, 2, 0, true},
-		{"L10 10L10 -10L-10 10L20 40L20 -40L-10 -10z", math32.Vector2{1.0, 0.0}, 2, -2, false},
-		{"L10 10L10 -10L-10 10L20 40L20 -40L-10 -10z", math32.Vector2{-1.0, 0.0}, 4, 0, false},
+		{"L10 10L10 -10L-10 10L-10 -10z", math32.Vec2(0.0, 0.0), 1, 0, true},
+		{"L10 10L10 -10L-10 10L-10 -10z", math32.Vec2(-1.0, 0.0), 3, 1, false},
+		{"L10 10L10 -10L-10 10L20 40L20 -40L-10 -10z", math32.Vec2(0.0, 0.0), 2, 0, true},
+		{"L10 10L10 -10L-10 10L20 40L20 -40L-10 -10z", math32.Vec2(1.0, 0.0), 2, -2, false},
+		{"L10 10L10 -10L-10 10L20 40L20 -40L-10 -10z", math32.Vec2(-1.0, 0.0), 4, 0, false},
 
 		// bugs
-		{"M0 35.43000000000029L0 385.82000000000016L11.819999999999709 397.6300000000001L185.03999999999996 397.6300000000001L188.97999999999956 393.7000000000003L196.85000000000036 385.8299999999999L196.85000000000036 19.68000000000029", math32.Vector2{89.4930000000003, 19.68000000000019}, 0, 0, false}, // #346
-		{"M0 35.43000000000029L0 385.82000000000016L11.819999999999709 397.6300000000001L185.03999999999996 397.6300000000001L188.97999999999956 393.7000000000003L196.85000000000036 385.8299999999999L196.85000000000036 19.68000000000029", math32.Vector2{89.4930000000003, 20}, 1, -1, false},               // #346
+		{"M0 35.43000000000029L0 385.82000000000016L11.819999999999709 397.6300000000001L185.03999999999996 397.6300000000001L188.97999999999956 393.7000000000003L196.85000000000036 385.8299999999999L196.85000000000036 19.68000000000029", math32.Vec2(89.4930000000003, 19.68000000000019), 0, 0, false}, // #346
+		{"M0 35.43000000000029L0 385.82000000000016L11.819999999999709 397.6300000000001L185.03999999999996 397.6300000000001L188.97999999999956 393.7000000000003L196.85000000000036 385.8299999999999L196.85000000000036 19.68000000000029", math32.Vec2(89.4930000000003, 20), 1, -1, false},               // #346
 	}
 	for _, tt := range tts {
 		t.Run(fmt.Sprint(tt.p, " at ", tt.pos), func(t *testing.T) {

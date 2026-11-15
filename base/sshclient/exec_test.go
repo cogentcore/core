@@ -24,7 +24,7 @@ import (
 // done, after [exec.InterruptWait] if the interrupt does not end it.
 func TestRunInterrupt(t *testing.T) {
 	cl, _ := testClient(t)
-	sio := &exec.StdIOState{StdIO: exec.StdIO{Out: io.Discard, Err: io.Discard}}
+	sio := &exec.StdIOState{Out: io.Discard, Err: io.Discard}
 	defer func(w time.Duration) { exec.InterruptWait = w }(exec.InterruptWait)
 	exec.InterruptWait = 300 * time.Millisecond
 
@@ -55,7 +55,7 @@ func TestRunTerminalInput(t *testing.T) {
 		result <- strings.ReplaceAll(string(buf[:n]), "\r", "")
 	}
 	p, err := pty.Run(func(in, out *os.File) error {
-		sio := &exec.StdIOState{StdIO: exec.StdIO{In: in, Out: out, Err: out}}
+		sio := &exec.StdIOState{In: in, Out: out, Err: out}
 		if err := cl.Run(sio, "head", "-1"); err != nil {
 			return err
 		}
@@ -112,7 +112,7 @@ func TestShell(t *testing.T) {
 	shell := func(input ...string) string {
 		t.Helper()
 		p, err := pty.Run(func(in, out *os.File) error {
-			return cl.Shell(&exec.StdIOState{StdIO: exec.StdIO{In: in, Out: out, Err: out}})
+			return cl.Shell(&exec.StdIOState{In: in, Out: out, Err: out})
 		}, 80, 24)
 		require.NoError(t, err)
 		defer p.Close()
@@ -140,7 +140,7 @@ func TestShell(t *testing.T) {
 	out := shell("pwd\r", "exit 3\r")
 	assert.Contains(t, out, s.Root+"\r\n")
 
-	_, err := cl.Output(&exec.StdIOState{StdIO: exec.StdIO{Out: io.Discard, Err: io.Discard}}, "cd", "sub")
+	_, err := cl.Output(&exec.StdIOState{Out: io.Discard, Err: io.Discard}, "cd", "sub")
 	require.NoError(t, err)
 	out = shell("pwd\r", "\x04") // Control+D
 	assert.Contains(t, out, s.Root+"/sub\r\n")

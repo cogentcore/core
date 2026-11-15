@@ -32,8 +32,8 @@ func (dt *Date) Year() string {
 	if str == "" {
 		return "undated"
 	}
-	fs := strings.Fields(str)
-	for _, s := range fs {
+	fs := strings.FieldsSeq(str)
+	for s := range fs {
 		if len(s) == 4 {
 			return s
 		}

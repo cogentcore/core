@@ -18,7 +18,7 @@ import (
 	"github.com/aymerick/douceur/css"
 )
 
-// FontDecoder, if set, decodes the data of web fonts in formats that the
+// FontDecoder is, if set, a function that decodes the data of web fonts in formats that the
 // text shapers do not read (as WOFF2) into TrueType or OpenType data, for
 // [Context.WebFonts]. Fonts that it cannot decode (with an error) are not
 // used.
@@ -148,10 +148,10 @@ func fontSource(s string) (url, format string) {
 	}
 	url = strings.Trim(strings.TrimSpace(s[4:end]), `"'`)
 	rest := strings.ToLower(s[end+1:])
-	if i := strings.Index(rest, "format("); i >= 0 {
-		f := rest[i+7:]
-		if j := strings.Index(f, ")"); j >= 0 {
-			format = strings.Trim(strings.TrimSpace(f[:j]), `"'`)
+	if _, after, ok := strings.Cut(rest, "format("); ok {
+		f := after
+		if before, _, ok := strings.Cut(f, ")"); ok {
+			format = strings.Trim(strings.TrimSpace(before), `"'`)
 		}
 	}
 	return url, format
@@ -160,7 +160,7 @@ func fontSource(s string) (url, format string) {
 // unicodeRangeHas returns whether the given unicode-range includes the
 // given rune.
 func unicodeRangeHas(urange string, r rune) bool {
-	for _, part := range strings.Split(urange, ",") {
+	for part := range strings.SplitSeq(urange, ",") {
 		part = strings.ToUpper(strings.TrimSpace(part))
 		part = strings.TrimPrefix(part, "U+")
 		lo, hi := part, part
@@ -181,7 +181,7 @@ func unicodeRangeHas(urange string, r rune) bool {
 // webFontFamily returns the first of the families of the given value of
 // font-family that is a web font that has been loaded, or "".
 func webFontFamily(v string) string {
-	for _, f := range strings.Split(v, ",") {
+	for f := range strings.SplitSeq(v, ",") {
 		f = strings.Trim(strings.TrimSpace(f), `"'`)
 		if f != "" && fonts.HasWebFont(f) {
 			return f

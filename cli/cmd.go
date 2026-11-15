@@ -98,7 +98,7 @@ func cmdFromCmdOrFunc[T any, C CmdOrFunc[T]](cmd C) (*Cmd[T], error) {
 func CmdsFromCmdOrFuncs[T any, C CmdOrFunc[T]](cmds []C) ([]*Cmd[T], error) {
 	res := make([]*Cmd[T], len(cmds))
 	for i, cmd := range cmds {
-		cmd, err := cmdFromCmdOrFunc[T, C](cmd)
+		cmd, err := cmdFromCmdOrFunc[T](cmd)
 		if err != nil {
 			return nil, err
 		}

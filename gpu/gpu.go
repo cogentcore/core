@@ -136,7 +136,7 @@ func NewComputeGPU() *GPU {
 }
 
 // init configures the GPU
-func (gp *GPU) init(sf *wgpu.Surface) error {
+func (gp *GPU) init(_ *wgpu.Surface) error {
 	inst := Instance()
 	if inst == nil {
 		return errors.New("WebGPU is not supported on this machine: could not create an instance")
@@ -186,10 +186,11 @@ func (gp *GPU) init(sf *wgpu.Surface) error {
 	if Debug || DebugAdapter {
 		fmt.Println("GPU device vendor:", dv)
 	}
-	if dv == "nvidia" {
+	switch dv {
+	case "nvidia":
 		// all NVIDIA are either 1 << 31 or -1 of that.
 		gp.MaxComputeWorkGroupCount1D = (1 << 31) - 1
-	} else if dv == "apple" {
+	case "apple":
 		gp.MaxComputeWorkGroupCount1D = (1 << 31) - 1
 	}
 	// note: if known to be higher for any specific case, please file an issue or PR

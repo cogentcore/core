@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package num provides generic constraints of numeric types, and generic
+// functions of numbers.
 package num
 
 // Signed is a constraint that permits any signed integer type.

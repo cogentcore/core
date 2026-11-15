@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package phong renders 3D meshes with Blinn-Phong lighting on the GPU, with
+// lights, materials, textures, and a camera.
 package phong
 
 //go:generate core generate

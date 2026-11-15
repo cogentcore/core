@@ -24,6 +24,8 @@ func New[T tree.NodeValue](ctx *Context) *T {
 	add(map[string]map[string]reflect.Value{
 		"cogentcore.org/core/htmlcore": {
 			"AcceptLanguage":      reflect.ValueOf(&p_cogentcore_org_core_htmlcore.AcceptLanguage),
+			"AudioDefaultHeight":  reflect.ValueOf(p_cogentcore_org_core_htmlcore.AudioDefaultHeight),
+			"AudioDefaultWidth":   reflect.ValueOf(p_cogentcore_org_core_htmlcore.AudioDefaultWidth),
 			"Context":             reflect.ValueOf((*p_cogentcore_org_core_htmlcore.Context)(nil)),
 			"ExtractText":         reflect.ValueOf(p_cogentcore_org_core_htmlcore.ExtractText),
 			"ExtractTextExclude":  reflect.ValueOf(p_cogentcore_org_core_htmlcore.ExtractTextExclude),
@@ -56,6 +58,7 @@ func New[T tree.NodeValue](ctx *Context) *T {
 			"ReadMDString":        reflect.ValueOf(p_cogentcore_org_core_htmlcore.ReadMDString),
 			"ScreenMediaWidth":    reflect.ValueOf(p_cogentcore_org_core_htmlcore.ScreenMediaWidth),
 			"SetRequestHeaders":   reflect.ValueOf(p_cogentcore_org_core_htmlcore.SetRequestHeaders),
+			"StyleSheetURLs":      reflect.ValueOf(p_cogentcore_org_core_htmlcore.StyleSheetURLs),
 			"TagTexts":            reflect.ValueOf(p_cogentcore_org_core_htmlcore.TagTexts),
 			"TextElement":         reflect.ValueOf(p_cogentcore_org_core_htmlcore.TextElement),
 			"TextTag":             reflect.ValueOf(p_cogentcore_org_core_htmlcore.TextTag),

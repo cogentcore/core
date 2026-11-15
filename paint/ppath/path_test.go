@@ -104,14 +104,14 @@ func TestPathJoin(t *testing.T) {
 func TestPathCoords(t *testing.T) {
 	coords := MustParseSVGPath("L5 10").Coords()
 	assert.Equal(t, len(coords), 2)
-	assert.Equal(t, coords[0], math32.Vector2{0.0, 0.0})
-	assert.Equal(t, coords[1], math32.Vector2{5.0, 10.0})
+	assert.Equal(t, coords[0], math32.Vec2(0.0, 0.0))
+	assert.Equal(t, coords[1], math32.Vec2(5.0, 10.0))
 
 	coords = MustParseSVGPath("L5 10C2.5 10 0 5 0 0z").Coords()
 	assert.Equal(t, len(coords), 3)
-	assert.Equal(t, coords[0], math32.Vector2{0.0, 0.0})
-	assert.Equal(t, coords[1], math32.Vector2{5.0, 10.0})
-	assert.Equal(t, coords[2], math32.Vector2{0.0, 0.0})
+	assert.Equal(t, coords[0], math32.Vec2(0.0, 0.0))
+	assert.Equal(t, coords[1], math32.Vec2(5.0, 10.0))
+	assert.Equal(t, coords[2], math32.Vec2(0.0, 0.0))
 }
 
 func TestPathCommands(t *testing.T) {

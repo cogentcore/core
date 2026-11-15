@@ -6,6 +6,7 @@ package highlighting
 
 import (
 	"html"
+	"slices"
 
 	"cogentcore.org/core/text/parse/lexer"
 )
@@ -57,8 +58,8 @@ func MarkupLineHTML(txt []rune, hitags, tags lexer.Line, escapeHTML bool) []byte
 		if cp >= sz {
 			break
 		}
-		for si := len(tstack) - 1; si >= 0; si-- {
-			ts := ttags[tstack[si]]
+		for si, t := range slices.Backward(tstack) {
+			ts := ttags[t]
 			if ts.End <= tr.Start {
 				ep := min(sz, ts.End)
 				if cp < ep {
@@ -88,8 +89,8 @@ func MarkupLineHTML(txt []rune, hitags, tags lexer.Line, escapeHTML bool) []byte
 				if len(tstack) == 0 {
 					tstack = append(tstack, i)
 				} else {
-					for si := len(tstack) - 1; si >= 0; si-- {
-						ts := ttags[tstack[si]]
+					for si, t := range slices.Backward(tstack) {
+						ts := ttags[t]
 						if tr.End <= ts.End {
 							ni := si // + 1 // new index in stack -- right *before* current
 							tstack = append(tstack, i)

@@ -56,8 +56,8 @@ func Identity2() Matrix2 {
 	}
 }
 
-func (m Matrix2) IsIdentity() bool {
-	return m.XX == 1 && m.YX == 0 && m.XY == 0 && m.YY == 1 && m.X0 == 0 && m.Y0 == 0
+func (a Matrix2) IsIdentity() bool {
+	return a.XX == 1 && a.YX == 0 && a.XY == 0 && a.YY == 1 && a.X0 == 0 && a.Y0 == 0
 }
 
 // Translate2D returns a Matrix2 2D matrix with given translations
@@ -152,7 +152,7 @@ func (a Matrix2) MulPoint(v Vector2) Vector2 {
 func (a Matrix2) MulFixedPoint(fp fixed.Point26_6) fixed.Point26_6 {
 	x := fixed.Int26_6((float32(fp.X)*a.XX + float32(fp.Y)*a.XY) + a.X0*64) // 64 per unit
 	y := fixed.Int26_6((float32(fp.X)*a.YX + float32(fp.Y)*a.YY) + a.Y0*64)
-	return fixed.Point26_6{x, y}
+	return fixed.Point26_6{X: x, Y: y}
 }
 
 func (a Matrix2) Translate(x, y float32) Matrix2 {
@@ -165,8 +165,8 @@ func (a Matrix2) Scale(x, y float32) Matrix2 {
 
 // ScaleAbout adds a scaling transformation about (x,y) in sx and sy.
 // When scale is negative it will flip those axes.
-func (m Matrix2) ScaleAbout(sx, sy, x, y float32) Matrix2 {
-	return m.Translate(x, y).Scale(sx, sy).Translate(-x, -y)
+func (a Matrix2) ScaleAbout(sx, sy, x, y float32) Matrix2 {
+	return a.Translate(x, y).Scale(sx, sy).Translate(-x, -y)
 }
 
 func (a Matrix2) Rotate(angle float32) Matrix2 {
@@ -175,8 +175,8 @@ func (a Matrix2) Rotate(angle float32) Matrix2 {
 
 // RotateAbout adds a rotation transformation about (x,y)
 // with rot in radians counter clockwise.
-func (m Matrix2) RotateAbout(rot, x, y float32) Matrix2 {
-	return m.Translate(x, y).Rotate(rot).Translate(-x, -y)
+func (a Matrix2) RotateAbout(rot, x, y float32) Matrix2 {
+	return a.Translate(x, y).Rotate(rot).Translate(-x, -y)
 }
 
 func (a Matrix2) Shear(x, y float32) Matrix2 {
@@ -193,7 +193,7 @@ func (a Matrix2) ExtractRot() float32 {
 	return Atan2(-a.XY, a.XX)
 }
 
-// ExtractXYScale extracts the X and Y scale factors after undoing any
+// ExtractScale extracts the X and Y scale factors after undoing any
 // rotation present -- i.e., in the original X, Y coordinates
 func (a Matrix2) ExtractScale() (scx, scy float32) {
 	_, _, _, scx, scy, _ = a.Decompose()
@@ -209,12 +209,12 @@ func (a Matrix2) Pos() (tx, ty float32) {
 // (applied in the reverse order) as (tx, ty, theta, sx, sy, phi) with rotation
 // counter clockwise. This corresponds to:
 // Identity.Translate(tx, ty).Rotate(phi).Scale(sx, sy).Rotate(theta).
-func (m Matrix2) Decompose() (tx, ty, phi, sx, sy, theta float32) {
+func (a Matrix2) Decompose() (tx, ty, phi, sx, sy, theta float32) {
 	// see https://math.stackexchange.com/questions/861674/decompose-a-2d-arbitrary-transform-into-only-scaling-and-rotation
-	E := (m.XX + m.YY) / 2.0
-	F := (m.XX - m.YY) / 2.0
-	G := (m.YX + m.XY) / 2.0
-	H := (m.YX - m.XY) / 2.0
+	E := (a.XX + a.YY) / 2.0
+	F := (a.XX - a.YY) / 2.0
+	G := (a.YX + a.XY) / 2.0
+	H := (a.YX - a.XY) / 2.0
 
 	Q, R := Sqrt(E*E+H*H), Sqrt(F*F+G*G)
 	sx, sy = Q+R, Q-R
@@ -227,8 +227,8 @@ func (m Matrix2) Decompose() (tx, ty, phi, sx, sy, theta float32) {
 		theta += phi
 		phi = 0
 	}
-	tx = m.X0
-	ty = m.Y0
+	tx = a.X0
+	ty = a.Y0
 	return
 }
 
@@ -277,12 +277,12 @@ func (a Matrix2) Inverse() Matrix2 {
 // Eigen returns the matrix eigenvalues and eigenvectors.
 // The first eigenvalue is related to the first eigenvector,
 // and so for the second pair. Eigenvectors are normalized.
-func (m Matrix2) Eigen() (float32, float32, Vector2, Vector2) {
-	if Abs(m.YX) < 1.0e-7 && Abs(m.XY) < 1.0e-7 {
-		return m.XX, m.YY, Vector2{1.0, 0.0}, Vector2{0.0, 1.0}
+func (a Matrix2) Eigen() (float32, float32, Vector2, Vector2) {
+	if Abs(a.YX) < 1.0e-7 && Abs(a.XY) < 1.0e-7 {
+		return a.XX, a.YY, Vector2{1.0, 0.0}, Vector2{0.0, 1.0}
 	}
 
-	lambda1, lambda2 := solveQuadraticFormula(1.0, -m.XX-m.YY, m.Det())
+	lambda1, lambda2 := solveQuadraticFormula(1.0, -a.XX-a.YY, a.Det())
 	if IsNaN(lambda1) && IsNaN(lambda2) {
 		// either m.XX or m.YY is NaN or the the affine matrix has no real eigenvalues
 		return lambda1, lambda2, Vector2{}, Vector2{}
@@ -292,12 +292,12 @@ func (m Matrix2) Eigen() (float32, float32, Vector2, Vector2) {
 
 	// see http://www.math.harvard.edu/archive/21b_fall_04/exhibits/2dmatrices/index.html
 	var v1, v2 Vector2
-	if m.YX != 0 {
-		v1 = Vector2{lambda1 - m.YY, m.YX}.Normal()
-		v2 = Vector2{lambda2 - m.YY, m.YX}.Normal()
-	} else if m.XY != 0 {
-		v1 = Vector2{m.XY, lambda1 - m.XX}.Normal()
-		v2 = Vector2{m.XY, lambda2 - m.XX}.Normal()
+	if a.YX != 0 {
+		v1 = Vector2{lambda1 - a.YY, a.YX}.Normal()
+		v2 = Vector2{lambda2 - a.YY, a.YX}.Normal()
+	} else if a.XY != 0 {
+		v1 = Vector2{a.XY, lambda1 - a.XX}.Normal()
+		v2 = Vector2{a.XY, lambda2 - a.XX}.Normal()
 	}
 	return lambda1, lambda2, v1, v2
 }
@@ -401,7 +401,7 @@ func ReadPoints(pstr string) []float32 {
 	var pts []float32
 	lr := ' '
 	for i, r := range pstr {
-		if !unicode.IsNumber(r) && r != '.' && !(r == '-' && lr == 'e') && r != 'e' {
+		if !unicode.IsNumber(r) && r != '.' && (r != '-' || lr != 'e') && r != 'e' {
 			if lastIndex != -1 {
 				s := pstr[lastIndex:i]
 				p, err := ParseFloat32(s)
@@ -461,8 +461,8 @@ func (a *Matrix2) SetString(str string) error {
 		eidx := strings.IndexByte(vals, ')')
 		if eidx > 0 {
 			nxt = strings.TrimSpace(vals[eidx+1:])
-			if strings.HasPrefix(nxt, ";") {
-				nxt = strings.TrimSpace(strings.TrimPrefix(nxt, ";"))
+			if after, ok := strings.CutPrefix(nxt, ";"); ok {
+				nxt = strings.TrimSpace(after)
 			}
 			vals = vals[:eidx]
 		}

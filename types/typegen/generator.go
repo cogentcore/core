@@ -97,15 +97,15 @@ func (g *Generator) GetInterfaces() error {
 		return nil
 	}
 	for _, nm := range g.Config.InterfaceConfigs.Keys {
-		li := strings.LastIndex(nm, ".")
-		if li < 0 {
+		before, after, ok0 := strings.CutLast(nm, ".")
+		if !ok0 {
 			return fmt.Errorf("invalid InterfaceConfigs key: %q is not a fully qualified type name", nm)
 		}
-		pkg := findPackage(g.Pkg, nm[:li], map[*packages.Package]bool{})
+		pkg := findPackage(g.Pkg, before, map[*packages.Package]bool{})
 		if pkg == nil || pkg.Types == nil {
 			continue
 		}
-		obj := pkg.Types.Scope().Lookup(nm[li+1:])
+		obj := pkg.Types.Scope().Lookup(after)
 		if obj == nil {
 			continue
 		}
@@ -211,16 +211,14 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 		}
 
 		typ := &Type{
-			Type: ctypes.Type{
-				Name:       FullName(g.Pkg, ts.Name.Name),
-				IDName:     strcase.ToKebab(ts.Name.Name),
-				Doc:        doc,
-				Directives: dirs,
-			},
-			LocalName: ts.Name.Name,
-			AST:       ts,
-			Pkg:       g.Pkg.Name,
-			Config:    cfg,
+			Name:       FullName(g.Pkg, ts.Name.Name),
+			IDName:     strcase.ToKebab(ts.Name.Name),
+			Doc:        doc,
+			Directives: dirs,
+			LocalName:  ts.Name.Name,
+			AST:        ts,
+			Pkg:        g.Pkg.Name,
+			Config:     cfg,
 		}
 		if st, ok := ts.Type.(*ast.StructType); ok && st.Fields != nil {
 			emblist := &ast.FieldList{}

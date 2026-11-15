@@ -17,7 +17,7 @@ func TestShapes(t *testing.T) {
 	assert.Equal(t, "M1 2L3 4", New().Line(1, 2, 3, 4).String())
 	assert.True(t, New().Line(1, 2, 1, 2).Empty(), "a zero-length line")
 
-	pts := []math32.Vector2{{0, 0}, {1, 0}, {1, 1}}
+	pts := []math32.Vector2{{X: 0, Y: 0}, {X: 1, Y: 0}, {X: 1, Y: 1}}
 	assert.Equal(t, "M0 0L1 0L1 1", New().Polyline(pts...).String())
 	assert.True(t, New().Polyline(pts[0]).Empty())
 	assert.Equal(t, "M0 0L1 0L1 1z", New().Polygon(pts...).String())

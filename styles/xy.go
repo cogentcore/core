@@ -43,7 +43,7 @@ func (xy *XY[T]) Set(v ...T) {
 	}
 }
 
-// return the value for given dimension
+// Dim returns the value for given dimension.
 func (xy *XY[T]) Dim(d math32.Dims) T {
 	switch d {
 	case math32.X:
@@ -55,7 +55,7 @@ func (xy *XY[T]) Dim(d math32.Dims) T {
 	}
 }
 
-// set the value for given dimension
+// SetDim sets the value for given dimension.
 func (xy *XY[T]) SetDim(d math32.Dims, val T) {
 	switch d {
 	case math32.X:

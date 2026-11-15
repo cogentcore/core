@@ -60,7 +60,7 @@ func ownKeys(n *html.Node) keyMask {
 				m = m.or(keyBit("#" + a.Val))
 			}
 		case "class":
-			for _, cl := range strings.Fields(a.Val) {
+			for cl := range strings.FieldsSeq(a.Val) {
 				m = m.or(keyBit("." + cl))
 			}
 		}

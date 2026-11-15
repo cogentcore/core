@@ -71,7 +71,7 @@ func TestNodeRootJSON(t *testing.T) {
 
 func BenchmarkNodeMarshalJSON(b *testing.B) {
 	parent := testNodeTree()
-	for range b.N {
+	for b.Loop() {
 		var buf bytes.Buffer
 		assert.NoError(b, jsonx.Write(&parent, &buf))
 	}
@@ -82,7 +82,7 @@ func BenchmarkNodeUnmarshalJSON(b *testing.B) {
 	var buf bytes.Buffer
 	assert.NoError(b, jsonx.Write(&parent, &buf))
 	bs := buf.Bytes()
-	for range b.N {
+	for b.Loop() {
 		testload := testdata.NewNodeEmbed()
 		assert.NoError(b, jsonx.Read(&testload, bytes.NewReader(bs)))
 	}

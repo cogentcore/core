@@ -80,6 +80,7 @@ func TestRenderer(t *testing.T) {
 	rs.SetSize(units.UnitPt, math32.Vec2(50, 50))
 	un, sz = rs.Size()
 	assert.Equal(t, units.UnitPt, un)
+	assert.Equal(t, math32.Vec2(50, 50), sz)
 	var b bytes.Buffer
 	rs.StartRender(&b)
 	rs.AddPage()

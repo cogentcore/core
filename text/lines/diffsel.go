@@ -78,7 +78,7 @@ func ApplyOneDiff(op difflib.OpCode, bedit *[]string, aorig []string, blmap []in
 		nb := op.I2 - op.I1
 		b1 := blmap[op.I1]
 		nc := min(na, nb)
-		for i := 0; i < nc; i++ {
+		for i := range nc {
 			(*bedit)[b1+i] = aorig[op.J1+i]
 		}
 		db := na - nb

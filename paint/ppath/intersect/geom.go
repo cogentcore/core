@@ -303,10 +303,9 @@ func Filling(p ppath.Path, fillRule ppath.FillRules) []bool {
 				continue
 			}
 			zs := RayIntersections(pj, pos.X, pos.Y)
+			// TODO: on the boundary, check if around the interior or exterior of pos
 			if ni, boundaryi := windings(zs); !boundaryi {
 				n += ni
-			} else {
-				// on the boundary, check if around the interior or exterior of pos
 			}
 		}
 		filling[i] = fillRule.Fills(n)

@@ -5,6 +5,7 @@
 package lexers
 
 import (
+	"maps"
 	"slices"
 	"testing"
 
@@ -26,9 +27,7 @@ func TestLexers(t *testing.T) {
 	}
 
 	funcs := map[string]func(reg *chroma.LexerRegistry){"Go": Go}
-	for name, f := range all {
-		funcs[name] = f
-	}
+	maps.Copy(funcs, all)
 	for name, f := range funcs {
 		t.Run(name, func(t *testing.T) {
 			reg := chroma.NewLexerRegistry()

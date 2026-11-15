@@ -7,6 +7,7 @@ package commands
 import (
 	"html"
 	"image"
+	"maps"
 	"reflect"
 	"slices"
 	"strings"
@@ -181,13 +182,11 @@ func (mc *Macro) promptKeys() map[string]bool {
 
 // withPrompted returns the values of the macro, with those of the given
 // keys from the given values of the form of its prompts.
-func (mc *Macro) withPrompted(cm *SubCmd, prompted *SubCmdArgs, keys map[string]bool) *SubCmdArgs {
+func (mc *Macro) withPrompted(prompted *SubCmdArgs, keys map[string]bool) *SubCmdArgs {
 	sa := &SubCmdArgs{Flags: map[string]string{}}
 	if mc.Values != nil {
 		sa.Args = mc.Values.Args
-		for k, v := range mc.Values.Flags {
-			sa.Flags[k] = v
-		}
+		maps.Copy(sa.Flags, mc.Values.Flags)
 	}
 	for k := range keys {
 		if k == argsField {
@@ -270,7 +269,7 @@ func (cs *Commands) RunMacro(ctx core.Widget, root string, mc *Macro, run RunFun
 	ctx = cs.context(ctx)
 	cs.macroSubCmd(ctx, root, mc, func(sc *SubCmd) {
 		if len(mc.Prompts) == 0 {
-			cmdline := sc.ArgsCommandLine(mc.withPrompted(sc, nil, nil))
+			cmdline := sc.ArgsCommandLine(mc.withPrompted(nil, nil))
 			if !mc.Confirm {
 				cs.runMacroLine(root, mc, cmdline, run)
 				return
@@ -362,7 +361,7 @@ func (cs *Commands) NewPromptDialog(ctx core.Widget, root string, sc *SubCmd, mc
 	mc.Values.SetValues(sc, values)
 	cs.Args.MacroValues(root, mc).SetValues(sc, values)
 	cmdline := func() string {
-		return sc.ArgsCommandLine(mc.withPrompted(sc, sc.ArgsOf(values), keys))
+		return sc.ArgsCommandLine(mc.withPrompted(sc.ArgsOf(values), keys))
 	}
 	line := commandLineText(d, cmdline)
 	fm := cs.chooserForm(ctx, d, values, cs.subCmdChoosers(sc))

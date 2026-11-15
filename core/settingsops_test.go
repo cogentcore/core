@@ -27,7 +27,7 @@ func (ts *testSettingsData) Apply() { ts.applied++ }
 // newTestSettings returns test settings in a file of the given extension
 // in a temporary directory.
 func newTestSettings(t *testing.T, ext string) *testSettingsData {
-	return &testSettingsData{SettingsBase: SettingsBase{Name: "Test", File: filepath.Join(t.TempDir(), "test"+ext)}}
+	return &testSettingsData{Name: "Test", File: filepath.Join(t.TempDir(), "test"+ext)}
 }
 
 // TestSettingsSaveLoadReset tests saving, loading, and resetting settings,

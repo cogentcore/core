@@ -17,11 +17,11 @@ import (
 )
 
 func TestEllipse(t *testing.T) {
-	tolEqualVec2(t, EllipsePos(2.0, 1.0, math32.Pi/2.0, 1.0, 0.5, 0.0), math32.Vector2{1.0, 2.5})
-	tolEqualVec2(t, EllipseDeriv(2.0, 1.0, math32.Pi/2.0, true, 0.0), math32.Vector2{-1.0, 0.0})
-	tolEqualVec2(t, EllipseDeriv(2.0, 1.0, math32.Pi/2.0, false, 0.0), math32.Vector2{1.0, 0.0})
+	tolEqualVec2(t, EllipsePos(2.0, 1.0, math32.Pi/2.0, 1.0, 0.5, 0.0), math32.Vec2(1.0, 2.5))
+	tolEqualVec2(t, EllipseDeriv(2.0, 1.0, math32.Pi/2.0, true, 0.0), math32.Vec2(-1.0, 0.0))
+	tolEqualVec2(t, EllipseDeriv(2.0, 1.0, math32.Pi/2.0, false, 0.0), math32.Vec2(1.0, 0.0))
 
-	assert.InDelta(t, EllipseRadiiCorrection(math32.Vector2{0.0, 0.0}, 0.1, 0.1, 0.0, math32.Vector2{1.0, 0.0}), 5.0, 1.0e-5)
+	assert.InDelta(t, EllipseRadiiCorrection(math32.Vec2(0.0, 0.0), 0.1, 0.1, 0.0, math32.Vec2(1.0, 0.0)), 5.0, 1.0e-5)
 }
 
 func TestEllipseToCenter(t *testing.T) {
@@ -96,22 +96,22 @@ func TestEllipseToCenter(t *testing.T) {
 }
 
 func TestArcToQuad(t *testing.T) {
-	assert.InDeltaSlice(t, ArcToQuad(math32.Vector2{0.0, 0.0}, 100.0, 100.0, 0.0, false, false, math32.Vector2{200.0, 0.0}), MustParseSVGPath("Q0 100 100 100Q200 100 200 0"), 1.0e-4)
+	assert.InDeltaSlice(t, ArcToQuad(math32.Vec2(0.0, 0.0), 100.0, 100.0, 0.0, false, false, math32.Vec2(200.0, 0.0)), MustParseSVGPath("Q0 100 100 100Q200 100 200 0"), 1.0e-4)
 }
 
 func TestArcToCube(t *testing.T) {
 	// defer setEpsilon(1e-3)()
-	assert.InDeltaSlice(t, ArcToCube(math32.Vector2{0.0, 0.0}, 100.0, 100.0, 0.0, false, false, math32.Vector2{200.0, 0.0}), MustParseSVGPath("C0 54.858 45.142 100 100 100C154.858 100 200 54.858 200 0"), 1.0e-3)
+	assert.InDeltaSlice(t, ArcToCube(math32.Vec2(0.0, 0.0), 100.0, 100.0, 0.0, false, false, math32.Vec2(200.0, 0.0)), MustParseSVGPath("C0 54.858 45.142 100 100 100C154.858 100 200 54.858 200 0"), 1.0e-3)
 }
 
 func TestQuadraticBezier(t *testing.T) {
-	p1, p2 := QuadraticToCubicBezier(math32.Vector2{0.0, 0.0}, math32.Vector2{1.5, 0.0}, math32.Vector2{3.0, 0.0})
-	tolEqualVec2(t, p1, math32.Vector2{1.0, 0.0})
-	tolEqualVec2(t, p2, math32.Vector2{2.0, 0.0})
+	p1, p2 := QuadraticToCubicBezier(math32.Vec2(0.0, 0.0), math32.Vec2(1.5, 0.0), math32.Vec2(3.0, 0.0))
+	tolEqualVec2(t, p1, math32.Vec2(1.0, 0.0))
+	tolEqualVec2(t, p2, math32.Vec2(2.0, 0.0))
 
-	p1, p2 = QuadraticToCubicBezier(math32.Vector2{0.0, 0.0}, math32.Vector2{1.0, 0.0}, math32.Vector2{1.0, 1.0})
-	tolEqualVec2(t, p1, math32.Vector2{2.0 / 3.0, 0.0})
-	tolEqualVec2(t, p2, math32.Vector2{1.0, 1.0 / 3.0})
+	p1, p2 = QuadraticToCubicBezier(math32.Vec2(0.0, 0.0), math32.Vec2(1.0, 0.0), math32.Vec2(1.0, 1.0))
+	tolEqualVec2(t, p1, math32.Vec2(2.0/3.0, 0.0))
+	tolEqualVec2(t, p2, math32.Vec2(1.0, 1.0/3.0))
 }
 
 func TestQuadraticBezierDeriv(t *testing.T) {
@@ -120,9 +120,9 @@ func TestQuadraticBezierDeriv(t *testing.T) {
 		t          float32
 		q          math32.Vector2
 	}{
-		{math32.Vector2{0.0, 0.0}, math32.Vector2{1.0, 0.0}, math32.Vector2{1.0, 1.0}, 0.0, math32.Vector2{2.0, 0.0}},
-		{math32.Vector2{0.0, 0.0}, math32.Vector2{1.0, 0.0}, math32.Vector2{1.0, 1.0}, 0.5, math32.Vector2{1.0, 1.0}},
-		{math32.Vector2{0.0, 0.0}, math32.Vector2{1.0, 0.0}, math32.Vector2{1.0, 1.0}, 1.0, math32.Vector2{0.0, 2.0}},
+		{math32.Vec2(0.0, 0.0), math32.Vec2(1.0, 0.0), math32.Vec2(1.0, 1.0), 0.0, math32.Vec2(2.0, 0.0)},
+		{math32.Vec2(0.0, 0.0), math32.Vec2(1.0, 0.0), math32.Vec2(1.0, 1.0), 0.5, math32.Vec2(1.0, 1.0)},
+		{math32.Vec2(0.0, 0.0), math32.Vec2(1.0, 0.0), math32.Vec2(1.0, 1.0), 1.0, math32.Vec2(0.0, 2.0)},
 	}
 
 	for _, tt := range tests {
@@ -134,15 +134,15 @@ func TestQuadraticBezierDeriv(t *testing.T) {
 }
 
 func TestCubicBezierDeriv(t *testing.T) {
-	p0, p1, p2, p3 := math32.Vector2{0.0, 0.0}, math32.Vector2{2.0 / 3.0, 0.0}, math32.Vector2{1.0, 1.0 / 3.0}, math32.Vector2{1.0, 1.0}
+	p0, p1, p2, p3 := math32.Vec2(0.0, 0.0), math32.Vec2(2.0/3.0, 0.0), math32.Vec2(1.0, 1.0/3.0), math32.Vec2(1.0, 1.0)
 	var tests = []struct {
 		p0, p1, p2, p3 math32.Vector2
 		t              float32
 		q              math32.Vector2
 	}{
-		{p0, p1, p2, p3, 0.0, math32.Vector2{2.0, 0.0}},
-		{p0, p1, p2, p3, 0.5, math32.Vector2{1.0, 1.0}},
-		{p0, p1, p2, p3, 1.0, math32.Vector2{0.0, 2.0}},
+		{p0, p1, p2, p3, 0.0, math32.Vec2(2.0, 0.0)},
+		{p0, p1, p2, p3, 0.5, math32.Vec2(1.0, 1.0)},
+		{p0, p1, p2, p3, 1.0, math32.Vec2(0.0, 2.0)},
 	}
 
 	for _, tt := range tests {

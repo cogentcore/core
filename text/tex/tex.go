@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package tex typesets LaTeX math expressions into paths, with the fonts of TeX.
 package tex
 
 import (
@@ -126,13 +127,12 @@ func InstallTexMF() bool {
 
 	dir := system.TheApp.CogentCoreDataDir()
 	tdir := filepath.Join(dir, "texmf")
-	ex, err := fsx.DirExists(tdir)
-	if ex {
+	if ex, _ := fsx.DirExists(tdir); ex {
 		texmfAt = tdir
 		os.Setenv("TEXMF", tdir)
 		return true
 	}
-	err = os.MkdirAll(tdir, 0777)
+	err := os.MkdirAll(tdir, 0777)
 	if errors.Log(err) != nil {
 		return false
 	}

@@ -24,7 +24,7 @@ var (
 
 	// typeIDCounter is an atomically incremented uint64 used
 	// for assigning new [Type.ID] numbers.
-	typeIDCounter uint64
+	typeIDCounter atomic.Uint64
 )
 
 func init() {
@@ -82,7 +82,7 @@ func For[T any]() *Type {
 // AddType adds a constructed [Type] to the registry
 // and returns it. This sets the ID.
 func AddType(typ *Type) *Type {
-	typ.ID = atomic.AddUint64(&typeIDCounter, 1)
+	typ.ID = typeIDCounter.Add(1)
 	Types[typ.Name] = typ
 	return typ
 }

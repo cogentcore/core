@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"iter"
 	"slices"
+	"strings"
 )
 
 // List implements an ordered list (slice) of Values,
@@ -223,12 +224,16 @@ func (kl *List[K, V]) Copy(from *List[K, V]) {
 
 // String returns a string representation of the list.
 func (kl *List[K, V]) String() string {
-	sv := "{"
+	var sv strings.Builder
+	sv.WriteString("{")
 	for i, v := range kl.Values {
-		sv += fmt.Sprintf("%v", kl.Keys[i]) + ": " + fmt.Sprintf("%v", v) + ", "
+		fmt.Fprintf(&sv, "%v", kl.Keys[i])
+		sv.WriteString(": ")
+		fmt.Fprintf(&sv, "%v", v)
+		sv.WriteString(", ")
 	}
-	sv += "}"
-	return sv
+	sv.WriteString("}")
+	return sv.String()
 }
 
 // UpdateIndexes updates the Indexes from Keys and Values.

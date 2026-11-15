@@ -503,7 +503,7 @@ func (ts *Tabs) getFrame() *Frame {
 func (ts *Tabs) unselectOtherTabs(idx int) {
 	sz := ts.NumTabs()
 	tbs := ts.getTabs()
-	for i := 0; i < sz; i++ {
+	for i := range sz {
 		if i == idx {
 			continue
 		}

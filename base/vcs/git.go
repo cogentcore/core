@@ -266,8 +266,8 @@ func (gr *GitRepo) RevertFile(fname string) error {
 }
 
 // UpdateVersion sets the version of a package currently checked out via Git.
-func (s *GitRepo) UpdateVersion(version string) error {
-	_, err := s.runErr("git", "switch", "--detach", version)
+func (gr *GitRepo) UpdateVersion(version string) error {
+	_, err := gr.runErr("git", "switch", "--detach", version)
 	return err
 }
 
@@ -427,8 +427,8 @@ func (gr *GitRepo) Blame(fname string) ([]byte, error) {
 }
 
 // Branches returns a list of the local branches.
-func (s *GitRepo) Branches() ([]string, error) {
-	out, err := s.runErr("git", "branch")
+func (gr *GitRepo) Branches() ([]string, error) {
+	out, err := gr.runErr("git", "branch")
 	if err != nil {
 		return []string{}, err
 	}

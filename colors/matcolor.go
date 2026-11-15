@@ -41,7 +41,7 @@ func SetSchemes(primary color.RGBA) {
 	SetSchemesFromKey(matcolor.KeyFromPrimary(primary))
 }
 
-// SetSchemes sets [Schemes], [Scheme], and [Palette] based on the
+// SetSchemesFromKey sets [Schemes], [Scheme], and [Palette] based on the
 // given [matcolor.Key]. It should be used instead of [SetSchemes]
 // if you want more specific control over the color scheme.
 // The schemes are kept if [Palette] is already from the same key

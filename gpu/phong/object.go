@@ -66,15 +66,6 @@ func (ph *Phong) ResetObjects() {
 	// updateObjects is auto-resetting
 }
 
-func (ph *Phong) object(name string) *Object {
-	ob, ok := ph.objects.AtTry(name)
-	if !ok {
-		err := fmt.Errorf("phong:Object: name not found: %s", name)
-		errors.Log(err)
-	}
-	return ob
-}
-
 func (ph *Phong) setWorldMatrix(ob *Object) {
 	mvm := math32.Matrix3FromMatrix4(ph.Camera.View.Mul(&ob.Matrix))
 	nm := mvm.Inverse().Transpose()
@@ -112,7 +103,7 @@ func (ph *Phong) UseObjectIndex(idx int) error {
 // updating the WorldMatrix based on current Camera settings first.
 // This is called in the RenderStart function.
 func (ph *Phong) updateObjects() {
-	if !(ph.objectUpdated || ph.cameraUpdated) {
+	if !ph.objectUpdated && !ph.cameraUpdated {
 		return
 	}
 	vl := errors.Log1(ph.System.Vars().ValueByIndex(int(ObjectGroup), "Object", 0))

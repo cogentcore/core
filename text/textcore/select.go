@@ -44,8 +44,8 @@ func (ed *Base) scopelightsReset() {
 }
 
 func (ed *Base) addScopelights(st, end textpos.Pos) {
-	ed.scopelights = append(ed.scopelights, textpos.NewRegionPos(st, textpos.Pos{st.Line, st.Char + 1}))
-	ed.scopelights = append(ed.scopelights, textpos.NewRegionPos(end, textpos.Pos{end.Line, end.Char + 1}))
+	ed.scopelights = append(ed.scopelights, textpos.NewRegionPos(st, textpos.Pos{Line: st.Line, Char: st.Char + 1}))
+	ed.scopelights = append(ed.scopelights, textpos.NewRegionPos(end, textpos.Pos{Line: end.Line, Char: end.Char + 1}))
 }
 
 //////// Selection

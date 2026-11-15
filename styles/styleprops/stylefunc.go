@@ -38,7 +38,7 @@ func InhInit(val, parent any) (inh, init bool) {
 	return false, false
 }
 
-// FuncInt returns a style function for any numerical value
+// Int returns a style function for any numerical value
 func Int[T any, F num.Integer](initVal F, getField func(obj *T) *F) Func {
 	return func(obj any, key string, val any, parent any, cc colors.Context) {
 		fp := getField(obj.(*T))

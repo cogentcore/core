@@ -261,7 +261,7 @@ func (tx *Text) Init() {
 		system.TheApp.OpenURL(tl.URL)
 	})
 	tx.OnFocusLost(func(e events.Event) {
-		if !(tx.Scene.selectedText != nil && !e.HasAnyModifier(key.Shift, key.Meta)) {
+		if tx.Scene.selectedText == nil || e.HasAnyModifier(key.Shift, key.Meta) {
 			tx.selectReset()
 		}
 	})
@@ -659,7 +659,7 @@ func (tx *Text) minContentWidth() float32 {
 // min-content width of the text when it wraps.
 func longestWordWidth(sc *Scene, st *styles.Style, txt string) float32 {
 	longest := ""
-	for _, w := range strings.Fields(txt) {
+	for w := range strings.FieldsSeq(txt) {
 		if utf8.RuneCountInString(w) > utf8.RuneCountInString(longest) {
 			longest = w
 		}

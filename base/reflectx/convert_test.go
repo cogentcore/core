@@ -10,9 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// ptr returns a pointer to the given value.
-func ptr[T any](v T) *T { return &v }
-
 // numbers returns the value 3 of every basic numeric type, and pointers to
 // them, and the nil pointers of those types.
 func numbers() (vals, nils []any) {
@@ -20,9 +17,9 @@ func numbers() (vals, nils []any) {
 		int(3), int8(3), int16(3), int32(3), int64(3),
 		uint(3), uint8(3), uint16(3), uint32(3), uint64(3), uintptr(3),
 		float32(3), float64(3),
-		ptr(int(3)), ptr(int8(3)), ptr(int16(3)), ptr(int32(3)), ptr(int64(3)),
-		ptr(uint(3)), ptr(uint8(3)), ptr(uint16(3)), ptr(uint32(3)), ptr(uint64(3)), ptr(uintptr(3)),
-		ptr(float32(3)), ptr(float64(3)),
+		new(int(3)), new(int8(3)), new(int16(3)), new(int32(3)), new(int64(3)),
+		new(uint(3)), new(uint8(3)), new(uint16(3)), new(uint32(3)), new(uint64(3)), new(uintptr(3)),
+		new(float32(3)), new(float64(3)),
 	}
 	nils = []any{
 		(*int)(nil), (*int8)(nil), (*int16)(nil), (*int32)(nil), (*int64)(nil),
@@ -82,14 +79,14 @@ func TestToNumbersOther(t *testing.T) {
 	}{
 		{true, 1, 1, true},
 		{false, 0, 0, false},
-		{ptr(true), 1, 1, true},
+		{new(true), 1, 1, true},
 		{"12", 12, 12, true},
-		{ptr("12"), 12, 12, true},
+		{new("12"), 12, 12, true},
 		{myInt(5), 5, 5, true},
-		{ptr(myInt(5)), 5, 5, true},
+		{new(myInt(5)), 5, 5, true},
 		{myString("7"), 7, 7, true},
 		{complex(2, 1), 2, 2, true},
-		{ptr(complex64(complex(2, 1))), 2, 2, true},
+		{new(complex64(complex(2, 1))), 2, 2, true},
 		{3.7, 3, 3.7, true},
 	}
 	for _, tt := range tests {

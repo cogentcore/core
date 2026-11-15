@@ -112,7 +112,7 @@ func HeightfieldN(nx, ny int) (numVertex, nIndex int) {
 // pos is a 3D position offset.
 func SetHeightfield(vertex, normal, texcoord math32.ArrayF32, index math32.ArrayU32, vtxOff, idxOff int, nx, ny int, data HeightfieldData2D, waxis, haxis math32.Dims, wdir, hdir int, width, height, woff, hoff, zoff, zscale float32, pos math32.Vector3) error {
 	if ny < 2 || nx < 2 {
-		return fmt.Errorf("SetHeightfield: must have at least 2 data points along each dimension.")
+		return fmt.Errorf("SetHeightfield: must have at least 2 data points along each dimension")
 	}
 	zaxis := OrthoAxis(waxis, haxis)
 
@@ -157,7 +157,7 @@ func SetHeightfield(vertex, normal, texcoord math32.ArrayF32, index math32.Array
 	nidx := vtxOff * 3
 	iidx := idxOff // index index
 	for yi := ny1; yi >= 0; yi-- {
-		for xi := 0; xi < nx; xi++ {
+		for xi := range nx {
 			if yi == 0 { // no index
 				if xi == nx-1 { // no right
 					vertex.GetVector3(vIdx(1, xi-1)*3, &a) // a = yi=1, xi=left

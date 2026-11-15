@@ -229,11 +229,11 @@ func applyShortestUniqueName(field *field, idx int, usedNames map[string]*field)
 func shortestUniqueName(name string, usedNames map[string]*field) string {
 	strs := strings.Split(name, ".")
 	cur := ""
-	for i := len(strs) - 1; i >= 0; i-- {
+	for _, str := range slices.Backward(strs) {
 		if cur == "" {
-			cur = strs[i]
+			cur = str
 		} else {
-			cur = strs[i] + "." + cur
+			cur = str + "." + cur
 		}
 		if _, has := usedNames[cur]; !has {
 			return cur

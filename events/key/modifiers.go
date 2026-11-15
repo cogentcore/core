@@ -7,6 +7,7 @@ package key
 //go:generate core generate
 
 import (
+	"slices"
 	"strings"
 
 	"cogentcore.org/core/enums"
@@ -40,13 +41,14 @@ const (
 // plus symbols as seperators. The order is given by Modifiers order:
 // Control, Meta, Alt, Shift.
 func (mo Modifiers) ModifiersString() string {
-	modstr := ""
+	var modstr strings.Builder
 	for _, m := range ModifiersValues() {
 		if mo.HasFlag(m) {
-			modstr += m.BitIndexString() + "+"
+			modstr.WriteString(m.BitIndexString())
+			modstr.WriteString("+")
 		}
 	}
-	return modstr
+	return modstr.String()
 }
 
 // ModifiersFromString returns the modifiers corresponding to given string
@@ -68,12 +70,7 @@ func ModifiersFromString(cs string) (Modifiers, string) {
 
 // HasAnyModifier tests whether any of given modifier(s) were set
 func HasAnyModifier(flags Modifiers, mods ...enums.BitFlag) bool {
-	for _, m := range mods {
-		if flags.HasFlag(m) {
-			return true
-		}
-	}
-	return false
+	return slices.ContainsFunc(mods, flags.HasFlag)
 }
 
 // HasAllModifiers tests whether all of given modifier(s) were set

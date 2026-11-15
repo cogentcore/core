@@ -88,4 +88,4 @@ type NodeValue interface {
 }
 
 // NodeValue implements [NodeValue]. It should not be called.
-func (nb NodeBase) NodeValue() {}
+func (n NodeBase) NodeValue() {}

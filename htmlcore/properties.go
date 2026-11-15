@@ -392,7 +392,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		if prop == "container" { // name / type
 			_, v, _ = strings.Cut(lval, "/")
 		}
-		for _, f := range strings.Fields(v) {
+		for f := range strings.FieldsSeq(v) {
 			switch f {
 			case "size", "strict":
 				c = styles.ContainSize
@@ -407,7 +407,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		// the lengths of the values, without auto (the size that a box
 		// last had, which is the length until it is laid out); none is no size
 		var vals []string
-		for _, f := range strings.Fields(lval) {
+		for f := range strings.FieldsSeq(lval) {
 			if f != "auto" {
 				vals = append(vals, f)
 			}
@@ -515,7 +515,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		})
 	case "text-decoration", "text-decoration-line":
 		var deco rich.Decorations
-		for _, f := range strings.Fields(lval) {
+		for f := range strings.FieldsSeq(lval) {
 			switch f {
 			case "underline":
 				deco.SetFlag(true, rich.Underline)
@@ -540,7 +540,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		// (the wrap is not a direction: a flex-flow of column nowrap, as
 		// the election results of nytimes.com, is a column)
 		dir, wrap := "row", "nowrap"
-		for _, f := range strings.Fields(lval) {
+		for f := range strings.FieldsSeq(lval) {
 			if strings.Contains(f, "wrap") {
 				wrap = f
 			} else {
@@ -826,7 +826,7 @@ func compileBorder(side int, val string) styleOp {
 		if width != "" {
 			w = st.env.borderWidth(width)
 		}
-		var cl image.Image = colors.Uniform(colors.ToUniform(s.Color))
+		cl := image.Image(colors.Uniform(colors.ToUniform(s.Color)))
 		if color != nil {
 			cl = color()
 		}
@@ -1034,12 +1034,12 @@ func splitColors(v string) []string {
 	depth := 0
 	start := -1
 	for i, r := range v {
-		switch {
-		case r == '(':
+		switch r {
+		case '(':
 			depth++
-		case r == ')':
+		case ')':
 			depth--
-		case r == ' ' || r == '\t' || r == '\n':
+		case ' ', '\t', '\n':
 			if depth == 0 {
 				if start >= 0 {
 					fs = append(fs, v[start:i])
@@ -1081,8 +1081,8 @@ func alignValue(v string) styles.Aligns {
 
 // gridColumns returns the number of columns of a grid-template-columns value.
 func gridColumns(v string) int {
-	if strings.HasPrefix(v, "repeat(") {
-		n, _, _ := strings.Cut(strings.TrimPrefix(v, "repeat("), ",")
+	if after, ok := strings.CutPrefix(v, "repeat("); ok {
+		n, _, _ := strings.Cut(after, ",")
 		if i, err := strconv.Atoi(strings.TrimSpace(n)); err == nil {
 			return i
 		}
@@ -1122,11 +1122,11 @@ func cssZeroScale(v string) bool {
 		if !found {
 			break
 		}
-		end := strings.Index(args, ")")
-		if end < 0 {
+		before, after, ok := strings.Cut(args, ")")
+		if !ok {
 			break
 		}
-		as := strings.Split(args[:end], ",")
+		as := strings.Split(before, ",")
 		zero := func(i int) bool {
 			if i >= len(as) {
 				return false
@@ -1144,7 +1144,7 @@ func cssZeroScale(v string) bool {
 				return true
 			}
 		}
-		rest = strings.TrimSpace(args[end+1:])
+		rest = strings.TrimSpace(after)
 	}
 	return false
 }
@@ -1170,11 +1170,11 @@ func cssTranslate(prop, v string) (x, y string, ok bool) {
 		if !found {
 			break
 		}
-		end := strings.Index(args, ")")
-		if end < 0 {
+		before, after, ok := strings.Cut(args, ")")
+		if !ok {
 			return "", "", false
 		}
-		as := strings.Split(args[:end], ",")
+		as := strings.Split(before, ",")
 		for i := range as {
 			as[i] = strings.TrimSpace(as[i])
 		}
@@ -1189,7 +1189,7 @@ func cssTranslate(prop, v string) (x, y string, ok bool) {
 		case "translatey":
 			ys = append(ys, as[0])
 		}
-		rest = strings.TrimSpace(args[end+1:])
+		rest = strings.TrimSpace(after)
 	}
 	sum := func(ls []string) string {
 		switch len(ls) {
@@ -1205,21 +1205,21 @@ func cssTranslate(prop, v string) (x, y string, ok bool) {
 
 // cssRotate returns the sum of the angles of the rotate functions of the
 // given transform, in degrees.
-func cssRotate(prop, v string) float32 {
+func cssRotate(_, v string) float32 {
 	var deg float32
 	for rest := v; rest != ""; {
 		name, args, found := strings.Cut(rest, "(")
 		if !found {
 			break
 		}
-		end := strings.Index(args, ")")
-		if end < 0 {
+		before, after, ok := strings.Cut(args, ")")
+		if !ok {
 			break
 		}
 		if n := strings.TrimSpace(name); n == "rotate" || n == "rotatez" {
-			deg += cssAngle(strings.TrimSpace(args[:end]))
+			deg += cssAngle(strings.TrimSpace(before))
 		}
-		rest = strings.TrimSpace(args[end+1:])
+		rest = strings.TrimSpace(after)
 	}
 	return deg
 }
@@ -1250,7 +1250,7 @@ func boxShadow(env *lengthEnv, item string) (styles.Shadow, bool) {
 		if strings.EqualFold(f, "inset") {
 			return sh, false
 		}
-		if l, ok := env.length(f, units.UnitDp); ok && len(lens) < 4 && (f == "0" || strings.IndexAny(f, "0123456789") >= 0) && parseColor(f) == nil {
+		if l, ok := env.length(f, units.UnitDp); ok && len(lens) < 4 && (f == "0" || strings.ContainsAny(f, "0123456789")) && parseColor(f) == nil {
 			lens = append(lens, l)
 			continue
 		}

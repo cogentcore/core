@@ -112,7 +112,7 @@ func (s *Server) closeConns() {
 	s.connsMu.Lock()
 	defer s.connsMu.Unlock()
 	for _, c := range s.conns {
-		c.Conn.Close()
+		c.Close()
 	}
 	s.conns = nil
 }
@@ -326,8 +326,7 @@ func (s *Server) session(ch ssh.Channel, reqs <-chan *ssh.Request) {
 				code := 0
 				if err := wait(); err != nil {
 					code = 1
-					var ee *exec.ExitError
-					if errors.As(err, &ee) {
+					if ee, ok := errors.AsType[*exec.ExitError](err); ok {
 						code = ee.ExitCode()
 					}
 				}

@@ -4,7 +4,7 @@
 
 //go:generate core generate -add-types
 
-// package printer provides standard printer settings.
+// Package printer provides standard printer settings.
 package printer
 
 import (

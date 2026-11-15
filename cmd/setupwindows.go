@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strings"
 
 	"cogentcore.org/core/base/exec"
@@ -231,10 +232,8 @@ func goFlagsWithTag(goflags, tag string) string {
 		if !ok {
 			continue
 		}
-		for _, t := range strings.Split(tags, ",") {
-			if t == tag {
-				return strings.Join(fields, " ")
-			}
+		if slices.Contains(strings.Split(tags, ","), tag) {
+			return strings.Join(fields, " ")
 		}
 		if tags == "" {
 			fields[i] = f + tag

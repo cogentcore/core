@@ -73,8 +73,6 @@ import (
 	"github.com/go-fonts/latin-modern/lmsansquot8regular"
 )
 
-const mmPerPt = 25.4 / 72.0
-
 // LMFontsLoad loads the LMFonts.
 func LMFontsLoad() {
 	for i := range LMFonts {
@@ -402,7 +400,6 @@ func (fs *dviFonts) loadFont(fontname string, cmap charMaps, fontsize, scale flo
 	faces, err := font.ParseTTC(bytes.NewReader(data))
 	if err != nil { // todo: should still work presumably?
 		panic(fmt.Errorf("dviFonts error: no font found %s: %w", fontname, err))
-		return nil
 	}
 	face := faces[0]
 	fsize := scale * fontsize

@@ -195,7 +195,7 @@ func addMimeData(ctyp *C.char, typlen C.int, cdata *C.char, datalen C.int) {
 	}
 	typ := C.GoStringN(ctyp, typlen)
 	data := C.GoBytes(unsafe.Pointer(cdata), datalen)
-	*CurMimeData = append(*CurMimeData, &mimedata.Data{typ, data})
+	*CurMimeData = append(*CurMimeData, &mimedata.Data{Type: typ, Data: data})
 }
 
 // note: this does not happen in time for main startup

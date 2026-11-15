@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/math32"
 )
 
-// Number of different lights active.
+// NLights is the number of different lights active.
 type NLights struct {
 	Ambient     int32
 	Directional int32
@@ -68,7 +68,7 @@ type Point struct {
 	pad2  float32
 }
 
-// Spotlight is a light with a position and direction and
+// Spot is a spotlight: a light with a position and direction and
 // associated decay factors and angles,
 // which divide the light intensity as a function of
 // linear and quadratic distance.

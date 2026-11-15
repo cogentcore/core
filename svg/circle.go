@@ -13,7 +13,7 @@ type Circle struct {
 	NodeBase
 
 	// position of the center of the circle
-	Pos math32.Vector2 `xml:"{cx,cy}"`
+	Pos math32.Vector2 `svg:"cx,cy"`
 
 	// radius of the circle
 	Radius float32 `xml:"r"`

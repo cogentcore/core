@@ -504,7 +504,7 @@ func appendKeyPath(b []byte, keys []string) []byte {
 func appendKey(b []byte, k string) []byte {
 	bare := k != ""
 	for _, c := range k {
-		if !(c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9' || c == '-' || c == '_') {
+		if (c < 'A' || c > 'Z') && (c < 'a' || c > 'z') && (c < '0' || c > '9') && c != '-' && c != '_' {
 			bare = false
 			break
 		}

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package tex provides the support for TeX and LaTeX of the parse package,
+// with the completion of commands and citations.
 package tex
 
 import (

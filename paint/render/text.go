@@ -34,7 +34,7 @@ func NewText(txt *shaped.Lines, sty *styles.Paint, ctx *Context, pos math32.Vect
 	return nt
 }
 
-// interface assertion.
+// IsRenderItem marks this as a render item (interface assertion).
 func (tx *Text) IsRenderItem() {}
 
 func (tx *Text) String() string {

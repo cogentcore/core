@@ -158,6 +158,9 @@ func (pg *Page) ReadMetadata() error {
 		}
 		data = append(data, append(b, '\n')...)
 	}
+	if err := sc.Err(); err != nil {
+		return err
+	}
 	err = tomlx.ReadBytes(pg, data)
 	if err != nil {
 		return err
@@ -214,11 +217,11 @@ func (pg *Page) categoryLinks(pagesByCategory map[string][]*Page) []byte {
 // SpecialName extracts a special element type name from given element name,
 // defined as the part before the first underscore _ character.
 func SpecialName(name string) string {
-	usi := strings.Index(name, "_")
-	if usi < 0 {
+	before, _, ok := strings.Cut(name, "_")
+	if !ok {
 		return ""
 	}
-	return name[:usi]
+	return before
 }
 
 // SpecialToKebab does strcase.ToKebab on parts after specialName if present.

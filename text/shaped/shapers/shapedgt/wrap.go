@@ -112,10 +112,8 @@ func singleLine(outs []shaping.Output, txt []rune, cfg shaping.WrapConfig, maxSi
 	}
 
 	// Any line break character (line break classes BK, CR, LF and NL) needs the wrapper.
-	for _, r := range txt {
-		if isLineBreak(r) {
-			return nil, false
-		}
+	if slices.ContainsFunc(txt, isLineBreak) {
+		return nil, false
 	}
 
 	// The wrapper sets the visual order of the runs (logical here)

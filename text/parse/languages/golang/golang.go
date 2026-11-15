@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package golang provides the support for the Go language of the parse
+// package: its parser, symbols, type inference, and completion.
 package golang
 
 import (
@@ -184,11 +186,12 @@ func (gl *GoLang) IndentLine(fs *parse.FileStates, src [][]rune, tags []lexer.Li
 	cwrd := lexer.FirstWord(string(src[ln]))
 
 	if cwrd == "case" || cwrd == "default" {
-		if pwrd == "switch" {
+		switch pwrd {
+		case "switch":
 			delInd = 0
-		} else if pwrd == "case" {
+		case "case":
 			delInd = 0
-		} else {
+		default:
 			delInd = -1
 		}
 	} else if pwrd == "case" || pwrd == "default" {

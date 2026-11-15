@@ -15,7 +15,6 @@ import (
 	_ "cogentcore.org/core/paint/renderers"
 	"cogentcore.org/core/text/text"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/xyz"
 	. "cogentcore.org/core/xyz"
 	"cogentcore.org/core/xyz/examples/assets"
 	_ "cogentcore.org/core/xyz/io/obj"
@@ -54,13 +53,13 @@ func TestScene(t *testing.T) {
 		n.Material.Tiling.Repeat.Set(40, 40)
 	})
 
-	lines := NewLines(sc, "Lines", []math32.Vector3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, math32.Vec2(.2, .1), CloseLines)
+	lines := NewLines(sc, "Lines", []math32.Vector3{{X: -3, Y: -1, Z: 0}, {X: -2, Y: 1, Z: 0}, {X: 2, Y: 1, Z: 0}, {X: 3, Y: -1, Z: 0}}, math32.Vec2(.2, .1), CloseLines)
 	tree.AddChild(sc, func(n *Solid) {
 		n.SetMesh(lines).SetColor(color.RGBA{255, 255, 0, 128}).SetPos(0, 0, 1)
 	})
 
 	// this line should go from lower left front of red cube to upper vertex of above hi-line
-	tree.AddChild(sc, func(g *xyz.Group) {
+	tree.AddChild(sc, func(g *Group) {
 		InitArrow(g, math32.Vec3(-1.5, -.5, .5), math32.Vec3(2, 1, 1), .05, colors.Cyan, StartArrow, EndArrow, 4, .5, 8)
 	})
 

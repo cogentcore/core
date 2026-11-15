@@ -145,7 +145,7 @@ func (ix *ruleIndex) candidates(n *html.Node) []int {
 		case "id":
 			cands = append(cands, ix.byID[a.Val]...)
 		case "class":
-			for _, cl := range strings.Fields(a.Val) {
+			for cl := range strings.FieldsSeq(a.Val) {
 				cands = append(cands, ix.byClass[cl]...)
 			}
 		}
@@ -535,7 +535,7 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 				c.setPseudo(n, kind, nd, len(nd) > 0)
 				continue
 			}
-			if !isFree(n) && !(c.addRoot != nil && c.addRoot(n)) {
+			if !isFree(n) && (c.addRoot == nil || !c.addRoot(n)) {
 				undo()
 				// its pseudo-element, which may be a widget
 				return nil, c.noChange("a change of the ::" + kind + " of " + describeNode(n))
@@ -680,12 +680,7 @@ func (cs *compiledSelector) keyIn(n *html.Node) bool {
 	case '#':
 		return GetAttr(n, "id") == cs.key
 	case '.':
-		for _, cl := range strings.Fields(GetAttr(n, "class")) {
-			if cl == cs.key {
-				return true
-			}
-		}
-		return false
+		return slices.Contains(strings.Fields(GetAttr(n, "class")), cs.key)
 	case 't':
 		return strings.EqualFold(n.Data, cs.key)
 	}
@@ -947,9 +942,10 @@ func combinators(sel string) []combinator {
 		isComb := false
 		switch {
 		case quote != 0:
-			if ch == '\\' {
+			switch ch {
+			case '\\':
 				i++
-			} else if ch == quote {
+			case quote:
 				quote = 0
 			}
 		case ch == '"' || ch == '\'':

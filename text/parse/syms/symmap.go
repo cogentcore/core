@@ -288,10 +288,8 @@ func (sm *SymMap) WriteDoc(out io.Writer, depth int) {
 // FindNamePrefix looks for given symbol name prefix within this map
 // adds to given matches map (which can be nil), for more efficient recursive use
 func (sm *SymMap) FindNamePrefix(seed string, matches *SymMap) {
-	noCase := true
-	if lexer.HasUpperCase(seed) {
-		noCase = false
-	}
+	noCase := !lexer.HasUpperCase(seed)
+
 	for _, sy := range *sm {
 		nm := sy.Name
 		if noCase {
@@ -310,10 +308,8 @@ func (sm *SymMap) FindNamePrefix(seed string, matches *SymMap) {
 // and any children on the map.
 // adds to given matches map (which can be nil), for more efficient recursive use
 func (sm *SymMap) FindNamePrefixRecursive(seed string, matches *SymMap) {
-	noCase := true
-	if lexer.HasUpperCase(seed) {
-		noCase = false
-	}
+	noCase := !lexer.HasUpperCase(seed)
+
 	for _, sy := range *sm {
 		nm := sy.Name
 		if noCase {
@@ -336,10 +332,8 @@ func (sm *SymMap) FindNamePrefixRecursive(seed string, matches *SymMap) {
 // token.NameScope (i.e., namespace, module, package, library)
 // adds to given matches map (which can be nil), for more efficient recursive use
 func (sm *SymMap) FindNamePrefixScoped(seed string, matches *SymMap) {
-	noCase := true
-	if lexer.HasUpperCase(seed) {
-		noCase = false
-	}
+	noCase := !lexer.HasUpperCase(seed)
+
 	for _, sy := range *sm {
 		nm := sy.Name
 		if nm[0] == '"' {

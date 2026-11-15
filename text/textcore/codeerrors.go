@@ -131,7 +131,7 @@ func (ed *Base) renderCodeErrors() {
 				p := ed.charStartPos(textpos.Pos{Line: ln, Char: c})
 				switch {
 				case p.Y != rowStart.Y: // c starts a new visual line
-					prev := ed.Lines.PosToView(ed.viewId, textpos.Pos{Line: ln, Char: c - 1})
+					prev := ed.Lines.PosToView(ed.viewID, textpos.Pos{Line: ln, Char: c - 1})
 					prev.Char++ // the end of the char, which can be wide
 					fill(rowStart, ed.viewCharStartPos(prev).X)
 					rowStart = p

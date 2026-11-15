@@ -497,9 +497,10 @@ func (lr *Rule) WriteGrammar(writer io.Writer, depth int) {
 			actstr = "\t do: "
 			for _, ac := range lr.Acts {
 				actstr += ac.String()
-				if ac == PushState {
+				switch ac {
+				case PushState:
 					actstr += ": " + lr.PushState
-				} else if ac == ReadUntil {
+				case ReadUntil:
 					actstr += ": \"" + lr.Until + "\""
 				}
 				actstr += "; "

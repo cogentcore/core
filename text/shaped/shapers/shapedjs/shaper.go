@@ -4,6 +4,8 @@
 
 //go:build js
 
+// Package shapedjs shapes text on the web, with the shaper of go-text,
+// corrected by the measurements of the text in a browser canvas.
 package shapedjs
 
 import (
@@ -43,7 +45,7 @@ func initCanvas() {
 // which bootstraps off of the go-text version and corrects
 // the results using the results of measuring the text.
 type Shaper struct {
-	shapedgt.Shaper
+	*shapedgt.Shaper
 }
 
 // NewShaper returns a new text shaper.
@@ -56,7 +58,7 @@ func NewShaper() shaped.Shaper {
 	// The outputs are measured by the browser, so simple text is not shaped.
 	gs := sh.(*shapedgt.Shaper)
 	gs.SimpleSpans = true
-	jsh := &Shaper{Shaper: *gs}
+	jsh := &Shaper{Shaper: gs}
 	shapersMu.Lock()
 	shapers = append(shapers, jsh)
 	shapersMu.Unlock()
@@ -126,7 +128,7 @@ func (sh *Shaper) WrapLines(tx rich.Text, defSty *rich.Style, tsty *text.Style, 
 // This should already have the mutex lock, and is used by shapedjs but is
 // not an end-user call.
 func (sh *Shaper) adjustOutput(out *shaping.Output, fnt *text.Font, tx rich.Text, tsty *text.Style) {
-	rng := textpos.Range{out.Runes.Offset, out.Runes.Offset + out.Runes.Count}
+	rng := textpos.Range{Start: out.Runes.Offset, End: out.Runes.Offset + out.Runes.Count}
 	si, sn, ri := tx.Index(rng.Start)
 	sty, stx := tx.Span(si)
 	if sty.IsMath() {

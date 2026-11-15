@@ -25,7 +25,7 @@ func (ph *Phong) SetCamera(view, projection *math32.Matrix4) {
 	ph.Camera.View = *view
 	ph.Camera.Projection = *projection
 	vl := errors.Log1(ph.System.Vars().ValueByIndex(int(CameraGroup), "Camera", 0))
-	gpu.SetValueFrom(vl, []Camera{Camera{View: *view, Projection: *projection}})
+	gpu.SetValueFrom(vl, []Camera{{View: *view, Projection: *projection}})
 	ph.cameraUpdated = true
 }
 

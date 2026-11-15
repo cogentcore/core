@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package shaped provides the interfaces and types of the shaping of rich text
+// into lines of runs of glyphs, for rendering.
 package shaped
 
 import (

@@ -5,6 +5,7 @@
 package htmlcore
 
 import (
+	"slices"
 	"strings"
 
 	"cogentcore.org/core/core"
@@ -131,7 +132,7 @@ func (cf *containerFrame) SizeFinal() {
 func containerUnits(w core.Widget, vw, vh float64) (cqw, cqh float64) {
 	cqw, cqh = vw, vh
 	gotW, gotH := false, false
-	for p := w.AsTree().Parent; p != nil && !(gotW && gotH); p = p.AsTree().Parent {
+	for p := w.AsTree().Parent; p != nil && (!gotW || !gotH); p = p.AsTree().Parent {
 		cf, ok := p.(*containerFrame)
 		if !ok {
 			continue
@@ -275,12 +276,7 @@ func (c *Context) containerNamed(n *html.Node, name string) bool {
 	if v := declarationIn(ds, "container"); v != "" {
 		names, _, _ = strings.Cut(v, "/")
 	}
-	for _, f := range strings.Fields(names) {
-		if f == name {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(strings.Fields(names), name)
 }
 
 // containerQueryKey is a query of an @container rule for a width of its

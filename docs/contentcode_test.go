@@ -20,6 +20,7 @@ func TestCompiledCode(t *testing.T) {
 	b := core.NewBody("code blocks")
 	parent := core.NewFrame(b)
 	ok, failed, blocked := 0, 0, 0
+blocks:
 	for key, f := range content.CompiledCode {
 		done := make(chan error, 1)
 		go func() {
@@ -46,7 +47,7 @@ func TestCompiledCode(t *testing.T) {
 		case <-time.After(5 * time.Second):
 			blocked++
 			t.Logf("%s: still running after 5s", key)
-			return
+			break blocks // (it still uses the parent)
 		}
 	}
 	// failures are only mentioned when there are some

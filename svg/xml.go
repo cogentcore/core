@@ -99,7 +99,7 @@ var (
 	escFFFD = []byte("\uFFFD") // Unicode replacement character
 )
 
-// XMLEscapeText writes to w the properly escaped XML equivalent
+// EscapeText writes to w the properly escaped XML equivalent
 // of the plain text data s. If escapeNewline is true, newline
 // XMLcharacters will be escaped.
 func EscapeText(w io.Writer, s []byte, escapeNewline bool) error {

@@ -22,7 +22,7 @@ func (ed *Base) SetVirtualText(layer string, vts ...lines.VirtualText) {
 	if ed.Lines == nil {
 		return
 	}
-	ed.Lines.SetVirtualText(layer, ed.viewId, vts...)
+	ed.Lines.SetVirtualText(layer, ed.viewID, vts...)
 }
 
 // ClearVirtualText removes the virtual text in the given layer
@@ -37,7 +37,7 @@ func (ed *Base) VirtualText(layer string) []lines.VirtualText {
 	if ed.Lines == nil {
 		return nil
 	}
-	return ed.Lines.VirtualText(layer, ed.viewId)
+	return ed.Lines.VirtualText(layer, ed.viewID)
 }
 
 // VirtualCharStartPos returns the starting (top left) render coords of the
@@ -50,7 +50,7 @@ func (ed *Base) VirtualCharStartPos(layer string, pos textpos.Pos, offset int) (
 	if ed.Lines == nil {
 		return math32.Vector2{}, false
 	}
-	vp, ok := ed.Lines.VirtualTextView(ed.viewId, layer, pos, offset)
+	vp, ok := ed.Lines.VirtualTextView(ed.viewID, layer, pos, offset)
 	if !ok {
 		return math32.Vector2{}, false
 	}

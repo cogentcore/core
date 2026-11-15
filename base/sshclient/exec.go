@@ -28,7 +28,7 @@ import (
 // Code reports the exit code the command returned if it ran. If err == nil, ran
 // is always true and code is always 0.
 func (cl *Client) Exec(sio *exec.StdIOState, start, output bool, cmd string, args ...string) (string, error) {
-	return cl.ExecContext(nil, sio, start, output, cmd, args...)
+	return cl.ExecContext(context.Background(), sio, start, output, cmd, args...)
 }
 
 // ExecContext is [Client.Exec] with a context: if it is not nil, a command
@@ -64,7 +64,7 @@ func (cl *Client) ExecContext(ctx context.Context, sio *exec.StdIOState, start, 
 	for i := range args {
 		args[i] = os.Expand(args[i], expand)
 	}
-	if ctx != nil && !start {
+	if ctx != nil && ctx.Done() != nil && !start { // (Background is never done)
 		done := make(chan struct{})
 		defer close(done)
 		go interruptOnDone(ctx, done, ses)
@@ -196,8 +196,7 @@ func (cl *Client) Shell(sio *exec.StdIOState) error {
 		return err
 	}
 	err = ses.Wait()
-	var ee *ssh.ExitError
-	if errors.As(err, &ee) {
+	if _, ok := errors.AsType[*ssh.ExitError](err); ok {
 		return nil
 	}
 	return err

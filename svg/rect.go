@@ -14,13 +14,13 @@ type Rect struct {
 	NodeBase
 
 	// position of the top-left of the rectangle
-	Pos math32.Vector2 `xml:"{x,y}"`
+	Pos math32.Vector2 `svg:"x,y"`
 
 	// size of the rectangle
-	Size math32.Vector2 `xml:"{width,height}"`
+	Size math32.Vector2 `svg:"width,height"`
 
 	// radii for curved corners. only rx is used for now.
-	Radius math32.Vector2 `xml:"{rx,ry}"`
+	Radius math32.Vector2 `svg:"rx,ry"`
 }
 
 func (g *Rect) SVGName() string { return "rect" }

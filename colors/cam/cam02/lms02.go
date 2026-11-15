@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package cam02 provides the CIECAM02 color appearance model: the LMS cone
+// responses of its transform, luminance adaptation, and response compression.
 package cam02
 
 import (

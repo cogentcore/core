@@ -522,8 +522,8 @@ func (fp *FilePicker) addPathToFavorites() { //types:add
 	_, fnm := filepath.Split(dp)
 	hd, _ := homedir.Dir()
 	hd += string(filepath.Separator)
-	if strings.HasPrefix(dp, hd) {
-		dp = filepath.Join("~", strings.TrimPrefix(dp, hd))
+	if after, ok := strings.CutPrefix(dp, hd); ok {
+		dp = filepath.Join("~", after)
 	}
 	if fnm == "" {
 		fnm = dp

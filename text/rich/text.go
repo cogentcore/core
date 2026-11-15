@@ -13,6 +13,7 @@ package rich
 import (
 	"fmt"
 	"slices"
+	"strings"
 	"unicode"
 
 	"cogentcore.org/core/text/textpos"
@@ -262,7 +263,7 @@ func (tx *Text) InsertEndSpecial(at int) *Text {
 func (tx Text) SpecialRange(si int) textpos.Range {
 	sp := RuneToSpecial(tx[si][0])
 	if sp == Nothing {
-		return textpos.Range{-1, -1}
+		return textpos.Range{Start: -1, End: -1}
 	}
 	depth := 1
 	n := len(tx)
@@ -272,14 +273,14 @@ func (tx Text) SpecialRange(si int) textpos.Range {
 		case End:
 			depth--
 			if depth == 0 {
-				return textpos.Range{si, j}
+				return textpos.Range{Start: si, End: j}
 			}
 		case Nothing: // a span of text in the special, as of an element in it
 		default:
 			depth++
 		}
 	}
-	return textpos.Range{-1, -1}
+	return textpos.Range{Start: -1, End: -1}
 }
 
 // AddLink adds a [Link] special with given url and label text.
@@ -336,14 +337,18 @@ func (tx *Text) AddRunes(r []rune) *Text {
 }
 
 func (tx Text) String() string {
-	str := ""
+	var str strings.Builder
 	for _, rs := range tx {
 		s := &Style{}
 		ss := s.FromRunes(rs)
 		sstr := s.String()
-		str += "[" + sstr + "]: \"" + string(ss) + "\"\n"
+		str.WriteString("[")
+		str.WriteString(sstr)
+		str.WriteString("]: \"")
+		str.WriteString(string(ss))
+		str.WriteString("\"\n")
 	}
-	return str
+	return str.String()
 }
 
 // Join joins multiple texts into one text. Just appends the spans.

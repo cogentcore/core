@@ -110,7 +110,7 @@ var attrEscaper = strings.NewReplacer("\\", "\\\\", "\n", "\\n")
 // [otherAttrs] with their values (escaped).
 func attrValues(lines string) map[string]string {
 	m := map[string]string{}
-	for _, l := range strings.Split(lines, "\n") {
+	for l := range strings.SplitSeq(lines, "\n") {
 		if k, v, ok := strings.Cut(l, "="); ok {
 			m[k] = v
 		}
@@ -386,12 +386,7 @@ func siblingSelects(n *html.Node, masks []keyMask) bool {
 		return true
 	}
 	own := ownKeys(n)
-	for _, m := range masks {
-		if own.has(m) {
-			return true
-		}
-	}
-	return false
+	return slices.ContainsFunc(masks, own.has)
 }
 
 // siblingCombinators returns whether a style rule of the context may
@@ -419,9 +414,10 @@ func siblingCombinator(sel string) (sibling, in bool) {
 		ch := sel[i]
 		switch {
 		case quote != 0:
-			if ch == '\\' {
+			switch ch {
+			case '\\':
 				i++
-			} else if ch == quote {
+			case quote:
 				quote = 0
 			}
 		case ch == '"' || ch == '\'':
@@ -623,7 +619,7 @@ func (c *Context) setMatched(n *html.Node, ds []*cssDecl) {
 // ruleDecls returns the declarations of the given rules (indexes in the
 // rules of the context, in order) for the given element, which they
 // select, as [Context.matchDecls] does.
-func (c *Context) ruleDecls(n *html.Node, ids []int) []*cssDecl {
+func (c *Context) ruleDecls(_ *html.Node, ids []int) []*cssDecl {
 	var ds []*cssDecl
 	base := c.cssBase
 	defer func() { c.cssBase = base }()

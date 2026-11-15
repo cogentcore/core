@@ -30,14 +30,14 @@ func TestSpacedLight(t *testing.T) {
 	img := image.NewRGBA(image.Rectangle{Max: sz})
 	draw.Draw(img, img.Bounds(), &image.Uniform{White}, image.Point{}, draw.Src)
 
-	for idx := 0; idx < mx; idx++ {
+	for idx := range mx {
 		c := Spaced(idx)
 		yp := idx / nX
 		xp := idx % nX
 		ys := yp*spY + ysp
 		xs := xp*spX + xsp
-		for y := 0; y < lnY; y++ {
-			for x := 0; x < lnX; x++ {
+		for y := range lnY {
+			for x := range lnX {
 				img.SetRGBA(xs+x, ys+y, c)
 			}
 		}
@@ -46,12 +46,12 @@ func TestSpacedLight(t *testing.T) {
 	chroma := float32(90)
 	tone := float32(65)
 	yp := nY
-	for hue := 0; hue < 360; hue++ {
+	for hue := range 360 {
 		c := hct.New(float32(hue), chroma, tone).AsRGBA()
 
 		ys := yp*spY + ysp
 		xs := hue + xsp
-		for y := 0; y < spY; y++ {
+		for y := range spY {
 			img.SetRGBA(xs, ys+y, c)
 		}
 		for _, h := range hues {
@@ -81,14 +81,14 @@ func TestSpacedDark(t *testing.T) {
 	img := image.NewRGBA(image.Rectangle{Max: sz})
 	draw.Draw(img, img.Bounds(), &image.Uniform{Black}, image.Point{}, draw.Src)
 
-	for idx := 0; idx < mx; idx++ {
+	for idx := range mx {
 		c := Spaced(idx)
 		yp := idx / nX
 		xp := idx % nX
 		ys := yp*spY + ysp
 		xs := xp*spX + xsp
-		for y := 0; y < lnY; y++ {
-			for x := 0; x < lnX; x++ {
+		for y := range lnY {
+			for x := range lnX {
 				img.SetRGBA(xs+x, ys+y, c)
 			}
 		}
@@ -97,12 +97,12 @@ func TestSpacedDark(t *testing.T) {
 	chroma := float32(90)
 	tone := float32(65)
 	yp := nY
-	for hue := 0; hue < 360; hue++ {
+	for hue := range 360 {
 		c := hct.New(float32(hue), chroma, tone).AsRGBA()
 
 		ys := yp*spY + ysp
 		xs := hue + xsp
-		for y := 0; y < spY; y++ {
+		for y := range spY {
 			img.SetRGBA(xs, ys+y, c)
 		}
 		for _, h := range hues {

@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"cogentcore.org/core/base/fileinfo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -126,6 +125,5 @@ func TestFilePickerComplete(t *testing.T) {
 
 		info := fp.SelectedFileInfo()
 		assert.True(t, info == nil || info.Name != "new.go")
-		var _ *fileinfo.FileInfo = info
 	}))
 }

@@ -32,7 +32,7 @@ func TestTextAscii(t *testing.T) {
 		"ABCDEFGHIJKLMNOPQRSTUV",
 		"abcdefghijklmnopqrstuvwxyz",
 	}
-	for fam := rich.SansSerif; fam < rich.FamilyN; fam++ {
+	for fam := range rich.FamilyN {
 		// if fam != rich.Monospace {
 		// 	continue
 		// }
@@ -47,7 +47,7 @@ func TestTextAscii(t *testing.T) {
 			for _, ts := range lines {
 				tx := rich.NewText(fsty, []rune(ts))
 				lns := txtSh.WrapLines(tx, fsty, tsty, sizef)
-				pos := math32.Vector2{5, y}
+				pos := math32.Vec2(5, y)
 				pc.DrawText(lns, pos)
 				y += 20
 			}
@@ -75,8 +75,8 @@ func TestTextMarkup(t *testing.T) {
 		// 	t.Errorf("unexpected text size: %v", tsz)
 		// }
 		// txt.HasOverflow = true
-		pos := math32.Vector2{10, 200}
-		pc.Paint.Transform = math32.Rotate2DAround(math32.DegToRad(-45), pos)
+		pos := math32.Vec2(10, 200)
+		pc.Transform = math32.Rotate2DAround(math32.DegToRad(-45), pos)
 		pc.DrawText(lns, pos)
 	})
 }
@@ -109,7 +109,7 @@ func TestTextLines(t *testing.T) {
 		tx.AddSpan(fsty, []rune(" and ")).AddSpan(&ol, []rune("Overline"))
 
 		lns := txtSh.WrapLines(tx, fsty, tsty, sizef)
-		pos := math32.Vector2{10, 10}
+		pos := math32.Vec2(10, 10)
 		// pc.Paint.Transform = math32.Rotate2DAround(math32.DegToRad(-45), pos)
 		pc.DrawText(lns, pos)
 	})
@@ -141,7 +141,7 @@ func TestTextColors(t *testing.T) {
 		tx.AddSpan(fsty, []rune(" and ")).AddSpan(&gr, []rune("Green"))
 
 		lns := txtSh.WrapLines(tx, fsty, tsty, sizef)
-		pos := math32.Vector2{10, 10}
+		pos := math32.Vec2(10, 10)
 		// pc.Paint.Transform = math32.Rotate2DAround(math32.DegToRad(-45), pos)
 		pc.DrawText(lns, pos)
 	})

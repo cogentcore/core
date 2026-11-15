@@ -6,6 +6,7 @@ package terminal
 
 import (
 	"image"
+	"slices"
 	"strings"
 
 	"cogentcore.org/core/base/fileinfo/mimedata"
@@ -94,11 +95,11 @@ func (vw *View) Init() {
 	vw.AddContextMenu(func(m *core.Scene, pos image.Point) {
 		// those of the terminal, first
 		cms := vw.Terminal.ContextMenus
-		for i := len(cms) - 1; i >= 0; i-- {
+		for _, cm := range slices.Backward(cms) {
 			if m.NumChildren() > 0 {
 				core.NewSeparator(m)
 			}
-			cms[i](m, pos)
+			cm(m, pos)
 		}
 	})
 }

@@ -6,6 +6,7 @@ package core
 
 import (
 	"image"
+	"slices"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
@@ -140,11 +141,11 @@ func (wb *WidgetBase) AddContextMenu(menu func(m *Scene, pos image.Point)) {
 // context menu function.
 func (wb *WidgetBase) applyContextMenus(m *Scene, pos image.Point) {
 	do := func(cms []func(m *Scene, pos image.Point)) {
-		for i := len(cms) - 1; i >= 0; i-- {
+		for _, cm := range slices.Backward(cms) {
 			if m.NumChildren() > 0 {
 				NewSeparator(m)
 			}
-			cms[i](m, pos)
+			cm(m, pos)
 		}
 	}
 	do(wb.ContextMenus)
@@ -215,7 +216,7 @@ type MenuSearcher interface {
 	MenuSearch(items *[]ChooserItem)
 }
 
-// NewWindowFunc, if set, returns the body of a new window of the app, as
+// NewWindowFunc is, if set, a function that returns the body of a new window of the app, as
 // for its main window, made from the window of the given scene, which it
 // can take settings from, as a directory. The new window is run with the
 // size of the window from which it is made, below and to the right of it,

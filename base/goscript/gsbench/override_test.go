@@ -16,7 +16,7 @@ import (
 
 func BenchmarkBytesBufferPointer(b *testing.B) {
 	buf := &bytes.Buffer{}
-	for range b.N {
+	for b.Loop() {
 		buf.Reset()
 		for range 100 {
 			buf.WriteByte('a')
@@ -26,7 +26,7 @@ func BenchmarkBytesBufferPointer(b *testing.B) {
 }
 
 func BenchmarkStringBuilderPointer(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		sb := &strings.Builder{}
 		for range 100 {
 			sb.WriteString("ab")
@@ -37,7 +37,7 @@ func BenchmarkStringBuilderPointer(b *testing.B) {
 
 func BenchmarkTimeMethods(b *testing.B) {
 	t0 := time.Date(2026, 10, 16, 0, 0, 0, 0, time.UTC)
-	for range b.N {
+	for b.Loop() {
 		t := t0
 		var d time.Duration
 		for range 100 {

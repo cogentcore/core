@@ -10,6 +10,7 @@ package rasterx
 
 import (
 	"fmt"
+	"strings"
 
 	"cogentcore.org/core/math32"
 	"golang.org/x/image/math/fixed"
@@ -59,34 +60,34 @@ type Path []fixed.Int26_6
 
 // ToSVGPath returns a string representation of the path
 func (p Path) ToSVGPath() string {
-	s := ""
+	var s strings.Builder
 	for i := 0; i < len(p); {
 		if i != 0 {
-			s += " "
+			s.WriteString(" ")
 		}
 		switch PathCommand(p[i]) {
 		case PathMoveTo:
-			s += fmt.Sprintf("M%4.3f,%4.3f", float32(p[i+1])/64, float32(p[i+2])/64)
+			fmt.Fprintf(&s, "M%4.3f,%4.3f", float32(p[i+1])/64, float32(p[i+2])/64)
 			i += 3
 		case PathLineTo:
-			s += fmt.Sprintf("L%4.3f,%4.3f", float32(p[i+1])/64, float32(p[i+2])/64)
+			fmt.Fprintf(&s, "L%4.3f,%4.3f", float32(p[i+1])/64, float32(p[i+2])/64)
 			i += 3
 		case PathQuadTo:
-			s += fmt.Sprintf("Q%4.3f,%4.3f,%4.3f,%4.3f", float32(p[i+1])/64, float32(p[i+2])/64,
+			fmt.Fprintf(&s, "Q%4.3f,%4.3f,%4.3f,%4.3f", float32(p[i+1])/64, float32(p[i+2])/64,
 				float32(p[i+3])/64, float32(p[i+4])/64)
 			i += 5
 		case PathCubicTo:
-			s += "C" + fmt.Sprintf("C%4.3f,%4.3f,%4.3f,%4.3f,%4.3f,%4.3f", float32(p[i+1])/64, float32(p[i+2])/64,
+			fmt.Fprintf(&s, "C%4.3f,%4.3f,%4.3f,%4.3f,%4.3f,%4.3f", float32(p[i+1])/64, float32(p[i+2])/64,
 				float32(p[i+3])/64, float32(p[i+4])/64, float32(p[i+5])/64, float32(p[i+6])/64)
 			i += 7
 		case PathClose:
-			s += "Z"
+			s.WriteString("Z")
 			i++
 		default:
 			panic("freetype/rasterx: bad pather")
 		}
 	}
-	return s
+	return s.String()
 }
 
 // String returns a readable representation of a Path.

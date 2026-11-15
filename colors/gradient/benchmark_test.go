@@ -14,7 +14,7 @@ import (
 func BenchmarkLinear(b *testing.B) {
 	g := NewLinear().AddStop(colors.White, 0).AddStop(colors.Black, 1)
 	g.Update(1, math32.B2(0, 0, 100, 100), math32.Identity2())
-	for range b.N {
+	for b.Loop() {
 		g.At(40, 40)
 	}
 }

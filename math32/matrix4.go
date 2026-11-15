@@ -185,7 +185,7 @@ func (m *Matrix4) SetMul(other *Matrix4) {
 	m.MulMatrices(m, other)
 }
 
-// SetMulScalar multiplies each element of this matrix by the specified scalar.
+// MulScalar multiplies each element of this matrix by the specified scalar.
 func (m *Matrix4) MulScalar(s float32) {
 	m[0] *= s
 	m[4] *= s
@@ -210,7 +210,7 @@ func (m *Matrix4) MulScalar(s float32) {
 func (m *Matrix4) MulVector3Array(array []float32, start, count int) {
 	var v1 Vector3
 	j := start
-	for i := 0; i < count; i++ {
+	for range count {
 		v1.FromSlice(array, j)
 		mv := v1.MulMatrix4(m)
 		mv.ToSlice(array, j)

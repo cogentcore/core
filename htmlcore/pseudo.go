@@ -44,12 +44,11 @@ func pseudoSelector(sel string) (base, kind string, ok bool) {
 // pseudo-element of the elements under root that the given selector
 // selects.
 func (c *Context) addPseudoRule(root *html.Node, sel, kind string, decls []*css.Declaration, origin cssOrigin) {
-	spec := specificity(sel) + 1 // the pseudo-element
-	if cs := compileSelector(sel); cs != nil {
-		spec = cs.specificity + 1
-	} else {
+	cs := compileSelector(sel)
+	if cs == nil {
 		return
 	}
+	spec := cs.specificity + 1 // the pseudo-element
 	if c.pseudoStyles == nil {
 		c.pseudoStyles = map[pseudoKey][]*cssDecl{}
 	}
@@ -328,14 +327,14 @@ func (c *Context) pseudoContent(n *html.Node, kind string) string {
 func contentText(n *html.Node, v string) string {
 	var sb strings.Builder
 	for i := 0; i < len(v); {
-		switch ch := v[i]; {
-		case ch == '"' || ch == '\'':
+		switch ch := v[i]; ch {
+		case '"', '\'':
 			s, end := cssString(v, i)
 			sb.WriteString(s)
 			i = end
-		case ch == '/': // the alternative text, for speech
+		case '/': // the alternative text, for speech
 			return sb.String()
-		case ch == ' ' || ch == '\t' || ch == '\n':
+		case ' ', '\t', '\n':
 			i++
 		default:
 			j := i

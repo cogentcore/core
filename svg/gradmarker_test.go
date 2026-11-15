@@ -65,13 +65,13 @@ func TestMarkers(t *testing.T) {
 <line id="ln" x1="0" y1="0" x2="1" y2="1" marker-end="url(#notmarker)"/>
 <line id="ln2" x1="0" y1="0" x2="1" y2="1" marker-end="url(#missing)"/>
 </svg>`)
-	pg := sv.FindNamedElement("pg").(Node)
+	pg := sv.FindNamedElement("pg")
 	require.NotNil(t, sv.MarkerByName(pg, "marker-start"))
-	pl := sv.FindNamedElement("pl").(Node)
+	pl := sv.FindNamedElement("pl")
 	assert.NotNil(t, sv.MarkerByName(pl, "marker-end"), "the generic marker property")
-	assert.Nil(t, sv.MarkerByName(sv.FindNamedElement("ln").(Node), "marker-end"), "not a marker")
-	assert.Nil(t, sv.MarkerByName(sv.FindNamedElement("ln2").(Node), "marker-end"), "missing")
-	assert.Nil(t, sv.MarkerByName(sv.FindNamedElement("ln2").(Node), "marker-start"), "none")
+	assert.Nil(t, sv.MarkerByName(sv.FindNamedElement("ln"), "marker-end"), "not a marker")
+	assert.Nil(t, sv.MarkerByName(sv.FindNamedElement("ln2"), "marker-end"), "missing")
+	assert.Nil(t, sv.MarkerByName(sv.FindNamedElement("ln2"), "marker-start"), "none")
 
 	img := sv.RenderImage().(*image.RGBA)
 	c := img.RGBAAt(50*img.Bounds().Dx()/100, 10*img.Bounds().Dy()/100)

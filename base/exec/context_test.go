@@ -41,6 +41,6 @@ func TestRunIOContext(t *testing.T) {
 	assert.Greater(t, took, 600*time.Millisecond, "ignores the interrupt")
 	assert.Less(t, took, 2*time.Second, "killed after InterruptWait")
 
-	// without a context
-	assert.NoError(t, c.RunIOContext(nil, NewCmdIO(c), "true"))
+	// without a context that can be done
+	assert.NoError(t, c.RunIOContext(context.Background(), NewCmdIO(c), "true"))
 }

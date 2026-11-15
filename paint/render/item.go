@@ -20,7 +20,7 @@ type ContextPush struct {
 	Context Context
 }
 
-// interface assertion.
+// IsRenderItem marks this as a render item (interface assertion).
 func (p *ContextPush) IsRenderItem() {
 }
 
@@ -37,6 +37,6 @@ func (p *ContextPop) String() string {
 	return "ctx-pop"
 }
 
-// interface assertion.
+// IsRenderItem marks this as a render item (interface assertion).
 func (p *ContextPop) IsRenderItem() {
 }

@@ -90,10 +90,7 @@ func (st *Stage) runPopup() *Stage {
 	sc.SceneGeom.Size = maxGeom.Size
 	sc.SceneGeom.Pos = st.Pos
 	sz := sc.contentSize(maxGeom.Size)
-	bigPopup := false
-	if usingWinGeom && 4*sz.X*sz.Y > 3*msc.SceneGeom.Size.X*msc.SceneGeom.Size.Y { // reasonable fraction
-		bigPopup = true
-	}
+	bigPopup := usingWinGeom && 4*sz.X*sz.Y > 3*msc.SceneGeom.Size.X*msc.SceneGeom.Size.Y // reasonable fraction
 	scrollWd := int(sc.Styles.ScrollbarWidth.Dots)
 	fontHt := sc.Styles.Font.FontHeight()
 	if fontHt == 0 {
@@ -116,10 +113,7 @@ func (st *Stage) runPopup() *Stage {
 	case TooltipStage:
 		sc.SceneGeom.Pos.X = opos.X
 		// default to tooltip above element
-		ypos := opos.Y - sz.Y - 10
-		if ypos < 0 {
-			ypos = 0
-		}
+		ypos := max(opos.Y-sz.Y-10, 0)
 		// however, if we are within 10 pixels of the element,
 		// we put the tooltip below it instead of above it
 		maxy := ypos + sz.Y
@@ -217,8 +211,8 @@ func (st *Stage) popupHandleEvent(e events.Event) {
 }
 
 // topIsModal returns true if there is a Top PopupStage and it is Modal.
-func (pm *stages) topIsModal() bool {
-	top := pm.top()
+func (sm *stages) topIsModal() bool {
+	top := sm.top()
 	if top == nil {
 		return false
 	}
@@ -227,8 +221,8 @@ func (pm *stages) topIsModal() bool {
 
 // popupHandleEvent processes Popup events.
 // requires outer RenderContext mutex.
-func (pm *stages) popupHandleEvent(e events.Event) {
-	top := pm.top()
+func (sm *stages) popupHandleEvent(e events.Event) {
+	top := sm.top()
 	if top == nil {
 		return
 	}
@@ -237,8 +231,8 @@ func (pm *stages) popupHandleEvent(e events.Event) {
 	// we must get the top stage that does not ignore events
 	if top.ignoreEvents {
 		var ntop *Stage
-		for i := pm.stack.Len() - 1; i >= 0; i-- {
-			s := pm.stack.Values[i]
+		for i := sm.stack.Len() - 1; i >= 0; i-- {
+			s := sm.stack.Values[i]
 			if !s.ignoreEvents {
 				ntop = s
 				break
@@ -253,7 +247,7 @@ func (pm *stages) popupHandleEvent(e events.Event) {
 
 	if e.HasPos() {
 		pos := e.WindowPos()
-		if top.pressOpened && pm.pressOpenedEvent(top, e) {
+		if top.pressOpened && sm.pressOpenedEvent(top, e) {
 			e.SetHandled()
 			return
 		}
@@ -263,7 +257,7 @@ func (pm *stages) popupHandleEvent(e events.Event) {
 			e.SetHandled()
 			return
 		}
-		if pm.parentMenuPress(top, e) {
+		if sm.parentMenuPress(top, e) {
 			e.SetHandled()
 			return
 		}
@@ -276,8 +270,8 @@ func (pm *stages) popupHandleEvent(e events.Event) {
 		}
 		// otherwise not Handled, so pass on to first lower stage
 		// that accepts events and is in bounds
-		for i := pm.stack.Len() - 1; i >= 0; i-- {
-			s := pm.stack.Values[i]
+		for i := sm.stack.Len() - 1; i >= 0; i-- {
+			s := sm.stack.Values[i]
 			ss := s.Scene
 			if !s.ignoreEvents && pos.In(ss.SceneGeom.Bounds()) {
 				s.popupHandleEvent(e)
@@ -299,12 +293,12 @@ func (pm *stages) popupHandleEvent(e events.Event) {
 // button over an item clicks it, other than one with a submenu, which stays
 // open. Releasing it over the context button is a click on it, which leaves
 // the menu open, and releasing it anywhere else closes the menus.
-func (pm *stages) pressOpenedEvent(top *Stage, e events.Event) bool {
+func (sm *stages) pressOpenedEvent(top *Stage, e events.Event) bool {
 	if e.Type() != events.MouseDrag && e.Type() != events.MouseUp {
 		return false
 	}
 	pos := e.WindowPos()
-	chain := pm.menuChain()
+	chain := sm.menuChain()
 	if len(chain) == 0 {
 		return false
 	}
@@ -331,7 +325,7 @@ func (pm *stages) pressOpenedEvent(top *Stage, e events.Event) bool {
 			n--
 		}
 		for _, s := range chain[:n] {
-			pm.deleteStage(s)
+			sm.deleteStage(s)
 		}
 		chain[n].pressOpened = true
 		under.popupHandleEvent(mouseClone(e, events.MouseMove))
@@ -366,7 +360,7 @@ func (pm *stages) pressOpenedEvent(top *Stage, e events.Event) bool {
 			return true
 		}
 		for _, s := range chain[:idx] {
-			pm.deleteStage(s)
+			sm.deleteStage(s)
 		}
 		// a click on the item
 		under.popupHandleEvent(mouseClone(e, events.MouseDown))
@@ -380,10 +374,10 @@ func (pm *stages) pressOpenedEvent(top *Stage, e events.Event) bool {
 // menuChain returns the menu stages at the top of the stack, from the top
 // one down: a menu and its submenus, skipping the stages that ignore
 // events, such as the tooltip of an item.
-func (pm *stages) menuChain() []*Stage {
+func (sm *stages) menuChain() []*Stage {
 	var chain []*Stage
-	for i := pm.stack.Len() - 1; i >= 0; i-- {
-		s := pm.stack.Values[i]
+	for i := sm.stack.Len() - 1; i >= 0; i-- {
+		s := sm.stack.Values[i]
 		if s.ignoreEvents {
 			continue
 		}
@@ -413,19 +407,19 @@ func menuButtonAt(st *Stage, pos image.Point) *Button {
 // returning whether it did: the menus above that menu are closed, and it
 // gets the press, so that its items can be clicked, such as to open
 // another submenu.
-func (pm *stages) parentMenuPress(top *Stage, e events.Event) bool {
+func (sm *stages) parentMenuPress(top *Stage, e events.Event) bool {
 	if top.Type != MenuStage || e.Type() != events.MouseDown {
 		return false
 	}
 	pos := e.WindowPos()
-	chain := pm.menuChain()
+	chain := sm.menuChain()
 	for i := 1; i < len(chain); i++ {
 		s := chain[i]
 		if s.Scene == nil || !pos.In(s.Scene.SceneGeom.Bounds()) {
 			continue
 		}
 		for _, a := range chain[:i] {
-			pm.deleteStage(a)
+			sm.deleteStage(a)
 		}
 		s.popupHandleEvent(e)
 		return true

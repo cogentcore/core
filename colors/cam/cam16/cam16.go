@@ -17,6 +17,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package cam16 provides the CAM16 color appearance model, and its CAM16-UCS
+// uniform color space, under given viewing conditions.
 package cam16
 
 import (
@@ -82,7 +84,7 @@ func FromUCS(j, a, b float32) *CAM {
 	return FromUCSView(j, a, b, NewStdView())
 }
 
-// FromUCS returns CAM values from the given CAM16-UCS coordinates
+// FromUCSView returns CAM values from the given CAM16-UCS coordinates
 // (jstar, astar, and bstar), using the given viewing conditions
 func FromUCSView(j, a, b float32, vw *View) *CAM {
 	m := math32.Sqrt(a*a + b*b)
@@ -167,7 +169,7 @@ func (cam *CAM) XYZ() (x, y, z float32) {
 	return cam.XYZView(NewStdView())
 }
 
-// XYZ returns the CAM color as XYZ coordinates
+// XYZView returns the CAM color as XYZ coordinates
 // under the given viewing conditions.
 // Returns 100-base XYZ coordinates.
 func (cam *CAM) XYZView(vw *View) (x, y, z float32) {

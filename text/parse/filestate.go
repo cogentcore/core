@@ -6,8 +6,6 @@ package parse
 
 import (
 	"fmt"
-	"path/filepath"
-	"strings"
 	"sync"
 
 	"cogentcore.org/core/base/fileinfo"
@@ -285,11 +283,6 @@ func (fs *FileState) FindNamePrefixScoped(seed string, scope syms.SymMap, matche
 // and given context name (e.g., package name)
 func (fs *FileState) NextAnonName(ctxt string) string {
 	fs.AnonCtr++
-	fn := filepath.Base(fs.Src.Filename)
-	ext := filepath.Ext(fn)
-	if ext != "" {
-		fn = strings.TrimSuffix(fn, ext)
-	}
 	return fmt.Sprintf("anon_%s_%d", ctxt, fs.AnonCtr)
 }
 

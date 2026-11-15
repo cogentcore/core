@@ -9,6 +9,6 @@ package filetree
 import "context"
 
 // watchDirs does nothing on platforms without file system watching.
-func watchDirs(ctx context.Context, dirs []string, ready chan struct{}) (*watchBackend, error) {
+func watchDirs(_ context.Context, _ []string, _ chan struct{}) (*watchBackend, error) {
 	return nil, nil
 }

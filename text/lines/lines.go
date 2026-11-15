@@ -731,7 +731,7 @@ func (ls *Lines) insertTextRectImpl(tbe *textpos.Edit) *textpos.Edit {
 		ls.linesInserted(ie)
 	}
 	nch := (ed.Char - st.Char)
-	for i := 0; i < nlns; i++ {
+	for i := range nlns {
 		ln := st.Line + i
 		lr := ls.lines[ln]
 		ir := tbe.Text[i]

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package cie provides the CIE color spaces (XYZ and L*a*b*), standard
+// illuminants, and the conversions of sRGB to and from them.
 package cie
 
 import "cogentcore.org/core/math32"

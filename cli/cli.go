@@ -31,7 +31,7 @@ import (
 // true, the error result of Run does not need to be handled. Run uses
 // [os.Args] for its arguments.
 func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
-	cs, err := CmdsFromCmdOrFuncs[T, C](cmds)
+	cs, err := CmdsFromCmdOrFuncs[T](cmds)
 	if err != nil {
 		err := fmt.Errorf("internal/programmer error: error getting commands from given commands: %w", err)
 		if opts.Fatal {

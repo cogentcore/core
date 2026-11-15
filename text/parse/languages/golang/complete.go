@@ -446,7 +446,6 @@ func (gl *GoLang) CompleteASTStart(ast *parser.AST, scope token.Tokens) (start, 
 		prv = cur
 		cur = nxt
 	}
-	return cur, last
 }
 
 // CompleteEdit returns the completion edit data for integrating the selected completion

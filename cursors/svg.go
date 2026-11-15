@@ -36,7 +36,7 @@ func replaceColors(b []byte) []byte {
 		"#ff0": colors.Scheme.Warn.Base,
 	}
 	for old, clr := range m {
-		b = bytes.ReplaceAll(b, []byte(fmt.Sprintf("%q", old)), []byte(fmt.Sprintf("%q", colors.AsHex(colors.ToUniform(clr)))))
+		b = bytes.ReplaceAll(b, fmt.Appendf(nil, "%q", old), fmt.Appendf(nil, "%q", colors.AsHex(colors.ToUniform(clr))))
 	}
 	return b
 }

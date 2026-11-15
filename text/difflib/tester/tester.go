@@ -1,3 +1,5 @@
+// Package tester provides random strings for the tests and benchmarks of
+// difflib.
 package tester
 
 import (

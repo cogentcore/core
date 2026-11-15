@@ -16,9 +16,9 @@ import (
 
 var (
 	// ErrUnexpectedAtsign is an error for unexpected @ in {}.
-	ErrUnexpectedAtsign = errors.New("Unexpected @ sign")
+	ErrUnexpectedAtsign = errors.New("unexpected @ sign")
 	// ErrUnknownStringVar is an error for looking up undefined string var.
-	ErrUnknownStringVar = errors.New("Unknown string variable")
+	ErrUnknownStringVar = errors.New("unknown string variable")
 )
 
 // ErrParse is a parse error.

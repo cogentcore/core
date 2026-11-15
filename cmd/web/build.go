@@ -140,7 +140,7 @@ func makeFiles(c *config.Config) error {
 	}
 
 	prindex := &bcontent.PreRenderPage{
-		Page: bcontent.Page{Name: c.Name},
+		Name: c.Name,
 		HTML: preRenderHTML,
 	}
 	if c.About != "" {

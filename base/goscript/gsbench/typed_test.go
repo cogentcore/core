@@ -14,7 +14,7 @@ var sinkU32 uint32
 // BenchmarkFloat32Append appends the coordinates of 1000 vertices to a nil
 // float32 slice.
 func BenchmarkFloat32Append(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		var s []float32
 		for i := range 1000 {
 			x := float32(i)
@@ -28,7 +28,7 @@ func BenchmarkFloat32Append(b *testing.B) {
 // float32 slice made to hold them, as mesh generators do.
 func BenchmarkFloat32Fill(b *testing.B) {
 	s := make([]float32, 3000)
-	for range b.N {
+	for b.Loop() {
 		for i := range 1000 {
 			x := float32(i)
 			s[3*i] = x
@@ -46,7 +46,7 @@ func BenchmarkUint32Sum(b *testing.B) {
 	for i := range s {
 		s[i] = uint32(i) * 7
 	}
-	for range b.N {
+	for b.Loop() {
 		var t uint32
 		for _, v := range s {
 			t += v
@@ -61,7 +61,7 @@ func BenchmarkUint32Sum(b *testing.B) {
 // BenchmarkSmallFloat32Slices makes 1000 small float32 slices, as code
 // that returns vectors in slices does.
 func BenchmarkSmallFloat32Slices(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		var t float32
 		for i := range 1000 {
 			v := []float32{float32(i), 1, 2}

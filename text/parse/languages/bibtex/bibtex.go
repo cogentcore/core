@@ -7,6 +7,7 @@
 // Licensed under an Apache-2.0 license
 // and presumably Copyright (c) 2017 by Nick Ng
 
+// Package bibtex reads BibTeX files of bibliographic references.
 package bibtex
 
 import (
@@ -172,16 +173,16 @@ func (bib *BibTex) GetStringVar(key string) *BibVar {
 func (bib *BibTex) String() string {
 	var bibtex bytes.Buffer
 	for _, entry := range bib.Entries {
-		bibtex.WriteString(fmt.Sprintf("@%s{%s,\n", entry.Type, entry.CiteName))
+		fmt.Fprintf(&bibtex, "@%s{%s,\n", entry.Type, entry.CiteName)
 		for key, val := range entry.Fields {
 			if i, err := strconv.Atoi(strings.TrimSpace(val.String())); err == nil {
-				bibtex.WriteString(fmt.Sprintf("  %s = %d,\n", key, i))
+				fmt.Fprintf(&bibtex, "  %s = %d,\n", key, i)
 			} else {
-				bibtex.WriteString(fmt.Sprintf("  %s = {%s},\n", key, strings.TrimSpace(val.String())))
+				fmt.Fprintf(&bibtex, "  %s = {%s},\n", key, strings.TrimSpace(val.String()))
 			}
 		}
 		bibtex.Truncate(bibtex.Len() - 2)
-		bibtex.WriteString(fmt.Sprintf("\n}\n"))
+		fmt.Fprintf(&bibtex, "\n}\n")
 	}
 	return bibtex.String()
 }
@@ -190,22 +191,22 @@ func (bib *BibTex) String() string {
 func (bib *BibTex) RawString() string {
 	var bibtex bytes.Buffer
 	for k, strvar := range bib.StringVar {
-		bibtex.WriteString(fmt.Sprintf("@string{%s = {%s}}\n", k, strvar.String()))
+		fmt.Fprintf(&bibtex, "@string{%s = {%s}}\n", k, strvar.String())
 	}
 	for _, preamble := range bib.Preambles {
-		bibtex.WriteString(fmt.Sprintf("@preamble{%s}\n", preamble.RawString()))
+		fmt.Fprintf(&bibtex, "@preamble{%s}\n", preamble.RawString())
 	}
 	for _, entry := range bib.Entries {
-		bibtex.WriteString(fmt.Sprintf("@%s{%s,\n", entry.Type, entry.CiteName))
+		fmt.Fprintf(&bibtex, "@%s{%s,\n", entry.Type, entry.CiteName)
 		for key, val := range entry.Fields {
 			if i, err := strconv.Atoi(strings.TrimSpace(val.String())); err == nil {
-				bibtex.WriteString(fmt.Sprintf("  %s = %d,\n", key, i))
+				fmt.Fprintf(&bibtex, "  %s = %d,\n", key, i)
 			} else {
-				bibtex.WriteString(fmt.Sprintf("  %s = %s,\n", key, val.RawString()))
+				fmt.Fprintf(&bibtex, "  %s = %s,\n", key, val.RawString())
 			}
 		}
 		bibtex.Truncate(bibtex.Len() - 2)
-		bibtex.WriteString(fmt.Sprintf("\n}\n"))
+		fmt.Fprintf(&bibtex, "\n}\n")
 	}
 	return bibtex.String()
 }

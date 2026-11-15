@@ -59,9 +59,7 @@ func (sm *stages) list() []*Stage {
 	defer sm.Unlock()
 
 	sts := make([]*Stage, 0, sm.stack.Len())
-	for _, st := range sm.stack.Values {
-		sts = append(sts, st)
-	}
+	sts = append(sts, sm.stack.Values...)
 	return sts
 }
 

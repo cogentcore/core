@@ -94,7 +94,9 @@ func (c *Context) svgForRender(n *html.Node) *html.Node {
 				if i > 0 {
 					sb.WriteString("; ")
 				}
-				sb.WriteString(p + ": " + style[p])
+				sb.WriteString(p)
+				sb.WriteString(": ")
+				sb.WriteString(style[p])
 			}
 			cn.Attr = append(cn.Attr, html.Attribute{Key: "style", Val: sb.String()})
 		}
@@ -172,7 +174,7 @@ func svgTransform(env *lengthEnv, v string) (string, bool) {
 			var f float32
 			switch name {
 			case "rotate", "skew", "skewx", "skewy":
-				if _, err := strconv.ParseFloat(strings.TrimRight(a, "degradtun"), 32); err != nil {
+				if _, err := strconv.ParseFloat(strings.TrimRight(a, "degratun"), 32); err != nil {
 					return "", false
 				}
 				f = cssAngle(a)
@@ -203,7 +205,7 @@ func svgTransform(env *lengthEnv, v string) (string, bool) {
 	return strings.Join(out, " "), len(out) > 0
 }
 
-func handleImage(ctx *Context, tag string) core.Widget {
+func handleImage(ctx *Context, _ string) core.Widget {
 	n := ctx.Node
 	src, density := ctx.imageSource(n) // of its srcset or picture, or its src
 	if src == "" {

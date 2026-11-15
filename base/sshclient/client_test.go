@@ -27,7 +27,7 @@ func TestReconnect(t *testing.T) {
 	cl.Timeout = 300 * time.Millisecond
 	require.NoError(t, cl.Connect(s.Addr))
 	t.Cleanup(cl.Close)
-	sio := &exec.StdIOState{StdIO: exec.StdIO{Out: io.Discard, Err: io.Discard}}
+	sio := &exec.StdIOState{Out: io.Discard, Err: io.Discard}
 	output := func(cmd string, args ...string) (string, error) {
 		return cl.Output(sio, cmd, args...)
 	}

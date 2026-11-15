@@ -96,8 +96,8 @@ func TestInlineBlockInHeading(t *testing.T) {
 		})
 	})
 	if assert.NotNil(t, big) && assert.NotNil(t, small) {
-		assert.Contains(t, small.Text, "<span style=\"color: #54595d\">[ ⁠</span>", "the margin of ::before is an en space, in its color")
-		assert.Contains(t, small.Text, "edit⁠ ]", "the last margin declaration of the side applies")
+		assert.Contains(t, small.Text, "<span style=\"color: #54595d\">[ \u2060</span>", "the margin of ::before is an en space, in its color")
+		assert.Contains(t, small.Text, "edit\u2060 ]", "the last margin declaration of the side applies")
 		bb, sb := big.Geom.TotalBBox, small.Geom.TotalBBox
 		assert.Less(t, sb.Dy(), bb.Dy()/2, "the font size of the span")
 		assert.Less(t, sb.Max.Y, bb.Max.Y, "on the baseline, above the descent of the heading")

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package fonts provides the fonts that are embedded in apps (Noto Sans and
+// Roboto Mono by default), the fonts added at run time, and their information.
 package fonts
 
 import (

@@ -16,6 +16,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"sort"
+	"strings"
 
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/text/textpos"
@@ -171,7 +172,7 @@ func (p ErrorList) Report(maxN int, basepath string, showSrc, showRule bool) str
 	if ne == 0 {
 		return ""
 	}
-	str := ""
+	var str strings.Builder
 	if maxN == 0 {
 		maxN = ne
 	} else {
@@ -181,13 +182,14 @@ func (p ErrorList) Report(maxN int, basepath string, showSrc, showRule bool) str
 	lstln := -1
 	lstfn := ""
 	rest := 0 // the number of errors after the last one reported
-	for ei := 0; ei < ne; ei++ {
+	for ei := range ne {
 		er := p[ei]
 		// only one error is reported per line of a file
 		if er.Pos.Line == lstln && er.Filename == lstfn {
 			continue
 		}
-		str += p[ei].Report(basepath, showSrc, showRule) + "<br>\n"
+		str.WriteString(p[ei].Report(basepath, showSrc, showRule))
+		str.WriteString("<br>\n")
 		lstln = er.Pos.Line
 		lstfn = er.Filename
 		cnt++
@@ -197,9 +199,9 @@ func (p ErrorList) Report(maxN int, basepath string, showSrc, showRule bool) str
 		}
 	}
 	if rest > 0 {
-		str += fmt.Sprintf("... and %v more errors<br>\n", rest)
+		fmt.Fprintf(&str, "... and %v more errors<br>\n", rest)
 	}
-	return str
+	return str.String()
 }
 
 // PrintError is a utility function that prints a list of errors to w,

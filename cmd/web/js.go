@@ -304,7 +304,7 @@ func jsOverrideDirs(tags string) ([]string, error) {
 	}
 	var dirs []string
 	seen := map[string]bool{}
-	for _, dir := range strings.Split(out, "\n") {
+	for dir := range strings.SplitSeq(out, "\n") {
 		dir = strings.TrimSpace(dir)
 		if dir == "" || seen[dir] {
 			continue

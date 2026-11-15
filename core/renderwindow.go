@@ -145,7 +145,7 @@ type renderWindow struct {
 	// and each time one completes, it is decremented. This ensures
 	// everything is synchronized. Basically a [sync.WaitGroup] but we
 	// need to just bail if not done, not wait.
-	winRenderCounter int32
+	winRenderCounter atomic.Int32
 }
 
 // newRenderWindow creates a new window with given internal name handle,
@@ -735,7 +735,7 @@ func (w *renderWindow) renderWindow() {
 	// if it goes idle in this pass (see idle.go)
 	w.paintWanted.Store(false)
 
-	if atomic.LoadInt32(&w.winRenderCounter) > 0 { // still working
+	if w.winRenderCounter.Load() > 0 { // still working
 		w.flags.SetFlag(true, winRenderSkipped)
 		if DebugSettings.WindowRenderTrace {
 			log.Printf("RenderWindow: still rendering, skipped: %v\n", w.name)
@@ -879,7 +879,7 @@ func (w *renderWindow) renderWindow() {
 
 	w.SystemWindow.Unlock()
 	if offscreen || w.flags.HasFlag(winResize) || sinceResize < 500*time.Millisecond {
-		atomic.AddInt32(&w.winRenderCounter, 1)
+		w.winRenderCounter.Add(1)
 		w.renderAsync(cp)
 		if w.flags.HasFlag(winResize) {
 			w.lastResize.Store(time.Now().UnixNano())
@@ -889,7 +889,7 @@ func (w *renderWindow) renderWindow() {
 		// note: it is critical to set *before* going into loop
 		// because otherwise we can lose an entire pass before the goroutine starts!
 		// function will turn flag off when it finishes.
-		atomic.AddInt32(&w.winRenderCounter, 1)
+		w.winRenderCounter.Add(1)
 		go w.renderAsync(cp)
 	}
 }
@@ -899,7 +899,7 @@ func (w *renderWindow) renderWindow() {
 // It calls the Compose function on the given composer.
 func (w *renderWindow) renderAsync(cp composer.Composer) {
 	if !w.SystemWindow.Lock() {
-		atomic.AddInt32(&w.winRenderCounter, -1)
+		w.winRenderCounter.Add(-1)
 		// fmt.Println("renderAsync SystemWindow lock fail")
 		return
 	}
@@ -908,7 +908,7 @@ func (w *renderWindow) renderAsync(cp composer.Composer) {
 	cp.Compose()
 	// pr.End()
 	w.SystemWindow.Unlock()
-	atomic.AddInt32(&w.winRenderCounter, -1)
+	w.winRenderCounter.Add(-1)
 }
 
 // RenderSource returns the [render.Render] state from the [Scene.Painter].

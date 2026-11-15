@@ -212,7 +212,7 @@ func (vl *Value) ReleaseRead() {
 	}
 }
 
-// NilBufferCheckCheck checks if buffer is nil, returning error if so
+// NilBufferCheck checks if buffer is nil, returning error if so
 func (vl *Value) NilBufferCheck() error {
 	if vl.buffer == nil {
 		return fmt.Errorf("gpu.Value NilBufferCheck: buffer is nil for value: %s", vl.Name)
@@ -467,7 +467,7 @@ func (vl *Value) textureChanged(prior *wgpu.TextureView) {
 // for [Storage] values only. Automatically called for !ReadOnly.
 // Read buffer is needed for reading values back from the GPU.
 func (vl *Value) CreateReadBuffer() error {
-	if !(vl.role == Storage || vl.role == StorageTexture) || vl.vvar.ReadOnly {
+	if (vl.role != Storage && vl.role != StorageTexture) || vl.vvar.ReadOnly {
 		return nil
 	}
 	sz := vl.MemSize()

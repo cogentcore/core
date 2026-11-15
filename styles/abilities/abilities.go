@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package abilities provides the abilities of widgets: what they can do,
+// as be pressed, focused, or scrolled.
 package abilities
 
 //go:generate core generate

@@ -158,27 +158,27 @@ func Edits1(word string) []string {
 		splits = append(splits, Pair{word[:i], word[i:]})
 	}
 
-	total_set := []string{}
+	totalSet := []string{}
 	for _, elem := range splits {
 
 		//deletion
 		if len(elem.str2) > 0 {
-			total_set = append(total_set, elem.str1+elem.str2[1:])
+			totalSet = append(totalSet, elem.str1+elem.str2[1:])
 		} else {
-			total_set = append(total_set, elem.str1)
+			totalSet = append(totalSet, elem.str1)
 		}
 
 	}
 
 	// Special case ending in "ies" or "ys"
 	if strings.HasSuffix(word, "ies") {
-		total_set = append(total_set, word[:len(word)-3]+"ys")
+		totalSet = append(totalSet, word[:len(word)-3]+"ys")
 	}
 	if strings.HasSuffix(word, "ys") {
-		total_set = append(total_set, word[:len(word)-2]+"ies")
+		totalSet = append(totalSet, word[:len(word)-2]+"ies")
 	}
 
-	return total_set
+	return totalSet
 }
 
 // For a given input term, suggest some alternatives.

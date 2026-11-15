@@ -69,17 +69,17 @@ type glyphKey struct {
 	oy  uint8
 }
 
-func (fc *glyphCache) init() {
-	fc.glyphs = make(map[*font.Face]map[glyphKey]*image.Alpha)
-	fc.maxSize = image.Point{glyphMaxSize, glyphMaxSize}
-	sz := fc.maxSize
-	fc.image = image.NewRGBA(image.Rectangle{Max: sz})
-	fc.imgSpanner = scan.NewImgSpanner(fc.image)
-	fc.scanner = scan.NewScanner(fc.imgSpanner, sz.X, sz.Y)
-	fc.filler = NewFiller(sz.X, sz.Y, fc.scanner)
-	fc.filler.SetWinding(true)
-	fc.filler.SetColor(colors.Uniform(color.Black))
-	fc.scanner.SetClip(fc.image.Bounds())
+func (gc *glyphCache) init() {
+	gc.glyphs = make(map[*font.Face]map[glyphKey]*image.Alpha)
+	gc.maxSize = image.Point{glyphMaxSize, glyphMaxSize}
+	sz := gc.maxSize
+	gc.image = image.NewRGBA(image.Rectangle{Max: sz})
+	gc.imgSpanner = scan.NewImgSpanner(gc.image)
+	gc.scanner = scan.NewScanner(gc.imgSpanner, sz.X, sz.Y)
+	gc.filler = NewFiller(sz.X, sz.Y, gc.scanner)
+	gc.filler.SetWinding(true)
+	gc.filler.SetColor(colors.Uniform(color.Black))
+	gc.scanner.SetClip(gc.image.Bounds())
 }
 
 // Glyph returns an existing cached glyph or a newly rendered one,
@@ -126,7 +126,7 @@ func (gc *glyphCache) Glyph(face *font.Face, g *shaping.Glyph, outline font.Glyp
 }
 
 // renderGlyph renders the given glyph and caches the result.
-func (gc *glyphCache) renderGlyph(face *font.Face, gid font.GID, g *shaping.Glyph, outline font.GlyphOutline, size image.Point, scale float32, xo, yo int) *image.Alpha {
+func (gc *glyphCache) renderGlyph(_ *font.Face, _ font.GID, g *shaping.Glyph, outline font.GlyphOutline, size image.Point, scale float32, xo, yo int) *image.Alpha {
 	// clear target:
 	draw.Draw(gc.image, gc.image.Bounds(), colors.Uniform(color.Transparent), image.Point{0, 0}, draw.Src)
 

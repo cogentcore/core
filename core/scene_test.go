@@ -88,8 +88,10 @@ func TestResizeToContentAsync(t *testing.T) {
 	// The resizes of the goroutines above are done once we have their lock,
 	// and the snackbar timers are done after waiting for them.
 	time.Sleep(50 * time.Millisecond)
-	rw.resizeMu.Lock()
-	rw.resizeMu.Unlock()
+	func() { // (waits for them)
+		rw.resizeMu.Lock()
+		defer rw.resizeMu.Unlock()
+	}()
 	b.waitNoEvents(rw)
 	rw.waitRenderDone()
 	rc := sc.renderContext()

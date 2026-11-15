@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"slices"
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/fsx"
@@ -128,13 +129,7 @@ func (br *Browser) diffDirsAt(pathA, pathB string, node *Node, excludeFile func(
 	fsb := fsx.Filenames(pathB)
 
 	for _, fa := range fsa {
-		isDir := false
-		for _, pa := range da {
-			if fa == pa {
-				isDir = true
-				break
-			}
-		}
+		isDir := slices.Contains(da, fa)
 		if isDir {
 			continue
 		}

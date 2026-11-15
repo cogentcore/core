@@ -13,6 +13,7 @@ var _ = register(func() {
 			"AppBundles":        reflect.ValueOf(&p_cogentcore_org_core_filetree.AppBundles),
 			"AsNode":            reflect.ValueOf(p_cogentcore_org_core_filetree.AsNode),
 			"AsTree":            reflect.ValueOf(p_cogentcore_org_core_filetree.AsTree),
+			"CopyFS":            reflect.ValueOf((*p_cogentcore_org_core_filetree.CopyFS)(nil)),
 			"DirFlagMap":        reflect.ValueOf((*p_cogentcore_org_core_filetree.DirFlagMap)(nil)),
 			"FileChange":        reflect.ValueOf((*p_cogentcore_org_core_filetree.FileChange)(nil)),
 			"Filer":             reflect.ValueOf((*p_cogentcore_org_core_filetree.Filer)(nil)),

@@ -9,6 +9,7 @@ package textpos
 import (
 	"fmt"
 	"slices"
+	"strings"
 	"time"
 
 	"cogentcore.org/core/text/runes"
@@ -195,16 +196,17 @@ func (te *Edit) AdjustRegion(reg Region) Region {
 }
 
 func (te *Edit) String() string {
-	str := te.Region.String()
+	var str strings.Builder
+	str.WriteString(te.Region.String())
 	if te.Rect {
-		str += " [Rect]"
+		str.WriteString(" [Rect]")
 	}
 	if te.Delete {
-		str += " [Delete]"
+		str.WriteString(" [Delete]")
 	}
-	str += fmt.Sprintf(" Gp: %d\n", te.Group)
+	fmt.Fprintf(&str, " Gp: %d\n", te.Group)
 	for li := range te.Text {
-		str += fmt.Sprintf("%d\t%s\n", li, string(te.Text[li]))
+		fmt.Fprintf(&str, "%d\t%s\n", li, string(te.Text[li]))
 	}
-	return str
+	return str.String()
 }

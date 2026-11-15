@@ -39,7 +39,7 @@ func MapAdd(mv any) {
 	mvtyp := mpvnp.Type()
 	valtyp := MapValueType(mv)
 	if valtyp.Kind() == reflect.Interface && valtyp.String() == "interface {}" {
-		valtyp = reflect.TypeOf("")
+		valtyp = reflect.TypeFor[string]()
 	}
 	nkey := reflect.New(MapKeyType(mv))
 	nval := reflect.New(valtyp)
@@ -156,8 +156,8 @@ func MapValueSort(mpvnp reflect.Value, keys []reflect.Value, ascending bool) err
 	}
 
 	// last resort!
-	switch {
-	case vk == reflect.String:
+	switch vk {
+	case reflect.String:
 		sort.Slice(keys, func(i, j int) bool {
 			iv := Underlying(mpvnp.MapIndex(keys[i])).String()
 			jv := Underlying(mpvnp.MapIndex(keys[j])).String()

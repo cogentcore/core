@@ -28,7 +28,7 @@ func BenchmarkUploadFloats(b *testing.B) {
 	}
 	array := js.Global().Get("Uint8Array").New(4 * benchFloats)
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		js.CopyBytesToJS(array, sliceToBytes(f))
 	}
 }
@@ -40,7 +40,7 @@ func BenchmarkReadbackFloats(b *testing.B) {
 	f := make([]float32, benchFloats)
 	src := js.Global().Get("Uint8Array").New(4 * benchFloats)
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		mapped := make([]byte, 4*benchFloats)
 		js.CopyBytesToGo(mapped, src)
 		readBytesInto(f, mapped)
@@ -60,7 +60,7 @@ func BenchmarkUploadStructs(b *testing.B) {
 		v[i].A = float32(i)
 	}
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		sliceToBytes(v)
 	}
 }
@@ -120,7 +120,7 @@ func BenchmarkUploadObject(b *testing.B) {
 	ob[0].Matrix.SetIdentity()
 	array := js.Global().Get("Uint8Array").New(192)
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		js.CopyBytesToJS(array, sliceToBytes(ob))
 	}
 }

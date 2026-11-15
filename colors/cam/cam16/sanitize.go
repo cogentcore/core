@@ -41,7 +41,7 @@ func SanitizeRadians(angle float32) float32 {
 
 // InCyclicOrder returns true a, b, c are in order around a circle
 func InCyclicOrder(a, b, c float32) bool {
-	delta_a_b := SanitizeRadians(b - a)
-	delta_a_c := SanitizeRadians(c - a)
-	return delta_a_b < delta_a_c
+	deltaAB := SanitizeRadians(b - a)
+	deltaAC := SanitizeRadians(c - a)
+	return deltaAB < deltaAC
 }

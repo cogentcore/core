@@ -278,7 +278,7 @@ func (fr *Frame) layoutFrame(size math32.Vector2) {
 	// alternate (as a scrollbar that is added and removed) stop it too.
 	const maxIter, maxSettle = layoutIters, 6
 	var sizes, prev, prev2 float64
-	for iter := 0; iter < maxSettle; iter++ {
+	for iter := range maxSettle {
 		redo := fr.SizeDown(iter)
 		if !redo {
 			break
@@ -324,7 +324,7 @@ func (fr *Frame) sizesSum() float64 {
 	return sum
 }
 
-// layoutFrame does a layout on the given Frame using given size.
+// LayoutFrame does a layout on the given Frame using given size.
 func (fr *Frame) LayoutFrame(size math32.Vector2) {
 	fr.layoutFrame(size)
 	fr.ApplyScenePos()
@@ -513,7 +513,7 @@ func (sc *Scene) applyStyleScene() {
 
 	sc.StyleTree()
 	if sc.Painter.Paint != nil {
-		sc.Painter.Paint.UnitContext = sc.Styles.UnitContext
+		sc.Painter.UnitContext = sc.Styles.UnitContext
 	}
 	sc.setFlag(true, sceneNeedsLayout)
 }
@@ -531,7 +531,7 @@ func (sc *Scene) doRebuild() {
 // contentSize computes the size of the scene based on current content.
 // initSz is the initial size, e.g., size of screen.
 // Used for auto-sizing windows when created, and in [Scene.ResizeToContent].
-func (sc *Scene) contentSize(initSz image.Point) image.Point {
+func (sc *Scene) contentSize(_ image.Point) image.Point {
 	sc.setFlag(true, sceneUpdating) // prevent rendering
 	defer func() { sc.setFlag(false, sceneUpdating) }()
 
@@ -594,7 +594,7 @@ func (wb *WidgetBase) StartRender() bool {
 			pc.PushContext(nil, render.NewBoundsRect(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots()))
 		}
 	}
-	pc.Paint.Defaults() // start with default style values
+	pc.Defaults() // start with default style values
 	if DebugSettings.RenderTrace {
 		fmt.Printf("Render: %v at %v\n", wb.Path(), wb.Geom.TotalBBox)
 	}

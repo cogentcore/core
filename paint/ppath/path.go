@@ -5,6 +5,8 @@
 // This is adapted from https://github.com/tdewolff/canvas
 // Copyright (c) 2015 Taco de Wolff, under an MIT License.
 
+// Package ppath provides vector paths of lines, Bézier curves, and arcs, with
+// their construction, transformation, and parsing and writing as SVG.
 package ppath
 
 import (
@@ -108,7 +110,7 @@ func (p Path) Equals(q Path) bool {
 	if len(p) != len(q) {
 		return false
 	}
-	for i := 0; i < len(p); i++ {
+	for i := range p {
 		if !Equal(p[i], q[i]) {
 			return false
 		}
@@ -152,7 +154,7 @@ func (p Path) Same(q Path) bool {
 	qr := q.Reverse() // TODO: can we do without?
 	for j := 0; j < len(q); {
 		equal := true
-		for i := 0; i < len(p); i++ {
+		for i := range p {
 			if !Equal(p[i], q[(j+i)%len(q)]) {
 				equal = false
 				break
@@ -164,7 +166,7 @@ func (p Path) Same(q Path) bool {
 
 		// backwards
 		equal = true
-		for i := 0; i < len(p); i++ {
+		for i := range p {
 			if !Equal(p[i], qr[(j+i)%len(qr)]) {
 				equal = false
 				break
@@ -384,7 +386,7 @@ func (p *Path) MoveTo(x, y float32) {
 // LineTo adds a linear path to (x,y).
 func (p *Path) LineTo(x, y float32) {
 	start := p.Pos()
-	end := math32.Vector2{x, y}
+	end := math32.Vec2(x, y)
 	if EqualPoint(start, end) {
 		return
 	} else if CmdLen(LineTo) <= len(*p) && (*p)[len(*p)-1] == LineTo {
@@ -426,8 +428,8 @@ func (p *Path) LineTo(x, y float32) {
 // QuadTo adds a quadratic Bézier path with control point (cpx,cpy) and end point (x,y).
 func (p *Path) QuadTo(cpx, cpy, x, y float32) {
 	start := p.Pos()
-	cp := math32.Vector2{cpx, cpy}
-	end := math32.Vector2{x, y}
+	cp := math32.Vec2(cpx, cpy)
+	end := math32.Vec2(x, y)
 	if EqualPoint(start, end) && EqualPoint(start, cp) {
 		return
 	} else if !EqualPoint(start, end) && (EqualPoint(start, cp) || AngleEqual(AngleBetween(end.Sub(start), cp.Sub(start)), 0.0)) && (EqualPoint(end, cp) || AngleEqual(AngleBetween(end.Sub(start), end.Sub(cp)), 0.0)) {
@@ -447,9 +449,9 @@ func (p *Path) QuadTo(cpx, cpy, x, y float32) {
 // (cpx1,cpy1) and (cpx2,cpy2) and end point (x,y).
 func (p *Path) CubeTo(cpx1, cpy1, cpx2, cpy2, x, y float32) {
 	start := p.Pos()
-	cp1 := math32.Vector2{cpx1, cpy1}
-	cp2 := math32.Vector2{cpx2, cpy2}
-	end := math32.Vector2{x, y}
+	cp1 := math32.Vec2(cpx1, cpy1)
+	cp2 := math32.Vec2(cpx2, cpy2)
+	end := math32.Vec2(x, y)
 	if EqualPoint(start, end) && EqualPoint(start, cp1) && EqualPoint(start, cp2) {
 		return
 	} else if !EqualPoint(start, end) && (EqualPoint(start, cp1) || EqualPoint(end, cp1) || AngleEqual(AngleBetween(end.Sub(start), cp1.Sub(start)), 0.0) && AngleEqual(AngleBetween(end.Sub(start), end.Sub(cp1)), 0.0)) && (EqualPoint(start, cp2) || EqualPoint(end, cp2) || AngleEqual(AngleBetween(end.Sub(start), cp2.Sub(start)), 0.0) && AngleEqual(AngleBetween(end.Sub(start), end.Sub(cp2)), 0.0)) {
@@ -472,7 +474,7 @@ func (p *Path) CubeTo(cpx1, cpy1, cpx2, cpy2, x, y float32) {
 // given by a previous command's end point.
 func (p *Path) ArcTo(rx, ry, rot float32, large, sweep bool, x, y float32) {
 	start := p.Pos()
-	end := math32.Vector2{x, y}
+	end := math32.Vec2(x, y)
 	if EqualPoint(start, end) {
 		return
 	}

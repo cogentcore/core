@@ -49,7 +49,7 @@ func TestUndoRedo(t *testing.T) {
 		assert.True(t, us.HasRedoAvail())
 		assert.Equal(t, []string{"act0", "act1", "act2", "act3"}, us.RedoList())
 
-		for i := 0; i < 3; i++ {
+		for i := range 3 {
 			act, _, st = us.Redo()
 			assert.Equal(t, "act"+string(rune('0'+i)), act)
 			assert.Equal(t, state(states[i+1]), st, "the state after the action")

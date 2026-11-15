@@ -31,7 +31,7 @@ func Base64SplitLines(b []byte) []byte {
 	sz := len(b)
 	nl := (sz / ll)
 	rb := make([]byte, sz+nl+1)
-	for i := 0; i < nl; i++ {
+	for i := range nl {
 		st := ll * i
 		rst := ll*i + i
 		copy(rb[rst:rst+ll], b[st:st+ll])

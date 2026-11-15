@@ -393,7 +393,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 
 	n := len(em.mouseInBBox)
 	// A slide continues (or starts) and stops wherever the mouse is.
-	if n == 0 && !(em.capturesMouse(e) && (et == events.MouseDrag || et == events.MouseUp)) {
+	if n == 0 && (!em.capturesMouse(e) || (et != events.MouseDrag && et != events.MouseUp)) {
 		if DebugSettings.EventTrace && et != events.MouseMove {
 			log.Println("Nothing in bbox:", sc.Geom.TotalBBox, "pos:", pos)
 		}
@@ -447,7 +447,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 			if tree.IsNil(slidePress) && wb.AbilityIs(abilities.Slideable) {
 				// On mobile, sliding results in scrolling, so we must have the appropriate
 				// scrolling attention to allow sliding.
-				if TheApp.SystemPlatform().IsMobile() && !wb.AbilityIs(abilities.ScrollableUnattended) && !(wb.StateIs(states.Focused) || wb.StateIs(states.Attended)) {
+				if TheApp.SystemPlatform().IsMobile() && !wb.AbilityIs(abilities.ScrollableUnattended) && !wb.StateIs(states.Focused) && !wb.StateIs(states.Attended) {
 					continue
 				}
 				slidePress = w
@@ -463,7 +463,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 				up = w
 			}
 		case events.Scroll:
-			if !wb.AbilityIs(abilities.ScrollableUnattended) && !(wb.StateIs(states.Focused) || wb.StateIs(states.Attended)) {
+			if !wb.AbilityIs(abilities.ScrollableUnattended) && !wb.StateIs(states.Focused) && !wb.StateIs(states.Attended) {
 				continue
 			}
 			if e.IsHandled() {
@@ -594,7 +594,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 		}
 		// if we have sent a long press start event, we don't send click
 		// events (non-nil widget plus nil timer means we already sent)
-		if em.press == up && !tree.IsNil(up) && !(!tree.IsNil(em.longPressWidget) && em.longPressTimer == nil) {
+		if em.press == up && !tree.IsNil(up) && (tree.IsNil(em.longPressWidget) || em.longPressTimer != nil) {
 			em.cancelLongPress()
 			switch e.MouseButton() {
 			case events.Left:
@@ -706,8 +706,8 @@ func (em *Events) updateSpriteHovers(hov, prev []*Sprite, e events.Event, enter,
 // topLongHover returns the top-most LongHoverable widget among the Hovers
 func (em *Events) topLongHover() Widget {
 	var deep Widget
-	for i := len(em.hovers) - 1; i >= 0; i-- {
-		h := em.hovers[i]
+	for _, h := range slices.Backward(em.hovers) {
+
 		if h.AsWidget().AbilityIs(abilities.LongHoverable) {
 			deep = h
 			break
@@ -992,7 +992,7 @@ func pathLayer(path []*WidgetBase, i int) int {
 		if r == nil {
 			continue
 		}
-		for k := 0; k < i; k++ {
+		for k := range i {
 			if path[k] == r {
 				l = max(l, 2+path[j].Styles.ZIndex)
 				break
@@ -1709,8 +1709,8 @@ func (em *Events) addShortcut(chord key.Chord, bt *Button) {
 	if em.shortcuts == nil {
 		em.shortcuts = shortcuts{}
 	}
-	chords := strings.Split(string(chord), "\n")
-	for _, c := range chords {
+	chords := strings.SplitSeq(string(chord), "\n")
+	for c := range chords {
 		cc := key.Chord(c)
 		if DebugSettings.KeyEventTrace {
 			old, exists := em.shortcuts[cc]

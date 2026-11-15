@@ -6,8 +6,12 @@ package textcore
 
 import (
 	"bufio"
+	"errors"
 	"io"
+	"log/slog"
+	"os"
 	"sync"
+	"syscall"
 	"time"
 
 	"cogentcore.org/core/text/lines"
@@ -69,6 +73,8 @@ func (ob *OutputBuffer) MonitorOutput() {
 	ob.bufferedLines = make([][]rune, 0, 100)
 	ob.bufferedMarkup = make([]rich.Text, 0, 100)
 	outscan := bufio.NewScanner(ob.Output) // line at a time
+	// (long lines, as of minified output, must not end the output)
+	outscan.Buffer(make([]byte, 0, 64*1024), 16*1024*1024)
 	for outscan.Scan() {
 		ob.Lock()
 		b := outscan.Bytes()
@@ -100,6 +106,11 @@ func (ob *OutputBuffer) MonitorOutput() {
 			})
 		}
 		ob.Unlock()
+	}
+	// a closed pipe, or a pseudo-terminal whose process ended (EIO), is
+	// the normal end of the output
+	if err := outscan.Err(); err != nil && !errors.Is(err, os.ErrClosed) && !errors.Is(err, io.ErrClosedPipe) && !errors.Is(err, syscall.EIO) {
+		slog.Error("textcore.OutputBuffer: reading the output", "err", err)
 	}
 	ob.Lock()
 	ob.outputToBuffer()

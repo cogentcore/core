@@ -28,7 +28,7 @@ func main() {
 
 	b.OnShow(func(e events.Event) {
 		go func() {
-			for i := 0; i < rows; i++ {
+			for i := range rows {
 				b.AsyncLock()
 				table = append(table, &tableStruct{IntField: i, FloatField: float32(i) / 10.0})
 				tv.Update()

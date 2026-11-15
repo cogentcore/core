@@ -89,8 +89,7 @@ func splitErrors(err error) []error {
 		}
 		return errs
 	}
-	var pe positionedError
-	if errors.As(err, &pe) {
+	if pe, ok := errors.AsType[positionedError](err); ok {
 		return []error{pe}
 	}
 	return []error{err}

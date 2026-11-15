@@ -23,7 +23,7 @@ import (
 
 // positionTest makes a relative parent 300 x 200 dp with a 100 x 50 static
 // child, and calls fun with the parent before laying it out.
-func positionTest(t *testing.T, fun func(parent *Frame, static *Frame), check func(parent, static *Frame)) {
+func positionTest(_ *testing.T, fun func(parent *Frame, static *Frame), check func(parent, static *Frame)) {
 	b := NewBody()
 	parent := NewFrame(b)
 	parent.Styler(func(s *styles.Style) {

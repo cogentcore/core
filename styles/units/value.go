@@ -159,7 +159,7 @@ func (v Value) StringCSSDp() string {
 
 // SetString sets value from a string
 func (v *Value) SetString(str string) error {
-	trstr := strings.TrimSpace(strings.Replace(str, "%", "pct", -1))
+	trstr := strings.TrimSpace(strings.ReplaceAll(str, "%", "pct"))
 	sz := len(trstr)
 	if sz < 2 {
 		vc, err := reflectx.ToFloat(str)

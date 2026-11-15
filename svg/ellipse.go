@@ -13,10 +13,10 @@ type Ellipse struct {
 	NodeBase
 
 	// position of the center of the ellipse
-	Pos math32.Vector2 `xml:"{cx,cy}"`
+	Pos math32.Vector2 `svg:"cx,cy"`
 
 	// radii of the ellipse in the horizontal, vertical axes
-	Radii math32.Vector2 `xml:"{rx,ry}"`
+	Radii math32.Vector2 `svg:"rx,ry"`
 }
 
 func (g *Ellipse) SVGName() string { return "ellipse" }

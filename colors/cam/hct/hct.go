@@ -17,6 +17,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package hct provides the HCT (hue, chroma, tone) color space of Material
+// Design, based on CAM16 hue and chroma and L* tone, and contrast utilities.
 package hct
 
 import (

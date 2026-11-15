@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package texcache caches the paths of typeset LaTeX math expressions, which
+// can be saved to a file and opened again, so that TeX is not needed for them.
 package texcache
 
 import (
@@ -9,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"maps"
 	"strings"
 	"sync"
 
@@ -119,9 +122,7 @@ func setCache(c map[string]*cached) {
 		cache = c
 		return
 	}
-	for k, v := range c {
-		cache[k] = v
-	}
+	maps.Copy(cache, c)
 }
 
 // OpenFS opens saved cache entries from given file system (e.g., for embed).
@@ -189,7 +190,7 @@ func SaveAs(filename string) error {
 	defer mu.Unlock()
 
 	if cache == nil {
-		return fmt.Errorf("texcache.SaveAs: no cache entries!")
+		return errors.New("texcache.SaveAs: no cache entries")
 	}
 	for _, v := range cache {
 		v.Path = v.pp.ToSVG()

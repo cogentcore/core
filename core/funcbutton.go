@@ -187,8 +187,8 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 	}
 	fnm = strings.ReplaceAll(fnm, "[...]", "") // remove any labeling for generics
 	// the "-fm" suffix indicates that it is a method
-	if strings.HasSuffix(fnm, "-fm") {
-		fnm = strings.TrimSuffix(fnm, "-fm")
+	if before, ok := strings.CutSuffix(fnm, "-fm"); ok {
+		fnm = before
 		// the last dot separates the function name
 		li := strings.LastIndex(fnm, ".")
 		metnm := fnm[li+1:]
@@ -439,7 +439,7 @@ func (fb *FuncButton) setMethodImpl(gmet *types.Method, rmet reflect.Value) *Fun
 func (fb *FuncButton) showReturnsDialog(rets []reflect.Value) {
 	if !fb.ShowReturn {
 		for _, ret := range rets {
-			if err, ok := ret.Interface().(error); ok && err != nil {
+			if err, ok := reflect.TypeAssert[error](ret); ok && err != nil {
 				ErrorSnackbar(fb, err, fb.Text+" failed")
 				return
 			}
@@ -458,17 +458,18 @@ func (fb *FuncButton) showReturnsDialog(rets []reflect.Value) {
 		main = fb.Text + " succeeded"
 	}
 	if !fb.ShowReturnAsDialog {
-		txt := main
+		var txt strings.Builder
+		txt.WriteString(main)
 		if len(fb.Returns) > 0 {
-			txt += ": "
+			txt.WriteString(": ")
 			for i, ret := range fb.Returns {
-				txt += reflectx.ToString(ret.Value)
+				txt.WriteString(reflectx.ToString(ret.Value))
 				if i < len(fb.Returns)-1 {
-					txt += ", "
+					txt.WriteString(", ")
 				}
 			}
 		}
-		MessageSnackbar(ctx, txt)
+		MessageSnackbar(ctx, txt.String())
 		return
 	}
 

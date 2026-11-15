@@ -236,10 +236,8 @@ func restyleAll() {
 
 // AppearanceSettings are the currently active global Cogent Core appearance settings.
 var AppearanceSettings = &AppearanceSettingsData{
-	SettingsBase: SettingsBase{
-		Name: "Appearance",
-		File: filepath.Join(TheApp.CogentCoreDataDir(), "appearance-settings.toml"),
-	},
+	Name: "Appearance",
+	File: filepath.Join(TheApp.CogentCoreDataDir(), "appearance-settings.toml"),
 }
 
 // AppearanceSettingsData is the data type for the global Cogent Core appearance settings.
@@ -417,7 +415,7 @@ func (as *AppearanceSettingsData) updateLogicalDPI() {
 	}
 	// fmt.Println("system ldpi:", system.LogicalDPIScale)
 	n := system.TheApp.NScreens()
-	for i := 0; i < n; i++ {
+	for i := range n {
 		sc := system.TheApp.Screen(i)
 		if sc == nil {
 			continue
@@ -457,10 +455,8 @@ func (as *AppearanceSettingsData) ZebraStripesWeight() float32 {
 
 // TimingSettings are the global timing settings.
 var TimingSettings = &TimingSettingsData{
-	SettingsBase: SettingsBase{
-		Name: "Timing",
-		File: filepath.Join(TheApp.CogentCoreDataDir(), "timing-settings.toml"),
-	},
+	Name: "Timing",
+	File: filepath.Join(TheApp.CogentCoreDataDir(), "timing-settings.toml"),
 }
 
 // SaveScreenZoom saves the current zoom factor for the current screen,
@@ -567,10 +563,8 @@ type ScreenSettings struct { //types:add
 
 // SystemSettings are the currently active Cogent Core system settings.
 var SystemSettings = &SystemSettingsData{
-	SettingsBase: SettingsBase{
-		Name: "System",
-		File: filepath.Join(TheApp.CogentCoreDataDir(), "system-settings.toml"),
-	},
+	Name: "System",
+	File: filepath.Join(TheApp.CogentCoreDataDir(), "system-settings.toml"),
 }
 
 // SystemSettingsData is the data type of the global Cogent Core settings.
@@ -622,7 +616,7 @@ func (ss *SystemSettingsData) Apply() { //types:add
 		keymap.SetActiveMapName(ss.KeyMap)
 	}
 	np := len(ss.FavPaths)
-	for i := 0; i < np; i++ {
+	for i := range np {
 		if ss.FavPaths[i].Icon == "" || ss.FavPaths[i].Icon == "folder" {
 			ss.FavPaths[i].Icon = icons.Folder
 		}
@@ -767,10 +761,8 @@ func openRecentPaths() {
 
 // DebugSettings are the currently active debugging settings
 var DebugSettings = &DebugSettingsData{
-	SettingsBase: SettingsBase{
-		Name: "Debug",
-		File: filepath.Join(TheApp.CogentCoreDataDir(), "debug-settings.toml"),
-	},
+	Name: "Debug",
+	File: filepath.Join(TheApp.CogentCoreDataDir(), "debug-settings.toml"),
 }
 
 // DebugSettingsData is the data type for debugging settings.

@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -96,7 +97,7 @@ func waitFor(t *testing.T, b *core.Body, what string, cond func() bool) {
 // editing (such as dash, the sh of Debian and Ubuntu) echo input that is
 // typed ahead before the prompt for it, so output follows a prompt.
 func hasOutputLine(tm *Terminal, s string) bool {
-	for _, ln := range strings.Split(linesText(tm), "\n") {
+	for ln := range strings.SplitSeq(linesText(tm), "\n") {
 		if strings.TrimPrefix(ln, "$ ") == s {
 			return true
 		}
@@ -374,8 +375,8 @@ func TestTerminalContextMenu(t *testing.T) {
 	})
 	m := core.NewScene()
 	cms := tm.linesView.ContextMenus
-	for i := len(cms) - 1; i >= 0; i-- {
-		cms[i](m, image.Point{})
+	for _, cm := range slices.Backward(cms) {
+		cm(m, image.Point{})
 	}
 	var items []string
 	m.WidgetWalkDown(func(cw core.Widget, cwb *core.WidgetBase) bool {

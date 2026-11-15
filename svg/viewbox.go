@@ -80,7 +80,7 @@ func (vb *ViewBox) Transform(box math32.Vector2) (size, trans, scale math32.Vect
 	return
 }
 
-// ViewBoxAlign defines values for the PreserveAspectRatio alignment factor
+// ViewBoxAligns defines values for the PreserveAspectRatio alignment factor
 type ViewBoxAligns int32 //enums:enum -trim-prefix Align -transform lower
 
 const (

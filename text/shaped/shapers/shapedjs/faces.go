@@ -28,7 +28,7 @@ type webFace struct {
 // such as "U+0-FF, U+131, U+4??", or nil (all runes) if it cannot parse it.
 func parseUnicodeRange(s string) [][2]rune {
 	var ranges [][2]rune
-	for _, part := range strings.Split(s, ",") {
+	for part := range strings.SplitSeq(s, ",") {
 		part = strings.TrimSpace(part)
 		if len(part) < 3 || (part[0] != 'U' && part[0] != 'u') || part[1] != '+' {
 			return nil
@@ -72,7 +72,7 @@ func (wf *webFace) usedBy(families string, italic bool) bool {
 	if wf.italic && !italic {
 		return false
 	}
-	for _, f := range strings.Split(families, ",") {
+	for f := range strings.SplitSeq(families, ",") {
 		if strings.Trim(f, `"' `) == wf.family {
 			return true
 		}

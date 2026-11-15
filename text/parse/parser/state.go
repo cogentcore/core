@@ -6,6 +6,7 @@ package parser
 
 import (
 	"fmt"
+	"strings"
 
 	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/parse/syms"
@@ -121,7 +122,7 @@ func (ps *State) AllocRules() {
 		return
 	}
 	ntot := 0
-	for ln := 0; ln < nlines; ln++ {
+	for ln := range nlines {
 		ntot += len(ps.Src.Lexs[ln])
 	}
 	// We make one allocation for all of the lines, and reuse the buffers
@@ -150,7 +151,7 @@ func (ps *State) AllocRules() {
 	}
 	ps.nonMatched = ps.nonMatched[:0]
 	off := 0
-	for ln := 0; ln < nlines; ln++ {
+	for ln := range nlines {
 		sz := len(ps.Src.Lexs[ln])
 		ps.Matches[ln] = ps.matchBuf[off : off+sz : off+sz]
 		ps.nonMatches[ln] = ps.nonMatchBuf[off : off+sz : off+sz]
@@ -219,7 +220,7 @@ func (ps *State) MatchLex(lx *lexer.Lex, tkey token.KeyToken, isCat, isSubCat bo
 	if lx.Token.Depth != tkey.Depth {
 		return false
 	}
-	if !(lx.Token.Token == tkey.Token || (isCat && lx.Token.Token.Cat() == tkey.Token) || (isSubCat && lx.Token.Token.SubCat() == tkey.Token)) {
+	if lx.Token.Token != tkey.Token && (!isCat || lx.Token.Token.Cat() != tkey.Token) && (!isSubCat || lx.Token.Token.SubCat() != tkey.Token) {
 		return false
 	}
 	if tkey.Key == "" {
@@ -388,35 +389,37 @@ func (ps *State) IsMatch(pr *Rule, scope textpos.Region) (*MatchState, bool) {
 // then it includes the full stack at each point -- otherwise just the top
 // of stack
 func (ps *State) RuleString(full bool) string {
-	txt := ""
+	var txt strings.Builder
 	nlines := ps.Src.NLines()
-	for ln := 0; ln < nlines; ln++ {
+	for ln := range nlines {
 		sz := len(ps.Matches[ln])
 		if sz == 0 {
-			txt += "\n"
+			txt.WriteString("\n")
 		} else {
-			for ch := 0; ch < sz; ch++ {
+			for ch := range sz {
 				rs := ps.Matches[ln][ch]
 				sd := len(rs)
-				txt += ` "` + string(ps.Src.TokenSrc(textpos.Pos{ln, ch})) + `"`
+				txt.WriteString(` "`)
+				txt.WriteString(string(ps.Src.TokenSrc(textpos.Pos{Line: ln, Char: ch})))
+				txt.WriteString(`"`)
 				if sd == 0 {
-					txt += "-"
+					txt.WriteString("-")
 				} else {
 					if !full {
-						txt += rs[sd-1].String()
+						txt.WriteString(rs[sd-1].String())
 					} else {
-						txt += fmt.Sprintf("[%v: ", sd)
-						for i := 0; i < sd; i++ {
-							txt += rs[i].String()
+						fmt.Fprintf(&txt, "[%v: ", sd)
+						for i := range sd {
+							txt.WriteString(rs[i].String())
 						}
-						txt += "]"
+						txt.WriteString("]")
 					}
 				}
 			}
-			txt += "\n"
+			txt.WriteString("\n")
 		}
 	}
-	return txt
+	return txt.String()
 }
 
 ///////////////////////////////////////////////////////////////////////////

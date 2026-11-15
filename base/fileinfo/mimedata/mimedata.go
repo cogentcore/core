@@ -155,11 +155,11 @@ func IsMultipart(str []byte) (isMulti bool, mediaType, boundary string, body []b
 	var pars map[string]string
 	var err error
 	if bytes.HasPrefix(str, MIMEVersion1B) {
-		cri := bytes.IndexByte(str, '\n')
-		if cri < 0 { // shouldn't happen
+		_, after, ok := bytes.Cut(str, []byte{'\n'})
+		if !ok { // shouldn't happen
 			return
 		}
-		ctln := str[cri+1:]
+		ctln := after
 		if bytes.HasPrefix(ctln, ContentTypeB) { // should
 			cri2 := bytes.IndexByte(ctln, '\n')
 			if cri2 < 0 { // shouldn't happen

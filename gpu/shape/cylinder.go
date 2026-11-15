@@ -94,7 +94,7 @@ func (cy *Cylinder) MeshSize() (numVertex, nIndex int, hasColor bool) {
 	return
 }
 
-// SetCylinderSector sets points in given allocated arrays
+// Set sets points in given allocated arrays.
 func (cy *Cylinder) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
 	cy.CBBox = SetCylinderSector(vertex, normal, texcoord, index, cy.VertexOffset, cy.IndexOffset, cy.Height, cy.TopRad, cy.BotRad, cy.RadialSegs, cy.HeightSegs, cy.AngStart, cy.AngLen, cy.Top, cy.Bottom, cy.Pos)
 }
@@ -177,7 +177,7 @@ func SetCylinderSector(vertex, normal, texcoord math32.ArrayF32, index math32.Ar
 
 	vOff := uint32(vtxOff)
 	ii := idxOff
-	for x := 0; x < radialSegs; x++ {
+	for x := range radialSegs {
 		if topRad != 0 {
 			vertex.GetVector3(3*vtxs[0][x], &na)
 			vertex.GetVector3(3*vtxs[0][x+1], &nb)
@@ -191,7 +191,7 @@ func SetCylinderSector(vertex, normal, texcoord math32.ArrayF32, index math32.Ar
 		nb.Y = math32.Sqrt(nb.X*nb.X+nb.Z*nb.Z) * tanTheta
 		nb.SetNormal()
 
-		for y := 0; y < heightSegs; y++ {
+		for y := range heightSegs {
 			v1 := vtxs[y][x]
 			v2 := vtxs[y+1][x]
 			v3 := vtxs[y+1][x+1]
@@ -233,7 +233,7 @@ func SetCylinderSector(vertex, normal, texcoord math32.ArrayF32, index math32.Ar
 
 		// Appends top segments vtxs and builds array of its idxsOrig
 		var uv1, uv2, uv3 math32.Vector2
-		for x := 0; x < radialSegs; x++ {
+		for x := range radialSegs {
 			uv1 = uvsOrig[0][x]
 			uv2 = uvsOrig[0][x+1]
 			uv3 = math32.Vec2(uv2.X, 0)
@@ -275,7 +275,7 @@ func SetCylinderSector(vertex, normal, texcoord math32.ArrayF32, index math32.Ar
 		idx++
 
 		// Append faces idxsOrig
-		for x := 0; x < radialSegs; x++ {
+		for x := range radialSegs {
 			pos := 2 * x
 			i1 := idxsOrig[pos]
 			i2 := idxsOrig[pos+1]
@@ -292,7 +292,7 @@ func SetCylinderSector(vertex, normal, texcoord math32.ArrayF32, index math32.Ar
 
 		// Appends top segments vtxs and builds array of its idxsOrig
 		var uv1, uv2, uv3 math32.Vector2
-		for x := 0; x < radialSegs; x++ {
+		for x := range radialSegs {
 			uv1 = uvsOrig[heightSegs][x]
 			uv2 = uvsOrig[heightSegs][x+1]
 			uv3 = math32.Vec2(uv2.X, 1)
@@ -332,10 +332,9 @@ func SetCylinderSector(vertex, normal, texcoord math32.ArrayF32, index math32.Ar
 		normal.SetVector3(vidx+idx*3, norm)
 		texcoord.SetVector2(tidx+idx*2, uv2)
 		idxsOrig = append(idxsOrig, uint32(idx))
-		idx++
 
 		// Appends faces idxsOrig
-		for x := 0; x < radialSegs; x++ {
+		for x := range radialSegs {
 			pos := 2 * x
 			i1 := idxsOrig[pos]
 			i2 := idxsOrig[pos+3]

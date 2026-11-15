@@ -39,10 +39,10 @@ func (te *TwinEditors) Init() {
 				s.Min.Y.Em(40)
 			})
 			w.On(events.Scroll, func(e events.Event) {
-				te.syncEditors(events.Scroll, e, name)
+				te.syncEditors(events.Scroll, name)
 			})
 			w.On(events.Input, func(e events.Event) {
-				te.syncEditors(events.Input, e, name)
+				te.syncEditors(events.Input, name)
 			})
 		})
 	}
@@ -59,7 +59,7 @@ func (te *TwinEditors) SetFiles(fileA, fileB string) {
 }
 
 // syncEditors synchronizes the [Editor] scrolling and cursor positions
-func (te *TwinEditors) syncEditors(typ events.Types, e events.Event, name string) {
+func (te *TwinEditors) syncEditors(typ events.Types, name string) {
 	tva, tvb := te.Editors()
 	me, other := tva, tvb
 	if name == "text-b" {

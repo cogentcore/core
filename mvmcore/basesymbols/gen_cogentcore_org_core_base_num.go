@@ -48,6 +48,7 @@ type Ordered interface {
 func SetFromBool[T Number](dst *T, b bool) {
 	if b {
 		*dst = 1
+		return
 	}
 	*dst = 0
 }

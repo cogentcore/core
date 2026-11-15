@@ -38,12 +38,7 @@ import (
 // see https://cogentcore.org/core/ki/wiki/Naming for IO naming conventions
 // using standard XML marshal / unmarshal
 
-var (
-	errParamMismatch  = errors.New("SVG Parse: Param mismatch")
-	errCommandUnknown = errors.New("SVG Parse: Unknown command")
-	errZeroLengthID   = errors.New("SVG Parse: zero length id")
-	errMissingID      = errors.New("SVG Parse: cannot find id")
-)
+var errParamMismatch = errors.New("SVG Parse: Param mismatch")
 
 // OpenXML Opens XML-formatted SVG input from given file
 func (sv *SVG) OpenXML(fname string) error {
@@ -367,9 +362,6 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					default:
 						polygon.SetProperty(attr.Name.Local, attr.Value)
 					}
-					if err != nil {
-						return err
-					}
 				}
 			case nm == "polyline":
 				polyline := NewPolyline(curPar)
@@ -396,9 +388,6 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					default:
 						polyline.SetProperty(attr.Name.Local, attr.Value)
 					}
-					if err != nil {
-						return err
-					}
 				}
 			case nm == "path":
 				path := NewPath(curPar)
@@ -418,9 +407,6 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						}
 					default:
 						path.SetProperty(attr.Name.Local, attr.Value)
-					}
-					if err != nil {
-						return err
 					}
 				}
 			case nm == "image":
@@ -546,9 +532,6 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						}
 					default:
 						txt.SetProperty(attr.Name.Local, attr.Value)
-					}
-					if err != nil {
-						return err
 					}
 				}
 			case nm == "linearGradient":
@@ -1115,13 +1098,13 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 	case *Polygon:
 		nm = "polygon"
 		for _, p := range nd.Points {
-			sb.WriteString(fmt.Sprintf("%g,%g ", p.X, p.Y))
+			fmt.Fprintf(&sb, "%g,%g ", p.X, p.Y)
 		}
 		XMLAddAttr(&se.Attr, "points", sb.String())
 	case *Polyline:
 		nm = "polyline"
 		for _, p := range nd.Points {
-			sb.WriteString(fmt.Sprintf("%g,%g ", p.X, p.Y))
+			fmt.Fprintf(&sb, "%g,%g ", p.X, p.Y)
 		}
 		XMLAddAttr(&se.Attr, "points", sb.String())
 	case *Text:

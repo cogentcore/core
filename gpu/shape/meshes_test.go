@@ -88,14 +88,14 @@ func TestTriangleQuad(t *testing.T) {
 	idx := make(math32.ArrayU32, ni+qi)
 	pos := math32.Vec3(0, 0, 1)
 	bb := SetTriangle(vtx, norm, tex, idx, 0, 0, math32.Vec3(0, 0, 0), math32.Vec3(1, 0, 0), math32.Vec3(0, 1, 0),
-		[]math32.Vector2{{0, 0}, {1, 0}, {0, 1}}, pos)
+		[]math32.Vector2{{X: 0, Y: 0}, {X: 1, Y: 0}, {X: 0, Y: 1}}, pos)
 	assert.Equal(t, math32.Vec3(1, 1, 0), bb.Max)
 	assert.Equal(t, math32.ArrayU32{0, 1, 2}, idx[:3])
 	assert.Equal(t, float32(1), vtx[2], "offset by pos")
 	assert.Equal(t, math32.ArrayF32{0, 0, 1}, norm[:3], "counter-clockwise faces +z")
 
-	quad := []math32.Vector3{{0, 0, 0}, {2, 0, 0}, {2, 2, 0}, {0, 2, 0}}
-	bb = SetQuad(vtx, norm, tex, idx, nv, ni, quad, []math32.Vector2{{0, 0}, {1, 0}, {1, 1}, {0, 1}}, math32.Vector3{})
+	quad := []math32.Vector3{{X: 0, Y: 0, Z: 0}, {X: 2, Y: 0, Z: 0}, {X: 2, Y: 2, Z: 0}, {X: 0, Y: 2, Z: 0}}
+	bb = SetQuad(vtx, norm, tex, idx, nv, ni, quad, []math32.Vector2{{X: 0, Y: 0}, {X: 1, Y: 0}, {X: 1, Y: 1}, {X: 0, Y: 1}}, math32.Vector3{})
 	assert.Equal(t, math32.Vec3(2, 2, 0), bb.Max)
 	assert.Equal(t, math32.ArrayU32{3, 4, 5, 3, 5, 6}, idx[3:])
 	assert.Equal(t, float32(1), tex[(nv+2)*2], "texture coordinates")
@@ -140,7 +140,7 @@ func TestShapeGroup(t *testing.T) {
 
 // TestLines tests lines, open and closed.
 func TestLines(t *testing.T) {
-	pts := []math32.Vector3{{0, 0, 0}, {1, 0, 0}, {1, 1, 0}}
+	pts := []math32.Vector3{{X: 0, Y: 0, Z: 0}, {X: 1, Y: 0, Z: 0}, {X: 1, Y: 1, Z: 0}}
 	open := NewLines(pts, math32.Vec2(0.2, 0.2), false)
 	md := checkMesh(t, "lines", open)
 	nv, ni := LinesN(3, false)

@@ -31,8 +31,8 @@ func tolEqualVec2(t *testing.T, a, b math32.Vector2, tols ...float64) {
 }
 
 func TestEllipse(t *testing.T) {
-	tolEqualVec2(t, ellipseNormal(2.0, 1.0, math32.Pi/2.0, true, 0.0, 1.0), math32.Vector2{0.0, 1.0})
-	tolEqualVec2(t, ellipseNormal(2.0, 1.0, math32.Pi/2.0, false, 0.0, 1.0), math32.Vector2{0.0, -1.0})
+	tolEqualVec2(t, ellipseNormal(2.0, 1.0, math32.Pi/2.0, true, 0.0, 1.0), math32.Vec2(0.0, 1.0))
+	tolEqualVec2(t, ellipseNormal(2.0, 1.0, math32.Pi/2.0, false, 0.0, 1.0), math32.Vec2(0.0, -1.0))
 }
 
 func TestPathStroke(t *testing.T) {
@@ -111,9 +111,9 @@ func TestPathStrokeEllipse(t *testing.T) {
 	rx, ry := float32(20.0), float32(10.0)
 	nphi := 12
 	ntheta := 120
-	for iphi := 0; iphi < nphi; iphi++ {
+	for iphi := range nphi {
 		phi := float32(iphi) / float32(nphi) * math.Pi
-		for itheta := 0; itheta < ntheta; itheta++ {
+		for itheta := range ntheta {
 			theta := float32(itheta) / float32(ntheta) * 2.0 * math.Pi
 			outer := ppath.EllipsePos(rx+1.0, ry+1.0, phi, 0.0, 0.0, theta)
 			inner := ppath.EllipsePos(rx-1.0, ry-1.0, phi, 0.0, 0.0, theta)

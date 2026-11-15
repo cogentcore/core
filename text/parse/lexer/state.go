@@ -143,7 +143,7 @@ func (ls *State) LineString() string {
 
 // Error adds a lexing error at given position
 func (ls *State) Error(pos int, msg string, rule *Rule) {
-	ls.Errs.Add(textpos.Pos{ls.Line, pos}, ls.Filename, "Lexer: "+msg, string(ls.Src), rule)
+	ls.Errs.Add(textpos.Pos{Line: ls.Line, Char: pos}, ls.Filename, "Lexer: "+msg, string(ls.Src), rule)
 }
 
 // AtEol returns true if current position is at end of line

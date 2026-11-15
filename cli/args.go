@@ -351,9 +351,9 @@ func parseFlag(name string, value string, allFlags *fields, errNotFound bool) er
 func setFieldValue(f *field, value string) error {
 	nptyp := reflectx.NonPointerType(f.Value.Type())
 	vk := nptyp.Kind()
-	switch {
+	switch vk {
 	// TODO: more robust parsing of maps and slices
-	case vk == reflect.Map:
+	case reflect.Map:
 		strs := strings.Split(value, ",")
 		mval := map[string]string{}
 		for _, str := range strs {
@@ -367,7 +367,7 @@ func setFieldValue(f *field, value string) error {
 		if err != nil {
 			return fmt.Errorf("unable to set map flag %q from flag value %q: %w", f.Names[0], value, err)
 		}
-	case vk == reflect.Slice:
+	case reflect.Slice:
 		err := reflectx.CopySliceRobust(f.Value.Interface(), strings.Split(value, ","))
 		if err != nil {
 			return fmt.Errorf("unable to set slice flag %q from flag value %q: %w", f.Names[0], value, err)

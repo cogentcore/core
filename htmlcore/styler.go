@@ -5,6 +5,8 @@
 package htmlcore
 
 import (
+	"slices"
+
 	"cogentcore.org/core/text/shaped"
 	_ "embed"
 	"fmt"
@@ -412,9 +414,9 @@ func (c *Context) inlineInheritedOps(node *html.Node, wb *core.WidgetBase) []sty
 		break
 	}
 	var ops []styleOp
-	for i := len(chain) - 1; i >= 0; i-- {
+	for _, c0 := range slices.Backward(chain) {
 		var inh []*cssDecl
-		for _, d := range c.declarations(chain[i]) {
+		for _, d := range c.declarations(c0) {
 			if inheritedProperties[d.Property] {
 				inh = append(inh, d)
 			}

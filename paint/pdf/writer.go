@@ -131,7 +131,7 @@ func (w *pdfWriter) writeBytes(b []byte) {
 	w.err = err
 }
 
-func (w *pdfWriter) write(s string, v ...interface{}) {
+func (w *pdfWriter) write(s string, v ...any) {
 	if w.err != nil {
 		return
 	}
@@ -142,9 +142,9 @@ func (w *pdfWriter) write(s string, v ...interface{}) {
 
 type pdfRef int
 type pdfName string
-type pdfArray []interface{}
-type pdfDict map[pdfName]interface{}
-type pdfMap map[string]interface{}
+type pdfArray []any
+type pdfDict map[pdfName]any
+type pdfMap map[string]any
 type pdfFilter string
 type pdfStream struct {
 	dict   pdfDict
@@ -165,7 +165,7 @@ func pdfValContinuesName(val any) bool {
 	return true
 }
 
-func (w *pdfWriter) writeVal(i interface{}) {
+func (w *pdfWriter) writeVal(i any) {
 	switch v := i.(type) {
 	case bool:
 		if v {
@@ -257,8 +257,8 @@ func (w *pdfWriter) writeVal(i interface{}) {
 		if filter, ok := v.dict["Filter"].(pdfFilter); ok {
 			filters = append(filters, filter)
 		} else if filterArray, ok := v.dict["Filter"].(pdfArray); ok {
-			for i := len(filterArray) - 1; i >= 0; i-- {
-				if filter, ok := filterArray[i].(pdfFilter); ok {
+			for _, f := range slices.Backward(filterArray) {
+				if filter, ok := f.(pdfFilter); ok {
 					filters = append(filters, filter)
 				}
 			}
@@ -294,7 +294,7 @@ func (w *pdfWriter) writeVal(i interface{}) {
 	}
 }
 
-func (w *pdfWriter) writeObject(val interface{}) pdfRef {
+func (w *pdfWriter) writeObject(val any) pdfRef {
 	// newlines before and after obj and endobj are required by PDF/A
 	w.objOffsets = append(w.objOffsets, w.pos)
 	w.write("%v 0 obj\n", len(w.objOffsets))
@@ -514,10 +514,10 @@ func mat2(m math32.Matrix2) string {
 
 // Escape special characters in strings
 func escape(s string) string {
-	s = strings.Replace(s, "\\", "\\\\", -1)
-	s = strings.Replace(s, "(", "\\(", -1)
-	s = strings.Replace(s, ")", "\\)", -1)
-	s = strings.Replace(s, "\r", "\\r", -1)
+	s = strings.ReplaceAll(s, "\\", "\\\\")
+	s = strings.ReplaceAll(s, "(", "\\(")
+	s = strings.ReplaceAll(s, ")", "\\)")
+	s = strings.ReplaceAll(s, "\r", "\\r")
 	return s
 }
 

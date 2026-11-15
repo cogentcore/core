@@ -76,7 +76,7 @@ func TestBase64Lines(t *testing.T) {
 	eb, mime := ToBase64(img, PNG)
 	assert.Equal(t, "image/png", mime)
 	lines := Base64SplitLines(eb)
-	for _, ln := range bytes.Split(bytes.TrimSpace(lines), []byte("\n")) {
+	for ln := range bytes.SplitSeq(bytes.TrimSpace(lines), []byte("\n")) {
 		assert.LessOrEqual(t, len(ln), 76)
 	}
 	got, f, err := FromBase64(lines)

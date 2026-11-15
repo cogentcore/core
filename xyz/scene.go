@@ -21,7 +21,7 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Set Update3DTrace to true to get a trace of 3D updating
+// Update3DTrace can be set to true to get a trace of 3D updating.
 var Update3DTrace = false
 
 // note: Scene provides a complete separate representation of the

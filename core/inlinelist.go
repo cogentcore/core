@@ -35,7 +35,7 @@ func (il *InlineList) Init() {
 		sl := reflectx.Underlying(reflect.ValueOf(il.Slice))
 
 		sz := min(sl.Len(), AppearanceSettings.InlineLengths.Slice)
-		for i := 0; i < sz; i++ {
+		for i := range sz {
 			itxt := strconv.Itoa(i)
 			tree.AddNew(p, "value-"+itxt, func() Value {
 				val := reflectx.UnderlyingPointer(sl.Index(i))

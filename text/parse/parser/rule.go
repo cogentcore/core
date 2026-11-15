@@ -307,10 +307,11 @@ func (pr *Rule) Compile(ps *State) bool {
 				curStInc = 0
 			}
 			sz := len(rn)
-			if rn[0] == '+' {
+			switch rn[0] {
+			case '+':
 				td, _ := strconv.ParseInt(rn[1:tokst], 10, 64)
 				rr.Token.Depth = int(td)
-			} else if rn[0] == '-' {
+			case '-':
 				rr.FromNext = true
 			}
 			tn := rn[tokst+1 : sz-1]
@@ -386,7 +387,7 @@ func (pr *Rule) OptimizeOrder(ps *State) {
 	fmnSt := -1
 	fmnEd := -1
 	lastwas := false
-	for oi := 0; oi < osz; oi++ {
+	for oi := range osz {
 		ri := pr.Order[oi]
 		rr := &pr.Rules[ri]
 		if rr.FromNext {
@@ -831,7 +832,7 @@ func (pr *Rule) MatchOnlyToks(ps *State, parAST *AST, scope textpos.Region, dept
 
 	creg := scope
 	osz := len(pr.Order)
-	for oi := 0; oi < osz; oi++ {
+	for oi := range osz {
 		ri := pr.Order[oi]
 		rr := &pr.Rules[ri]
 		kt := rr.Token
@@ -940,7 +941,7 @@ func (pr *Rule) MatchMixed(ps *State, parAST *AST, scope textpos.Region, depth i
 
 	// 	first pass filter on tokens
 	if optMap != nil {
-		for oi := 0; oi < osz; oi++ {
+		for oi := range osz {
 			ri := pr.Order[oi]
 			rr := &pr.Rules[ri]
 			if rr.IsToken() {
@@ -952,7 +953,7 @@ func (pr *Rule) MatchMixed(ps *State, parAST *AST, scope textpos.Region, depth i
 		}
 	}
 
-	for oi := 0; oi < osz; oi++ {
+	for oi := range osz {
 		ri := pr.Order[oi]
 		rr := &pr.Rules[ri]
 
@@ -1025,7 +1026,7 @@ func (pr *Rule) MatchMixed(ps *State, parAST *AST, scope textpos.Region, depth i
 		// look through smpos for last valid position -- use that as last match pos
 		mreg := smpos.StartEnd()
 		lmnpos, ok := ps.Src.NextTokenPos(mreg.End)
-		if !ok && !(ri == nr-1 || (ri == nr-2 && pr.setsScope)) {
+		if !ok && (ri != nr-1 && (ri != nr-2 || !pr.setsScope)) {
 			// if at end, or ends in EOS, then ok..
 			if ps.Trace.On {
 				ps.Trace.Out(ps, pr, NoMatch, creg.Start, creg, parAST, fmt.Sprintf("%v sub-rule: %v -- not at end and no tokens left", ri, rr.Rule.Name))
@@ -1250,7 +1251,7 @@ func (pr *Rule) DoRules(ps *State, parent *Rule, parentAST *AST, scope textpos.R
 	nr := len(pr.Rules)
 	valid := true
 	creg := scope
-	for ri := 0; ri < nr; ri++ {
+	for ri := range nr {
 		pr.DoActs(ps, ri, parent, ourAST, parentAST)
 		rr := &pr.Rules[ri]
 		if rr.IsToken() && !rr.Opt {
@@ -1459,10 +1460,11 @@ func (pr *Rule) DoActs(ps *State, ri int, parent *Rule, ourAST, parentAST *AST) 
 
 // DoAct performs one action after a rule executes
 func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAST, parAST *AST) bool {
-	if act.Act == PushStack {
+	switch act.Act {
+	case PushStack:
 		ps.Stack.Push(act.Path)
 		return true
-	} else if act.Act == PopStack {
+	case PopStack:
 		ps.Stack.Pop()
 		return true
 	}
@@ -1756,7 +1758,7 @@ func (pr *Rule) WriteGrammar(writer io.Writer, depth int) {
 // names of their rules), and FindPath finds any child of a name.
 func (ast *AST) findPath(path string) *AST {
 	cur := ast
-	for _, pe := range strings.Split(strings.TrimSpace(path), "/") {
+	for pe := range strings.SplitSeq(strings.TrimSpace(path), "/") {
 		if pe == "" {
 			continue
 		}

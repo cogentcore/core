@@ -127,7 +127,7 @@ const (
 	// CodeContextMenu is the Menu key of Windows keyboards (Application).
 	CodeContextMenu Codes = 101
 
-	CodeKeypadEqualSign   Codes = 103
+	CodeKeypadEqualSign Codes = 103
 
 	CodeF13 Codes = 104
 	CodeF14 Codes = 105
@@ -233,14 +233,14 @@ var CodeRuneMap = map[Codes]rune{
 	CodeKeypadPlusSign:    '+',
 	CodeKeypadFullStop:    '.',
 	CodeKeypadEqualSign:   '=',
-	CodeKeypad1: '1',
-	CodeKeypad2: '2',
-	CodeKeypad3: '3',
-	CodeKeypad4: '4',
-	CodeKeypad5: '5',
-	CodeKeypad6: '6',
-	CodeKeypad7: '7',
-	CodeKeypad8: '8',
-	CodeKeypad9: '9',
-	CodeKeypad0: '0',
+	CodeKeypad1:           '1',
+	CodeKeypad2:           '2',
+	CodeKeypad3:           '3',
+	CodeKeypad4:           '4',
+	CodeKeypad5:           '5',
+	CodeKeypad6:           '6',
+	CodeKeypad7:           '7',
+	CodeKeypad8:           '8',
+	CodeKeypad9:           '9',
+	CodeKeypad0:           '0',
 }

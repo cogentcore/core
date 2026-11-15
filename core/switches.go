@@ -100,7 +100,7 @@ func (sw *Switches) WidgetValue() any {
 
 func (sw *Switches) SetWidgetValue(value any) error {
 	up := reflectx.UnderlyingPointer(reflect.ValueOf(value))
-	if bf, ok := up.Interface().(enums.BitFlagSetter); ok {
+	if bf, ok := reflect.TypeAssert[enums.BitFlagSetter](up); ok {
 		sw.selectFromBitFlag(bf)
 		return nil
 	}

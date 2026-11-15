@@ -68,16 +68,16 @@ func main() {
 	// Note: 100 segs improves lighting differentiation significantly
 
 	ph.SetMesh("floor",
-		shape.NewPlane(math32.Y, 100, 100).SetSegs(math32.Vector2i{100, 100}).SetNormalNeg(false))
+		shape.NewPlane(math32.Y, 100, 100).SetSegs(math32.Vec2i(100, 100)).SetNormalNeg(false))
 	ph.SetMesh("cube",
-		shape.NewBox(1, 1, 1).SetSegs(math32.Vector3i{50, 50, 50}))
+		shape.NewBox(1, 1, 1).SetSegs(math32.Vec3i(50, 50, 50)))
 	ph.SetMesh("sphere", shape.NewSphere(.5, 64))
 	ph.SetMesh("cylinder", shape.NewCylinder(1, .5, 64, 64, true, true))
 	ph.SetMesh("cone", shape.NewCone(1, .5, 64, 64, true))
 	ph.SetMesh("capsule", shape.NewCapsule(1, .5, 64, 64))
 	ph.SetMesh("torus", shape.NewTorus(2, .2, 64))
 
-	lines := shape.NewLines([]math32.Vector3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, math32.Vec2(.2, .1), false)
+	lines := shape.NewLines([]math32.Vector3{{X: -3, Y: -1, Z: 0}, {X: -2, Y: 1, Z: 0}, {X: 2, Y: 1, Z: 0}, {X: 3, Y: -1, Z: 0}}, math32.Vec2(.2, .1), false)
 	ph.SetMesh("lines", lines)
 
 	/////////////////////////////
@@ -87,7 +87,7 @@ func main() {
 	imgs := make([]image.Image, len(imgFiles))
 	for i, fnm := range imgFiles {
 		imgs[i], _, _ = imagex.OpenFS(images.Images, fnm)
-		fn := strings.Split(fnm, ".")[0]
+		fn, _, _ := strings.Cut(fnm, ".")
 		ph.SetTexture(fn, phong.NewTexture(imgs[i]))
 	}
 
@@ -159,7 +159,7 @@ func main() {
 			nm := strconv.Itoa(i)
 			od := phong.NewObject(&ob.Matrix, phong.NewColors(ob.Color, color.Black, 30, 1, 1))
 			if i == 0 {
-				od.SetTilingRepeat(math32.Vector2{50, 50})
+				od.SetTilingRepeat(math32.Vec2(50, 50))
 			}
 			if i == 3 { // cone
 				od.SetColors(dark, green, 30, .1, 1) // emissive, not reflective

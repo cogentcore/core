@@ -7,12 +7,12 @@ package coresymbols
 import (
 	"reflect"
 
-	. "cogentcore.org/core/icons"
+	"cogentcore.org/core/icons"
 )
 
 // iconsList is a subset of icons to include in the symbols.
 // It is based on the icons used in the core docs.
-var iconsList = map[string]Icon{"Download": Download, "Share": Share, "Send": Send, "Computer": Computer, "Smartphone": Smartphone, "Sort": Sort, "Home": Home, "HomeFill": HomeFill, "DeployedCodeFill": DeployedCodeFill, "Close": Close, "Explore": Explore, "History": History, "Euro": Euro, "OpenInNew": OpenInNew, "Add": Add}
+var iconsList = map[string]icons.Icon{"Download": icons.Download, "Share": icons.Share, "Send": icons.Send, "Computer": icons.Computer, "Smartphone": icons.Smartphone, "Sort": icons.Sort, "Home": icons.Home, "HomeFill": icons.HomeFill, "DeployedCodeFill": icons.DeployedCodeFill, "Close": icons.Close, "Explore": icons.Explore, "History": icons.History, "Euro": icons.Euro, "OpenInNew": icons.OpenInNew, "Add": icons.Add}
 
 var _ = register(func() {
 	m := map[string]reflect.Value{}

@@ -35,7 +35,7 @@ func BenchmarkAbs(b *testing.B) {
 
 func BenchmarkVector2Length(b *testing.B) {
 	v := Vec2(3, 4)
-	for range b.N {
+	for b.Loop() {
 		benchSink = v.Length()
 	}
 }
@@ -43,7 +43,7 @@ func BenchmarkVector2Length(b *testing.B) {
 func BenchmarkMatrix2Mul(b *testing.B) {
 	m := Identity2().Rotate(0.3).Scale(2, 3)
 	p := Vec2(1, 2)
-	for range b.N {
+	for b.Loop() {
 		p = m.MulPoint(p)
 	}
 	benchSink = p.X

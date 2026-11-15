@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package typgen provides the generation of type information for
+// Package typegen provides the generation of type information for
 // Go types, methods, and functions.
 package typegen
 

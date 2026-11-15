@@ -32,7 +32,7 @@ func NewPath(pt ppath.Path, sty *styles.Paint, ctx *Context) *Path {
 	return pe
 }
 
-// interface assertion.
+// IsRenderItem marks this as a render item (interface assertion).
 func (p *Path) IsRenderItem() {}
 
 func (p *Path) String() string {

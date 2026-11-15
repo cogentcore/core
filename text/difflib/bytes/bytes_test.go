@@ -19,7 +19,7 @@ func assertAlmostEqual(t *testing.T, a, b float64, places int) {
 	}
 }
 
-func assertEqual(t *testing.T, a, b interface{}) {
+func assertEqual(t *testing.T, a, b any) {
 	if !reflect.DeepEqual(a, b) {
 		t.Errorf("%v != %v", a, b)
 	}
@@ -88,7 +88,7 @@ i a[6:6], () b[5:6] (f)
 func TestGroupedOpCodes(t *testing.T) {
 	a := [][]byte{}
 	for i := 0; i != 39; i++ {
-		a = append(a, []byte(fmt.Sprintf("%02d", i)))
+		a = append(a, fmt.Appendf(nil, "%02d", i))
 	}
 	b := [][]byte{}
 	b = append(b, a[:8]...)
@@ -149,7 +149,7 @@ four`
 		Context:  3,
 	}
 	result, _ := GetUnifiedDiffString(diff)
-	fmt.Println(strings.Replace(string(result), "\t", " ", -1))
+	fmt.Println(strings.ReplaceAll(string(result), "\t", " "))
 	// Output:
 	// --- Original 2005-01-26 23:30:50
 	// +++ Current 2010-04-02 10:20:52
@@ -181,7 +181,7 @@ four`
 		Eol:      []byte{'\n'},
 	}
 	result, _ := GetContextDiffString(diff)
-	fmt.Print(strings.Replace(string(result), "\t", " ", -1))
+	fmt.Print(strings.ReplaceAll(string(result), "\t", " "))
 	// Output:
 	// *** Original
 	// --- Current
@@ -217,7 +217,7 @@ four`
 		Eol:      []byte{'\n'},
 	}
 	result, _ := GetContextDiffString(diff)
-	fmt.Print(strings.Replace(string(result), "\t", " ", -1))
+	fmt.Print(strings.ReplaceAll(string(result), "\t", " "))
 	// Output:
 	// *** Original
 	// --- Current
@@ -497,7 +497,7 @@ func BenchmarkDiffer(b *testing.B) {
 	differ := NewDiffer()
 	for i := range A {
 		var x [][]byte
-		for n := 0; n < 5; n++ {
+		for range 5 {
 			x, _ = differ.Compare(A[i], B[i])
 		}
 		fmt.Printf(" %v", len(x))
@@ -511,7 +511,7 @@ func BenchmarkMatcher(b *testing.B) {
 	b.ResetTimer()
 	for i := range As {
 		var x []OpCode
-		for n := 0; n < 5; n++ {
+		for range 5 {
 			sm := NewMatcher(As[i], Bs[i])
 			x = sm.GetOpCodes()
 		}

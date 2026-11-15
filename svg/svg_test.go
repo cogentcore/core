@@ -168,7 +168,7 @@ func TestFontEmoji(t *testing.T) {
 	size := float32(512)
 	hext, _ := face.FontHExtents()
 	ctr := 0
-	for r := rune(0); r < math.MaxInt32; r++ {
+	for r := range rune(math.MaxInt32) {
 		gid, has := face.NominalGlyph(r)
 		if !has {
 			continue

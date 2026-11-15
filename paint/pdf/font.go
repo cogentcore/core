@@ -53,7 +53,7 @@ func standardFontName(sty *rich.Style) string {
 	return name
 }
 
-func (w *pdfWriter) getFont(sty *rich.Style, tsty *text.Style) pdfRef {
+func (w *pdfWriter) getFont(sty *rich.Style, _ *text.Style) pdfRef {
 	if sty.Family != rich.Custom {
 		stdFont := standardFontName(sty)
 		if ref, ok := w.fontsStd[stdFont]; ok {

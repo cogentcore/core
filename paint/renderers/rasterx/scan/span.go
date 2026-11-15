@@ -70,7 +70,7 @@ func (x *LinkListSpanner) Clear() {
 	x.LastY, x.LastP = 0, 0
 	x.Spans = x.Spans[0:0]
 	width := x.Bounds.Dy()
-	for i := 0; i < width; i++ {
+	for range width {
 		// The first cells are indexed according to the y values
 		// to create y separate linked lists corresponding to the
 		// image y length. Since index 0 is used by the first of these sentinel cells

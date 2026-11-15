@@ -59,7 +59,7 @@ func TestMacroValues(t *testing.T) {
 	assert.Equal(t, "wip", mc.Name)
 	assert.Equal(t, []string{"--message"}, mc.Prompts)
 	assert.Equal(t, "Git commit wip", mc.Label("git"))
-	assert.Equal(t, "git commit --verbose --message 'default message' -- .", sc.ArgsCommandLine(mc.withPrompted(sc, nil, nil)))
+	assert.Equal(t, "git commit --verbose --message 'default message' -- .", sc.ArgsCommandLine(mc.withPrompted(nil, nil)))
 
 	// the prompt has only the prompted arguments, with the defaults
 	keys := mc.promptKeys()
@@ -68,9 +68,9 @@ func TestMacroValues(t *testing.T) {
 	mc.Values.SetValues(sc, pv)
 	assert.Equal(t, "default message", reflect.ValueOf(pv).Elem().Field(0).String())
 	reflect.ValueOf(pv).Elem().Field(0).SetString("the fix")
-	assert.Equal(t, "git commit --verbose --message 'the fix' -- .", sc.ArgsCommandLine(mc.withPrompted(sc, sc.ArgsOf(pv), keys)))
+	assert.Equal(t, "git commit --verbose --message 'the fix' -- .", sc.ArgsCommandLine(mc.withPrompted(sc.ArgsOf(pv), keys)))
 	reflect.ValueOf(pv).Elem().Field(0).SetString("")
-	assert.Equal(t, "git commit --verbose -- .", sc.ArgsCommandLine(mc.withPrompted(sc, sc.ArgsOf(pv), keys)))
+	assert.Equal(t, "git commit --verbose -- .", sc.ArgsCommandLine(mc.withPrompted(sc.ArgsOf(pv), keys)))
 }
 
 // TestMacros tests saving and deleting macros, which are kept when their
@@ -264,7 +264,7 @@ func TestStandardMacros(t *testing.T) {
 		keys := mc.promptKeys()
 		pv := gc.formStruct(keys)
 		reflect.ValueOf(pv).Elem().Field(0).SetString("the fix")
-		assert.Equal(t, "git commit --message 'the fix' --all", gc.ArgsCommandLine(mc.withPrompted(gc, gc.ArgsOf(pv), keys)))
+		assert.Equal(t, "git commit --message 'the fix' --all", gc.ArgsCommandLine(mc.withPrompted(gc.ArgsOf(pv), keys)))
 	}
 }
 

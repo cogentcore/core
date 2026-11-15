@@ -97,7 +97,7 @@ func ParseSVGPath(s string) (Path, error) {
 
 		cmd := prevCmd
 		repeat := true
-		if cmd == 'z' || cmd == 'Z' || !(path[i] >= '0' && path[i] <= '9' || path[i] == '.' || path[i] == '-' || path[i] == '+') {
+		if cmd == 'z' || cmd == 'Z' || (path[i] < '0' || path[i] > '9') && path[i] != '.' && path[i] != '-' && path[i] != '+' {
 			cmd = path[i]
 			repeat = false
 			i++
@@ -138,7 +138,7 @@ func ParseSVGPath(s string) (Path, error) {
 
 		switch cmd {
 		case 'M', 'm':
-			p1 = math32.Vector2{f[0], f[1]}
+			p1 = math32.Vec2(f[0], f[1])
 			if cmd == 'm' {
 				p1 = p1.Add(p0)
 				cmd = 'l'
@@ -150,7 +150,7 @@ func ParseSVGPath(s string) (Path, error) {
 			p1 = p.StartPos()
 			p.Close()
 		case 'L', 'l':
-			p1 = math32.Vector2{f[0], f[1]}
+			p1 = math32.Vec2(f[0], f[1])
 			if cmd == 'l' {
 				p1 = p1.Add(p0)
 			}
@@ -168,9 +168,9 @@ func ParseSVGPath(s string) (Path, error) {
 			}
 			p.LineTo(p1.X, p1.Y)
 		case 'C', 'c':
-			cp1 := math32.Vector2{f[0], f[1]}
-			cp2 := math32.Vector2{f[2], f[3]}
-			p1 = math32.Vector2{f[4], f[5]}
+			cp1 := math32.Vec2(f[0], f[1])
+			cp2 := math32.Vec2(f[2], f[3])
+			p1 = math32.Vec2(f[4], f[5])
 			if cmd == 'c' {
 				cp1 = cp1.Add(p0)
 				cp2 = cp2.Add(p0)
@@ -180,8 +180,8 @@ func ParseSVGPath(s string) (Path, error) {
 			c = cp2
 		case 'S', 's':
 			cp1 := p0
-			cp2 := math32.Vector2{f[0], f[1]}
-			p1 = math32.Vector2{f[2], f[3]}
+			cp2 := math32.Vec2(f[0], f[1])
+			p1 = math32.Vec2(f[2], f[3])
 			if cmd == 's' {
 				cp2 = cp2.Add(p0)
 				p1 = p1.Add(p0)
@@ -192,8 +192,8 @@ func ParseSVGPath(s string) (Path, error) {
 			p.CubeTo(cp1.X, cp1.Y, cp2.X, cp2.Y, p1.X, p1.Y)
 			c = cp2
 		case 'Q', 'q':
-			cp := math32.Vector2{f[0], f[1]}
-			p1 = math32.Vector2{f[2], f[3]}
+			cp := math32.Vec2(f[0], f[1])
+			p1 = math32.Vec2(f[2], f[3])
 			if cmd == 'q' {
 				cp = cp.Add(p0)
 				p1 = p1.Add(p0)
@@ -202,7 +202,7 @@ func ParseSVGPath(s string) (Path, error) {
 			q = cp
 		case 'T', 't':
 			cp := p0
-			p1 = math32.Vector2{f[0], f[1]}
+			p1 = math32.Vec2(f[0], f[1])
 			if cmd == 't' {
 				p1 = p1.Add(p0)
 			}
@@ -217,7 +217,7 @@ func ParseSVGPath(s string) (Path, error) {
 			rot := f[2]
 			large := f[3] == 1.0
 			sweep := f[4] == 1.0
-			p1 = math32.Vector2{f[5], f[6]}
+			p1 = math32.Vec2(f[5], f[6])
 			if cmd == 'a' {
 				p1 = p1.Add(p0)
 			}
@@ -344,10 +344,10 @@ func (p Path) ToPS() string {
 			fmt.Fprintf(&sb, " %v %v lineto", dec(x), dec(y))
 		case QuadTo, CubeTo:
 			var start, cp1, cp2 math32.Vector2
-			start = math32.Vector2{x, y}
+			start = math32.Vec2(x, y)
 			if cmd == QuadTo {
 				x, y = p[i+3], p[i+4]
-				cp1, cp2 = QuadraticToCubicBezier(start, math32.Vec2(p[i+1], p[i+2]), math32.Vector2{x, y})
+				cp1, cp2 = QuadraticToCubicBezier(start, math32.Vec2(p[i+1], p[i+2]), math32.Vec2(x, y))
 			} else {
 				cp1 = math32.Vec2(p[i+1], p[i+2])
 				cp2 = math32.Vec2(p[i+3], p[i+4])
@@ -398,10 +398,10 @@ func (p Path) ToPDF() string {
 			fmt.Fprintf(&sb, " %v %v l", dec(x), dec(y))
 		case QuadTo, CubeTo:
 			var start, cp1, cp2 math32.Vector2
-			start = math32.Vector2{x, y}
+			start = math32.Vec2(x, y)
 			if cmd == QuadTo {
 				x, y = p[i+3], p[i+4]
-				cp1, cp2 = QuadraticToCubicBezier(start, math32.Vec2(p[i+1], p[i+2]), math32.Vector2{x, y})
+				cp1, cp2 = QuadraticToCubicBezier(start, math32.Vec2(p[i+1], p[i+2]), math32.Vec2(x, y))
 			} else {
 				cp1 = math32.Vec2(p[i+1], p[i+2])
 				cp2 = math32.Vec2(p[i+3], p[i+4])

@@ -7,6 +7,7 @@ package htmlcore
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 	"sort"
@@ -249,12 +250,8 @@ func saveFidelitySummary(outDir string, results []*fidResult) map[string]*fidSum
 	}
 	sums := fidelitySummaries(results)
 	all := map[string]*fidSummary{}
-	for n, s := range prev {
-		all[n] = s
-	}
-	for n, s := range sums {
-		all[n] = s
-	}
+	maps.Copy(all, prev)
+	maps.Copy(all, sums)
 	b, _ := json.MarshalIndent(all, "", "\t")
 	os.WriteFile(p, b, 0666)
 	return prev

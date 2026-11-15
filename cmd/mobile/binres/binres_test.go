@@ -13,6 +13,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -57,53 +58,6 @@ func printrecurse(t *testing.T, pl *Pool, el *Element, ws string) {
 	for _, e := range el.Children {
 		printrecurse(t, pl, e, ws+"  ")
 	}
-}
-
-func compareBytes(a, b []byte) error {
-	if bytes.Equal(a, b) {
-		return nil
-	}
-	buf := new(bytes.Buffer)
-	x, y := len(a), len(b)
-	if x != y {
-		fmt.Fprintf(buf, "byte length does not match, have %v, want %v\n", y, x)
-	}
-	if x > y {
-		x, y = y, x
-	}
-	mismatch := false
-	for i := 0; i < x; i++ {
-		if mismatch = a[i] != b[i]; mismatch {
-			fmt.Fprintf(buf, "first byte mismatch at %v\n", i)
-			break
-		}
-	}
-	if mismatch {
-		// print out a reasonable amount of data to help identify issues
-		truncate := x > 3300
-		if truncate {
-			x = 3300
-		}
-		buf.WriteString("      HAVE               WANT\n")
-		for i := 0; i < x; i += 4 {
-			he, we := 4, 4
-			if i+he >= x {
-				he = x - i
-			}
-			if i+we >= y {
-				we = y - i
-			}
-			notequal := ""
-			if !bytes.Equal(b[i:i+he], a[i:i+we]) {
-				notequal = "***"
-			}
-			fmt.Fprintf(buf, "%3v | % X        % X    %s\n", i, b[i:i+he], a[i:i+we], notequal)
-		}
-		if truncate {
-			fmt.Fprint(buf, "... output truncated.\n")
-		}
-	}
-	return errors.New(buf.String())
 }
 
 func TestBootstrap(t *testing.T) {
@@ -227,11 +181,11 @@ func TestEncode(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := compareStrings(t, bxml.Pool.strings, bx.Pool.strings); err != nil {
+	if err := compareStrings(bxml.Pool.strings, bx.Pool.strings); err != nil {
 		t.Error(err)
 	}
 
-	if err := compareUint32s(t, rtou(bxml.Map.rs), rtou(bx.Map.rs)); err != nil {
+	if err := compareUint32s(rtou(bxml.Map.rs), rtou(bx.Map.rs)); err != nil {
 		t.Error(err)
 	}
 
@@ -356,20 +310,17 @@ func rtou(a []TableRef) (b []uint32) {
 	return
 }
 
-func compareUint32s(t *testing.T, a, b []uint32) error {
+func compareUint32s(a, b []uint32) error {
 	var err error
 	if len(a) != len(b) {
 		err = errors.New("lengths do not match")
 	}
 
-	n := len(a)
-	if n < len(b) {
-		n = len(b)
-	}
+	n := max(len(a), len(b))
 
 	var buf bytes.Buffer
 	buf.WriteString("a.Map.rs    b.Map.rs\n")
-	for i := 0; i < n; i++ {
+	for i := range n {
 		var c, d string
 		if i < len(a) {
 			c = fmt.Sprintf("%0#8x ", a[i])
@@ -384,7 +335,10 @@ func compareUint32s(t *testing.T, a, b []uint32) error {
 		if err == nil && c != d {
 			err = errors.New("has missing/incorrect values")
 		}
-		buf.WriteString(c + " " + d + "\n")
+		buf.WriteString(c)
+		buf.WriteString(" ")
+		buf.WriteString(d)
+		buf.WriteString("\n")
 	}
 
 	if err != nil {
@@ -394,7 +348,7 @@ func compareUint32s(t *testing.T, a, b []uint32) error {
 	return err
 }
 
-func compareStrings(t *testing.T, a, b []string) error {
+func compareStrings(a, b []string) error {
 	var err error
 	if len(a) != len(b) {
 		err = errors.New("lengths do not match")
@@ -425,12 +379,7 @@ func compareStrings(t *testing.T, a, b []string) error {
 	}
 
 	contains := func(xs []string, a string) bool {
-		for _, x := range xs {
-			if x == a {
-				return true
-			}
-		}
-		return false
+		return slices.Contains(xs, a)
 	}
 
 	if err != nil {
@@ -541,10 +490,10 @@ func TestTableMarshal(t *testing.T) {
 	}
 
 	pkg, xpkg := tbl.pkgs[0], xtbl.pkgs[0]
-	if err := compareStrings(t, pkg.typePool.strings, xpkg.typePool.strings); err != nil {
+	if err := compareStrings(pkg.typePool.strings, xpkg.typePool.strings); err != nil {
 		t.Fatal(err)
 	}
-	if err := compareStrings(t, pkg.keyPool.strings, xpkg.keyPool.strings); err != nil {
+	if err := compareStrings(pkg.keyPool.strings, xpkg.keyPool.strings); err != nil {
 		t.Fatal(err)
 	}
 
@@ -653,7 +602,7 @@ func BenchmarkTableRefByName(b *testing.B) {
 
 	b.ReportAllocs()
 	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
+	for b.Loop() {
 		tbl, err := OpenTable()
 		if err != nil {
 			b.Fatal(err)

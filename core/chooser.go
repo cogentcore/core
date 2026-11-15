@@ -517,7 +517,7 @@ func (ch *Chooser) setCurrentText(text string) error {
 			return nil
 		}
 	}
-	if !(ch.AllowNew || ch.DefaultNew) {
+	if !ch.AllowNew && !ch.DefaultNew {
 		return errors.New("unknown value")
 	}
 	ch.Items = append(ch.Items, ChooserItem{Value: text})

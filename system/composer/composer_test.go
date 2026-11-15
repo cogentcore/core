@@ -44,7 +44,7 @@ var (
 )
 
 func TestComposerDrawer(t *testing.T) {
-	td := &testDrawer{DrawerBase: DrawerBase{Image: image.NewRGBA(image.Rect(0, 0, 20, 20))}}
+	td := &testDrawer{Image: image.NewRGBA(image.Rect(0, 0, 20, 20))}
 	cd := &ComposerDrawer{Drawer: td}
 	var _ Composer = cd
 

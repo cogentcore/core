@@ -77,7 +77,7 @@ func TestBaseFlagsAndClone(t *testing.T) {
 	assert.True(t, ev.IsHandled())
 	cl := ev.Clone()
 	assert.False(t, cl.IsHandled(), "a clone is not handled")
-	assert.Equal(t, ev.Base.Rune, cl.KeyRune())
+	assert.Equal(t, ev.Rune, cl.KeyRune())
 	ev.ClearHandled()
 	assert.False(t, ev.IsHandled())
 
@@ -150,7 +150,7 @@ func TestEventStrings(t *testing.T) {
 		{NewExternalDrop(Drop, Left, image.Pt(8, 9), 0, nil), []string{"Drop", "(8,9)"}},
 		{NewOSEvent(OSOpenFiles), []string{"OSOpenFiles"}},
 		{NewTextComposition("ka", 0, 2), []string{"Composition", `"ka"`, "End: 2"}},
-		{&CustomEvent{Base: Base{Typ: Custom, Data: 42}}, []string{"Custom", "42"}},
+		{&CustomEvent{Typ: Custom, Data: 42}, []string{"Custom", "42"}},
 	}
 	for _, tt := range tests {
 		s := tt.ev.String()

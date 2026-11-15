@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package lms provides the opponent color components of LMS cone responses
+// (as red-green and blue-yellow).
 package lms
 
 //go:generate core generate

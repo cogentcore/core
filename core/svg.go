@@ -97,7 +97,7 @@ func (sv *SVG) Open(filename Filename) error { //types:add
 	return sv.SVG.OpenXML(string(filename))
 }
 
-// OpenSVG opens an XML-formatted SVG file from the given fs.
+// OpenFS opens an XML-formatted SVG file from the given fs.
 func (sv *SVG) OpenFS(fsys fs.FS, filename string) error {
 	return sv.SVG.OpenFS(fsys, filename)
 }

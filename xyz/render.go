@@ -312,10 +312,9 @@ func (sc *Scene) renderImpl(grabImage bool) *image.NRGBA {
 		if !ni.IsSolid() {
 			return tree.Continue
 		}
-		rc := ni.RenderClass()
-		if rc > RClassTransTexture { // all in one group b/c z-sorting is key
-			rc = RClassTransTexture
-		}
+		rc := min(ni.RenderClass(),
+			// all in one group b/c z-sorting is key
+			RClassTransTexture)
 		rcs[rc] = append(rcs[rc], ni)
 		return tree.Continue
 	})
@@ -339,12 +338,7 @@ func (sc *Scene) renderImpl(grabImage bool) *image.NRGBA {
 		// 	fmt.Printf("obj: %s  max z: %g   min z: %g\n", objs[i].Name, objs[i].AsNode().NDCBBox.Max.Z, objs[i].AsNode().NDCBBox.Min.Z)
 		// }
 
-		lastrc := RClassOpaqueVertex
 		for _, obj := range objs {
-			rc = obj.RenderClass()
-			if rc >= RClassTransTexture && rc != lastrc {
-				lastrc = rc
-			}
 			obj.PreRender()
 		}
 	}
@@ -353,17 +347,8 @@ func (sc *Scene) renderImpl(grabImage bool) *image.NRGBA {
 	if err != nil {
 		return nil
 	}
-	for rci, objs := range rcs {
-		rc := RenderClasses(rci)
-		if len(objs) == 0 {
-			continue
-		}
-		lastrc := RClassOpaqueVertex
+	for _, objs := range rcs {
 		for _, obj := range objs {
-			rc = obj.RenderClass()
-			if rc >= RClassTransTexture && rc != lastrc {
-				lastrc = rc
-			}
 			obj.Render(rp)
 		}
 	}

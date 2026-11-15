@@ -12,6 +12,7 @@ import (
 	"image"
 	"image/color"
 	"log/slog"
+	"maps"
 	"reflect"
 
 	"cogentcore.org/core/colors"
@@ -24,19 +25,9 @@ import (
 // Path renders a path to the canvas using a style and an
 // individual matrix (needed for fill)
 func (r *PDF) Path(path ppath.Path, style *styles.Paint, tr math32.Matrix2) {
-	// PDFs don't support the arcs joiner, miter joiner (not clipped),
-	// or miter joiner (clipped) with non-bevel fallback
-	strokeUnsupported := false
-	if style.Stroke.Join == ppath.JoinArcs {
-		strokeUnsupported = true
-	} else if style.Stroke.Join == ppath.JoinMiter {
-		if style.Stroke.MiterLimit == 0 {
-			strokeUnsupported = true
-		}
-		// } else if _, ok := miter.GapJoiner.(canvas.BevelJoiner); !ok {
-		// 	strokeUnsupported = true
-		// }
-	}
+	// TODO: PDFs don't support the arcs joiner, miter joiner (not clipped),
+	// or miter joiner (clipped) with non-bevel fallback, which could be
+	// drawn by filling the outline of the stroke (see stroke.Stroke).
 	scale := math32.Sqrt(math32.Abs(tr.Det()))
 	stk := style.Stroke
 	stk.Width.Dots *= scale
@@ -67,32 +58,6 @@ func (r *PDF) Path(path ppath.Path, style *styles.Paint, tr math32.Matrix2) {
 		bounds = fbox.MulMatrix2(cum)
 	}
 
-	if style.HasStroke() && strokeUnsupported {
-		// todo: handle with optional inclusion of stroke function as _ import
-		/*	// style.HasStroke() && strokeUnsupported
-			if style.HasFill() {
-				r.w.SetFill(style.Fill)
-				r.w.Write([]byte(" "))
-				r.w.Write([]byte(data))
-				r.w.Write([]byte(" f"))
-				if style.Fill.Rule == canvas.EvenOdd {
-					r.w.Write([]byte("*"))
-				}
-			}
-
-			// stroke settings unsupported by PDF, draw stroke explicitly
-			if style.IsDashed() {
-				path = path.Dash(style.DashOffset, style.Dashes...)
-			}
-			path = path.Stroke(style.StrokeWidth, style.StrokeCapper, style.StrokeJoiner, canvas.Tolerance)
-
-			r.w.SetFill(style.Stroke)
-			r.w.Write([]byte(" "))
-			r.w.Write([]byte(path.Transform(m).ToPDF()))
-			r.w.Write([]byte(" f"))
-		*/
-		// return
-	}
 	if style.HasFill() && !style.HasStroke() {
 		r.w.SetFill(&style.Fill, bounds, tr)
 		r.w.Write([]byte(" "))
@@ -391,9 +356,7 @@ func (w *pdfPage) gradientPattern(gr gradient.Gradient, opacity float32, bounds 
 		geom["Coords"] = pdfArray{f.X, f.Y, 0, c.X, c.Y, r}
 	}
 	shading := pdfDict{"ColorSpace": pdfName("DeviceRGB")}
-	for k, v := range geom {
-		shading[k] = v
-	}
+	maps.Copy(shading, geom)
 	shading["Function"] = patternStopsFunction(base.Stops, stopColor)
 	pattern := pdfDict{
 		"Type":        pdfName("Pattern"),
@@ -429,9 +392,7 @@ func (w *pdfPage) gradientPattern(gr gradient.Gradient, opacity float32, bounds 
 	// the mask is a luminosity transparency group of a gray shading of the
 	// alphas, in the default space of the page, as the pattern is.
 	alphas := pdfDict{"ColorSpace": pdfName("DeviceGray")}
-	for k, v := range geom {
-		alphas[k] = v
-	}
+	maps.Copy(alphas, geom)
 	alphas["Function"] = patternStopsFunction(base.Stops, func(st *gradient.Stop) pdfArray {
 		return pdfArray{dec(stopAlpha(st, opacity))}
 	})

@@ -116,11 +116,11 @@ func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 
 	gtyp := str[:gidx]
 	rmdr := str[gidx+len(grad):]
-	pidx := strings.IndexByte(rmdr, '(')
-	if pidx < 0 {
+	_, after, ok := strings.Cut(rmdr, "(")
+	if !ok {
 		return nil, fmt.Errorf("gradient specified but parameters not found in string %q", str)
 	}
-	pars := rmdr[pidx+1:]
+	pars := after
 	pars = strings.TrimSuffix(pars, ");")
 	pars = strings.TrimSuffix(pars, ")")
 
@@ -202,7 +202,7 @@ func (l *Linear) SetString(str string) error {
 	var prevColor color.Color
 	stopIndex := 0
 outer:
-	for pidx := 0; pidx < len(plist); pidx++ {
+	for pidx := range plist {
 		par := strings.TrimRight(strings.TrimSpace(plist[pidx]), ",")
 		origPar := par
 		switch {
@@ -270,7 +270,7 @@ func (r *Radial) SetString(str string) error {
 	var prevColor color.Color
 	stopIndex := 0
 outer:
-	for pidx := 0; pidx < len(plist); pidx++ {
+	for pidx := range plist {
 		par := strings.TrimRight(strings.TrimSpace(plist[pidx]), ",")
 
 		// currently we just ignore circle and ellipse, but we should handle them at some point
@@ -467,16 +467,16 @@ func UnmarshalXML(g *Gradient, decoder *xml.Decoder, se xml.StartElement) error 
 				ats := se.Attr
 				sty := XMLAttr("style", ats)
 				if sty != "" {
-					spl := strings.Split(sty, ";")
-					for _, s := range spl {
+					spl := strings.SplitSeq(sty, ";")
+					for s := range spl {
 						s := strings.TrimSpace(s)
-						ci := strings.IndexByte(s, ':')
-						if ci < 0 {
+						before, after, ok := strings.Cut(s, ":")
+						if !ok {
 							continue
 						}
 						a := xml.Attr{}
-						a.Name.Local = strings.TrimSpace(s[:ci])
-						a.Value = strings.TrimSpace(s[ci+1:])
+						a.Name.Local = strings.TrimSpace(before)
+						a.Value = strings.TrimSpace(after)
 						ats = append(ats, a)
 					}
 				}
@@ -571,7 +571,7 @@ func fixGradientStops(stops []Stop) {
 	}
 	splitSt := -1
 	last := float32(0)
-	for i := 0; i < sz; i++ {
+	for i := range sz {
 		st := &stops[i]
 		if i == sz-1 && st.Pos == 0 {
 			if last < 1.0 {

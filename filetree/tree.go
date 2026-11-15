@@ -124,9 +124,9 @@ func (ft *Tree) Init() {
 	})
 }
 
-func (fv *Tree) Destroy() {
-	fv.stopWatcher()
-	fv.Tree.Destroy()
+func (ft *Tree) Destroy() {
+	ft.stopWatcher()
+	ft.Tree.Destroy()
 }
 
 func (ft *Tree) AsFileTree() *Tree {

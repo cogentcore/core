@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package render provides the render items that painters record (paths,
+// text, images, and contexts), and the Renderer interface that draws them.
 package render
 
 import (
@@ -52,7 +54,8 @@ func (pr *Render) Reset() {
 func (pr *Render) String() string {
 	var b strings.Builder
 	for _, it := range *pr {
-		b.WriteString(it.String() + "\n")
+		b.WriteString(it.String())
+		b.WriteByte('\n')
 	}
 	return b.String()
 }

@@ -151,7 +151,7 @@ var (
 
 // IMPORTANT: any changes here must be updated in style_properties.go StyleShadowFuncs
 
-// style parameters for shadows
+// Shadow contains the style parameters for shadows.
 type Shadow struct { //types:add
 
 	// OffsetX is th horizontal offset of the shadow.

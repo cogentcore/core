@@ -73,16 +73,27 @@ func TestInspectorSelectElement(t *testing.T) {
 func TestInspectorWindowProfile(t *testing.T) {
 	b := NewBody("inspected")
 	NewText(b).SetText("Inspect me")
-	nw := len(AllRenderWindows)
+	// inspectors returns the number of inspector windows of the body (by
+	// title, as other windows can open and close meanwhile)
+	inspectors := func() int {
+		n := 0
+		for _, w := range AllRenderWindows {
+			if w.title == "Inspector: inspected" {
+				n++
+			}
+		}
+		return n
+	}
 	RenderImage(b, Locked(b, func() {
 		InspectorWindow(b)
 	}), func() {
-		require.Eventually(t, func() bool { return len(AllRenderWindows) > nw+1 }, 5*time.Second, 10*time.Millisecond)
+		require.Eventually(t, func() bool { return inspectors() == 1 }, 5*time.Second, 10*time.Millisecond)
 	}, Locked(b, func() {
-		n := len(AllRenderWindows)
 		InspectorWindow(b) // recycled
-		assert.Equal(t, n, len(AllRenderWindows))
-	}))
+	}), func() {
+		time.Sleep(100 * time.Millisecond)
+		assert.Equal(t, 1, inspectors(), "recycled")
+	})
 
 	t.Chdir(t.TempDir())
 	ProfileToggle()

@@ -31,5 +31,5 @@ func TestEqualTolSlice(t *testing.T) {
 	assert.False(t, EqualTolSlice(testingT, []float64{1, 2}, []float64{1, 3}, 0.1))
 	assert.False(t, EqualTolSlice(testingT, []float32{1, 2}, []float32{1}, 0.1), "a shorter actual fails, without panicking")
 	assert.False(t, EqualTolSlice(testingT, []float32{1}, []float32{1, 2}, 0.1), "a longer actual fails")
-	assert.True(t, EqualTolSlice[float64](testingT, nil, nil, 0.1))
+	assert.True(t, EqualTolSlice(testingT, nil, nil, 0.1))
 }

@@ -226,7 +226,6 @@ func (gl *GoLang) TypeFromASTExpr(fs *parse.FileState, origPkg, pkg *syms.Symbol
 		}
 		return nil, tyast, false
 	}
-	return nil, tyast, false
 }
 
 // TypeFromASTSym attempts to get the type from given symbol as part of expression.
@@ -359,15 +358,12 @@ func (gl *GoLang) TypeFromASTType(fs *parse.FileState, origPkg, pkg *syms.Symbol
 			return nil, fun, false
 
 		}
-		if brk || nxt == nil || nxt == last {
+		if brk { // (nxt is neither nil nor last here: see the start of the loop)
 			break
 		}
 		// if TraceTypes {
 		// 	fmt.Printf("TExpr: skipping over %v\n", nxt.Nm)
 		// }
-	}
-	if nxt == nil {
-		return ttp, nxt, false
 	}
 	nm := nxt.Src
 	stp := ttp.Els.ByName(nm)

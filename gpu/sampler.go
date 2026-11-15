@@ -74,7 +74,7 @@ func (sm *Sampler) Release() {
 	sm.sampler = nil
 }
 
-// Texture image sampler modes
+// SamplerModes are the texture image sampler modes.
 type SamplerModes int32 //enums:enum
 
 const (
@@ -106,7 +106,7 @@ var WebGPUSamplerModes = map[SamplerModes]wgpu.AddressMode{
 
 //////////////////////////////////////////////////////
 
-// Texture image sampler modes
+// BorderColors are the border colors of the texture image sampler.
 type BorderColors int32 //enums:enum -trim-prefix Border
 
 const (

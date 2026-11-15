@@ -18,7 +18,7 @@ var wrapText = strings.Repeat("Some words that wrap. ", 12)
 
 // shrinkTest makes a frame 300 dp wide, styled by the given function,
 // and calls add to add its children before laying it out.
-func shrinkTest(t *testing.T, style func(s *styles.Style), add func(fr *Frame), check func(fr *Frame, dp float32)) {
+func shrinkTest(_ *testing.T, style func(s *styles.Style), add func(fr *Frame), check func(fr *Frame, dp float32)) {
 	b := NewBody()
 	fr := NewFrame(b)
 	fr.Styler(func(s *styles.Style) {

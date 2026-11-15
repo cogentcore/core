@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"maps"
 	"strings"
 	"unicode"
 
@@ -39,9 +40,7 @@ var CodeSymbols = map[string]any{}
 // AddCompiledCode adds the given compiled code blocks to [CompiledCode].
 // Generated code calls it.
 func AddCompiledCode(code map[string]CodeFunc) {
-	for k, f := range code {
-		CompiledCode[k] = f
-	}
+	maps.Copy(CompiledCode, code)
 }
 
 // CodeKey returns the key of the given code block source in [CompiledCode]:
@@ -123,13 +122,13 @@ func bindCompiledCode(ed *textcore.Editor, parent *core.Frame, language string, 
 
 // runCompiledCode runs f in parent, like the interpreter would.
 func runCompiledCode(ed *textcore.Editor, parent *core.Frame, language string, f CodeFunc) {
-	runCode(ed, parent, language, func(out io.Writer) { f(parent, out) })
+	runCode(ed, parent, func(out io.Writer) { f(parent, out) })
 }
 
 // runCode runs compiled code in parent, like the interpreter would: run
 // runs it with the given output, which is shown below the result, and
 // a panic is shown as an error.
-func runCode(ed *textcore.Editor, parent *core.Frame, language string, run func(out io.Writer)) {
+func runCode(ed *textcore.Editor, parent *core.Frame, run func(out io.Writer)) {
 	parent.DeleteChildren()
 	// a program that makes a body and runs a window adds it to parent instead
 	core.ExternalParent = parent

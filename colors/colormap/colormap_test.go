@@ -60,19 +60,18 @@ func TestColorMaps(t *testing.T) {
 		for bi, bm := range colors.BlendTypesValues() {
 			yp = idx*(nblend+1) + bi
 			cm.Blend = bm
-			for x := 0; x < nX; x++ {
+			for x := range nX {
 				xv := float32(x) / float32(nX)
 				c := cm.Map(xv)
 				ys := yp * sqSz
 				xs := x * sqX
-				for y := 0; y < sqSz; y++ {
-					for x := 0; x < sqX; x++ {
+				for y := range sqSz {
+					for x := range sqX {
 						img.SetRGBA(xs+x, ys+y, c)
 					}
 				}
 			}
 		}
-		idx++
 	}
 
 	imagex.Assert(t, img, "colormaps")

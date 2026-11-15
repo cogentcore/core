@@ -12,6 +12,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"golang.org/x/tools/go/packages"
@@ -58,12 +59,7 @@ func PrintHeader(w io.Writer, pkg string, imports ...string) {
 func ExcludeFile(pkg *packages.Package, file *ast.File, exclude ...string) bool {
 	fpos := pkg.Fset.Position(file.FileStart)
 	_, fname := filepath.Split(fpos.Filename)
-	for _, ex := range exclude {
-		if fname == ex {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(exclude, fname)
 }
 
 // Inspect goes through all of the files in the given package,

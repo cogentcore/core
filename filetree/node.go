@@ -187,7 +187,7 @@ func (fn *Node) Init() {
 		if !fn.IsDir() || fn.IsIrregular() {
 			return
 		}
-		if !((fn.FileRoot().inOpenAll && !fn.Info.IsHidden()) || fn.FileRoot().isDirOpen(fn.Filepath)) {
+		if (!fn.FileRoot().inOpenAll || fn.Info.IsHidden()) && !fn.FileRoot().isDirOpen(fn.Filepath) {
 			return
 		}
 		repo, _ := fn.Repo()
@@ -229,20 +229,20 @@ func (fn *Node) joinPath(dir, name string) string {
 func (fn *Node) styleFromStatus() {
 	status := fn.Info.VCS
 	hex := ""
-	switch {
-	case status == vcs.Untracked:
+	switch status {
+	case vcs.Untracked:
 		hex = "#808080"
-	case status == vcs.Modified:
+	case vcs.Modified:
 		hex = "#4b7fd1"
-	case status == vcs.Added:
+	case vcs.Added:
 		hex = "#008800"
-	case status == vcs.Deleted:
+	case vcs.Deleted:
 		hex = "#ff4252"
-	case status == vcs.Conflicted:
+	case vcs.Conflicted:
 		hex = "#ce8020"
-	case status == vcs.Updated:
+	case vcs.Updated:
 		hex = "#008060"
-	case status == vcs.Stored:
+	case vcs.Stored:
 		fn.Styles.Color = colors.Scheme.OnSurface
 	}
 	if fn.Info.Generated {
@@ -318,11 +318,6 @@ func (fn *Node) IsExec() bool {
 // isOpen returns true if file is flagged as open
 func (fn *Node) isOpen() bool {
 	return !fn.Closed
-}
-
-// isAutoSave returns true if file is an auto-save file (starts and ends with #)
-func (fn *Node) isAutoSave() bool {
-	return strings.HasPrefix(fn.Info.Name, "#") && strings.HasSuffix(fn.Info.Name, "#")
 }
 
 // RelativePath returns the relative path from root for this node
@@ -440,8 +435,8 @@ func (fn *Node) InitFileInfo() error {
 // SelectedFunc runs the given function on all selected nodes in reverse order.
 func (fn *Node) SelectedFunc(fun func(n *Node)) {
 	sels := fn.GetSelectedNodes()
-	for i := len(sels) - 1; i >= 0; i-- {
-		sn := AsNode(sels[i])
+	for _, sel := range slices.Backward(sels) {
+		sn := AsNode(sel)
 		if tree.IsNil(sn) {
 			continue
 		}
@@ -537,7 +532,7 @@ func (fn *Node) sortBy(s dirsort.Sort) {
 // openAll opens all directories under this one
 func (fn *Node) openAll() { //types:add
 	fn.FileRoot().inOpenAll = true // causes chaining of opening
-	fn.Tree.OpenAll()
+	fn.OpenAll()
 	fn.FileRoot().inOpenAll = false
 	fn.FileRoot().syncWatchDirs()
 }
@@ -580,7 +575,7 @@ func (fn *Node) dirsTo(path string) (*Node, error) {
 	dirs := strings.Split(rpath, sep)
 	cfn := fn
 	sz := len(dirs)
-	for i := 0; i < sz; i++ {
+	for i := range sz {
 		dr := dirs[i]
 		sfni := cfn.ChildByName(dr, 0)
 		if sfni == nil {

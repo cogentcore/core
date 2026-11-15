@@ -37,7 +37,9 @@ func BenchmarkTable(bm *testing.B) {
 			w.renderWindow() // Note: MUST remove "go" in renderwindow.go call to w.renderAsync!
 		}
 	})
-	return // comment to do profile too
+	if !profileRenderBench {
+		return
+	}
 	AssertRender(bm, b, "table/profile", func() {
 		w := b.Scene.RenderWindow()
 		// startCPUMemoryProfile()
@@ -68,7 +70,9 @@ func BenchmarkForm(bm *testing.B) {
 			w.renderWindow() // Note: MUST remove "go" in renderwindow.go call to w.renderAsync!
 		}
 	})
-	return // comment to do profile too
+	if !profileRenderBench {
+		return
+	}
 	AssertRender(bm, b, "form/profile", func() {
 		w := b.Scene.RenderWindow()
 		// startCPUMemoryProfile()
@@ -81,3 +85,7 @@ func BenchmarkForm(bm *testing.B) {
 		// endCPUMemoryProfile()
 	})
 }
+
+// profileRenderBench is whether the render benchmarks also profile the
+// rendering (set it to true to do so).
+var profileRenderBench = false

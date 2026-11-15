@@ -30,35 +30,35 @@ var benchSink any
 
 func BenchmarkValueOfPointer(b *testing.B) {
 	v := &benchStruct{Name: "a"}
-	for range b.N {
+	for b.Loop() {
 		benchSink = reflect.ValueOf(v)
 	}
 }
 
 func BenchmarkTypeOfPointer(b *testing.B) {
 	v := &benchStruct{Name: "a"}
-	for range b.N {
+	for b.Loop() {
 		benchSink = reflect.TypeOf(v)
 	}
 }
 
 func BenchmarkTypeOfStruct(b *testing.B) {
 	v := benchStruct{Name: "a"}
-	for range b.N {
+	for b.Loop() {
 		benchSink = reflect.TypeOf(v)
 	}
 }
 
 func BenchmarkFieldByIndex(b *testing.B) {
 	v := reflect.ValueOf(&benchStruct{Inner: benchInner{A: 1}}).Elem()
-	for range b.N {
+	for b.Loop() {
 		benchSink = v.FieldByIndex([]int{2, 0}).Interface()
 	}
 }
 
 func BenchmarkFieldByName(b *testing.B) {
 	v := reflect.ValueOf(&benchStruct{Value: 3}).Elem()
-	for range b.N {
+	for b.Loop() {
 		benchSink = v.FieldByName("Value").Int()
 	}
 }
@@ -72,45 +72,45 @@ func BenchmarkSetField(b *testing.B) {
 }
 
 func BenchmarkNumFieldLoop(b *testing.B) {
-	t := reflect.TypeOf(benchStruct{})
-	for range b.N {
-		for i := range t.NumField() {
-			benchSink = t.Field(i).Name
+	t := reflect.TypeFor[benchStruct]()
+	for b.Loop() {
+		for field := range t.Fields() {
+			benchSink = field.Name
 		}
 	}
 }
 
 func BenchmarkMethodByName(b *testing.B) {
 	v := reflect.ValueOf(&benchStruct{Value: 3})
-	for range b.N {
+	for b.Loop() {
 		benchSink = v.MethodByName("Method")
 	}
 }
 
 func BenchmarkValueInterface(b *testing.B) {
 	v := reflect.ValueOf(&benchStruct{Value: 3}).Elem().Field(0)
-	for range b.N {
+	for b.Loop() {
 		benchSink = v.Interface()
 	}
 }
 
 func BenchmarkNonPointerType(b *testing.B) {
-	t := reflect.TypeOf(&benchStruct{})
-	for range b.N {
+	t := reflect.TypeFor[*benchStruct]()
+	for b.Loop() {
 		benchSink = NonPointerType(t)
 	}
 }
 
 func BenchmarkUnderlying(b *testing.B) {
 	v := reflect.ValueOf(&benchStruct{})
-	for range b.N {
+	for b.Loop() {
 		benchSink = Underlying(v)
 	}
 }
 
 func BenchmarkCopyStruct(b *testing.B) {
 	src := &benchStruct{Name: "a", Value: 2, Items: []string{"x"}}
-	for range b.N {
+	for b.Loop() {
 		dst := &benchStruct{}
 		reflect.ValueOf(dst).Elem().Set(reflect.ValueOf(src).Elem())
 		benchSink = dst

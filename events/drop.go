@@ -134,6 +134,6 @@ func DropModFor(mods key.Modifiers, moveDefault bool) DropMods {
 }
 
 // DefaultMod sets the default DropMod modifier action based on modifier keys
-func (e *DragDrop) DefaultMod() {
-	e.DropMod = DefaultModBits(e.Mods)
+func (ev *DragDrop) DefaultMod() {
+	ev.DropMod = DefaultModBits(ev.Mods)
 }

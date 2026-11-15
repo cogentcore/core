@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package renderers sets the standard renderers of the platform for the
+// paint package: images, SVG, and PDF (importing it is enough).
 package renderers
 
 import (

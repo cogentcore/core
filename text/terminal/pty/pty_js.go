@@ -12,18 +12,18 @@ import (
 	"os/exec"
 )
 
-func start(cmd *exec.Cmd, cols, rows int) (pseudoTerminal, error) {
+func start(_ *exec.Cmd, _, _ int) (pseudoTerminal, error) {
 	return nil, ErrUnsupported
 }
 
-func wait(ctx context.Context, cmd *exec.Cmd) error {
+func wait(_ context.Context, _ *exec.Cmd) error {
 	return ErrUnsupported
 }
 
-func open(cols, rows int) (pseudoTerminal, *os.File, *os.File, error) {
+func open(_, _ int) (pseudoTerminal, *os.File, *os.File, error) {
 	return nil, nil, nil, ErrUnsupported
 }
 
-func signals(pt pseudoTerminal) bool {
+func signals(_ pseudoTerminal) bool {
 	return false
 }

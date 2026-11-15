@@ -304,8 +304,8 @@ func formFieldName(w core.Widget) string {
 	if !ok {
 		return ""
 	}
-	if i := strings.LastIndex(name, "-"); i >= 0 {
-		return name[:i]
+	if before, _, ok := strings.CutLast(name, "-"); ok {
+		return before
 	}
 	return ""
 }
@@ -437,15 +437,15 @@ func (cs *Commands) ChooserArgs() []*ChooserArg {
 	var cas []*ChooserArg
 	for root, cm := range cs.Parsed {
 		for key, name := range cm.Choosers {
-			i := strings.LastIndex(key, " ")
-			if i < 0 {
+			before, after, ok := strings.CutLast(key, " ")
+			if !ok {
 				continue
 			}
-			sub := key[:i]
+			sub := before
 			if sub == MainName {
 				sub = ""
 			}
-			cas = append(cas, &ChooserArg{Command: root, SubCmd: sub, Arg: key[i+1:], Chooser: ChooserName(name)})
+			cas = append(cas, &ChooserArg{Command: root, SubCmd: sub, Arg: after, Chooser: ChooserName(name)})
 		}
 	}
 	slices.SortFunc(cas, func(a, b *ChooserArg) int {

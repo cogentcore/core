@@ -8,6 +8,7 @@ import (
 	"bufio"
 	"errors"
 	"io/fs"
+	"log/slog"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -202,7 +203,10 @@ func readMimeApps() *mimeApps {
 				}
 			}
 		}
-		f.Close() // the associations read before an error are used
+		if err := sc.Err(); err != nil { // the associations read before it are used
+			slog.Warn("apps: reading a MIME apps file", "file", file, "err", err)
+		}
+		f.Close()
 	}
 	return ma
 }

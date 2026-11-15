@@ -217,7 +217,7 @@ func TestMacroPromptValues(t *testing.T) {
 				set(v)
 				keys := mc.promptKeys()
 				require.NoError(t, cs.Args.SetMacroValues("git", mc, sc.ArgsOf(fm.Struct), keys))
-				cs.runMacroLine("git", mc, sc.ArgsCommandLine(mc.withPrompted(sc, sc.ArgsOf(fm.Struct), keys)), run)
+				cs.runMacroLine("git", mc, sc.ArgsCommandLine(mc.withPrompted(sc.ArgsOf(fm.Struct), keys)), run)
 			}
 		})
 		return v

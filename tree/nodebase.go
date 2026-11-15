@@ -87,7 +87,7 @@ type NodeBase struct {
 
 	// numLifetimeChildren is the number of children that have ever been added to this
 	// node, which is used for automatic unique naming.
-	numLifetimeChildren uint64
+	numLifetimeChildren uint64 // (not an atomic.Uint64, as NodeBase is copied by value)
 
 	// index is the last value of our index, which is used as a starting point for
 	// finding us in our parent next time. It is not guaranteed to be accurate;
@@ -278,8 +278,8 @@ func (n *NodeBase) PathFrom(parent Node) string {
 // at the given path.
 func (n *NodeBase) FindPath(path string) Node {
 	curn := n.This
-	pels := strings.Split(strings.Trim(strings.TrimSpace(path), "\""), "/")
-	for _, pe := range pels {
+	pels := strings.SplitSeq(strings.Trim(strings.TrimSpace(path), "\""), "/")
+	for pe := range pels {
 		if len(pe) == 0 {
 			continue
 		}
@@ -641,10 +641,7 @@ func (n *NodeBase) WalkDownBreadth(fun func(n Node) bool) {
 	queue := make([]Node, 1)
 	queue[0] = start
 
-	for {
-		if len(queue) == 0 {
-			break
-		}
+	for len(queue) > 0 {
 		cur := queue[0]
 		depth := cur.AsTree().depth
 		queue = queue[1:]

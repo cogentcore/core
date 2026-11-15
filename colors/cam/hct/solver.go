@@ -35,14 +35,14 @@ func SolveToRGBLin(hue, chroma, tone float32) math32.Vector3 {
 		return math32.Vec3(y, y, y)
 	}
 	tone = math32.Clamp(tone, 0, 100)
-	hue_deg := cam16.SanitizeDegrees(hue)
-	hue_rad := math32.DegToRad(hue_deg)
+	hueDeg := cam16.SanitizeDegrees(hue)
+	hueRad := math32.DegToRad(hueDeg)
 	y := cie.LToY(tone)
-	exact := FindResultByJ(hue_rad, chroma, y)
+	exact := FindResultByJ(hueRad, chroma, y)
 	if exact != nil {
 		return *exact
 	}
-	return BisectToLimit(y, hue_rad)
+	return BisectToLimit(y, hueRad)
 }
 
 // SolveToRGB Finds an sRGB (gamma corrected, 0-1 range) color
@@ -55,12 +55,12 @@ func SolveToRGB(hue, chroma, tone float32) (r, g, b float32) {
 	return
 }
 
-// Finds a color with the given hue, chroma, and Y.
+// FindResultByJ finds a color with the given hue, chroma, and Y.
 // @param hue_radians The desired hue in radians.
 // @param chroma The desired chroma.
 // @param y The desired Y.
 // @return The desired color as linear sRGB values.
-func FindResultByJ(hue_rad, chroma, y float32) *math32.Vector3 {
+func FindResultByJ(hueRad, chroma, y float32) *math32.Vector3 {
 	// Initial estimate of j.
 	j := math32.Sqrt(y) * 11
 
@@ -68,39 +68,39 @@ func FindResultByJ(hue_rad, chroma, y float32) *math32.Vector3 {
 	// Operations inlined from Cam16 to avoid repeated calculation
 	// ===========================================================
 	vw := cam16.NewStdView()
-	t_inner_coeff := 1 / math32.Pow(1.64-math32.Pow(0.29, vw.BgYToWhiteY), 0.73)
-	e_hue := 0.25 * (math32.Cos(hue_rad+2) + 3.8)
-	p1 := e_hue * (50000 / 13) * vw.NC * vw.NCB
-	h_sin := math32.Sin(hue_rad)
-	h_cos := math32.Cos(hue_rad)
-	for itr := 0; itr < 5; itr++ {
-		j_norm := j / 100
+	tInnerCoeff := 1 / math32.Pow(1.64-math32.Pow(0.29, vw.BgYToWhiteY), 0.73)
+	eHue := 0.25 * (math32.Cos(hueRad+2) + 3.8)
+	p1 := eHue * (50000 / 13) * vw.NC * vw.NCB
+	hSin := math32.Sin(hueRad)
+	hCos := math32.Cos(hueRad)
+	for itr := range 5 {
+		jNorm := j / 100
 		alpha := float32(0)
 		if !(chroma == 0 || j == 0) {
-			alpha = chroma / math32.Sqrt(j_norm)
+			alpha = chroma / math32.Sqrt(jNorm)
 		}
-		t := math32.Pow(alpha*t_inner_coeff, 1/0.9)
-		ac := vw.AW * math32.Pow(j_norm, 1/vw.C/vw.Z)
+		t := math32.Pow(alpha*tInnerCoeff, 1/0.9)
+		ac := vw.AW * math32.Pow(jNorm, 1/vw.C/vw.Z)
 		p2 := ac / vw.NBB
-		gamma := 23 * (p2 + 0.305) * t / (23*p1 + 11*t*h_cos + 108*t*h_sin)
-		a := gamma * h_cos
-		b := gamma * h_sin
-		r_a := (460*p2 + 451*a + 288*b) / 1403
-		g_a := (460*p2 - 891*a - 261*b) / 1403
-		b_a := (460*p2 - 220*a - 6300*b) / 1403
-		r_c_scaled := cam16.InverseChromaticAdapt(r_a)
-		g_c_scaled := cam16.InverseChromaticAdapt(g_a)
-		b_c_scaled := cam16.InverseChromaticAdapt(b_a)
-		scaled := math32.Vec3(r_c_scaled, g_c_scaled, b_c_scaled)
+		gamma := 23 * (p2 + 0.305) * t / (23*p1 + 11*t*hCos + 108*t*hSin)
+		a := gamma * hCos
+		b := gamma * hSin
+		rA := (460*p2 + 451*a + 288*b) / 1403
+		gA := (460*p2 - 891*a - 261*b) / 1403
+		bA := (460*p2 - 220*a - 6300*b) / 1403
+		rCScaled := cam16.InverseChromaticAdapt(rA)
+		gCScaled := cam16.InverseChromaticAdapt(gA)
+		bCScaled := cam16.InverseChromaticAdapt(bA)
+		scaled := math32.Vec3(rCScaled, gCScaled, bCScaled)
 		linrgb := MatMul(scaled, kLinrgbFromScaledDiscount)
 
 		if linrgb.X < 0 || linrgb.Y < 0 || linrgb.Z < 0 {
 			return nil
 		}
-		k_r := kYFromLinrgb[0]
-		k_g := kYFromLinrgb[1]
-		k_b := kYFromLinrgb[2]
-		fnj := k_r*linrgb.X + k_g*linrgb.Y + k_b*linrgb.Z
+		kR := kYFromLinrgb[0]
+		kG := kYFromLinrgb[1]
+		kB := kYFromLinrgb[2]
+		fnj := kR*linrgb.X + kG*linrgb.Y + kB*linrgb.Z
 		if fnj <= 0 {
 			return nil
 		}

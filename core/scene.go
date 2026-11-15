@@ -350,7 +350,7 @@ func (sc *Scene) Resize(geom math32.Geom2DInt) bool {
 	sz := math32.FromPoint(geom.Size)
 	if sc.Painter.State == nil {
 		sc.Painter = *paint.NewPainter(sz)
-		sc.Painter.Paint.UnitContext = sc.Styles.UnitContext
+		sc.Painter.UnitContext = sc.Styles.UnitContext
 	}
 	sc.SceneGeom.Pos = geom.Pos
 	if sc.Renderer != nil {
@@ -368,8 +368,8 @@ func (sc *Scene) Resize(geom math32.Geom2DInt) bool {
 	} else {
 		sc.Renderer = paint.NewSourceRenderer(sz)
 	}
-	sc.Painter.Paint.UnitContext = sc.Styles.UnitContext
-	sc.Painter.State.Init(sc.Painter.Paint, sz)
+	sc.Painter.UnitContext = sc.Styles.UnitContext
+	sc.Painter.Init(sc.Painter.Paint, sz)
 	sc.Renderer.SetSize(units.UnitDot, sz)
 	sc.SceneGeom.Size = geom.Size // make sure
 	sc.layer.resize(sc)

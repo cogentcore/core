@@ -54,11 +54,11 @@ func (cl *Client) getLoginEnv() {
 	if !ok {
 		return
 	}
-	i := bytes.LastIndex(login, []byte("\001ENV\001"))
-	if i < 0 {
+	_, after, ok := bytes.CutLast(login, []byte("\001ENV\001"))
+	if !ok {
 		return
 	}
-	cl.exports = loginExports(parseEnv(plain), parseEnv(login[i+len("\001ENV\001"):]))
+	cl.exports = loginExports(parseEnv(plain), parseEnv(after))
 }
 
 // parseEnv returns the variables of the given output of env, separated by
@@ -72,7 +72,7 @@ func parseEnv(out []byte) map[string]string {
 		}
 	}
 	env := map[string]string{}
-	for _, kv := range bytes.Split(out, sep) {
+	for kv := range bytes.SplitSeq(out, sep) {
 		k, v, ok := strings.Cut(string(kv), "=")
 		if ok && envName.MatchString(k) {
 			env[k] = v
@@ -94,7 +94,11 @@ func loginExports(plain, login map[string]string) string {
 		if b.Len() == 0 {
 			b.WriteString("export")
 		}
-		b.WriteString(" " + k + "='" + strings.ReplaceAll(v, "'", `'\''`) + "'")
+		b.WriteString(" ")
+		b.WriteString(k)
+		b.WriteString("='")
+		b.WriteString(strings.ReplaceAll(v, "'", `'\''`))
+		b.WriteString("'")
 	}
 	if b.Len() == 0 {
 		return ""

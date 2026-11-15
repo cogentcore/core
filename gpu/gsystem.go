@@ -99,7 +99,7 @@ func (sy *GraphicsSystem) AddGraphicsPipeline(name string) *GraphicsPipeline {
 	return pl
 }
 
-// When the render surface (e.g., window) is resized, call this function.
+// SetSize must be called when the render surface (e.g., window) is resized.
 // WebGPU does not have any internal mechanism for tracking this, so we
 // need to drive it from external events.
 func (sy *GraphicsSystem) SetSize(size image.Point) {

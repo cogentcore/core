@@ -277,7 +277,7 @@ func androidAVDs() []string {
 		return nil
 	}
 	var avds []string
-	for _, l := range strings.Split(out, "\n") {
+	for l := range strings.SplitSeq(out, "\n") {
 		l = strings.TrimSpace(l)
 		// (it can log about its setup, as INFO lines)
 		if l != "" && !strings.Contains(l, " ") {
@@ -456,7 +456,7 @@ func androidDevices() ([]androidDevice, error) {
 // devices.
 func parseAndroidDevices(out string) []androidDevice {
 	var devs []androidDevice
-	for _, l := range strings.Split(out, "\n") {
+	for l := range strings.SplitSeq(out, "\n") {
 		f := strings.Fields(l)
 		if len(f) == 2 && f[0] != "List" {
 			devs = append(devs, androidDevice{f[0], f[1]})

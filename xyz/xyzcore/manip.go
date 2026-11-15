@@ -183,10 +183,10 @@ func (sw *Scene) handleSelectEventsImpl(e events.Event) {
 	e.SetLocalOff(e.LocalOff().Add(pos))
 	ns := xyz.NodesUnderPoint(xy, e.Pos())
 	nsel := len(ns)
-	switch {
-	case nsel == 0:
+	switch nsel {
+	case 0:
 		sw.SetSelected(nil)
-	case nsel == 1:
+	case 1:
 		sw.SetSelected(ns[0])
 	default:
 		for _, n := range ns {

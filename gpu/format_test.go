@@ -70,7 +70,7 @@ func TestSRGB(t *testing.T) {
 	assert.InDelta(t, 1, r, 1e-6)
 	assert.InDelta(t, 0.214, g, 0.001)
 	assert.Equal(t, float32(0), b)
-	r, g, b = SRGBFromLinear(r, g, b)
+	_, g, _ = SRGBFromLinear(r, g, b)
 	assert.InDelta(t, 0.5, g, 1e-4)
 	assert.Equal(t, uint8(255), ImgCompToUint8(1.2))
 	assert.Equal(t, uint8(0), ImgCompToUint8(-1))

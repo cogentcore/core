@@ -6,6 +6,7 @@ package parse
 
 import (
 	"fmt"
+	"slices"
 	"time"
 
 	"cogentcore.org/core/base/errors"
@@ -63,12 +64,7 @@ type LanguageProperties struct {
 
 // HasFlag returns true if given flag is set in Flags
 func (lp *LanguageProperties) HasFlag(flg LanguageFlags) bool {
-	for _, f := range lp.Flags {
-		if f == flg {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(lp.Flags, flg)
 }
 
 // StandardLanguageProperties is the standard compiled-in set of language properties

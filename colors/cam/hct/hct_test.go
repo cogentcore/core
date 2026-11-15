@@ -102,7 +102,7 @@ func TestGetAxis(t *testing.T) {
 }
 
 func BenchmarkHCT(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		New(120, 45, 56)
 	}
 }

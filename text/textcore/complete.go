@@ -65,18 +65,18 @@ func (ed *Editor) completeText(s string) {
 	}
 	// give the completer a chance to edit the completion before insert,
 	// also it return a number of runes past the cursor to delete
-	st := textpos.Pos{ed.Complete.SrcLn, 0}
-	en := textpos.Pos{ed.Complete.SrcLn, ed.Lines.LineLen(ed.Complete.SrcLn)}
+	st := textpos.Pos{Line: ed.Complete.SrcLn, Char: 0}
+	en := textpos.Pos{Line: ed.Complete.SrcLn, Char: ed.Lines.LineLen(ed.Complete.SrcLn)}
 	var tbes string
 	tbe := ed.Lines.Region(st, en)
 	if tbe != nil {
 		tbes = string(tbe.ToBytes())
 	}
 	c := ed.Complete.GetCompletion(s)
-	pos := textpos.Pos{ed.Complete.SrcLn, ed.Complete.SrcCh}
+	pos := textpos.Pos{Line: ed.Complete.SrcLn, Char: ed.Complete.SrcCh}
 	ced := ed.Complete.EditFunc(ed.Complete.Context, tbes, ed.Complete.SrcCh, c, ed.Complete.Seed)
 	if ced.ForwardDelete > 0 {
-		delEn := textpos.Pos{ed.Complete.SrcLn, ed.Complete.SrcCh + ced.ForwardDelete}
+		delEn := textpos.Pos{Line: ed.Complete.SrcLn, Char: ed.Complete.SrcCh + ced.ForwardDelete}
 		ed.Lines.DeleteText(pos, delEn)
 	}
 	// now the normal completion insertion
@@ -104,8 +104,8 @@ func (ed *Editor) offerComplete() {
 
 	ed.Complete.SrcLn = ed.CursorPos.Line
 	ed.Complete.SrcCh = ed.CursorPos.Char
-	st := textpos.Pos{ed.CursorPos.Line, 0}
-	en := textpos.Pos{ed.CursorPos.Line, ed.CursorPos.Char}
+	st := textpos.Pos{Line: ed.CursorPos.Line, Char: 0}
+	en := textpos.Pos{Line: ed.CursorPos.Line, Char: ed.CursorPos.Char}
 	tbe := ed.Lines.Region(st, en)
 	var s string
 	if tbe != nil {
@@ -161,8 +161,8 @@ func (ed *Editor) Lookup() { //types:add
 	}
 	ed.Complete.SrcLn = ln
 	ed.Complete.SrcCh = ch
-	st := textpos.Pos{ed.CursorPos.Line, 0}
-	en := textpos.Pos{ed.CursorPos.Line, ch}
+	st := textpos.Pos{Line: ed.CursorPos.Line, Char: 0}
+	en := textpos.Pos{Line: ed.CursorPos.Line, Char: ch}
 
 	tbe := ed.Lines.Region(st, en)
 	var s string
@@ -196,7 +196,7 @@ func completeParse(data any, text string, posLine, posChar int) (md complete.Mat
 	// must set it in pi/parse directly -- so it is changed in the fileparse too
 	parser.GUIActive = true // note: this is key for debugging -- runs slower but makes the tree unique
 
-	md = lp.Lang.CompleteLine(sfs, text, textpos.Pos{posLine, posChar})
+	md = lp.Lang.CompleteLine(sfs, text, textpos.Pos{Line: posLine, Char: posChar})
 	return md
 }
 
@@ -232,7 +232,7 @@ func lookupParse(data any, txt string, posLine, posChar int) (ld complete.Lookup
 	// must set it in pi/parse directly -- so it is changed in the fileparse too
 	parser.GUIActive = true // note: this is key for debugging -- runs slower but makes the tree unique
 
-	ld = lp.Lang.Lookup(sfs, txt, textpos.Pos{posLine, posChar})
+	ld = lp.Lang.Lookup(sfs, txt, textpos.Pos{Line: posLine, Char: posChar})
 	if len(ld.Text) > 0 {
 		// todo:
 		// TextDialog(nil, "Lookup: "+txt, string(ld.Text))

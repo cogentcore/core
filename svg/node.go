@@ -201,7 +201,7 @@ func (g *NodeBase) SetPos(pos math32.Vector2)     {}
 func (g *NodeBase) SetSize(sz math32.Vector2)     {}
 func (g *NodeBase) PaintStyle() *styles.Paint     { return &g.Paint }
 func (g *NodeBase) LocalBBox(sv *SVG) math32.Box2 { return math32.Box2{} }
-func (g *NodeBase) BaseInterface() reflect.Type   { return reflect.TypeOf((*NodeBase)(nil)).Elem() }
+func (g *NodeBase) BaseInterface() reflect.Type   { return reflect.TypeFor[NodeBase]() }
 func (g *NodeBase) SetTransformProperty()         { g.SetProperty("transform", g.Paint.Transform.String()) }
 
 func (g *NodeBase) Init() {
@@ -241,10 +241,7 @@ func (g *NodeBase) ParentTransform(self bool) math32.Matrix2 {
 	pars := []Node{}
 	xf := math32.Identity2()
 	n := g.This.(Node)
-	for {
-		if n.AsTree().Parent == nil {
-			break
-		}
+	for n.AsTree().Parent != nil {
 		n = n.AsTree().Parent.(Node)
 		pars = append(pars, n)
 	}
@@ -458,7 +455,7 @@ func (g *NodeBase) IsVisible(sv *SVG) bool {
 
 // Painter returns a new Painter using my styles.
 func (g *NodeBase) Painter(sv *SVG) *paint.Painter {
-	return &paint.Painter{sv.painter.State, &g.Paint}
+	return &paint.Painter{State: sv.painter.State, Paint: &g.Paint}
 }
 
 // PushContext checks our bounding box and visibility, returning false if

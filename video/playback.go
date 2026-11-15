@@ -105,7 +105,7 @@ func (p *Playback) playFrom(t time.Duration, paused bool) error {
 		p.pausedAt, p.resume = time.Now(), make(chan struct{})
 	}
 	p.mu.Unlock()
-	frames, samples, errs, a, err := p.start(t, done)
+	frames, _, errs, a, err := p.start(t, done)
 	if err != nil {
 		p.Stop() // (not playing)
 		return err
@@ -113,7 +113,7 @@ func (p *Playback) playFrom(t time.Duration, paused bool) error {
 	if p.audioOnly() {
 		go p.runAudio(done, t, a, errs)
 	} else {
-		go p.run(done, frames, samples, errs)
+		go p.run(done, frames, errs)
 	}
 	return nil
 }
@@ -211,7 +211,7 @@ func (p *Playback) start(t time.Duration, done chan struct{}) (<-chan Frame, <-c
 
 // run shows the frames at their times, until the end of the media
 // (playing it again for Loop), or until done is closed.
-func (p *Playback) run(done chan struct{}, frames <-chan Frame, samples <-chan [2]float64, errs <-chan error) {
+func (p *Playback) run(done chan struct{}, frames <-chan Frame, errs <-chan error) {
 	start := time.Now()
 	var first, base, last time.Duration // base: the start of this loop
 	firstFrame := true
@@ -241,7 +241,7 @@ func (p *Playback) run(done chan struct{}, frames <-chan Frame, samples <-chan [
 				return
 			}
 			var err error
-			if frames, samples, errs, _, err = p.start(0, done); err != nil {
+			if frames, _, errs, _, err = p.start(0, done); err != nil {
 				p.error(err)
 				return
 			}

@@ -12,12 +12,13 @@ import (
 	"runtime"
 	"time"
 
+	"math/rand/v2"
+
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/examples/images"
 	"cogentcore.org/core/gpu/gpudraw"
-	"golang.org/x/exp/rand"
 )
 
 func init() {
@@ -70,7 +71,7 @@ func main() {
 			drw.Copy(dp, imgs[i], image.Rectangle{}, gpudraw.Src, gpudraw.Unchanged)
 		}
 		for i := range iconFiles {
-			dp := image.Point{rand.Intn(500), rand.Intn(500)}
+			dp := image.Point{rand.IntN(500), rand.IntN(500)}
 			drw.Copy(dp, iconImgs[i], image.Rectangle{}, gpudraw.Over, gpudraw.Unchanged)
 		}
 		drw.End()
@@ -87,7 +88,7 @@ func main() {
 	rendFill := func() {
 		nclr := len(colors)
 		drw.Start()
-		for i := 0; i < 5; i++ {
+		for i := range 5 {
 			// sp := image.Point{rand.Intn(500), rand.Intn(500)}
 			// sz := image.Point{rand.Intn(500), rand.Intn(500)}
 			sp := image.Point{i * 30, i * 40}

@@ -46,7 +46,7 @@ func TestBench(t *testing.T) {
 }
 
 func BenchmarkIntLoop(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		s := 0
 		for i := range 1000 {
 			s += i * i
@@ -56,7 +56,7 @@ func BenchmarkIntLoop(b *testing.B) {
 }
 
 func BenchmarkFloatLoop(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		var s float32
 		for i := range 1000 {
 			s += float32(i) * 0.5
@@ -67,7 +67,7 @@ func BenchmarkFloatLoop(b *testing.B) {
 
 func BenchmarkStructValueMethod(b *testing.B) {
 	v := vec{1, 2}
-	for range b.N {
+	for b.Loop() {
 		v = v.Add(vec{0.5, 0.25})
 	}
 	sinkF = v.X
@@ -75,7 +75,7 @@ func BenchmarkStructValueMethod(b *testing.B) {
 
 func BenchmarkStructCopy(b *testing.B) {
 	src := box{Min: vec{1, 2}, Max: vec{3, 4}, Name: "a"}
-	for range b.N {
+	for b.Loop() {
 		dst := src
 		dst.Min.X++
 		sinkB = dst
@@ -84,7 +84,7 @@ func BenchmarkStructCopy(b *testing.B) {
 
 func BenchmarkStructSliceRange(b *testing.B) {
 	boxes := make([]box, 100)
-	for range b.N {
+	for b.Loop() {
 		var s float32
 		for _, bx := range boxes {
 			s += bx.Max.X
@@ -95,7 +95,7 @@ func BenchmarkStructSliceRange(b *testing.B) {
 
 func BenchmarkInterfaceCall(b *testing.B) {
 	shapes := []shape{&box{Max: vec{2, 3}}, circle{R: 2}}
-	for range b.N {
+	for b.Loop() {
 		var s float32
 		for _, sh := range shapes {
 			s += sh.Area()
@@ -106,7 +106,7 @@ func BenchmarkInterfaceCall(b *testing.B) {
 
 func BenchmarkTypeSwitch(b *testing.B) {
 	vals := []any{1, "a", 2.5, &box{}, circle{}}
-	for range b.N {
+	for b.Loop() {
 		n := 0
 		for _, v := range vals {
 			switch v.(type) {
@@ -126,7 +126,7 @@ func BenchmarkTypeSwitch(b *testing.B) {
 
 func BenchmarkTypeAssertInterface(b *testing.B) {
 	vals := []any{&box{}, circle{}, 1}
-	for range b.N {
+	for b.Loop() {
 		n := 0
 		for _, v := range vals {
 			if _, ok := v.(shape); ok {
@@ -144,7 +144,7 @@ func BenchmarkMapStringGet(b *testing.B) {
 		keys[i] = "key" + strconv.Itoa(i)
 		m[keys[i]] = i
 	}
-	for range b.N {
+	for b.Loop() {
 		s := 0
 		for _, k := range keys {
 			s += m[k]
@@ -158,7 +158,7 @@ func BenchmarkMapStructKey(b *testing.B) {
 	for i := range 100 {
 		m[vec{float32(i), 1}] = i
 	}
-	for range b.N {
+	for b.Loop() {
 		s := 0
 		for i := range 100 {
 			s += m[vec{float32(i), 1}]
@@ -168,7 +168,7 @@ func BenchmarkMapStructKey(b *testing.B) {
 }
 
 func BenchmarkSliceAppend(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		var s []int
 		for i := range 1000 {
 			s = append(s, i)
@@ -188,7 +188,7 @@ func BenchmarkPointerFieldUpdate(b *testing.B) {
 
 func BenchmarkClosureCall(b *testing.B) {
 	add := func(a, c int) int { return a + c }
-	for range b.N {
+	for b.Loop() {
 		s := 0
 		for i := range 100 {
 			s = add(s, i)
@@ -199,7 +199,7 @@ func BenchmarkClosureCall(b *testing.B) {
 
 func BenchmarkStringIndexLoop(b *testing.B) {
 	s := strings.Repeat("hello world\n", 1000)
-	for range b.N {
+	for b.Loop() {
 		n := 0
 		for i := 0; i < len(s); i++ {
 			if s[i] == '\n' {
@@ -212,7 +212,7 @@ func BenchmarkStringIndexLoop(b *testing.B) {
 
 func BenchmarkStringRangeRunes(b *testing.B) {
 	s := strings.Repeat("héllo wörld\n", 100)
-	for range b.N {
+	for b.Loop() {
 		n := 0
 		for _, r := range s {
 			if r == 'ö' {
@@ -224,7 +224,7 @@ func BenchmarkStringRangeRunes(b *testing.B) {
 }
 
 func BenchmarkStringBuilder(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		var sb strings.Builder
 		for range 100 {
 			sb.WriteString("ab")
@@ -234,7 +234,7 @@ func BenchmarkStringBuilder(b *testing.B) {
 }
 
 func BenchmarkStringConcat(b *testing.B) {
-	for range b.N {
+	for b.Loop() {
 		s := ""
 		for i := range 20 {
 			s += strconv.Itoa(i)
@@ -251,7 +251,7 @@ func BenchmarkSprintf(b *testing.B) {
 
 func BenchmarkSortSlice(b *testing.B) {
 	data := make([]int, 1000)
-	for range b.N {
+	for b.Loop() {
 		for i := range data {
 			data[i] = (i * 7919) % 1000
 		}
@@ -276,7 +276,7 @@ func BenchmarkMapPointerKeys(b *testing.B) {
 	for i := range nodes {
 		nodes[i] = &node{}
 	}
-	for range b.N {
+	for b.Loop() {
 		m := map[any]int{}
 		for i, n := range nodes {
 			m[n] = i

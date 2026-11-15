@@ -272,14 +272,14 @@ func TestApplyTransform(t *testing.T) {
 	assert.Equal(t, math32.Vec2(4, 5), l.End)
 
 	pl := NewPolyline(sv.Root)
-	pl.Points = []math32.Vector2{{0, 0}, {1, 2}}
+	pl.Points = []math32.Vector2{{X: 0, Y: 0}, {X: 1, Y: 2}}
 	pl.ApplyTransform(sv, math32.Scale2D(2, 2))
-	assert.Equal(t, []math32.Vector2{{0, 0}, {2, 4}}, pl.Points)
+	assert.Equal(t, []math32.Vector2{{X: 0, Y: 0}, {X: 2, Y: 4}}, pl.Points)
 	pl.ApplyTransform(sv, rot)
 	assert.NotEmpty(t, pl.Property("transform"))
 	pl.SetPos(math32.Vec2(1, 1))
 	pl.SetSize(math32.Vec2(1, 1))
-	assert.Equal(t, []math32.Vector2{{0, 0}, {2, 4}}, pl.Points, "no-ops")
+	assert.Equal(t, []math32.Vector2{{X: 0, Y: 0}, {X: 2, Y: 4}}, pl.Points, "no-ops")
 
 	p := NewPath(sv.Root)
 	require.NoError(t, p.SetData("M0 0L2 4"))

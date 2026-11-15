@@ -179,7 +179,7 @@ func clipboardPaths(md mimedata.Mimes) []string {
 		if !mimedata.IsText(d.Type) {
 			continue
 		}
-		for _, ln := range strings.Split(string(d.Data), "\n") {
+		for ln := range strings.SplitSeq(string(d.Data), "\n") {
 			p := strings.TrimPrefix(strings.TrimSpace(ln), "file://")
 			if filepath.IsAbs(p) && fsx.Exists(p) {
 				paths = append(paths, p)
@@ -362,7 +362,7 @@ func (fn *Node) pasteOntoFile(srcpath string, dropFinal func(inPlace []string)) 
 	d.RunDialog(fn)
 }
 
-// Dragged is called after target accepts the drop -- we just remove
+// DropDeleteSource is called after target accepts the drop -- we just remove
 // elements that were moved
 // satisfies core.DragNDropper interface and can be overridden by subtypes
 func (fn *Node) DropDeleteSource(e events.Event) {
@@ -375,7 +375,7 @@ func (fn *Node) DropDeleteSource(e events.Event) {
 	top := topPaths(filePaths(md))
 	nf := len(md) / 3 // always internal
 	var errs []error
-	for i := 0; i < nf; i++ {
+	for i := range nf {
 		if !slices.Contains(top, string(md[i*3+1].Data)) { // deleted with its directory
 			continue
 		}

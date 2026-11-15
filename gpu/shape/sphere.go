@@ -61,7 +61,7 @@ func (sp *Sphere) MeshSize() (numVertex, nIndex int, hasColor bool) {
 	return
 }
 
-// SetSphereSector sets points in given allocated arrays
+// Set sets points in given allocated arrays.
 func (sp *Sphere) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
 	sp.CBBox = SetSphereSector(vertex, normal, texcoord, index, sp.VertexOffset, sp.IndexOffset, sp.Radius, sp.WidthSegs, sp.HeightSegs, sp.AngStart, sp.AngLen, sp.ElevStart, sp.ElevLen, sp.Pos)
 }
@@ -143,8 +143,8 @@ func SetSphereSector(vertex, normal, texcoord math32.ArrayF32, index math32.Arra
 
 	vOff := uint32(vtxOff)
 	ii := idxOff
-	for y := 0; y < heightSegs; y++ {
-		for x := 0; x < widthSegs; x++ {
+	for y := range heightSegs {
+		for x := range widthSegs {
 			v1 := vtxs[y][x+1]
 			v2 := vtxs[y][x]
 			v3 := vtxs[y+1][x]

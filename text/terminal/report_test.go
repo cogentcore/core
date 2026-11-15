@@ -37,7 +37,7 @@ func waitGot(t *testing.T, b *core.Body, tm *Terminal, n int) string {
 	got := ""
 	waitFor(t, b, "the input", func() bool {
 		i := 0
-		for _, ln := range strings.Split(linesText(tm), "\n") {
+		for ln := range strings.SplitSeq(linesText(tm), "\n") {
 			if s, ok := strings.CutPrefix(ln, "got:"); ok && s != "$v\"" {
 				if i++; i < n {
 					continue

@@ -452,7 +452,7 @@ func selectedEntry(tt *core.TreeTable) *Entry {
 		rows = rows.Elem()
 	}
 	if i := tt.SelectedIndex; rows.Kind() == reflect.Slice && i >= 0 && i < rows.Len() {
-		en, _ := rows.Index(i).Interface().(*Entry)
+		en, _ := reflect.TypeAssert[*Entry](rows.Index(i))
 		return en
 	}
 	return nil

@@ -371,7 +371,7 @@ func (gl *GoLang) TypeFromASTComp(fs *parse.FileState, pkg *syms.Symbol, ty *sym
 			return BuiltinTypes["struct{}"], true
 		}
 		ty.Size = []int{nfld}
-		for i := 0; i < nfld; i++ {
+		for i := range nfld {
 			fld := tyast.Children[i].(*parser.AST)
 			fsrc := fld.Src
 			switch fld.Name {
@@ -417,7 +417,7 @@ func (gl *GoLang) TypeFromASTComp(fs *parse.FileState, pkg *syms.Symbol, ty *sym
 			return BuiltinTypes["interface{}"], true
 		}
 		ty.Size = []int{nmth}
-		for i := 0; i < nmth; i++ {
+		for i := range nmth {
 			fld := tyast.Children[i].(*parser.AST)
 			fsrc := fld.Src
 			switch fld.Name {

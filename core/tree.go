@@ -790,7 +790,7 @@ func (tr *Tree) Unselect() {
 		tr.Style()
 		sl := tr.GetSelectedNodes()
 		sz := len(sl)
-		for i := 0; i < sz; i++ {
+		for i := range sz {
 			if sl[i] == tr {
 				sl = append(sl[:i], sl[i+1:]...)
 				break
@@ -1061,9 +1061,10 @@ const treePageSteps = 10
 // Sends select event for newly selected item.
 func (tr *Tree) movePageUpEvent(selMode events.SelectModes) *Tree {
 	mvMode := selMode
-	if selMode == events.SelectOne {
+	switch selMode {
+	case events.SelectOne:
 		mvMode = events.NoSelect
-	} else if selMode == events.ExtendContinuous || selMode == events.ExtendOne {
+	case events.ExtendContinuous, events.ExtendOne:
 		mvMode = events.SelectQuiet
 	}
 	fnn := tr.moveUp(mvMode)
@@ -1092,9 +1093,10 @@ func (tr *Tree) movePageUpEvent(selMode events.SelectModes) *Tree {
 // Sends select event for newly selected item.
 func (tr *Tree) movePageDownEvent(selMode events.SelectModes) *Tree {
 	mvMode := selMode
-	if selMode == events.SelectOne {
+	switch selMode {
+	case events.SelectOne:
 		mvMode = events.NoSelect
-	} else if selMode == events.ExtendContinuous || selMode == events.ExtendOne {
+	case events.ExtendContinuous, events.ExtendOne:
 		mvMode = events.SelectQuiet
 	}
 	fnn := tr.moveDown(mvMode)
@@ -1148,9 +1150,10 @@ func (tr *Tree) moveHomeEvent(selMode events.SelectModes) *Tree {
 // Sends select event for newly selected item.
 func (tr *Tree) moveEndEvent(selMode events.SelectModes) *Tree {
 	mvMode := selMode
-	if selMode == events.SelectOne {
+	switch selMode {
+	case events.SelectOne:
 		mvMode = events.NoSelect
-	} else if selMode == events.ExtendContinuous || selMode == events.ExtendOne {
+	case events.ExtendContinuous, events.ExtendOne:
 		mvMode = events.SelectQuiet
 	}
 	fnn := tr.moveDown(mvMode)
@@ -1399,14 +1402,15 @@ func (tr *Tree) nodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []string) {
 	sl := make([]tree.Node, 0, ni)
 	pl := make([]string, 0, ni)
 	for _, d := range md {
-		if d.Type == fileinfo.DataJSON {
+		switch d.Type {
+		case fileinfo.DataJSON:
 			nn, err := tree.UnmarshalRootJSON(d.Data)
 			if err == nil {
 				sl = append(sl, nn)
 			} else {
 				ErrorSnackbar(tr, err, "Error loading node")
 			}
-		} else if d.Type == fileinfo.TextPlain { // paths
+		case fileinfo.TextPlain: // paths
 			pl = append(pl, string(d.Data))
 		}
 	}
@@ -1473,7 +1477,7 @@ func (tr *Tree) pasteMenu(md mimedata.Mimes) {
 // makePasteMenu makes the menu of options for paste events
 // Optional function is typically the DropFinalize but could also be other actions
 // to take after each optional action.
-func (tr *Tree) makePasteMenu(m *Scene, pos image.Point, md mimedata.Mimes, fun func()) {
+func (tr *Tree) makePasteMenu(m *Scene, _ image.Point, md mimedata.Mimes, fun func()) {
 	NewButton(m).SetText("Assign To").OnClick(func(e events.Event) {
 		tr.PasteAssign(md)
 		if fun != nil {

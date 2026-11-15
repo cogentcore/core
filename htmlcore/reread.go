@@ -1254,7 +1254,7 @@ func (c *Context) shallowKept(keep map[*html.Node]core.Widget) map[*html.Node]bo
 		newBefore := false // an element before it that is new (inserted)
 		snapChildren(p, func(k *html.Node, s nodeSnap) {
 			o, ok := c.snaps[k]
-			if keep[k] != nil && ok && !placeChangedDeep(k, o, s, places, siblingPlaces) && !(inSiblings && (newBefore || o.index != s.index) && siblingSelects(k, sibSubjects)) {
+			if keep[k] != nil && ok && !placeChangedDeep(k, o, s, places, siblingPlaces) && (!inSiblings || (!newBefore && o.index == s.index) || !siblingSelects(k, sibSubjects)) {
 				shallow[k] = true
 			}
 			newBefore = newBefore || !ok
@@ -1354,7 +1354,7 @@ func (c *Context) addedRuleTargets(root *html.Node) (shallow, deep []*html.Node,
 		if id := GetAttr(n, "id"); id != "" {
 			check("#" + id)
 		}
-		for _, cl := range strings.Fields(GetAttr(n, "class")) {
+		for cl := range strings.FieldsSeq(GetAttr(n, "class")) {
 			check("." + cl)
 		}
 		switch {

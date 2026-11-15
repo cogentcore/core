@@ -2,6 +2,6 @@
 
 package cmd
 
-func windowsRegistryAddPath(path string) error {
+func windowsRegistryAddPath(_ string) error {
 	return nil // no-op
 }

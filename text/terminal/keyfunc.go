@@ -54,7 +54,7 @@ func keyFunctionOf(ch key.Chord) keymap.Functions {
 // and a letter, with Shift added. It is "" if there are none.
 func ShortcutChord(kf keymap.Functions) key.Chord {
 	var chords []string
-	for _, ch := range strings.Split(string(kf.Chord()), "\n") {
+	for ch := range strings.SplitSeq(string(kf.Chord()), "\n") {
 		mods, k := key.ModifiersFromString(ch)
 		switch {
 		case mods.HasFlag(key.Meta):

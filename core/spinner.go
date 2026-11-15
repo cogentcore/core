@@ -161,17 +161,17 @@ func (sp *Spinner) Init() {
 		if DebugSettings.KeyEventTrace {
 			slog.Info("Spinner KeyChordEvent", "widget", sp, "keyFunction", kf)
 		}
-		switch {
-		case kf == keymap.MoveUp:
+		switch kf {
+		case keymap.MoveUp:
 			e.SetHandled()
 			sp.incrementValue(1)
-		case kf == keymap.MoveDown:
+		case keymap.MoveDown:
 			e.SetHandled()
 			sp.incrementValue(-1)
-		case kf == keymap.PageUp:
+		case keymap.PageUp:
 			e.SetHandled()
 			sp.pageIncrementValue(1)
-		case kf == keymap.PageDown:
+		case keymap.PageDown:
 			e.SetHandled()
 			sp.pageIncrementValue(-1)
 		}

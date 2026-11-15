@@ -217,7 +217,7 @@ func TestPhongMeshes(t *testing.T) {
 		"cone":     shape.NewCone(1, 0.5, 24, 1, true),
 		"capsule":  shape.NewCapsule(1, 0.4, 24, 8),
 		"torus":    shape.NewTorus(1, 0.3, 24),
-		"lines":    shape.NewLines([]math32.Vector3{{-1, 0, 0}, {1, 0, 0}}, math32.Vec2(0.3, 0.3), false),
+		"lines":    shape.NewLines([]math32.Vector3{{X: -1, Y: 0, Z: 0}, {X: 1, Y: 0, Z: 0}}, math32.Vec2(0.3, 0.3), false),
 	}
 	var mtx math32.Matrix4
 	mtx.SetIdentity()

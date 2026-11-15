@@ -9,6 +9,7 @@ import (
 	"io"
 	"maps"
 	"slices"
+	"strings"
 
 	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/text/textpos"
@@ -100,7 +101,7 @@ func (ty *Type) AddScopesStack(ss SymStack) {
 		return
 	}
 	ty.AllocScopes()
-	for i := 0; i < sz; i++ {
+	for i := range sz {
 		sc := ss[i]
 		ty.Scopes[sc.Kind] = sc.Name
 	}
@@ -283,13 +284,13 @@ func (te *TypeEls) String() string {
 // StringRange() returns a string rep of range of items
 func (te *TypeEls) StringRange(st, n int) string {
 	n = min(n, len(*te))
-	str := ""
+	var str strings.Builder
 	for i := 0; i < n; i++ {
 		tel := (*te)[st+i]
-		str += tel.String()
+		str.WriteString(tel.String())
 		if i < n-1 {
-			str += ", "
+			str.WriteString(", ")
 		}
 	}
-	return str
+	return str.String()
 }

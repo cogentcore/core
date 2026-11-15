@@ -83,10 +83,10 @@ func TestEditorVirtualInlay(t *testing.T) {
 		ed.SetVirtualText("ime", lines.VirtualText{Pos: textpos.Pos{Line: 0, Char: 9}, Text: rich.NewText(ed.CompositionStyle(), []rune("x"))})
 	}, func() {
 		end := textpos.Pos{Line: 0, Char: 9}
-		assert.Equal(t, textpos.Pos{Line: 0, Char: 15}, ed.Lines.PosToView(ed.viewId, end))
-		assert.Equal(t, textpos.Pos{Line: 0, Char: 15}, twin.Lines.PosToView(twin.viewId, end))
-		assert.Equal(t, 17, ed.Lines.ViewLineLen(ed.viewId, 0))     // with "x"
-		assert.Equal(t, 16, twin.Lines.ViewLineLen(twin.viewId, 0)) // without
+		assert.Equal(t, textpos.Pos{Line: 0, Char: 15}, ed.Lines.PosToView(ed.viewID, end))
+		assert.Equal(t, textpos.Pos{Line: 0, Char: 15}, twin.Lines.PosToView(twin.viewID, end))
+		assert.Equal(t, 17, ed.Lines.ViewLineLen(ed.viewID, 0))     // with "x"
+		assert.Equal(t, 16, twin.Lines.ViewLineLen(twin.viewID, 0)) // without
 
 		// typing moves the cursor over the hints, which are not text
 		ed.SetCursorShow(textpos.Pos{Line: 0, Char: 4})
@@ -107,7 +107,7 @@ func TestEditorVirtualSuggestion(t *testing.T) {
 		ed.SetCursorShow(sug.Pos)
 		ed.SetVirtualText("suggestion", sug)
 	}, func() {
-		assert.Equal(t, 4, ed.Lines.ViewLines(ed.viewId))
+		assert.Equal(t, 4, ed.Lines.ViewLines(ed.viewID))
 		ed.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeDownArrow, 0))
 		assert.Equal(t, 1, ed.CursorPos.Line)
 		ed.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeUpArrow, 0))

@@ -70,28 +70,28 @@ func (g *Path) Render(sv *SVG) {
 	pc.Draw()
 
 	g.PushContext(sv)
-	mrk_start := sv.MarkerByName(g, "marker-start")
-	mrk_end := sv.MarkerByName(g, "marker-end")
-	mrk_mid := sv.MarkerByName(g, "marker-mid")
+	mrkStart := sv.MarkerByName(g, "marker-start")
+	mrkEnd := sv.MarkerByName(g, "marker-end")
+	mrkMid := sv.MarkerByName(g, "marker-mid")
 
-	if mrk_start != nil || mrk_end != nil || mrk_mid != nil {
+	if mrkStart != nil || mrkEnd != nil || mrkMid != nil {
 		pos := g.Data.Coords()
 		dir := g.Data.CoordDirections()
 		np := len(pos)
-		if mrk_start != nil && np > 1 {
+		if mrkStart != nil && np > 1 {
 			dir0 := pos[1].Sub(pos[0])
 			ang := ppath.Angle(dir0) // dir[0]: has average but last 2 works better
-			mrk_start.RenderMarkerStart(sv, pos[0], ang, g.Paint.Stroke.Width.Dots)
+			mrkStart.RenderMarkerStart(sv, pos[0], ang, g.Paint.Stroke.Width.Dots)
 		}
-		if mrk_end != nil && np > 1 {
+		if mrkEnd != nil && np > 1 {
 			dirn := pos[np-1].Sub(pos[np-2])
 			ang := ppath.Angle(dirn) // dir[np-1]: see above
-			mrk_end.RenderMarker(sv, pos[np-1], ang, g.Paint.Stroke.Width.Dots)
+			mrkEnd.RenderMarker(sv, pos[np-1], ang, g.Paint.Stroke.Width.Dots)
 		}
-		if mrk_mid != nil && np > 2 {
+		if mrkMid != nil && np > 2 {
 			for i := 1; i < np-2; i++ {
 				ang := ppath.Angle(dir[i])
-				mrk_mid.RenderMarker(sv, pos[i], ang, g.Paint.Stroke.Width.Dots)
+				mrkMid.RenderMarker(sv, pos[i], ang, g.Paint.Stroke.Width.Dots)
 			}
 		}
 	}

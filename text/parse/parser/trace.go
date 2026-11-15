@@ -7,6 +7,7 @@ package parser
 import (
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 
 	"cogentcore.org/core/text/textpos"
@@ -96,12 +97,7 @@ func (pt *TraceOptions) CheckRule(rule string) bool {
 			return true
 		}
 	}
-	for _, rn := range pt.RulesList {
-		if rn == rule {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(pt.RulesList, rule)
 }
 
 // Out outputs a trace message -- returns true if actually output
@@ -136,14 +132,14 @@ func (pt *TraceOptions) Out(ps *State, pr *Rule, step Steps, pos textpos.Pos, sc
 	}
 	tokSrc := pos.String() + `"` + string(ps.Src.TokenSrc(pos)) + `"`
 	plev := ast.ParentLevel(ps.AST)
-	ind := ""
-	for i := 0; i < plev; i++ {
-		ind += "\t"
+	var ind strings.Builder
+	for range plev {
+		ind.WriteString("\t")
 	}
-	fmt.Fprintf(pt.OutWrite, "%v%v:\t %v\t %v\t tok: %v\t scope: %v\t ast: %v\n", ind, pr.Name, step, msg, tokSrc, scope, ast.Path())
+	fmt.Fprintf(pt.OutWrite, "%v%v:\t %v\t %v\t tok: %v\t scope: %v\t ast: %v\n", ind.String(), pr.Name, step, msg, tokSrc, scope, ast.Path())
 	if pt.ScopeSrc {
 		scopeSrc := ps.Src.TokenRegSrc(scope)
-		fmt.Fprintf(pt.OutWrite, "%v\t%v\n", ind, scopeSrc)
+		fmt.Fprintf(pt.OutWrite, "%v\t%v\n", ind.String(), scopeSrc)
 	}
 	return true
 }

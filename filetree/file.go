@@ -168,7 +168,7 @@ func (fn *Node) DeleteFile() error {
 	return err
 }
 
-// renames any selected files
+// RenameFiles renames any selected files.
 func (fn *Node) RenameFiles() { //types:add
 	fn.FileRoot().NeedsLayout()
 	fn.SelectedFunc(func(sn *Node) {

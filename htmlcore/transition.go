@@ -76,7 +76,7 @@ func transitionItems(decls map[string]string) []transitionItem {
 		for _, part := range splitTopLevel(v, ',') {
 			it := transitionItem{property: "all"}
 			times := 0
-			for _, f := range strings.Fields(part) {
+			for f := range strings.FieldsSeq(part) {
 				if d, ok := cssTime(f); ok {
 					if times == 0 {
 						it.duration = d

@@ -11,6 +11,7 @@ package keymap
 import (
 	"encoding/json"
 	"log/slog"
+	"maps"
 	"slices"
 	"sort"
 	"strings"
@@ -343,9 +344,7 @@ func (km *Maps) CopyFrom(cp Maps) {
 func (km *Maps) MergeFrom(cp Maps) {
 	for nm, mi := range cp {
 		tmi := (*km)[nm]
-		for ch, kf := range mi.Map {
-			tmi.Map[ch] = kf
-		}
+		maps.Copy(tmi.Map, mi.Map)
 	}
 }
 

@@ -300,7 +300,7 @@ func (m *cssMask) repeatValue(v string) {
 		m.noRepeatX = true
 	case len(fs) == 2:
 		m.noRepeatX, m.noRepeatY = fs[0] == "no-repeat", fs[1] == "no-repeat"
-		m.repeat = !(m.noRepeatX && m.noRepeatY)
+		m.repeat = !m.noRepeatX || !m.noRepeatY
 	}
 }
 
@@ -462,7 +462,7 @@ func maskURL(v string) string {
 		return ""
 	}
 	rest := v[i+4:]
-	end := strings.Index(rest, ")")
+	before, _, ok := strings.Cut(rest, ")")
 	if t := strings.TrimSpace(rest); strings.HasPrefix(t, `"`) || strings.HasPrefix(t, `'`) {
 		// a CSS string, with backslash escapes (as the quotes of the
 		// attributes of an SVG in a data URL)
@@ -481,10 +481,10 @@ func maskURL(v string) string {
 		}
 		return ""
 	}
-	if end < 0 {
+	if !ok {
 		return ""
 	}
-	return strings.TrimSpace(rest[:end])
+	return strings.TrimSpace(before)
 }
 
 // applyMask sets the background of the given style to its color through
@@ -572,7 +572,7 @@ func compileImageLayer(prop, val string, layer func(st *cssState) **cssMask) sty
 		}
 		pos, size, _ := strings.Cut(rest, "/")
 		var keep, repeats []string
-		for _, f := range strings.Fields(pos) {
+		for f := range strings.FieldsSeq(pos) {
 			switch f {
 			case "no-repeat", "repeat", "repeat-x", "repeat-y", "round", "space":
 				repeats = append(repeats, f)

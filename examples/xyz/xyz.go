@@ -105,7 +105,7 @@ func main() {
 		// n.SetDisabled() // not selectable
 	})
 
-	lines := xyz.NewLines(sc, "Lines", []math32.Vector3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, math32.Vec2(.2, .1), xyz.CloseLines)
+	lines := xyz.NewLines(sc, "Lines", []math32.Vector3{{X: -3, Y: -1, Z: 0}, {X: -2, Y: 1, Z: 0}, {X: 2, Y: 1, Z: 0}, {X: 3, Y: -1, Z: 0}}, math32.Vec2(.2, .1), xyz.CloseLines)
 	tree.AddChild(sc, func(n *xyz.Solid) {
 		n.SetMesh(lines).SetColor(color.RGBA{255, 255, 0, 128}).SetPos(0, 0, 1)
 	})

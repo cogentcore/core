@@ -192,7 +192,9 @@ func urlEncode(names, values []string) string {
 		if i > 0 {
 			b.WriteByte('&')
 		}
-		b.WriteString(url.QueryEscape(name) + "=" + url.QueryEscape(values[i]))
+		b.WriteString(url.QueryEscape(name))
+		b.WriteByte('=')
+		b.WriteString(url.QueryEscape(values[i]))
 	}
 	return b.String()
 }
@@ -213,7 +215,10 @@ func encodeForm(enctype string, names, values []string) (string, []byte) {
 	case "text/plain":
 		var b strings.Builder
 		for i, name := range names {
-			b.WriteString(name + "=" + values[i] + "\r\n")
+			b.WriteString(name)
+			b.WriteByte('=')
+			b.WriteString(values[i])
+			b.WriteString("\r\n")
 		}
 		return "text/plain", []byte(b.String())
 	}

@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -48,51 +49,51 @@ type PlanItem struct {
 
 // Updater adds a new function to [NodeBase.Updaters.Normal], which are called in sequential
 // descending (reverse) order in [NodeBase.RunUpdaters] to update the node.
-func (nb *NodeBase) Updater(updater func()) {
-	nb.Updaters.Normal = append(nb.Updaters.Normal, updater)
+func (n *NodeBase) Updater(updater func()) {
+	n.Updaters.Normal = append(n.Updaters.Normal, updater)
 }
 
 // FirstUpdater adds a new function to [NodeBase.Updaters.First], which are called in sequential
 // descending (reverse) order in [NodeBase.RunUpdaters] to update the node.
-func (nb *NodeBase) FirstUpdater(updater func()) {
-	nb.Updaters.First = append(nb.Updaters.First, updater)
+func (n *NodeBase) FirstUpdater(updater func()) {
+	n.Updaters.First = append(n.Updaters.First, updater)
 }
 
 // FinalUpdater adds a new function to [NodeBase.Updaters.Final], which are called in sequential
 // descending (reverse) order in [NodeBase.RunUpdaters] to update the node.
-func (nb *NodeBase) FinalUpdater(updater func()) {
-	nb.Updaters.Final = append(nb.Updaters.Final, updater)
+func (n *NodeBase) FinalUpdater(updater func()) {
+	n.Updaters.Final = append(n.Updaters.Final, updater)
 }
 
 // Maker adds a new function to [NodeBase.Makers.Normal], which are called in sequential
 // ascending order in [NodeBase.Make] to make the plan for how the node's children
 // should be configured.
-func (nb *NodeBase) Maker(maker func(p *Plan)) {
-	nb.Makers.Normal = append(nb.Makers.Normal, maker)
+func (n *NodeBase) Maker(maker func(p *Plan)) {
+	n.Makers.Normal = append(n.Makers.Normal, maker)
 }
 
 // FirstMaker adds a new function to [NodeBase.Makers.First], which are called in sequential
 // ascending order in [NodeBase.Make] to make the plan for how the node's children
 // should be configured.
-func (nb *NodeBase) FirstMaker(maker func(p *Plan)) {
-	nb.Makers.First = append(nb.Makers.First, maker)
+func (n *NodeBase) FirstMaker(maker func(p *Plan)) {
+	n.Makers.First = append(n.Makers.First, maker)
 }
 
 // FinalMaker adds a new function to [NodeBase.Makers.Final], which are called in sequential
 // ascending order in [NodeBase.Make] to make the plan for how the node's children
 // should be configured.
-func (nb *NodeBase) FinalMaker(maker func(p *Plan)) {
-	nb.Makers.Final = append(nb.Makers.Final, maker)
+func (n *NodeBase) FinalMaker(maker func(p *Plan)) {
+	n.Makers.Final = append(n.Makers.Final, maker)
 }
 
 // Make makes a plan for how the node's children should be structured.
 // It does this by running [NodeBase.Makers] in sequential ascending order.
-func (nb *NodeBase) Make(p *Plan) {
+func (n *NodeBase) Make(p *Plan) {
 	// only enforce empty if makers exist
-	if len(nb.Makers.First) > 0 || len(nb.Makers.Normal) > 0 || len(nb.Makers.Final) > 0 {
+	if len(n.Makers.First) > 0 || len(n.Makers.Normal) > 0 || len(n.Makers.Final) > 0 {
 		p.EnforceEmpty = true
 	}
-	nb.Makers.Do(func(makers *[]func(p *Plan)) {
+	n.Makers.Do(func(makers *[]func(p *Plan)) {
 		for _, maker := range *makers {
 			maker(p)
 		}
@@ -100,18 +101,18 @@ func (nb *NodeBase) Make(p *Plan) {
 }
 
 // UpdateFromMake updates the node using [NodeBase.Make].
-func (nb *NodeBase) UpdateFromMake() {
+func (n *NodeBase) UpdateFromMake() {
 	p := &Plan{}
-	nb.Make(p)
-	p.Update(nb)
+	n.Make(p)
+	p.Update(n)
 }
 
 // RunUpdaters runs the [NodeBase.Updaters] in sequential descending (reverse) order.
 // It is called in [cogentcore.org/core/core.WidgetBase.UpdateWidget] and other places
 // such as in xyz to update the node.
-func (nb *NodeBase) RunUpdaters() {
-	nb.Updaters.Do(func(updaters *[]func()) {
-		for i := len(*updaters) - 1; i >= 0; i-- {
+func (n *NodeBase) RunUpdaters() {
+	n.Updaters.Do(func(updaters *[]func()) {
+		for i := range slices.Backward(*updaters) {
 			(*updaters)[i]()
 		}
 	})

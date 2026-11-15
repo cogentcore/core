@@ -7,7 +7,6 @@ package core
 import (
 	"fmt"
 	"image"
-	"sync/atomic"
 	"time"
 
 	"cogentcore.org/core/base/iox/imagex"
@@ -47,7 +46,7 @@ func RenderImage(b *Body, fun ...func()) *image.RGBA {
 	b.runAndShowNewWindow()
 
 	rw := b.Scene.RenderWindow()
-	for i := 0; i < len(fun); i++ {
+	for i := range fun {
 		fun[i]()
 		b.waitNoEvents(rw)
 	}
@@ -87,20 +86,20 @@ func RenderImage(b *Body, fun ...func()) *image.RGBA {
 
 // runAndShowNewWindow runs a new window and waits for it to be shown,
 // in an empty window on the web (see [clearTestWindow]).
-func (b *Body) runAndShowNewWindow() {
+func (bd *Body) runAndShowNewWindow() {
 	clearTestWindow()
 	showed := make(chan struct{})
-	b.OnFinal(events.Show, func(e events.Event) {
+	bd.OnFinal(events.Show, func(e events.Event) {
 		showed <- struct{}{}
 	})
-	b.RunWindow()
+	bd.RunWindow()
 	<-showed
 }
 
 // waitRenderDone waits until any render of the window that is being
 // composed in another goroutine (see [renderWindow.renderAsync]) is done.
 func (w *renderWindow) waitRenderDone() {
-	for atomic.LoadInt32(&w.winRenderCounter) > 0 {
+	for w.winRenderCounter.Load() > 0 {
 		time.Sleep(time.Millisecond)
 	}
 }
@@ -109,7 +108,7 @@ func (w *renderWindow) waitRenderDone() {
 // are no events left, which includes any rendering of the body necessary,
 // as rendering is done in response to the periodic paint events, which
 // the window is woken for, as they are paused while it is idle.
-func (b *Body) waitNoEvents(rw *renderWindow) {
+func (bd *Body) waitNoEvents(rw *renderWindow) {
 	ch := make(chan struct{})
 	rw.noEventsMu.Lock()
 	rw.noEventsChan = ch

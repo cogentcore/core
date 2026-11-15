@@ -141,7 +141,7 @@ func dashCanonical(offset float32, d []float32) (float32, []float32) {
 REPEAT:
 	for len(d)%2 == 0 {
 		mid := len(d) / 2
-		for i := 0; i < mid; i++ {
+		for i := range mid {
 			if !ppath.Equal(d[i], d[mid+i]) {
 				break REPEAT
 			}

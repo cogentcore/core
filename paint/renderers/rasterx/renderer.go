@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package rasterx renders to images by rasterizing paths and text.
 package rasterx
 
 import (

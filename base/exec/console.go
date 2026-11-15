@@ -14,7 +14,7 @@ import (
 // interruptible returns whether a command that is run with a context
 // with the given standard input is interrupted when the context is done
 // (see [interrupt]).
-func interruptible(in io.Reader) bool {
+func interruptible(_ io.Reader) bool {
 	return true
 }
 
@@ -31,6 +31,6 @@ func interrupt(p *os.Process) error {
 
 // saveConsole returns a function that restores the modes of the console
 // of the given standard input and output, which is only needed on Windows.
-func saveConsole(in io.Reader, out io.Writer) func() {
+func saveConsole(_ io.Reader, _ io.Writer) func() {
 	return func() {}
 }

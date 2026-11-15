@@ -403,7 +403,7 @@ func (b *Base) updateRGBStops() {
 		}
 		pct := float32(1) / float32(np)
 		dopa := s.Opacity - sp.Opacity
-		for j := 0; j < np; j++ {
+		for j := range np {
 			p := pct * float32(j)
 			c := colors.Blend(colors.RGB, 100*p, s.Color, sp.Color)
 			pos := sp.Pos + p*dp

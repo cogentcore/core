@@ -33,23 +33,6 @@ func inIntervalExclusive(f, lower, upper float32) bool {
 	return lower+ppath.Epsilon < f && f < upper-ppath.Epsilon
 }
 
-// touchesPoint returns true if the rectangle touches a point (within +-Epsilon).
-func touchesPoint(r math32.Box2, p math32.Vector2) bool {
-	return inInterval(p.X, r.Min.X, r.Max.X) && inInterval(p.Y, r.Min.Y, r.Max.Y)
-}
-
-// touches returns true if both rectangles touch (or overlap).
-func touches(r, q math32.Box2) bool {
-	if q.Max.X+ppath.Epsilon < r.Min.X || r.Max.X < q.Min.X-ppath.Epsilon {
-		// left or right
-		return false
-	} else if q.Max.Y+ppath.Epsilon < r.Min.Y || r.Max.Y < q.Min.Y-ppath.Epsilon {
-		// below or above
-		return false
-	}
-	return true
-}
-
 // angleBetweenExclusive is true when theta is in range (lower,upper)
 // excluding the end points. Angles can be outside the [0,2PI) range.
 func angleBetweenExclusive(theta, lower, upper float32) bool {
@@ -220,16 +203,6 @@ func solveCubicFormula(a, b, c, d float32) (float32, float32, float32) {
 
 type gaussLegendreFunc func(func(float32) float32, float32, float32) float32
 
-// Gauss-Legendre quadrature integration from a to b with n=3, see https://pomax.github.io/bezierinfo/legendre-gauss.html for more values
-func gaussLegendre3(f func(float32) float32, a, b float32) float32 {
-	c := (b - a) / 2.0
-	d := (a + b) / 2.0
-	Qd1 := f(-0.774596669*c + d)
-	Qd2 := f(d)
-	Qd3 := f(0.774596669*c + d)
-	return c * ((5.0/9.0)*(Qd1+Qd3) + (8.0/9.0)*Qd2)
-}
-
 // Gauss-Legendre quadrature integration from a to b with n=5
 func gaussLegendre5(f func(float32) float32, a, b float32) float32 {
 	c := (b - a) / 2.0
@@ -271,15 +244,15 @@ func invSpeedPolynomialChebyshevApprox(N int, gaussLegendre gaussLegendreFunc, f
 
 func polynomialChebyshevApprox(N int, f func(float32) float32, xmin, xmax, ymin, ymax float32) func(float32) float32 {
 	fs := make([]float32, N)
-	for k := 0; k < N; k++ {
+	for k := range N {
 		u := math32.Cos(math32.Pi * (float32(k+1) - 0.5) / float32(N))
 		fs[k] = f(xmin + (xmax-xmin)*(u+1.0)/2.0)
 	}
 
 	c := make([]float32, N)
-	for j := 0; j < N; j++ {
+	for j := range N {
 		a := float32(0.0)
-		for k := 0; k < N; k++ {
+		for k := range N {
 			a += fs[k] * math32.Cos(float32(j)*math32.Pi*(float32(k+1)-0.5)/float32(N))
 		}
 		c[j] = (2.0 / float32(N)) * a
@@ -292,7 +265,7 @@ func polynomialChebyshevApprox(N int, f func(float32) float32, xmin, xmax, ymin,
 		x = math32.Min(xmax, math32.Max(xmin, x))
 		u := (x-xmin)/(xmax-xmin)*2.0 - 1.0
 		a := float32(0.0)
-		for j := 0; j < N; j++ {
+		for j := range N {
 			a += c[j] * math32.Cos(float32(j)*math32.Acos(u))
 		}
 		y := -0.5*c[0] + a
@@ -338,7 +311,7 @@ func snap(val, spacing float32) float32 {
 
 // Gridsnap snaps point to a grid with the given spacing.
 func Gridsnap(p math32.Vector2, spacing float32) math32.Vector2 {
-	return math32.Vector2{snap(p.X, spacing), snap(p.Y, spacing)}
+	return math32.Vec2(snap(p.X, spacing), snap(p.Y, spacing))
 }
 
 type numEps float32

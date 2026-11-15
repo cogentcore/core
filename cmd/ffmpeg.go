@@ -154,7 +154,7 @@ func setupFFmpeg(update bool) error {
 // setupFFmpegBrew installs or updates FFmpeg with Homebrew.
 func setupFFmpegBrew(update bool) error {
 	if _, err := exec.LookPath("brew"); err != nil {
-		return errors.New("Homebrew is needed to install FFmpeg for video: see https://brew.sh")
+		return errors.New("installing FFmpeg for video needs Homebrew: see https://brew.sh")
 	}
 	// the ffmpeg formula, if it is of the version, or else the formula of
 	// the version (as Homebrew keeps ffmpeg@7 and ffmpeg@8 for older ones)

@@ -49,7 +49,7 @@ type Interpreter interface {
 const DotPackage = "cogentcore.org/core/mvmcore/dot"
 
 var (
-	autoPlanNameCounter uint64
+	autoPlanNameCounter atomic.Uint64
 
 	// interpreterParent is the parent widget of the code, b, which is
 	// updated before the code runs.
@@ -244,5 +244,5 @@ func SetParent(parent *core.Frame) {
 // code, replacing tree.AutoPlanName, whose name from the call stack would
 // not tell apart the calls of interpreted code.
 func autoPlanName(int) string {
-	return fmt.Sprintf("mvm-%v", atomic.AddUint64(&autoPlanNameCounter, 1))
+	return fmt.Sprintf("mvm-%v", autoPlanNameCounter.Add(1))
 }

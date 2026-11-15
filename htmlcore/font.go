@@ -48,20 +48,20 @@ func setFontSize(env *lengthEnv, s, ps *styles.Style, v string) {
 		scale(1.2)
 		return
 	}
-	if strings.HasSuffix(v, "%") {
-		if f, err := strconv.ParseFloat(strings.TrimSuffix(v, "%"), 32); err == nil {
+	if before, ok := strings.CutSuffix(v, "%"); ok {
+		if f, err := strconv.ParseFloat(before, 32); err == nil {
 			scale(float32(f) / 100)
 		}
 		return
 	}
-	if strings.HasSuffix(v, "rem") {
-		if f, err := strconv.ParseFloat(strings.TrimSuffix(v, "rem"), 32); err == nil {
+	if before, ok := strings.CutSuffix(v, "rem"); ok {
+		if f, err := strconv.ParseFloat(before, 32); err == nil {
 			s.Font.Size = units.Dp(float32(env.rem) * float32(f))
 		}
 		return
 	}
-	if strings.HasSuffix(v, "em") {
-		if f, err := strconv.ParseFloat(strings.TrimSuffix(v, "em"), 32); err == nil {
+	if before, ok := strings.CutSuffix(v, "em"); ok {
+		if f, err := strconv.ParseFloat(before, 32); err == nil {
 			scale(float32(f))
 		}
 		return
@@ -98,7 +98,7 @@ func setFontWeight(s, ps *styles.Style, v string) {
 // fontFamily returns the font family for the given CSS font-family list,
 // the first generic family in it, or one for a common font name.
 func fontFamily(v string) rich.Family {
-	for _, f := range strings.Split(v, ",") {
+	for f := range strings.SplitSeq(v, ",") {
 		f = strings.ToLower(strings.Trim(strings.TrimSpace(f), `"'`))
 		switch f {
 		case "monospace", "courier", "courier new", "consolas", "menlo", "monaco", "roboto mono", "ui-monospace", "sfmono-regular":

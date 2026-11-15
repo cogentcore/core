@@ -190,8 +190,8 @@ func SetStringLowerExtended[T EnumConstraint, E EnumSetter](i *T, ie E, s string
 // SetStringOr sets the given bit flag value from its string representation while
 // preserving any bit flags already set.
 func SetStringOr[T BitFlagConstraint, S BitFlagSetter](i S, s string, valueMap map[string]T, typeName string) error {
-	flags := strings.Split(s, "|")
-	for _, flag := range flags {
+	flags := strings.SplitSeq(s, "|")
+	for flag := range flags {
 		if val, ok := valueMap[flag]; ok {
 			i.SetFlag(true, val)
 		} else if flag == "" {
@@ -207,8 +207,8 @@ func SetStringOr[T BitFlagConstraint, S BitFlagSetter](i S, s string, valueMap m
 // preserving any bit flags already set.
 // It also tries the lowercase version of each flag string if the original version fails.
 func SetStringOrLower[T BitFlagConstraint, S BitFlagSetter](i S, s string, valueMap map[string]T, typeName string) error {
-	flags := strings.Split(s, "|")
-	for _, flag := range flags {
+	flags := strings.SplitSeq(s, "|")
+	for flag := range flags {
 		if val, ok := valueMap[flag]; ok {
 			i.SetFlag(true, val)
 		} else if val, ok := valueMap[strings.ToLower(flag)]; ok {
@@ -227,8 +227,8 @@ func SetStringOrLower[T BitFlagConstraint, S BitFlagSetter](i S, s string, value
 // given enum type. It also takes the enum value in terms of the extended enum
 // type (ie).
 func SetStringOrExtended[T BitFlagConstraint, S BitFlagSetter, E BitFlagSetter](i S, ie E, s string, valueMap map[string]T) error {
-	flags := strings.Split(s, "|")
-	for _, flag := range flags {
+	flags := strings.SplitSeq(s, "|")
+	for flag := range flags {
 		if val, ok := valueMap[flag]; ok {
 			i.SetFlag(true, val)
 		} else if flag == "" {
@@ -248,8 +248,8 @@ func SetStringOrExtended[T BitFlagConstraint, S BitFlagSetter, E BitFlagSetter](
 // given enum type. It also takes the enum value in terms of the extended enum
 // type (ie). It also tries the lowercase version of each flag string if the original version fails.
 func SetStringOrLowerExtended[T BitFlagConstraint, S BitFlagSetter, E BitFlagSetter](i S, ie E, s string, valueMap map[string]T) error {
-	flags := strings.Split(s, "|")
-	for _, flag := range flags {
+	flags := strings.SplitSeq(s, "|")
+	for flag := range flags {
 		if val, ok := valueMap[flag]; ok {
 			i.SetFlag(true, val)
 		} else if val, ok := valueMap[strings.ToLower(flag)]; ok {

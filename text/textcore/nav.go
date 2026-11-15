@@ -130,15 +130,15 @@ func (ed *Base) setCursorColumn(pos textpos.Pos) {
 	if ed.Lines == nil {
 		return
 	}
-	vpos := ed.Lines.PosToView(ed.viewId, pos)
-	ed.cursorColumn = ed.Lines.ViewCell(ed.viewId, vpos)
+	vpos := ed.Lines.PosToView(ed.viewID, pos)
+	ed.cursorColumn = ed.Lines.ViewCell(ed.viewID, vpos)
 }
 
 ////////  cursor moving
 
 // cursorSelect updates selection based on cursor movements, given starting
 // cursor position and ed.CursorPos is current
-func (ed *Base) cursorSelect(org textpos.Pos) {
+func (ed *Base) cursorSelect() {
 	if !ed.selectMode {
 		return
 	}
@@ -149,7 +149,7 @@ func (ed *Base) cursorSelect(org textpos.Pos) {
 // This is typically called for move actions.
 func (ed *Base) cursorSelectShow(org textpos.Pos) {
 	ed.SetCursorShow(ed.CursorPos)
-	ed.cursorSelect(org)
+	ed.cursorSelect()
 	ed.SendInput()
 	ed.NeedsRender()
 }
@@ -189,7 +189,7 @@ func (ed *Base) cursorBackwardWord(steps int) {
 // cursorDown moves the cursor down line(s)
 func (ed *Base) cursorDown(steps int) {
 	org := ed.validateCursor()
-	ed.CursorPos = ed.Lines.MoveDown(ed.viewId, org, steps, ed.cursorColumn)
+	ed.CursorPos = ed.Lines.MoveDown(ed.viewID, org, steps, ed.cursorColumn)
 	ed.cursorSelectShow(org)
 }
 
@@ -197,16 +197,17 @@ func (ed *Base) cursorDown(steps int) {
 // dynamically as just moving the cursor off the screen
 func (ed *Base) cursorPageDown(steps int) {
 	org := ed.validateCursor()
-	vp := ed.Lines.PosToView(ed.viewId, ed.CursorPos)
+	vp := ed.Lines.PosToView(ed.viewID, ed.CursorPos)
 	cpr := max(0, vp.Line-int(ed.scrollPos))
 	nln := max(1, ed.visSize.Y-cpr)
 	for range steps {
-		ed.CursorPos = ed.Lines.MoveDown(ed.viewId, ed.CursorPos, nln, ed.cursorColumn)
+		ed.CursorPos = ed.Lines.MoveDown(ed.viewID, ed.CursorPos, nln, ed.cursorColumn)
 	}
 	ed.setCursor(ed.CursorPos)
 	ed.scrollCursorToTop()
 	ed.startCursor()
-	ed.cursorSelect(org)
+	_ = org
+	ed.cursorSelect()
 	ed.SendInput()
 	ed.NeedsRender()
 }
@@ -214,7 +215,7 @@ func (ed *Base) cursorPageDown(steps int) {
 // cursorUp moves the cursor up line(s)
 func (ed *Base) cursorUp(steps int) {
 	org := ed.validateCursor()
-	ed.CursorPos = ed.Lines.MoveUp(ed.viewId, org, steps, ed.cursorColumn)
+	ed.CursorPos = ed.Lines.MoveUp(ed.viewID, org, steps, ed.cursorColumn)
 	ed.cursorSelectShow(org)
 }
 
@@ -222,16 +223,17 @@ func (ed *Base) cursorUp(steps int) {
 // dynamically as just moving the cursor off the screen
 func (ed *Base) cursorPageUp(steps int) {
 	org := ed.validateCursor()
-	vp := ed.Lines.PosToView(ed.viewId, ed.CursorPos)
+	vp := ed.Lines.PosToView(ed.viewID, ed.CursorPos)
 	cpr := max(0, vp.Line-int(ed.scrollPos))
 	nln := max(1, cpr)
 	for range steps {
-		ed.CursorPos = ed.Lines.MoveUp(ed.viewId, ed.CursorPos, nln, ed.cursorColumn)
+		ed.CursorPos = ed.Lines.MoveUp(ed.viewID, ed.CursorPos, nln, ed.cursorColumn)
 	}
 	ed.setCursor(ed.CursorPos)
 	ed.scrollCursorToBottom()
 	ed.startCursor()
-	ed.cursorSelect(org)
+	_ = org
+	ed.cursorSelect()
 	ed.SendInput()
 	ed.NeedsRender()
 }
@@ -257,7 +259,7 @@ func (ed *Base) cursorRecenter() {
 // if select mode is active
 func (ed *Base) cursorLineStart() {
 	org := ed.validateCursor()
-	ed.CursorPos = ed.Lines.MoveLineStart(ed.viewId, org)
+	ed.CursorPos = ed.Lines.MoveLineStart(ed.viewID, org)
 	ed.cursorColumn = 0
 	ed.scrollCursorToRight()
 	ed.cursorSelectShow(org)
@@ -277,7 +279,7 @@ func (ed *Base) CursorStartDoc() {
 // cursorLineEnd moves the cursor to the end of the text
 func (ed *Base) cursorLineEnd() {
 	org := ed.validateCursor()
-	ed.CursorPos = ed.Lines.MoveLineEnd(ed.viewId, org)
+	ed.CursorPos = ed.Lines.MoveLineEnd(ed.viewID, org)
 	ed.setCursorColumn(ed.CursorPos)
 	ed.scrollCursorToRight()
 	ed.cursorSelectShow(org)
@@ -376,7 +378,7 @@ func (ed *Base) cursorTranspose() {
 	if pos.Char == 0 {
 		return
 	}
-	ed.Lines.TransposeChar(ed.viewId, pos)
+	ed.Lines.TransposeChar(ed.viewID, pos)
 	// ed.SetCursorShow(pos)
 	ed.NeedsRender()
 }

@@ -128,10 +128,8 @@ func (pr *Parser) LexNextLine(fs *FileState) *lexer.Rule {
 
 // LexRun keeps running LextNext until it stops
 func (pr *Parser) LexRun(fs *FileState) {
-	for {
-		if pr.LexNext(fs) == nil {
-			break
-		}
+	for pr.LexNext(fs) != nil {
+
 	}
 }
 

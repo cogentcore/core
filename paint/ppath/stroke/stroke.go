@@ -5,6 +5,8 @@
 // This is adapted from https://github.com/tdewolff/canvas
 // Copyright (c) 2015 Taco de Wolff, under an MIT License.
 
+// Package stroke provides the stroking of paths, with caps and joins, and
+// their dashing and offsetting.
 package stroke
 
 //go:generate core generate
@@ -391,7 +393,7 @@ func (j ArcsJoiner) Join(rhs, lhs *ppath.Path, halfWidth float32, pivot, n0, n1 
 			sweep := 0.0 < rMid
 			RMid := math32.Abs(rMid)
 			cx, cy, a0, _ := ppath.EllipseToCenter(pivot.X, pivot.Y, RMid, RMid, 0.0, false, sweep, mid.X, mid.Y)
-			cMid := math32.Vector2{cx, cy}
+			cMid := math32.Vec2(cx, cy)
 			dtheta := limit * halfWidth / rMid
 
 			clipMid = ppath.EllipsePos(RMid, RMid, 0.0, cMid.X, cMid.Y, a0+dtheta)
@@ -532,8 +534,8 @@ func optimizeInnerBend(p ppath.Path, i int) ppath.Path {
 	}
 	bi := i + ppath.CmdLen(p[i])
 
-	a0 := math32.Vector2{p[ai-3], p[ai-2]}
-	b0 := math32.Vector2{p[bi-3], p[bi-2]}
+	a0 := math32.Vec2(p[ai-3], p[ai-2])
+	b0 := math32.Vec2(p[bi-3], p[bi-2])
 	if bi == len(p) {
 		// inner bend is at the path's start
 		bi = 4
@@ -591,9 +593,9 @@ func offset(p ppath.Path, halfWidth float32, cr Capper, jr Joiner, strokeOpen bo
 		cmd := p[i]
 		switch cmd {
 		case ppath.MoveTo:
-			end = math32.Vector2{p[i+1], p[i+2]}
+			end = math32.Vec2(p[i+1], p[i+2])
 		case ppath.LineTo:
-			end = math32.Vector2{p[i+1], p[i+2]}
+			end = math32.Vec2(p[i+1], p[i+2])
 			n := end.Sub(start).Rot90CW().Normal().MulScalar(halfWidth)
 			states = append(states, pathStrokeState{
 				cmd: ppath.LineTo,
@@ -607,13 +609,13 @@ func offset(p ppath.Path, halfWidth float32, cr Capper, jr Joiner, strokeOpen bo
 		case ppath.QuadTo, ppath.CubeTo:
 			var cp1, cp2 math32.Vector2
 			if cmd == ppath.QuadTo {
-				cp := math32.Vector2{p[i+1], p[i+2]}
-				end = math32.Vector2{p[i+3], p[i+4]}
+				cp := math32.Vec2(p[i+1], p[i+2])
+				end = math32.Vec2(p[i+3], p[i+4])
 				cp1, cp2 = ppath.QuadraticToCubicBezier(start, cp, end)
 			} else {
-				cp1 = math32.Vector2{p[i+1], p[i+2]}
-				cp2 = math32.Vector2{p[i+3], p[i+4]}
-				end = math32.Vector2{p[i+5], p[i+6]}
+				cp1 = math32.Vec2(p[i+1], p[i+2])
+				cp2 = math32.Vec2(p[i+3], p[i+4])
+				end = math32.Vec2(p[i+5], p[i+6])
 			}
 			n0 := intersect.CubicBezierNormal(start, cp1, cp2, end, 0.0, halfWidth)
 			n1 := intersect.CubicBezierNormal(start, cp1, cp2, end, 1.0, halfWidth)
@@ -633,7 +635,7 @@ func offset(p ppath.Path, halfWidth float32, cr Capper, jr Joiner, strokeOpen bo
 		case ppath.ArcTo:
 			rx, ry, phi := p[i+1], p[i+2], p[i+3]
 			large, sweep := ppath.ToArcFlags(p[i+4])
-			end = math32.Vector2{p[i+5], p[i+6]}
+			end = math32.Vec2(p[i+5], p[i+6])
 			_, _, theta0, theta1 := ppath.EllipseToCenter(start.X, start.Y, rx, ry, phi, large, sweep, end.X, end.Y)
 			n0 := ellipseNormal(rx, ry, phi, sweep, theta0, halfWidth)
 			n1 := ellipseNormal(rx, ry, phi, sweep, theta1, halfWidth)
@@ -656,7 +658,7 @@ func offset(p ppath.Path, halfWidth float32, cr Capper, jr Joiner, strokeOpen bo
 				sweep:  sweep,
 			})
 		case ppath.Close:
-			end = math32.Vector2{p[i+1], p[i+2]}
+			end = math32.Vec2(p[i+1], p[i+2])
 			if !ppath.Equal(start.X, end.X) || !ppath.Equal(start.Y, end.Y) {
 				n := end.Sub(start).Rot90CW().Normal().MulScalar(halfWidth)
 				states = append(states, pathStrokeState{

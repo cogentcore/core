@@ -13,6 +13,7 @@ These are largely copied from the strings or bytes packages.
 package runes
 
 import (
+	"slices"
 	"unicode"
 	"unicode/utf8"
 
@@ -434,8 +435,6 @@ func SplitAfter(s, sep []rune) [][]rune {
 	return genSplit(s, sep, len(sep), -1)
 }
 
-var asciiSpace = [256]uint8{'\t': 1, '\n': 1, '\v': 1, '\f': 1, '\r': 1, ' ': 1}
-
 // Fields interprets s as a sequence of UTF-8-encoded code points.
 // It splits the slice s around each instance of one or more consecutive white space
 // characters, as defined by unicode.IsSpace, returning a slice of subslices of s or an
@@ -569,8 +568,8 @@ func indexFunc(s []rune, f func(r rune) bool, truth bool) int {
 // truth==false, the sense of the predicate function is
 // inverted.
 func lastIndexFunc(s []rune, f func(r rune) bool, truth bool) int {
-	for i := len(s) - 1; i >= 0; i-- {
-		if f(s[i]) == truth {
+	for i, v := range slices.Backward(s) {
+		if f(v) == truth {
 			return i
 		}
 	}

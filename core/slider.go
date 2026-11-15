@@ -450,7 +450,7 @@ func (sr *Slider) updatePos(val float32) bool {
 	return true
 }
 
-// setVisiblePercent sets the [Slider.visiblePercent] value for a [SliderScrollbar].
+// SetVisiblePercent sets the [Slider.visiblePercent] value for a [SliderScrollbar].
 func (sr *Slider) SetVisiblePercent(val float32) *Slider {
 	sr.visiblePercent = math32.Clamp(val, 0, 1)
 	return sr

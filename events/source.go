@@ -194,11 +194,12 @@ func (es *Source) Touch(typ Types, seq Sequence, where image.Point) {
 	ev.Init()
 	es.Deque.Send(ev)
 
-	if typ == TouchStart {
+	switch typ {
+	case TouchStart:
 		es.MouseButton(MouseDown, Left, where, 0) // TODO: modifiers
-	} else if typ == TouchEnd {
+	case TouchEnd:
 		es.MouseButton(MouseUp, Left, where, 0) // TODO: modifiers
-	} else {
+	default:
 		es.MouseMove(where)
 	}
 }

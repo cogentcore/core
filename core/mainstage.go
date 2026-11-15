@@ -288,7 +288,7 @@ func (st *Stage) runWindow() *Stage {
 	}
 
 	if st.NewWindow || cw == nil {
-		sc.Resize(math32.Geom2DInt{st.renderContext.geom.Pos, sz})
+		sc.Resize(math32.Geom2DInt{Pos: st.renderContext.geom.Pos, Size: sz})
 		win := st.newRenderWindow(st.renderContext)
 		mainRenderWindows.add(win)
 		setCurrentRenderWindow(win)
@@ -426,7 +426,7 @@ func (st *Stage) runDialog() *Stage {
 
 	if st.NewWindow {
 		st.storeMains(nil)
-		sc.Resize(math32.Geom2DInt{st.renderContext.geom.Pos, sz})
+		sc.Resize(math32.Geom2DInt{Pos: st.renderContext.geom.Pos, Size: sz})
 		st.Type = WindowStage            // critical: now is its own window!
 		sc.SceneGeom.Pos = image.Point{} // ignore pos
 		win := st.newRenderWindow(nil)

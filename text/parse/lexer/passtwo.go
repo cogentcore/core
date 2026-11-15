@@ -5,6 +5,8 @@
 package lexer
 
 import (
+	"strings"
+
 	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/text/token"
 )
@@ -74,23 +76,23 @@ func (ts *TwoState) Error(msg string) {
 	ppos := ts.Pos
 	ppos.Char--
 	clex := ts.Src.LexAtSafe(ppos)
-	ts.Errs.Add(textpos.Pos{ts.Pos.Line, clex.Start}, ts.Src.Filename, "PassTwo: "+msg, ts.Src.SrcLine(ts.Pos.Line), nil)
+	ts.Errs.Add(textpos.Pos{Line: ts.Pos.Line, Char: clex.Start}, ts.Src.Filename, "PassTwo: "+msg, ts.Src.SrcLine(ts.Pos.Line), nil)
 }
 
 // NestStackStr returns the token stack as strings
 func (ts *TwoState) NestStackStr() string {
-	str := ""
+	var str strings.Builder
 	for _, tok := range ts.NestStack {
 		switch tok {
 		case token.PunctGpLParen:
-			str += "paren ( "
+			str.WriteString("paren ( ")
 		case token.PunctGpLBrack:
-			str += "bracket [ "
+			str.WriteString("bracket [ ")
 		case token.PunctGpLBrace:
-			str += "brace { "
+			str.WriteString("brace { ")
 		}
 	}
-	return str
+	return str.String()
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -184,7 +186,7 @@ func (pt *PassTwo) NestDepthLine(line Line, initDepth int) {
 		return
 	}
 	depth := initDepth
-	for i := 0; i < sz; i++ {
+	for i := range sz {
 		lx := &line[i]
 		tok := lx.Token.Token
 		if tok.IsPunctGpLeft() {
@@ -227,10 +229,10 @@ func (pt *PassTwo) EosDetectPos(ts *TwoState, pos textpos.Pos, nln int) {
 		if pt.RBraceEos {
 			skip := false
 			for ci := 0; ci < sz; ci++ {
-				lx := ts.Src.LexAt(textpos.Pos{ts.Pos.Line, ci})
+				lx := ts.Src.LexAt(textpos.Pos{Line: ts.Pos.Line, Char: ci})
 				if lx.Token.Token == token.PunctGpRBrace {
 					if ci == 0 {
-						ip := textpos.Pos{ts.Pos.Line, 0}
+						ip := textpos.Pos{Line: ts.Pos.Line, Char: 0}
 						ip, ok = ts.Src.PrevTokenPos(ip)
 						if ok {
 							ilx := ts.Src.LexAt(ip)
@@ -239,7 +241,7 @@ func (pt *PassTwo) EosDetectPos(ts *TwoState, pos textpos.Pos, nln int) {
 							}
 						}
 					} else {
-						ip := textpos.Pos{ts.Pos.Line, ci - 1}
+						ip := textpos.Pos{Line: ts.Pos.Line, Char: ci - 1}
 						ilx := ts.Src.LexAt(ip)
 						if ilx.Token.Token != token.PunctGpLBrace {
 							ts.Src.InsertEos(ip)
@@ -248,7 +250,7 @@ func (pt *PassTwo) EosDetectPos(ts *TwoState, pos textpos.Pos, nln int) {
 						}
 					}
 					if ci == sz-1 {
-						ip := textpos.Pos{ts.Pos.Line, ci}
+						ip := textpos.Pos{Line: ts.Pos.Line, Char: ci}
 						ts.Src.InsertEos(ip)
 						sz++
 						skip = true
@@ -260,10 +262,10 @@ func (pt *PassTwo) EosDetectPos(ts *TwoState, pos textpos.Pos, nln int) {
 				continue
 			}
 		}
-		ep := textpos.Pos{ts.Pos.Line, sz - 1} // end of line token
+		ep := textpos.Pos{Line: ts.Pos.Line, Char: sz - 1} // end of line token
 		elx := ts.Src.LexAt(ep)
 		if pt.Eol {
-			sp := textpos.Pos{ts.Pos.Line, 0} // start of line token
+			sp := textpos.Pos{Line: ts.Pos.Line, Char: 0} // start of line token
 			slx := ts.Src.LexAt(sp)
 			if slx.Token.Depth == elx.Token.Depth {
 				ts.Src.InsertEos(ep)

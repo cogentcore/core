@@ -138,7 +138,7 @@ func (a *App) GetScreens() {
 	}
 	a.Screens = make([]*system.Screen, 0, sz)
 	scNo := 0
-	for i := 0; i < sz; i++ {
+	for i := range sz {
 		mon := mons[i]
 		if ScreenDebug {
 			log.Printf("ScreenDebug: getScreens: mon number: %v name: %v\n", i, mon.GetName())

@@ -263,7 +263,7 @@ func (wb *WidgetBase) HandleEvent(e events.Event) {
 		})
 	})
 
-	if s.State != state && !(e.Type() == events.Attend || e.Type() == events.AttendLost) {
+	if s.State != state && e.Type() != events.Attend && e.Type() != events.AttendLost {
 		wb.Restyle()
 	}
 }

@@ -130,7 +130,7 @@ func TestTreePasteMenu(t *testing.T) {
 // dropMenuAfterDrag drags from the value of row 0 to row 2 of the given
 // list, with mouse events in its window, and returns whether the drop menu
 // appeared.
-func dropMenuAfterDrag(t *testing.T, b *Body, lb *ListBase) bool {
+func dropMenuAfterDrag(_ *testing.T, b *Body, lb *ListBase) bool {
 	prev := TimingSettings.DragStartTime
 	TimingSettings.DragStartTime = 0
 	defer func() { TimingSettings.DragStartTime = prev }()

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package imagex provides utilities for images: opening, saving, and
+// encoding them in the standard formats, wrapping them for the web, and
+// asserting them in tests.
 package imagex
 
 //go:generate core generate

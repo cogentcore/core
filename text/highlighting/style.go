@@ -14,7 +14,9 @@ import (
 	"encoding/json"
 	"image/color"
 	"log/slog"
+	"maps"
 	"os"
+	"slices"
 	"strings"
 
 	"cogentcore.org/core/base/fsx"
@@ -52,14 +54,14 @@ func (t Trilean) Prefix(s string) string {
 type StyleEntry struct {
 
 	// Color is the text color.
-	Color color.RGBA `json:",omitempty"`
+	Color color.RGBA
 
 	// Background color.
 	// In general it is not good to use this because it obscures highlighting.
-	Background color.RGBA `json:",omitempty"`
+	Background color.RGBA
 
 	// Border color? not sure what this is -- not really used.
-	Border color.RGBA `display:"-" json:",omitempty"`
+	Border color.RGBA `display:"-"`
 
 	// Bold font.
 	Bold Trilean `json:",omitempty"`
@@ -272,11 +274,11 @@ func (se StyleEntry) Sub(e StyleEntry) StyleEntry {
 // Ancestors should be provided from oldest, furthest away to newest, closest.
 func (se StyleEntry) Inherit(ancestors ...StyleEntry) StyleEntry {
 	out := se
-	for i := len(ancestors) - 1; i >= 0; i-- {
+	for _, ancestor := range slices.Backward(ancestors) {
 		if out.NoInherit {
 			return out
 		}
-		ancestor := ancestors[i]
+		ancestor := ancestor
 		if colors.IsNil(out.themeColor) {
 			out.Color = ancestor.Color
 			out.themeColor = ancestor.themeColor
@@ -320,9 +322,7 @@ func (hs *Style) CopyFrom(ss *Style) {
 		return
 	}
 	*hs = make(Style, len(*ss))
-	for k, v := range *ss {
-		(*hs)[k] = v
-	}
+	maps.Copy((*hs), *ss)
 }
 
 // TagRaw returns a StyleEntry for given tag without any inheritance of anything

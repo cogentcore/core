@@ -17,9 +17,9 @@ func EllipseDeriv(rx, ry, phi float32, sweep bool, theta float32) math32.Vector2
 	dx := -rx*sintheta*cosphi - ry*costheta*sinphi
 	dy := -rx*sintheta*sinphi + ry*costheta*cosphi
 	if !sweep {
-		return math32.Vector2{-dx, -dy}
+		return math32.Vec2(-dx, -dy)
 	}
-	return math32.Vector2{dx, dy}
+	return math32.Vec2(dx, dy)
 }
 
 // EllipsePos adds the position on the ellipse at angle theta.
@@ -28,7 +28,7 @@ func EllipsePos(rx, ry, phi, cx, cy, theta float32) math32.Vector2 {
 	sinphi, cosphi := math32.Sincos(phi)
 	x := cx + rx*costheta*cosphi - ry*sintheta*sinphi
 	y := cy + rx*costheta*sinphi + ry*sintheta*cosphi
-	return math32.Vector2{x, y}
+	return math32.Vec2(x, y)
 }
 
 // EllipseToCenter converts to the center arc format and returns
@@ -111,7 +111,7 @@ func EllipseToCenter(x1, y1, rx, ry, phi float32, large, sweep bool, x2, y2 floa
 	return cx, cy, theta, theta + delta
 }
 
-// scale ellipse if rx and ry are too small, see https://www.w3.org/TR/SVG/implnote.html#ArcCorrectionOutOfRangeRadii
+// EllipseRadiiCorrection returns the scale of the ellipse radii if rx and ry are too small, see https://www.w3.org/TR/SVG/implnote.html#ArcCorrectionOutOfRangeRadii
 func EllipseRadiiCorrection(start math32.Vector2, rx, ry, phi float32, end math32.Vector2) float32 {
 	diff := start.Sub(end)
 	sinphi, cosphi := math32.Sincos(phi)

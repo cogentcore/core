@@ -54,18 +54,18 @@ func (c *Context) tableFor(n *html.Node) core.Widget {
 
 // hasPercentColumns returns whether the given table has cells with
 // percentage widths (in its rows, not in tables in it).
-func (ctx *Context) hasPercentColumns(table *html.Node) bool {
+func (c *Context) hasPercentColumns(table *html.Node) bool {
 	var rows func(n *html.Node) bool
 	rows = func(n *html.Node) bool {
-		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			switch c.Data {
+		for k := n.FirstChild; k != nil; k = k.NextSibling {
+			switch k.Data {
 			case "thead", "tbody", "tfoot":
-				if rows(c) {
+				if rows(k) {
 					return true
 				}
 			case "tr":
-				for cell := c.FirstChild; cell != nil; cell = cell.NextSibling {
-					if (cell.Data == "td" || cell.Data == "th") && strings.HasSuffix(strings.TrimSpace(ctx.declaration(cell, "width")), "%") {
+				for cell := k.FirstChild; cell != nil; cell = cell.NextSibling {
+					if (cell.Data == "td" || cell.Data == "th") && strings.HasSuffix(strings.TrimSpace(c.declaration(cell, "width")), "%") {
 						return true
 					}
 				}
@@ -79,18 +79,18 @@ func (ctx *Context) hasPercentColumns(table *html.Node) bool {
 // tableColumns returns the number of columns of the given table, the
 // largest number of cells (with their column spans) in any of its rows,
 // not counting those that are not displayed.
-func (ctx *Context) tableColumns(table *html.Node) int {
+func (c *Context) tableColumns(table *html.Node) int {
 	cols := 0
 	var rows func(n *html.Node)
 	rows = func(n *html.Node) {
-		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			switch c.Data {
+		for k := n.FirstChild; k != nil; k = k.NextSibling {
+			switch k.Data {
 			case "thead", "tbody", "tfoot":
-				rows(c)
+				rows(k)
 			case "tr":
 				n := 0
-				for cell := c.FirstChild; cell != nil; cell = cell.NextSibling {
-					if (cell.Data == "td" || cell.Data == "th") && ctx.displayOf(cell) != "none" {
+				for cell := k.FirstChild; cell != nil; cell = cell.NextSibling {
+					if (cell.Data == "td" || cell.Data == "th") && c.displayOf(cell) != "none" {
 						span, err := strconv.Atoi(GetAttr(cell, "colspan"))
 						if err != nil || span < 1 {
 							span = 1
@@ -107,7 +107,7 @@ func (ctx *Context) tableColumns(table *html.Node) int {
 }
 
 // handleCell handles a th or td element.
-func handleCell(ctx *Context, tag string) core.Widget {
+func handleCell(ctx *Context, _ string) core.Widget {
 	ctx.BlockParent = ctx.tableFor(ctx.Node)
 	ctx.inlineParent = nil
 	span, err := strconv.Atoi(GetAttr(ctx.Node, "colspan"))

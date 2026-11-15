@@ -20,7 +20,7 @@ import (
 // renderLayer renders a red square (10..90) in a context with the clip
 // mask, mask, and opacity of the given functions, which paint with pc,
 // and returns the image.
-func renderLayer(t *testing.T, clip, mask func(pc *Painter), opacity float32) *image.RGBA {
+func renderLayer(_ *testing.T, clip, mask func(pc *Painter), opacity float32) *image.RGBA {
 	size := math32.Vec2(100, 100)
 	pc := NewPainter(size)
 	pc.PushContext(nil, nil)

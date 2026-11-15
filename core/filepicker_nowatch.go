@@ -9,6 +9,6 @@ package core
 import "context"
 
 // watchFilePickerDir does nothing on platforms without file system watching.
-func watchFilePickerDir(ctx context.Context, dir string, changed func()) error {
+func watchFilePickerDir(_ context.Context, _ string, _ func()) error {
 	return nil
 }

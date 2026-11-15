@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package hpe provides the Hunt-Pointer-Estevez transform of XYZ colors to
+// LMS cone responses, and its inverse.
 package hpe
 
 import "cogentcore.org/core/colors/cam/cie"

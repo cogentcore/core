@@ -47,12 +47,12 @@ type Item struct {
 	ScriptWriter             []Name         `json:"script-writer,omitempty"`
 	SeriesCreator            []Name         `json:"series-creator,omitempty"`
 	Translator               []Name         `json:"translator,omitempty"`
-	Accessed                 Date           `json:"accessed,omitempty"`
-	AvailableDate            Date           `json:"available-date,omitempty"`
-	EventDate                Date           `json:"event-date,omitempty"`
-	Issued                   Date           `json:"issued,omitempty"`
-	OriginalDate             Date           `json:"original-date,omitempty"`
-	Submitted                Date           `json:"submitted,omitempty"`
+	Accessed                 Date           `json:"accessed"`
+	AvailableDate            Date           `json:"available-date"`
+	EventDate                Date           `json:"event-date"`
+	Issued                   Date           `json:"issued"`
+	OriginalDate             Date           `json:"original-date"`
+	Submitted                Date           `json:"submitted"`
 	Abstract                 string         `json:"abstract,omitempty"`
 	Annote                   string         `json:"annote,omitempty"`
 	Archive                  string         `json:"archive,omitempty"`

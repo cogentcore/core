@@ -160,7 +160,7 @@ func (nb *NodeBase) OnAdd() {
 }
 
 func (nb *NodeBase) BaseInterface() reflect.Type {
-	return reflect.TypeOf((*NodeBase)(nil)).Elem()
+	return reflect.TypeFor[NodeBase]()
 }
 
 func (nb *NodeBase) IsSolid() bool {

@@ -92,8 +92,8 @@ func (v Vector3) Dim(dim Dims) float32 {
 	}
 }
 
-func (a Vector3) String() string {
-	return fmt.Sprintf("(%v, %v, %v)", a.X, a.Y, a.Z)
+func (v Vector3) String() string {
+	return fmt.Sprintf("(%v, %v, %v)", v.X, v.Y, v.Z)
 }
 
 // GenGoSet returns code to set values in object at given path (var.member etc).

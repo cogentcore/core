@@ -132,7 +132,7 @@ four`
 		Context:  3,
 	}
 	result, _ := GetUnifiedDiffString(diff)
-	fmt.Println(strings.Replace(result, "\t", " ", -1))
+	fmt.Println(strings.ReplaceAll(result, "\t", " "))
 	// Output:
 	// --- Original 2005-01-26 23:30:50
 	// +++ Current 2010-04-02 10:20:52
@@ -164,7 +164,7 @@ four`
 		Eol:      "\n",
 	}
 	result, _ := GetContextDiffString(diff)
-	fmt.Print(strings.Replace(result, "\t", " ", -1))
+	fmt.Print(strings.ReplaceAll(result, "\t", " "))
 	// Output:
 	// *** Original
 	// --- Current
@@ -200,7 +200,7 @@ four`
 		Eol:      "\n",
 	}
 	result, _ := GetContextDiffString(diff)
-	fmt.Print(strings.Replace(result, "\t", " ", -1))
+	fmt.Print(strings.ReplaceAll(result, "\t", " "))
 	// Output:
 	// *** Original
 	// --- Current
@@ -447,7 +447,7 @@ func BenchmarkDiffer(b *testing.B) {
 	differ := NewDiffer()
 	for i := range A {
 		var x []string
-		for n := 0; n < 5; n++ {
+		for range 5 {
 			x, _ = differ.Compare(A[i], B[i])
 		}
 		fmt.Printf(" %v", len(x))
@@ -461,7 +461,7 @@ func BenchmarkMatcher(b *testing.B) {
 	b.ResetTimer()
 	for i := range A {
 		var x []OpCode
-		for n := 0; n < 5; n++ {
+		for range 5 {
 			sm := NewMatcher(A[i], B[i])
 			x = sm.GetOpCodes()
 		}

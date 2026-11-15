@@ -265,7 +265,7 @@ func InitCatMap() {
 		return
 	}
 	CatMap = make(map[Kinds]Kinds, KindsN)
-	for tk := Unknown; tk < KindsN; tk++ {
+	for tk := range KindsN {
 		for c := 1; c < len(Cats); c++ {
 			if tk < Cats[c] {
 				CatMap[tk] = Cats[c-1]
@@ -281,7 +281,7 @@ func InitSubCatMap() {
 		return
 	}
 	SubCatMap = make(map[Kinds]Kinds, KindsN)
-	for tk := Unknown; tk < KindsN; tk++ {
+	for tk := range KindsN {
 		for c := 1; c < len(SubCats); c++ {
 			if tk < SubCats[c] {
 				SubCatMap[tk] = SubCats[c-1]
@@ -297,7 +297,7 @@ func InitSub2CatMap() {
 		return
 	}
 	Sub2CatMap = make(map[Kinds]Kinds, KindsN)
-	for tk := Unknown; tk < KindsN; tk++ {
+	for tk := range KindsN {
 		for c := 1; c < len(SubCats); c++ {
 			if tk < Sub2Cats[c] {
 				Sub2CatMap[tk] = Sub2Cats[c-1]

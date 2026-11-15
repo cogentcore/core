@@ -323,7 +323,7 @@ func (sv *SVG) CloneSVG(size math32.Vector2) *SVG {
 
 func (sv *SVG) FillViewport() {
 	sty := styles.NewPaint() // has no transform
-	pc := &paint.Painter{sv.painter.State, sty}
+	pc := &paint.Painter{State: sv.painter.State, Paint: sty}
 	pc.FillBox(math32.Vector2{}, math32.FromPoint(sv.Geom.Size), sv.Background)
 }
 

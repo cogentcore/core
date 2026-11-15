@@ -48,12 +48,12 @@ func TestSetNodePosSize(t *testing.T) {
 
 	// no-ops for the nodes that do not support them
 	pl := NewPolyline(sv.Root)
-	pl.Points = []math32.Vector2{{0, 0}, {1, 1}}
+	pl.Points = []math32.Vector2{{X: 0, Y: 0}, {X: 1, Y: 1}}
 	pl.SetPos(math32.Vec2(9, 9))
 	pl.SetSize(math32.Vec2(9, 9))
 	pl.SetNodePos(math32.Vec2(9, 9))
 	pl.SetNodeSize(math32.Vec2(9, 9))
-	assert.Equal(t, []math32.Vector2{{0, 0}, {1, 1}}, pl.Points)
+	assert.Equal(t, []math32.Vector2{{X: 0, Y: 0}, {X: 1, Y: 1}}, pl.Points)
 	NewPath(sv.Root).SetPos(math32.Vec2(1, 1))
 }
 
@@ -63,9 +63,9 @@ func TestSetNodePosSize(t *testing.T) {
 func TestBitClone(t *testing.T) {
 	sv := NewSVG(math32.Vec2(100, 100))
 	pl := NewPolyline(sv.Root)
-	pl.Points = []math32.Vector2{{0, 0}, {10, 10}}
+	pl.Points = []math32.Vector2{{X: 0, Y: 0}, {X: 10, Y: 10}}
 	pg := NewPolygon(sv.Root)
-	pg.Points = []math32.Vector2{{0, 0}, {10, 0}, {5, 5}}
+	pg.Points = []math32.Vector2{{X: 0, Y: 0}, {X: 10, Y: 0}, {X: 5, Y: 5}}
 	for _, n := range []Node{pl, pg} {
 		saved := BitCloneNode(n)
 		n.ApplyTransform(sv, math32.Translate2D(1, 2))

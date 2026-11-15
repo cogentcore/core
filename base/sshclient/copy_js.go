@@ -31,7 +31,7 @@ func locationFS(l Location) (fileSystem, error) {
 }
 
 // sftpReaderFrom returns false: no file is on a remote host.
-func sftpReaderFrom(w io.Writer) (io.ReaderFrom, bool) {
+func sftpReaderFrom(_ io.Writer) (io.ReaderFrom, bool) {
 	return nil, false
 }
 

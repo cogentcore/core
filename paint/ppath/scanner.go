@@ -57,7 +57,7 @@ func (s *Scanner) Start() math32.Vector2 {
 	if i == -1 {
 		return math32.Vector2{}
 	}
-	return math32.Vector2{s.p[i-2], s.p[i-1]}
+	return math32.Vec2(s.p[i-2], s.p[i-1])
 }
 
 // CP1 returns the first control point for quadratic and cubic Béziers.
@@ -66,7 +66,7 @@ func (s *Scanner) CP1() math32.Vector2 {
 		panic("must be quadratic or cubic Bézier")
 	}
 	i := s.i - CmdLen(s.p[s.i]) + 1
-	return math32.Vector2{s.p[i+1], s.p[i+2]}
+	return math32.Vec2(s.p[i+1], s.p[i+2])
 }
 
 // CP2 returns the second control point for cubic Béziers.
@@ -75,7 +75,7 @@ func (s *Scanner) CP2() math32.Vector2 {
 		panic("must be cubic Bézier")
 	}
 	i := s.i - CmdLen(s.p[s.i]) + 1
-	return math32.Vector2{s.p[i+3], s.p[i+4]}
+	return math32.Vec2(s.p[i+3], s.p[i+4])
 }
 
 // Arc returns the arguments for arcs (rx,ry,rot,large,sweep).
@@ -90,7 +90,7 @@ func (s *Scanner) Arc() (float32, float32, float32, bool, bool) {
 
 // End returns the current path segment end position.
 func (s *Scanner) End() math32.Vector2 {
-	return math32.Vector2{s.p[s.i-2], s.p[s.i-1]}
+	return math32.Vec2(s.p[s.i-2], s.p[s.i-1])
 }
 
 // Path returns the current path segment.
@@ -141,7 +141,7 @@ func (s *ReverseScanner) Start() math32.Vector2 {
 	if s.i == 0 {
 		return math32.Vector2{}
 	}
-	return math32.Vector2{s.p[s.i-3], s.p[s.i-2]}
+	return math32.Vec2(s.p[s.i-3], s.p[s.i-2])
 }
 
 // CP1 returns the first control point for quadratic and cubic Béziers.
@@ -149,7 +149,7 @@ func (s *ReverseScanner) CP1() math32.Vector2 {
 	if s.p[s.i] != QuadTo && s.p[s.i] != CubeTo {
 		panic("must be quadratic or cubic Bézier")
 	}
-	return math32.Vector2{s.p[s.i+1], s.p[s.i+2]}
+	return math32.Vec2(s.p[s.i+1], s.p[s.i+2])
 }
 
 // CP2 returns the second control point for cubic Béziers.
@@ -157,7 +157,7 @@ func (s *ReverseScanner) CP2() math32.Vector2 {
 	if s.p[s.i] != CubeTo {
 		panic("must be cubic Bézier")
 	}
-	return math32.Vector2{s.p[s.i+3], s.p[s.i+4]}
+	return math32.Vec2(s.p[s.i+3], s.p[s.i+4])
 }
 
 // Arc returns the arguments for arcs (rx,ry,rot,large,sweep).
@@ -172,7 +172,7 @@ func (s *ReverseScanner) Arc() (float32, float32, float32, bool, bool) {
 // End returns the current path segment end position.
 func (s *ReverseScanner) End() math32.Vector2 {
 	i := s.i + CmdLen(s.p[s.i])
-	return math32.Vector2{s.p[i-3], s.p[i-2]}
+	return math32.Vec2(s.p[i-3], s.p[i-2])
 }
 
 // Path returns the current path segment.

@@ -106,7 +106,7 @@ func (pl *ComputePipeline) Dispatch1D(ce *wgpu.ComputePassEncoder, n, threads in
 // as the software GPU of the CI (lavapipe).
 const MaxWorkgroupsPerDimension = 65535
 
-// NumWorkgroups1D() returns the number of work groups of compute threads
+// NumWorkgroups1D returns the number of work groups of compute threads
 // that is sufficient to compute n total elements, given specified number
 // of threads in the x dimension, subject to constraint that no more than
 // [MaxWorkgroupsPerDimension] work groups can be deployed per dimension.
@@ -123,7 +123,7 @@ func NumWorkgroups1D(n, threads int) (nx, ny int) {
 	return
 }
 
-// NumWorkgroups2D() returns the number of work groups of compute threads
+// NumWorkgroups2D returns the number of work groups of compute threads
 // that is sufficient to compute n total elements, given specified number
 // of threads per x, y dimension, subject to constraint that no more than
 // [MaxWorkgroupsPerDimension] work groups can be deployed per dimension.

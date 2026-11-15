@@ -199,9 +199,10 @@ func blockEnd(style string, start int) int {
 		ch := style[i]
 		switch {
 		case quote != 0:
-			if ch == '\\' {
+			switch ch {
+			case '\\':
 				i++
-			} else if ch == quote {
+			case quote:
 				quote = 0
 			}
 		case ch == '"' || ch == '\'':
@@ -236,9 +237,10 @@ func topLevelBlocks(style string) []string {
 		ch := style[i]
 		switch {
 		case quote != 0:
-			if ch == '\\' {
+			switch ch {
+			case '\\':
 				i++
-			} else if ch == quote {
+			case quote:
 				quote = 0
 			}
 		case ch == '"' || ch == '\'':
@@ -349,7 +351,7 @@ func (c *Context) MediaChanged(width float32) bool {
 // mediaListMatches returns whether the given (non-empty, lowercase)
 // media query list matches.
 func (c *Context) mediaListMatches(query string) bool {
-	for _, q := range strings.Split(query, ",") {
+	for q := range strings.SplitSeq(query, ",") {
 		if c.mediaQueryMatches(strings.TrimSpace(q)) {
 			return true
 		}
@@ -365,7 +367,7 @@ func (c *Context) mediaQueryMatches(q string) bool {
 	}
 	q = strings.TrimPrefix(q, "only ")
 	match := true
-	for _, part := range strings.Split(q, " and ") {
+	for part := range strings.SplitSeq(q, " and ") {
 		part = strings.TrimSpace(part)
 		if part == "" {
 			continue

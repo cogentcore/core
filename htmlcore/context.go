@@ -554,7 +554,7 @@ func nodeSize(n *html.Node) int {
 // NewContext returns a new [Context] with basic defaults.
 func NewContext() *Context {
 	return &Context{
-		pageState:         pageState{styles: map[*html.Node][]*cssDecl{}},
+		styles:            map[*html.Node][]*cssDecl{},
 		OpenURL:           func(url string, e events.Event) { system.TheApp.OpenURL(url) },
 		GetURL:            getURL,
 		ElementHandlers:   map[string]func(ctx *Context) bool{},
@@ -612,11 +612,6 @@ func (c *Context) InlineParent() core.Widget {
 		s.Grow.Set(1, 0)
 	})
 	return c.inlineParent
-}
-
-// addStyle adds the given CSS style string to the page's compiled styles.
-func (c *Context) addStyle(style string) {
-	c.addStyleOrigin(style, originAuthor)
 }
 
 // addStyleOrigin adds the given CSS style string with the given origin.

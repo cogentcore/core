@@ -36,9 +36,7 @@ func TestMenuSearchOtherWindow(t *testing.T) {
 	// Meanwhile, the window of b opens and closes other dialogs.
 	stop := make(chan struct{})
 	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		for {
 			select {
 			case <-stop:
@@ -53,7 +51,7 @@ func TestMenuSearchOtherWindow(t *testing.T) {
 			d.Close()
 			b.AsyncUnlock()
 		}
-	}()
+	})
 
 	a.AsyncLock()
 	a.Scene.MenuSearchDialog("Search", "Search for a stage")

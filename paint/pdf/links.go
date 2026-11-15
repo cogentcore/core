@@ -106,7 +106,6 @@ func (w *pdfWriter) writeOutlines() pdfRef {
 		lastLev[o.level] = i
 		level = o.level
 	}
-	var refs pdfArray
 	firstRef := pdfRef(len(w.objOffsets) + 1)
 	for i, o := range w.outlines {
 		od := pdfDict{
@@ -130,8 +129,7 @@ func (w *pdfWriter) writeOutlines() pdfRef {
 		if i == 0 {
 			delete(od, "Parent")
 		}
-		ref := w.writeObject(od)
-		refs = append(refs, ref)
+		w.writeObject(od)
 	}
 	return firstRef
 }

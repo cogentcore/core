@@ -20,7 +20,9 @@ func RichToHTML(tx rich.Text) string {
 	var open []string        // the tags that are open, innermost last
 	closeTo := func(n int) { // closes the tags after the first n
 		for len(open) > n {
-			b.WriteString("</" + open[len(open)-1] + ">")
+			b.WriteString("</")
+			b.WriteString(open[len(open)-1])
+			b.WriteString(">")
 			open = open[:len(open)-1]
 		}
 	}
@@ -28,7 +30,11 @@ func RichToHTML(tx rich.Text) string {
 		sty, rs := tx.Span(si)
 		if sty.Special == rich.Link {
 			closeTo(0)
-			b.WriteString(`<a href="` + html.EscapeString(sty.URL) + `">` + html.EscapeString(string(rs)) + `</a>`)
+			b.WriteString(`<a href="`)
+			b.WriteString(html.EscapeString(sty.URL))
+			b.WriteString(`">`)
+			b.WriteString(html.EscapeString(string(rs)))
+			b.WriteString(`</a>`)
 			continue
 		}
 		var want []string // the tags of this span, in the order they are opened
@@ -50,7 +56,9 @@ func RichToHTML(tx rich.Text) string {
 		closeTo(keep)
 		for _, tag := range want {
 			if !slices.Contains(open, tag) {
-				b.WriteString("<" + tag + ">")
+				b.WriteString("<")
+				b.WriteString(tag)
+				b.WriteString(">")
 				open = append(open, tag)
 			}
 		}

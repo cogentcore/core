@@ -5,7 +5,7 @@
 // license that can be found in the LICENSE file.
 
 package units
-	
+
 // Dp returns a new dp value.
 // Dp is density-independent pixels. 1dp is 1/160 in. Inches are not necessarily the same as actual physical inches, as they depend on the DPI, so dp values may correspond to different physical sizes on different displays, but they will look correct.
 func Dp(value float32) Value {

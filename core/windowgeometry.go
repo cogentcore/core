@@ -197,9 +197,7 @@ func (ws *windowGeometrySaver) record(win *renderWindow) {
 	wgsc, hasCache := sgsc[winName]
 	if hasCache {
 		wgs.Last = wgsc.Last
-		for k, v := range wgsc.Screens {
-			wgs.Screens[k] = v
-		}
+		maps.Copy(wgs.Screens, wgsc.Screens)
 	}
 	wgs.Screens[sc.Name] = wgr
 	wgs.Last = sc.Name

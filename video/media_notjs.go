@@ -341,9 +341,7 @@ func (d *decoder) run(sink decodeSink) error {
 	stop := make(chan struct{})
 	var once sync.Once
 	for i, in := range d.inputs {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			// (each stops the others when the sink asks to stop, or it fails)
 			s := decodeSink{
 				video: func(f Frame) bool {
@@ -374,7 +372,7 @@ func (d *decoder) run(sink decodeSink) error {
 			if errs[i] = d.runInput(in, s); errs[i] != nil {
 				once.Do(func() { close(stop) })
 			}
-		}()
+		})
 	}
 	wg.Wait()
 	return errors.Join(errs...)

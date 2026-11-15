@@ -70,7 +70,7 @@ func (b *Box3) SetFromPoints(points []Vector3) {
 
 // ExpandByPoints may expand this bounding box from the specified array of points.
 func (b *Box3) ExpandByPoints(points []Vector3) {
-	for i := 0; i < len(points); i++ {
+	for i := range points {
 		b.ExpandByPoint(points[i])
 	}
 }
@@ -226,7 +226,7 @@ func (b Box3) MulQuat(q Quat) Box3 {
 	cs[7] = q.MulVector(Vec3(b.Min.X, b.Max.Y, b.Max.Z))
 
 	nb := B3Empty()
-	for i := 0; i < 8; i++ {
+	for i := range 8 {
 		nb.ExpandByPoint(cs[i])
 	}
 	return nb
@@ -256,7 +256,7 @@ func (b Box3) MVProjToNDC(m *Matrix4) Box3 {
 	cs[7] = Vector4{b.Min.X, b.Max.Y, b.Max.Z, 1}.MulMatrix4(m).PerspDiv()
 
 	nb := B3Empty()
-	for i := 0; i < 8; i++ {
+	for i := range 8 {
 		nb.ExpandByPoint(cs[i])
 	}
 	return nb

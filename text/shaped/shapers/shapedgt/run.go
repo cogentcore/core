@@ -32,7 +32,7 @@ func (run *Run) Advance() float32 {
 
 // Runes returns our rune range using textpos.Range
 func (run *Run) Runes() textpos.Range {
-	return textpos.Range{run.Output.Runes.Offset, run.Output.Runes.Offset + run.Output.Runes.Count}
+	return textpos.Range{Start: run.Output.Runes.Offset, End: run.Output.Runes.Offset + run.Output.Runes.Count}
 }
 
 // GlyphBoundsBox returns the math32.Box2 version of [Run.GlyphBounds],
@@ -98,11 +98,9 @@ func (run *Run) Bounds() fixed.Rectangle26_6 {
 		return run.MaxBounds.ToFixed()
 	}
 	mb := run.MaxBounds
-	if run.Direction.IsVertical() {
-		// ascent, descent describe horizontal, advance is vertical
-		// return fixed.Rectangle26_6{Min: fixed.Point26_6{X: -lb.Ascent, Y: 0},
-		// 	Max: fixed.Point26_6{X: -gapdec, Y: -run.Output.Advance}}
-	}
+	// todo: for a vertical run, ascent and descent describe horizontal, and
+	// advance is vertical: fixed.Rectangle26_6{Min: fixed.Point26_6{X: -lb.Ascent, Y: 0},
+	// Max: fixed.Point26_6{X: -gapdec, Y: -run.Output.Advance}}
 	return fixed.Rectangle26_6{Min: fixed.Point26_6{X: 0, Y: mb.Min.ToFixed().Y},
 		Max: fixed.Point26_6{X: run.Output.Advance, Y: mb.Max.ToFixed().Y}}
 }
@@ -276,7 +274,7 @@ func (run *Run) GlyphRegionBounds(st, ed int) math32.Box2 {
 	stb := run.GlyphLineBoundsBox(sg)
 	mb := run.MaxBounds
 	off := float32(0)
-	for gi := 0; gi < st; gi++ {
+	for gi := range st {
 		g := &run.Glyphs[gi]
 		off += math32.FromFixed(g.Advance)
 	}

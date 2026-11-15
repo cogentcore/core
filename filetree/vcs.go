@@ -235,10 +235,10 @@ func (fn *Node) revertVCS() (err error) {
 // revision specifiers -- if empty, defaults to A = current HEAD, B = current WC file.
 // -1, -2 etc also work as universal ways of specifying prior revisions.
 // Diffs are shown in a DiffEditorDialog.
-func (fn *Node) diffVCSSelected(rev_a string, rev_b string) { //types:add
+func (fn *Node) diffVCSSelected(revA string, revB string) { //types:add
 	var errs []error
 	fn.SelectedFunc(func(sn *Node) {
-		errs = append(errs, sn.diffVCS(rev_a, rev_b))
+		errs = append(errs, sn.diffVCS(revA, revB))
 	})
 	core.ErrorSnackbar(fn, errors.Join(errs...), "Error showing VCS diffs")
 }
@@ -247,7 +247,7 @@ func (fn *Node) diffVCSSelected(rev_a string, rev_b string) { //types:add
 // revision specifiers -- if empty, defaults to A = current HEAD, B = current WC file.
 // -1, -2 etc also work as universal ways of specifying prior revisions.
 // Diffs are shown in a DiffEditorDialog.
-func (fn *Node) diffVCS(rev_a, rev_b string) error {
+func (fn *Node) diffVCS(revA, revB string) error {
 	repo, _ := fn.Repo()
 	if repo == nil {
 		return errors.New("file not in vcs repo: " + string(fn.Filepath))
@@ -256,7 +256,7 @@ func (fn *Node) diffVCS(rev_a, rev_b string) error {
 		return errors.New("file not in vcs repo: " + string(fn.Filepath))
 	}
 	// todo:
-	_, err := textcore.DiffEditorDialogFromRevs(fn, repo, string(fn.Filepath) /*fn.Lines*/, nil, rev_a, rev_b)
+	_, err := textcore.DiffEditorDialogFromRevs(fn, repo, string(fn.Filepath) /*fn.Lines*/, nil, revA, revB)
 	return err
 }
 
@@ -323,7 +323,7 @@ func blameDialog(ctx core.Widget, fname string, blame, fbytes []byte) *textcore.
 	nln := min(len(lns), len(flns))
 	blns := make([][]byte, nln)
 	stidx := 0
-	for i := 0; i < nln; i++ {
+	for i := range nln {
 		fln := flns[i]
 		bln := lns[i]
 		if stidx == 0 {

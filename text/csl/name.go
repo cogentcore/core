@@ -65,9 +65,10 @@ func NamesLastFirstInitialCommaAmpersand(nms []Name) string {
 		w.WriteString(fam)
 		if giv != "" {
 			w.WriteString(", ")
-			nf := strings.Fields(giv)
-			for _, fn := range nf {
-				w.WriteString(fn[0:1] + ".")
+			nf := strings.FieldsSeq(giv)
+			for fn := range nf {
+				w.WriteString(fn[0:1])
+				w.WriteString(".")
 			}
 		}
 		if i == n-1 {
@@ -91,9 +92,10 @@ func NamesFirstInitialLastCommaAmpersand(nms []Name) string {
 		nm := &nms[i]
 		fam, giv := NameFamilyGiven(nm)
 		if giv != "" {
-			nf := strings.Fields(giv)
-			for _, fn := range nf {
-				w.WriteString(fn[0:1] + ".")
+			nf := strings.FieldsSeq(giv)
+			for fn := range nf {
+				w.WriteString(fn[0:1])
+				w.WriteString(".")
 			}
 			w.WriteString(" ")
 		}
@@ -116,13 +118,13 @@ func NamesFirstInitialLastCommaAmpersand(nms []Name) string {
 func NamesCiteEtAl(nms []Name) string {
 	var w strings.Builder
 	n := len(nms)
-	switch {
-	case n == 0:
+	switch n {
+	case 0:
 		return "(None)"
-	case n == 1:
+	case 1:
 		fam, _ := NameFamilyGiven(&nms[0])
 		w.WriteString(fam)
-	case n == 2:
+	case 2:
 		fam, _ := NameFamilyGiven(&nms[0])
 		w.WriteString(fam)
 		w.WriteString(" & ")
