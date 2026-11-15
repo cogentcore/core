@@ -363,28 +363,28 @@ func (lr *Rule) IsMatchPos(ls *State) bool {
 		return true
 	case StartOfLine:
 		return ls.Pos == 0
-	case EndOfLine:
+	case EndOfLine: // the target ends at the end of the line
 		tsz := lr.TargetLen(ls)
-		return ls.Pos == lsz-1-tsz
+		return ls.Pos+tsz == lsz
 	case MiddleOfLine:
 		if ls.Pos == 0 {
 			return false
 		}
 		tsz := lr.TargetLen(ls)
-		return ls.Pos != lsz-1-tsz
+		return ls.Pos+tsz < lsz
 	case StartOfWord:
 		return ls.Pos == 0 || unicode.IsSpace(ls.Src[ls.Pos-1])
 	case EndOfWord:
 		tsz := lr.TargetLen(ls)
-		ep := ls.Pos + tsz
-		return ep == lsz || (ep+1 < lsz && unicode.IsSpace(ls.Src[ep+1]))
+		ep := ls.Pos + tsz // the end of the target, after which is a space or the end
+		return ep == lsz || (ep < lsz && unicode.IsSpace(ls.Src[ep]))
 	case MiddleOfWord:
 		if ls.Pos == 0 || unicode.IsSpace(ls.Src[ls.Pos-1]) {
 			return false
 		}
 		tsz := lr.TargetLen(ls)
 		ep := ls.Pos + tsz
-		if ep == lsz || (ep+1 < lsz && unicode.IsSpace(ls.Src[ep+1])) {
+		if ep >= lsz || unicode.IsSpace(ls.Src[ep]) {
 			return false
 		}
 		return true

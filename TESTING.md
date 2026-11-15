@@ -32,6 +32,8 @@ core.AssertRender(t, b, "text-field/typed", core.Locked(b, func() {
 - `core.Locked(b, fun)` calls `fun` with the AsyncLock of the body held, which is needed to change widgets from a test.
 - `core.SendKey` sends a key chord with modifier flags, `core.TypeText` types text, and `core.SendKeyFunction` sends the key chord of a key function in the active key map, so that tests do not depend on the platform.
 - `core.RenderImage` is the rendering part of `AssertRender`, for tests that check things other than the image.
+- `core.Popups(b)` returns the scenes of the menus and other popups open over a body, `core.TopScene(b)` returns the scene on top in its window (a popup, or else a dialog in the window, or the window), and `core.ButtonByText(w, text)` finds a button in one, so that a test can click it.
+- `core.DragMouse(b, from, to)` drags the mouse through the events of the window, as a real mouse does, for drag and drop and sliding (called without the lock held).
 - The offscreen driver has an in-memory clipboard, so copy and paste can be tested.
 
 ## Test images

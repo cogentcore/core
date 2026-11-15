@@ -7,6 +7,7 @@ package rich
 import (
 	"fmt"
 	"image/color"
+	"math"
 	"strings"
 
 	"cogentcore.org/core/colors"
@@ -224,6 +225,13 @@ const (
 // ToFloat32 converts the weight to its numerical 100x value
 func (w Weights) ToFloat32() float32 {
 	return float32((w + 1) * 100)
+}
+
+// WeightFromFloat32 returns the weight of the given numerical weight,
+// as in CSS and OpenType (100 = [Thin], 400 = [Normal], 700 = [Bold]),
+// the inverse of [Weights.ToFloat32].
+func WeightFromFloat32(w float32) Weights {
+	return Weights(min(max(int(math.Round(float64(w)/100))-1, int(Thin)), int(Black)))
 }
 
 func (w Weights) HTMLTag() string {

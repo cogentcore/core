@@ -53,7 +53,7 @@ var styleFuncs = map[string]styleprops.Func{
 		func(obj *Style) *float32 { return &obj.LineHeight }),
 	"line-spacing": styleprops.FloatProportion(float32(1.3),
 		func(obj *Style) *float32 { return &obj.LineHeight }),
-	"para-spacing": styleprops.FloatProportion(float32(1.3),
+	"para-spacing": styleprops.FloatProportion(float32(1.5),
 		func(obj *Style) *float32 { return &obj.ParaSpacing }),
 	"white-space": styleprops.Enum(WrapAsNeeded,
 		func(obj *Style) enums.EnumSetter { return &obj.WhiteSpace }),
@@ -128,7 +128,7 @@ func (s *Style) ToProperties(sty *rich.Style, p map[string]any) {
 	if s.WhiteSpace != WrapAsNeeded {
 		p["white-space"] = s.WhiteSpace.String()
 	}
-	if sty.Direction != rich.LTR {
+	if s.Direction != rich.LTR {
 		p["direction"] = s.Direction.String()
 	}
 	if s.TabSize != 4 {

@@ -102,7 +102,7 @@ func (gl *GoLang) FuncTypeFromAST(fs *parse.FileState, pkg *syms.Symbol, ast *pa
 	npars := len(pars.Children)
 	var sigpars *parser.AST
 	if npars > 0 && (pars.Name == "SigParams" || pars.Name == "SigParamsResult") {
-		if ps := pars.ChildAST(0); ps == nil {
+		if ps := pars.ChildAST(0); ps != nil {
 			sigpars = pars
 			pars = ps
 			npars = len(pars.Children)

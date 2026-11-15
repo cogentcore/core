@@ -189,3 +189,54 @@ func (ls *Lines) transposeChar(vw *view, pos textpos.Pos) bool {
 	ls.replaceText(ppos, pos, ppos, repl, ReplaceMatchCase)
 	return true
 }
+
+// wordsOfLine returns the ranges of the words of the given line.
+func wordsOfLine(txt []rune) []textpos.Range {
+	var wds []textpos.Range
+	st := -1
+	for i, r := range txt {
+		brk := textpos.RuneIsWordBreak(r)
+		switch {
+		case !brk && st < 0:
+			st = i
+		case brk && st >= 0:
+			wds = append(wds, textpos.Range{Start: st, End: i})
+			st = -1
+		}
+	}
+	if st >= 0 {
+		wds = append(wds, textpos.Range{Start: st, End: len(txt)})
+	}
+	return wds
+}
+
+// transposeWord swaps the word at or before the given position with the
+// next word on its line, or with the word before it if it is the last
+// word of the line, as in "one tw|o three" to "one three two|". It returns
+// the position after the moved words, and false if there are not two
+// words to swap.
+func (ls *Lines) transposeWord(pos textpos.Pos) (textpos.Pos, bool) {
+	if !ls.isValidPos(pos) {
+		return pos, false
+	}
+	txt := ls.lines[pos.Line]
+	wds := wordsOfLine(txt)
+	if len(wds) < 2 {
+		return pos, false
+	}
+	wi := 0 // the word at or before pos
+	for i, w := range wds {
+		if w.Start <= pos.Char {
+			wi = i
+		}
+	}
+	if wi == len(wds)-1 {
+		wi--
+	}
+	w1, w2 := wds[wi], wds[wi+1]
+	repl := string(txt[w2.Start:w2.End]) + string(txt[w1.End:w2.Start]) + string(txt[w1.Start:w1.End])
+	st := textpos.Pos{Line: pos.Line, Char: w1.Start}
+	ed := textpos.Pos{Line: pos.Line, Char: w2.End}
+	ls.replaceText(st, ed, st, repl, ReplaceNoMatchCase)
+	return ed, true
+}

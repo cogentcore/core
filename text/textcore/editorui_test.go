@@ -6,6 +6,7 @@ package textcore
 
 import (
 	"image"
+	"strings"
 	"testing"
 
 	"cogentcore.org/core/core"
@@ -163,7 +164,7 @@ func TestEditorContextMenu(t *testing.T) {
 }
 
 // TestEditorJumpTranspose tests jumping to a line, the jump to line
-// prompt, and transposing (which does nothing for words).
+// prompt, and transposing words (which does nothing for one word).
 func TestEditorJumpTranspose(t *testing.T) {
 	editorTest(t, "a\nb\nc\nd\n", func(ed *Editor) {
 		ed.jumpToLine(3)
@@ -176,5 +177,47 @@ func TestEditorJumpTranspose(t *testing.T) {
 		assert.NoError(t, ed.SetWidgetValue("x\ny"))
 		assert.Equal(t, "x\ny\n", ed.Lines.String())
 		assert.True(t, ed.posIsVisible(pos(0, 0)))
+	})
+}
+
+// TestEditorTransposeWord tests transposing words with the key function.
+func TestEditorTransposeWord(t *testing.T) {
+	editorTest(t, "one two three\n", func(ed *Editor) {
+		ed.SetCursorShow(pos(0, 5))
+		core.SendKeyFunction(ed, keymap.TransposeWord)
+		assert.Equal(t, "one three two\n", ed.Lines.String())
+		assert.Equal(t, pos(0, 13), ed.CursorPos)
+		core.SendKeyFunction(ed, keymap.Undo)
+		assert.Equal(t, "one two three\n", ed.Lines.String())
+	})
+}
+
+// TestEditorPasteHistory tests the history of copied text, and the menu
+// of it for pasting.
+func TestEditorPasteHistory(t *testing.T) {
+	prev := editorClipboardHistory
+	defer func() { editorClipboardHistory = prev }()
+	editorClipboardHistory = nil
+	editorTest(t, "one two three\n", func(ed *Editor) {
+		core.SendKeyFunction(ed, keymap.PasteHist) // nothing copied yet
+		long := strings.Repeat("x", editorClipHistoryChooserLength+5)
+		addBaseClipboardHistory([]byte(long))
+		ed.SelectRegion = textpos.Region{Start: pos(0, 4), End: pos(0, 7)}
+		ed.Copy(false)
+		cl := editorClipHistoryChooserList()
+		require.Len(t, cl, 2)
+		assert.Equal(t, "two", cl[0], "the latest first")
+		assert.Len(t, cl[1], editorClipHistoryChooserLength, "shortened")
+		ed.SelectReset()
+		ed.SetCursorShow(pos(0, 0))
+		core.SendKeyFunction(ed, keymap.PasteHist)
+		b := ed.Scene.Body
+		pops := core.Popups(b)
+		require.NotEmpty(t, pops, "the menu")
+		bt := core.ButtonByText(pops[len(pops)-1], "two")
+		require.NotNil(t, bt)
+		bt.Send(events.Click)
+		assert.Equal(t, "twoone two three\n", ed.Lines.String(), "pasted at the cursor")
+		assert.Equal(t, pos(0, 3), ed.CursorPos)
 	})
 }

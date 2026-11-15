@@ -283,13 +283,21 @@ func (gl *GoLang) TypeFromASTType(fs *parse.FileState, origPkg, pkg *syms.Symbol
 		case nxt.Name == "Slice":
 			continue
 		case strings.HasPrefix(nxt.Name, "Slice"):
+			// the expression continues after the index (or slice) expression
+			end := lastDescendant(nxt)
+			if last != nil && last != nxt && last.ParentLevel(nxt) > 0 {
+				end = nxt
+			}
+			if nxt.Name == "SliceTwo" || nxt.Name == "SliceThree" { // a slice of the same type
+				return gl.TypeFromASTType(fs, origPkg, pkg, end, last, ttp.Name)
+			}
 			eltyp := ttp.Els.ByName("val")
 			if eltyp != nil {
 				elnm := QualifyType(pkgnm, eltyp.Type)
 				// if TraceTypes {
 				// 	fmt.Printf("TExpr: slice/map el type: %v\n", elnm)
 				// }
-				return gl.TypeFromASTType(fs, origPkg, pkg, nxt, last, elnm)
+				return gl.TypeFromASTType(fs, origPkg, pkg, end, last, elnm)
 			}
 			if ttp.Name == "string" {
 				return BuiltinTypes["string"], nil, true
@@ -411,4 +419,14 @@ func (gl *GoLang) TypeFromASTName(fs *parse.FileState, origPkg, pkg *syms.Symbol
 		fmt.Printf("TExpr: could not find symbol for name: %v\n", snm)
 	}
 	return nil, tyast, false
+}
+
+// lastDescendant returns the last node within the given node, in the
+// depth-first order of [parser.AST.NextAST]: the next node after it is
+// the node after the given node and all of its descendants.
+func lastDescendant(ast *parser.AST) *parser.AST {
+	for ast.HasChildren() {
+		ast = ast.ChildAST(len(ast.Children) - 1)
+	}
+	return ast
 }

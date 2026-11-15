@@ -94,7 +94,7 @@ func FloatProportion[T any, F num.Float](initVal F, getField func(obj *T) *F) Fu
 			return
 		}
 		isPct := false
-		if vstr, ok := val.(string); ok {
+		if vstr, ok := val.(string); ok && strings.HasSuffix(vstr, "%") {
 			val = strings.TrimSuffix(vstr, "%")
 			isPct = true
 		}

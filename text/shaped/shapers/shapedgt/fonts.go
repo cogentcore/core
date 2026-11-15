@@ -21,7 +21,7 @@ func (sh *Shaper) FontList() []fonts.Info {
 	for i := range ft {
 		fi[i].Family = ft[i].Family
 		as := ft[i].Aspect
-		fi[i].Weight = rich.Weights(int(as.Weight / 100.0))
+		fi[i].Weight = rich.WeightFromFloat32(float32(as.Weight))
 		fi[i].Slant = rich.Slants(as.Style - 1)
 		// fi[i].Stretch = rich.Stretch() // not avail
 		fi[i].Stretch = rich.StretchNormal

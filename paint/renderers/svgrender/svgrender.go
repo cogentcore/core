@@ -73,6 +73,7 @@ func (rs *Renderer) SetSize(un units.Units, size math32.Vector2) {
 // Render is the main rendering function.
 func (rs *Renderer) Render(r render.Render) render.Renderer {
 	rs.SVG = svg.NewSVG(rs.size)
+	rs.SVG.Root.ViewBox.Size = rs.size // so that the document is in dots
 	rs.gpStack = nil
 	bg := svg.NewGroup(rs.SVG.Root)
 	rs.gpStack.Push(bg)

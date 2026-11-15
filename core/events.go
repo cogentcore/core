@@ -284,6 +284,16 @@ func (em *Events) handleFocusEvent(e events.Event) {
 	em.managerKeyChordEvents(e)
 }
 
+// capturesMouse returns whether the mouse events of the scene go to it
+// wherever the mouse is, which they do while a widget of it is sliding, or
+// can start to slide, until the mouse button is released.
+func (em *Events) capturesMouse(e events.Event) bool {
+	if et := e.Type(); et != events.MouseDrag && et != events.MouseUp {
+		return false
+	}
+	return !tree.IsNil(em.slide) || !tree.IsNil(em.slidePress)
+}
+
 func (em *Events) resetOnMouseDown() {
 	em.press = nil
 	em.drag = nil
@@ -369,7 +379,8 @@ func (em *Events) handlePosEvent(e events.Event) {
 	em.mouseInBBox = sortByRenderLayer(em.mouseInBBox)
 
 	n := len(em.mouseInBBox)
-	if n == 0 {
+	// A slide continues (or starts) and stops wherever the mouse is.
+	if n == 0 && !(em.capturesMouse(e) && (et == events.MouseDrag || et == events.MouseUp)) {
 		if DebugSettings.EventTrace && et != events.MouseMove {
 			log.Println("Nothing in bbox:", sc.Geom.TotalBBox, "pos:", pos)
 		}
@@ -557,6 +568,7 @@ func (em *Events) handlePosEvent(e events.Event) {
 		}
 	case events.MouseUp:
 		em.cancelRepeatClick()
+		em.slidePress = nil
 		if !tree.IsNil(em.slide) {
 			em.slide.AsWidget().Send(events.SlideStop, e)
 			e.SetHandled()

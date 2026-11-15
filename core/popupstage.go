@@ -258,7 +258,7 @@ func (pm *stages) popupHandleEvent(e events.Event) {
 			return
 		}
 		// fmt.Println("pos:", pos, "top geom:", ts.SceneGeom)
-		if pos.In(ts.SceneGeom.Bounds()) {
+		if pos.In(ts.SceneGeom.Bounds()) || ts.Events.capturesMouse(e) {
 			top.popupHandleEvent(e)
 			e.SetHandled()
 			return

@@ -12,6 +12,7 @@ package parser
 import (
 	"fmt"
 	"io"
+	"slices"
 	"strconv"
 	"strings"
 	"text/tabwriter"
@@ -1486,24 +1487,19 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAST, parAST *AST) bo
 				findAll = true
 				p = strings.TrimSuffix(p, "...")
 			}
-			var nd tree.Node
+			var nd *AST
 			if p[:3] == "../" {
-				nd = parAST.FindPath(p[3:])
+				nd = parAST.findPath(p[3:])
 			} else {
-				nd = useAST.FindPath(p)
+				nd = useAST.findPath(p)
 			}
 			if nd != nil {
 				if node == nil {
 					node = nd
 				}
 				if findAll {
-					pn := nd.AsTree().Parent
-					for _, pk := range pn.AsTree().Children {
-						if pk != nd && pk.AsTree().Name == nd.AsTree().Name {
-							adnl = append(adnl, pk)
-						}
-					}
-				} else if node != nd {
+					adnl = append(adnl, listSiblings(ps, nd)...)
+				} else if node != tree.Node(nd) {
 					adnl = append(adnl, nd)
 				}
 			}
@@ -1515,19 +1511,16 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAST, parAST *AST) bo
 				findAll = true
 				p = strings.TrimSuffix(p, "...")
 			}
+			var nd *AST
 			if p[:3] == "../" {
-				node = parAST.FindPath(p[3:])
+				nd = parAST.findPath(p[3:])
 			} else {
-				node = useAST.FindPath(p)
+				nd = useAST.findPath(p)
 			}
-			if node != nil {
+			if nd != nil {
+				node = nd
 				if findAll {
-					pn := node.AsTree().Parent
-					for _, pk := range pn.AsTree().Children {
-						if pk != node && pk.AsTree().Name == node.AsTree().Name {
-							adnl = append(adnl, pk)
-						}
-					}
+					adnl = listSiblings(ps, nd)
 				}
 				break
 			}
@@ -1753,4 +1746,60 @@ func (pr *Rule) WriteGrammar(writer io.Writer, depth int) {
 			}
 		}
 	}
+}
+
+// findPath returns the node at the given path relative to this node, as
+// [tree.NodeBase.FindPath] does, except that a name specifies the first
+// child of the name: the names of AST nodes are not unique (they are the
+// names of their rules), and FindPath finds any child of a name.
+func (ast *AST) findPath(path string) *AST {
+	cur := ast
+	for _, pe := range strings.Split(strings.TrimSpace(path), "/") {
+		if pe == "" {
+			continue
+		}
+		var idx int
+		if pe[0] == '[' && pe[len(pe)-1] == ']' {
+			i, err := strconv.Atoi(pe[1 : len(pe)-1])
+			if err != nil {
+				return nil
+			}
+			if i < 0 {
+				i += len(cur.Children)
+			}
+			idx = i
+		} else {
+			idx = slices.IndexFunc(cur.Children, func(k tree.Node) bool { return k.AsTree().Name == pe })
+		}
+		if idx < 0 || idx >= len(cur.Children) {
+			return nil
+		}
+		cur = cur.ChildAST(idx)
+	}
+	return cur
+}
+
+// listSiblings returns the siblings of the given node of a path ending in
+// "...": the nodes of the same name that follow it in a comma-separated
+// list, as the other names of a, b, c in a, b, c := x, y, z.
+func listSiblings(ps *State, nd *AST) []tree.Node {
+	var sibs []tree.Node
+	par := nd.Parent
+	if par == nil {
+		return nil
+	}
+	kids := par.AsTree().Children
+	prev := nd
+	for _, k := range kids[nd.IndexInParent()+1:] {
+		if k.AsTree().Name != nd.Name {
+			break
+		}
+		pos, ok := ps.Src.ValidTokenPos(prev.TokReg.End)
+		if !ok || ps.Src.LexAt(pos).Token.Token != token.PunctSepComma {
+			break
+		}
+		sibs = append(sibs, k)
+		prev = k.(*AST)
+	}
+	return sibs
 }

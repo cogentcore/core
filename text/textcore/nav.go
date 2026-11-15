@@ -381,9 +381,14 @@ func (ed *Base) cursorTranspose() {
 	ed.NeedsRender()
 }
 
-// cursorTranspose swaps the character at the cursor with the one before it
+// cursorTransposeWord swaps the word at or before the cursor with the
+// next word, moving the cursor after them.
 func (ed *Base) cursorTransposeWord() {
-	// todo:
+	ed.validateCursor()
+	if pos, ok := ed.Lines.TransposeWord(ed.CursorPos); ok {
+		ed.SetCursorShow(pos)
+	}
+	ed.NeedsRender()
 }
 
 // setCursorFromMouse sets cursor position from mouse mouse action -- handles

@@ -347,3 +347,37 @@ func TestPreCommentStartFileStart(t *testing.T) {
 	src := [][]byte{[]byte("// doc"), []byte("// more"), []byte("func f() {}")}
 	assert.Equal(t, 0, PreCommentStart(src, 2, "//", "/*", "*/", 5))
 }
+
+// TestLinesTransposeWord tests swapping words.
+func TestLinesTransposeWord(t *testing.T) {
+	tests := []struct {
+		src  string
+		at   int
+		want string
+		end  int
+	}{
+		{"one two three", 5, "one three two", 13},      // in a word
+		{"one two three", 4, "one three two", 13},      // at the start of a word
+		{"one two three", 3, "two one three", 7},       // just after a word
+		{"one two three", 13, "one three two", 13},     // at the end: the last two words
+		{"  one, two", 0, "  two, one", 10},            // before the first word
+		{"a(b) c", 2, "a(c) b", 6},                     // punctuation stays
+		{"x := y.Z", 0, "y := x.Z", 6},                 // non-word runes between
+		{"one   two\nthree", 1, "two   one\nthree", 9}, // within the line
+	}
+	for _, tt := range tests {
+		lns, _ := newTestLines(t, tt.src)
+		pos, ok := lns.TransposeWord(textpos.Pos{Char: tt.at})
+		assert.True(t, ok, tt.src)
+		assert.Equal(t, tt.want, lns.String()[:len(tt.want)], tt.src)
+		assert.Equal(t, textpos.Pos{Char: tt.end}, pos, tt.src)
+	}
+	for _, src := range []string{"one", "", "  ,  "} {
+		lns, _ := newTestLines(t, src)
+		_, ok := lns.TransposeWord(textpos.Pos{})
+		assert.False(t, ok, src)
+	}
+	lns, _ := newTestLines(t, "a b")
+	_, ok := lns.TransposeWord(textpos.Pos{Line: 5})
+	assert.False(t, ok, "an invalid position")
+}

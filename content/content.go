@@ -474,7 +474,7 @@ func (ct *Content) OpenEvent(url string, e events.Event) *Content {
 		}
 		_, pg, heading := ct.parseURL(url)
 		_, nw, err := ct.pageURL(pg, heading)
-		if err != nil {
+		if err != nil || nw == nil { // (no URL other than on the web)
 			return ct
 		}
 		core.TheApp.OpenURL(nw.String())

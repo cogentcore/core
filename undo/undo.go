@@ -180,6 +180,8 @@ func (us *Stack) SaveUndoStart(state []string) {
 func (us *Stack) SaveReplace(action, data string, state []string) {
 	us.Mu.Lock()
 	nr := us.Records[us.Index]
+	nr.Action = action
+	nr.Data = data
 	go us.SaveState(nr, us.Index, state)
 }
 
@@ -295,7 +297,10 @@ func (us *Stack) Reset() {
 // UndoList returns the list actions in order from the most recent back in time
 // suitable for a menu of actions to undo.
 func (us *Stack) UndoList() []string {
-	al := make([]string, us.Index)
+	if us.Index < 0 || us.Index >= len(us.Records) {
+		return nil
+	}
+	al := make([]string, us.Index+1)
 	for i := us.Index; i >= 0; i-- {
 		al[us.Index-i] = us.Records[i].Action
 	}
