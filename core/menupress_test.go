@@ -55,7 +55,7 @@ func (mt *menuTest) menus() []string {
 	var texts []string
 	ps := mt.b.Scene.Stage.popups
 	for i := range ps.stack.Len() {
-		st := ps.stack.ValueByIndex(i)
+		st := ps.stack.Values[i]
 		if st.Type == MenuStage && st.Scene.HasChildren() {
 			texts = append(texts, AsButton(st.Scene.Child(0)).Text)
 		}
@@ -74,7 +74,7 @@ func (mt *menuTest) center(text string) image.Point {
 	} else {
 		ps := mt.b.Scene.Stage.popups
 		for i := ps.stack.Len() - 1; i >= 0 && w == nil; i-- {
-			for _, kid := range ps.stack.ValueByIndex(i).Scene.Children {
+			for _, kid := range ps.stack.Values[i].Scene.Children {
 				if b := AsButton(kid); b != nil && b.Text == text {
 					w = b.AsWidget()
 					break

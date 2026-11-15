@@ -71,3 +71,37 @@ func TestListOps(t *testing.T) {
 	assert.Equal(t, 0, kl.Len())
 	assert.Equal(t, -1, kl.IndexByKey("b"))
 }
+
+// TestAllIndexByKeyTry tests iterating over the keys and values, with an
+// early stop, and the index of a key with whether it is there.
+func TestAllIndexByKeyTry(t *testing.T) {
+	kl := New[string, int]()
+	kl.Set("a", 1)
+	kl.Set("b", 2)
+	kl.Set("c", 3)
+	var keys []string
+	var sum int
+	for k, v := range kl.All() {
+		keys = append(keys, k)
+		sum += v
+	}
+	assert.Equal(t, []string{"a", "b", "c"}, keys)
+	assert.Equal(t, 6, sum)
+	n := 0
+	for range kl.All() {
+		n++
+		if n == 2 {
+			break
+		}
+	}
+	assert.Equal(t, 2, n, "stops early")
+	idx, ok := kl.IndexByKeyTry("b")
+	assert.True(t, ok)
+	assert.Equal(t, 1, idx)
+	_, ok = kl.IndexByKeyTry("z")
+	assert.False(t, ok)
+	var empty List[string, int]
+	for range empty.All() {
+		t.Error("an empty list has nothing")
+	}
+}

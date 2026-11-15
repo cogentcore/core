@@ -265,7 +265,7 @@ func (sc *Scene) Init() {
 			return
 		}
 		// the stage that will be visible next
-		st := sm.stack.ValueByIndex(sm.stack.Len() - 2)
+		st := sm.stack.Values[sm.stack.Len()-2]
 		getCurrentRenderWindow().SetStageTitle(st.Title)
 	})
 	sc.Updater(func() {

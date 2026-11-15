@@ -74,8 +74,7 @@ func usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 
 	posArgStrs := []string{}
 
-	for _, kv := range fs.Order {
-		v := kv.Value
+	for _, v := range fs.Values {
 		f := v.Field
 
 		posArgTag, ok := f.Tag.Lookup("posarg")
@@ -195,8 +194,7 @@ outer:
 // flagUsage adds the flag usage info for the given fields
 // to the given [strings.Builder].
 func flagUsage(fields *fields, b *strings.Builder) {
-	for _, kv := range fields.Order {
-		f := kv.Value
+	for _, f := range fields.Values {
 		b.WriteString(indent)
 		for i, name := range f.Names {
 			b.WriteString(logx.CmdColor("-" + strcase.ToKebab(name)))

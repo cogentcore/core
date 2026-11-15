@@ -11,7 +11,7 @@ import (
 	"testing"
 	"text/template"
 
-	"cogentcore.org/core/base/ordmap"
+	"cogentcore.org/core/base/keylist"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/cli"
 	"cogentcore.org/core/types"
@@ -23,7 +23,7 @@ func TestGenerate(t *testing.T) {
 	c := &Config{
 		AddMethods: true,
 		AddFuncs:   true,
-		InterfaceConfigs: ordmap.Make([]ordmap.KeyValue[string, *Config]{{
+		InterfaceConfigs: newConfigs([]configKV{{
 			"fmt.Stringer", &Config{
 				AddTypes: true,
 				Setters:  true,
@@ -102,7 +102,7 @@ func BenchmarkIDName(b *testing.B) {
 // referencing it.
 func TestInterfaceNotReferenced(t *testing.T) {
 	c := &Config{
-		InterfaceConfigs: ordmap.Make([]ordmap.KeyValue[string, *Config]{{
+		InterfaceConfigs: newConfigs([]configKV{{
 			"fmt.Stringer", &Config{AddTypes: true, Setters: true},
 		}}),
 	}
@@ -114,4 +114,19 @@ func TestInterfaceNotReferenced(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Contains(t, string(have), "noref.Pet")
 	assert.Contains(t, string(have), "func (t *Pet) SetName(v string) *Pet")
+}
+
+// configKV is a key and value of the interface configs of a test.
+type configKV struct {
+	key string
+	cfg *Config
+}
+
+// newConfigs returns the interface configs of the given keys and values.
+func newConfigs(kvs []configKV) *keylist.List[string, *Config] {
+	kl := keylist.New[string, *Config]()
+	for _, kv := range kvs {
+		kl.Set(kv.key, kv.cfg)
+	}
+	return kl
 }

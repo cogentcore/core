@@ -75,8 +75,7 @@ func boolFlags(obj any) map[string]bool {
 
 	res := map[string]bool{}
 
-	for _, kv := range fields.Order {
-		f := kv.Value
+	for _, f := range fields.Values {
 
 		if f.Field.Type.Kind() != reflect.Bool { // we only care about bools here
 			continue
@@ -298,7 +297,7 @@ func parseFlags(flags map[string]string, allFlags *fields, errNotFound bool) err
 // It is recommended that the [ErrNotFound] and [NoErrNotFound]
 // constants be used for the value of errNotFound for clearer code.
 func parseFlag(name string, value string, allFlags *fields, errNotFound bool) error {
-	f, exists := allFlags.ValueByKeyTry(name)
+	f, exists := allFlags.AtTry(name)
 	if !exists {
 		if errNotFound {
 			return fmt.Errorf("flag name %q not recognized", name)
@@ -316,7 +315,7 @@ func parseFlag(name string, value string, allFlags *fields, errNotFound bool) er
 			if lcnm[:3] == "no_" || lcnm[:3] == "no-" {
 				negate = true
 			} else if lcnm[:2] == "no" {
-				if _, has := allFlags.ValueByKeyTry(lcnm[2:]); has { // e.g., nogui and gui is on list
+				if _, has := allFlags.AtTry(lcnm[2:]); has { // e.g., nogui and gui is on list
 					negate = true
 				}
 			}
@@ -394,7 +393,7 @@ func addAllCases(nm string, field *field, allFlags *fields) {
 		return // skip Includes
 	}
 	for _, nm := range allCases(nm) {
-		allFlags.Add(nm, field)
+		allFlags.Set(nm, field)
 	}
 }
 
@@ -413,8 +412,7 @@ func allCases(nm string) []string {
 func addFlags(allFields *fields, allFlags *fields, args []string, flags map[string]string) ([]string, error) {
 	consumed := map[int]bool{} // which args we have consumed via pos args
 	var leftoverField *field
-	for _, kv := range allFields.Order {
-		v := kv.Value
+	for _, v := range allFields.Values {
 		f := v.Field
 
 		for _, name := range v.Names {

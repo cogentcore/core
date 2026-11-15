@@ -93,7 +93,7 @@ func (w *renderWindow) fillInsets(cp composer.Composer) {
 		return
 	}
 	var clr image.Image = colors.Scheme.Surface
-	for _, st := range w.mains.stack.Values() {
+	for _, st := range w.mains.stack.Values {
 		if st.Type != WindowStage || st.Scene == nil {
 			continue
 		}

@@ -18,7 +18,7 @@ import (
 	"log/slog"
 
 	"cogentcore.org/core/base/generate"
-	"cogentcore.org/core/base/ordmap"
+	"cogentcore.org/core/base/keylist"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/cli"
 	ctypes "cogentcore.org/core/types"
@@ -28,16 +28,16 @@ import (
 // Generator holds the state of the generator.
 // It is primarily used to buffer the output.
 type Generator struct {
-	Config     *Config                              // The configuration information
-	Buf        bytes.Buffer                         // The accumulated output.
-	Pkgs       []*packages.Package                  // The packages we are scanning.
-	Pkg        *packages.Package                    // The packages we are currently on.
-	File       *ast.File                            // The file we are currently on.
-	Cmap       ast.CommentMap                       // The comment map for the file we are currently on.
-	Types      []*Type                              // The types
-	Methods    ordmap.Map[string, []ctypes.Method]  // The methods, keyed by the the full package name of the type of the receiver
-	Funcs      ordmap.Map[string, ctypes.Func]      // The functions
-	Interfaces ordmap.Map[string, *types.Interface] // The cached interfaces, created from [Config.InterfaceConfigs]
+	Config     *Config                                // The configuration information
+	Buf        bytes.Buffer                           // The accumulated output.
+	Pkgs       []*packages.Package                    // The packages we are scanning.
+	Pkg        *packages.Package                      // The packages we are currently on.
+	File       *ast.File                              // The file we are currently on.
+	Cmap       ast.CommentMap                         // The comment map for the file we are currently on.
+	Types      []*Type                                // The types
+	Methods    keylist.List[string, []ctypes.Method]  // The methods, keyed by the the full package name of the type of the receiver
+	Funcs      keylist.List[string, ctypes.Func]      // The functions
+	Interfaces keylist.List[string, *types.Interface] // The cached interfaces, created from [Config.InterfaceConfigs]
 }
 
 // NewGenerator returns a new generator with the
@@ -66,9 +66,9 @@ func (g *Generator) Printf(format string, args ...any) {
 // PrintHeader prints the header and package clause
 // to the accumulated output
 func (g *Generator) PrintHeader() {
-	// we need a manual import of types and ordmap because they are
+	// we need a manual import of types because it is
 	// external, but goimports will handle everything else
-	generate.PrintHeader(&g.Buf, g.Pkg.Name, "cogentcore.org/core/types", "cogentcore.org/core/base/ordmap")
+	generate.PrintHeader(&g.Buf, g.Pkg.Name, "cogentcore.org/core/types", "cogentcore.org/core/base/keylist")
 }
 
 // Find goes through all of the types, functions, variables,
@@ -96,8 +96,7 @@ func (g *Generator) GetInterfaces() error {
 	if g.Config.InterfaceConfigs.Len() == 0 {
 		return nil
 	}
-	for _, kv := range g.Config.InterfaceConfigs.Order {
-		nm := kv.Key
+	for _, nm := range g.Config.InterfaceConfigs.Keys {
 		li := strings.LastIndex(nm, ".")
 		if li < 0 {
 			return fmt.Errorf("invalid InterfaceConfigs key: %q is not a fully qualified type name", nm)
@@ -115,7 +114,7 @@ func (g *Generator) GetInterfaces() error {
 		if !ok {
 			return fmt.Errorf("invalid InterfaceConfigs value: type %q is not a *types.Interface but a %T (type value %v)", nm, utyp, utyp)
 		}
-		g.Interfaces.Add(nm, iface)
+		g.Interfaces.Set(nm, iface)
 	}
 	return nil
 }
@@ -176,10 +175,8 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 		if cfg.InterfaceConfigs.Len() > 0 {
 			typ := g.Pkg.TypesInfo.Defs[ts.Name].Type()
 			if !types.IsInterface(typ) {
-				for _, kv := range cfg.InterfaceConfigs.Order {
-					in := kv.Key
-					ic := kv.Value
-					iface := g.Interfaces.ValueByKey(in)
+				for in, ic := range cfg.InterfaceConfigs.All() {
+					iface := g.Interfaces.At(in)
 					if iface == nil {
 						slog.Info("missing interface object", "interface", in)
 						continue
@@ -328,7 +325,7 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 		for _, ret := range rets.Fields {
 			fun.Returns = append(fun.Returns, ret.Name)
 		}
-		g.Funcs.Add(fun.Name, fun)
+		g.Funcs.Set(fun.Name, fun)
 	} else {
 		if (!hasAdd && !cfg.AddMethods) || hasSkip { // we must be told to add or we will not add
 			return true, nil
@@ -357,7 +354,7 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 		// get rid of any pointer receiver
 		tnm := strings.TrimPrefix(types.ExprString(typ), "*")
 		typnm := FullName(g.Pkg, tnm)
-		g.Methods.Add(typnm, append(g.Methods.ValueByKey(typnm), method))
+		g.Methods.Set(typnm, append(g.Methods.At(typnm), method))
 	}
 
 	return true, nil
@@ -529,7 +526,7 @@ func (g *Generator) Generate() (bool, error) {
 		return false, nil
 	}
 	for _, typ := range g.Types {
-		typ.Methods = append(typ.Methods, g.Methods.ValueByKey(typ.Name)...)
+		typ.Methods = append(typ.Methods, g.Methods.At(typ.Name)...)
 		g.ExecTmpl(TypeTmpl, typ)
 		for _, tmpl := range typ.Config.Templates {
 			g.ExecTmpl(tmpl, typ)
@@ -538,8 +535,8 @@ func (g *Generator) Generate() (bool, error) {
 			g.ExecTmpl(SetterMethodsTmpl, typ)
 		}
 	}
-	for _, fun := range g.Funcs.Order {
-		g.ExecTmpl(FuncTmpl, fun.Value)
+	for _, fun := range g.Funcs.Values {
+		g.ExecTmpl(FuncTmpl, fun)
 	}
 	return true, nil
 }

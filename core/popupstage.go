@@ -239,7 +239,7 @@ func (pm *stages) popupHandleEvent(e events.Event) {
 	if top.ignoreEvents {
 		var ntop *Stage
 		for i := pm.stack.Len() - 1; i >= 0; i-- {
-			s := pm.stack.ValueByIndex(i)
+			s := pm.stack.Values[i]
 			if !s.ignoreEvents {
 				ntop = s
 				break
@@ -278,7 +278,7 @@ func (pm *stages) popupHandleEvent(e events.Event) {
 		// otherwise not Handled, so pass on to first lower stage
 		// that accepts events and is in bounds
 		for i := pm.stack.Len() - 1; i >= 0; i-- {
-			s := pm.stack.ValueByIndex(i)
+			s := pm.stack.Values[i]
 			ss := s.Scene
 			if !s.ignoreEvents && pos.In(ss.SceneGeom.Bounds()) {
 				s.popupHandleEvent(e)
@@ -384,7 +384,7 @@ func (pm *stages) pressOpenedEvent(top *Stage, e events.Event) bool {
 func (pm *stages) menuChain() []*Stage {
 	var chain []*Stage
 	for i := pm.stack.Len() - 1; i >= 0; i-- {
-		s := pm.stack.ValueByIndex(i)
+		s := pm.stack.Values[i]
 		if s.ignoreEvents {
 			continue
 		}

@@ -146,7 +146,7 @@ type ShouldSaver interface {
 	ShouldSave() bool
 }
 
-// TODO: it would be good to return an ordmap or struct of the fields for
+// TODO: it would be good to return a keylist or struct of the fields for
 // ordered output, but that may be difficult.
 
 // NonDefaultFields returns a map representing all of the fields of the given

@@ -12,7 +12,7 @@ import (
 
 	"slices"
 
-	"cogentcore.org/core/base/ordmap"
+	"cogentcore.org/core/base/keylist"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
 )
@@ -35,7 +35,7 @@ type field struct {
 }
 
 // fields is a simple type alias for an ordered map of [field] objects.
-type fields = ordmap.Map[string, *field]
+type fields = keylist.List[string, *field]
 
 // addAllFields, when passed as the command to [addFields], indicates
 // to add all fields, regardless of their command association.
@@ -203,7 +203,7 @@ func addFieldsImpl(obj any, path string, cmdPath string, allFields *fields, used
 				}
 			}
 		}
-		allFields.Add(name, nf)
+		allFields.Set(name, nf)
 	}
 }
 

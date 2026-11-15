@@ -168,11 +168,11 @@ func newRenderWindow(name, title string, opts *system.NewWindowOptions) *renderW
 		rc.Lock()
 		w.flags.SetFlag(true, winClosing)
 		// ensure that everyone is closed first
-		for _, kv := range w.mains.stack.Order {
-			if kv.Value == nil || kv.Value.Scene == nil || kv.Value.Scene.This == nil {
+		for _, st := range w.mains.stack.Values {
+			if st == nil || st.Scene == nil || st.Scene.This == nil {
 				continue
 			}
-			if !kv.Value.Scene.Close() {
+			if !st.Scene.Close() {
 				w.flags.SetFlag(false, winClosing)
 				rc.Unlock()
 				return
@@ -343,8 +343,8 @@ func (w *renderWindow) resized() {
 		}
 		if w.mains.resize(rg) || newDPI {
 			// The scenes are restyled by their next update.
-			for _, kv := range w.mains.stack.Order {
-				kv.Value.Scene.lastRender.invalidate()
+			for _, st := range w.mains.stack.Values {
+				st.Scene.lastRender.invalidate()
 			}
 		}
 		return
@@ -847,7 +847,7 @@ func (w *renderWindow) renderWindow() {
 	winIndex := 0
 	var winScene *Scene
 	for i := n - 1; i >= 0; i-- {
-		st := sm.stack.ValueByIndex(i)
+		st := sm.stack.Values[i]
 		if st.Type == WindowStage {
 			if DebugSettings.WindowRenderTrace {
 				log.Println("GatherScenes: main Window:", st.String())
@@ -866,7 +866,7 @@ func (w *renderWindow) renderWindow() {
 
 	// then add everyone above that
 	for i := winIndex + 1; i < n; i++ {
-		st := sm.stack.ValueByIndex(i)
+		st := sm.stack.Values[i]
 		if st.Scrim && i == n-1 {
 			// (in the window, where the scene is drawn at its position)
 			cp.Add(ScrimSource(winScene.Geom.TotalBBox.Add(winScene.SceneGeom.Pos)), &st.Scrim)
@@ -878,8 +878,7 @@ func (w *renderWindow) renderWindow() {
 	}
 
 	// then add the popups for the top main stage
-	for _, kv := range top.popups.stack.Order {
-		st := kv.Value
+	for _, st := range top.popups.stack.Values {
 		st.Scene.addRenderSources(cp, draw.Over, false)
 		if DebugSettings.WindowRenderTrace {
 			log.Println("GatherScenes: popup:", st.String())
