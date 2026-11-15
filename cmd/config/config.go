@@ -138,6 +138,11 @@ type Test struct { //types:add
 	// such as 2s, as with go test -benchtime.
 	BenchTime string
 
+	// Timeout, if non-empty, is the maximum time to run the tests of each
+	// package, as a duration such as 10m, as with go test -timeout (for the
+	// js platform, it replaces the timeout of a //core:js-test line).
+	Timeout string
+
 	// Browser runs the tests of all of the packages for the js platform
 	// in Chrome, instead of only those whose //core:js-test line says so
 	// (the others run in bun).

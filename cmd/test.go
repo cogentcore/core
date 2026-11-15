@@ -49,11 +49,21 @@ func Test(c *config.Config) error { //types:add
 		if c.Test.BenchTime != "" {
 			args = append(args, "-benchtime", c.Test.BenchTime)
 		}
+		if c.Test.Timeout != "" {
+			args = append(args, "-timeout", c.Test.Timeout)
+		}
 		if verbose {
 			args = append(args, "-v")
 		}
 		args = append(args, pkgs...)
 		return exec.Verbose().SetBuffer(false).Run("go", args...)
+	}
+	var timeout time.Duration
+	if c.Test.Timeout != "" {
+		var err error
+		if timeout, err = time.ParseDuration(c.Test.Timeout); err != nil {
+			return fmt.Errorf("invalid timeout: %w", err)
+		}
 	}
 	if err := web.SetupJS(); err != nil {
 		return err
@@ -80,6 +90,9 @@ func Test(c *config.Config) error { //types:add
 			o.Tags = append(strings.Split(web.JSTags, ","), o.Tags...)
 			o.Run = cmp.Or(c.Test.Run, o.Run)
 			o.Bench, o.BenchTime = c.Test.Bench, c.Test.BenchTime
+			if timeout > 0 {
+				o.Timeout = timeout
+			}
 			o.Browser = o.Browser || c.Test.Browser
 			if o.Browser {
 				o.BrowserChannel = "chrome"
