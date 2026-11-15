@@ -157,3 +157,32 @@ func TestGroupFilter(t *testing.T) {
 	assert.NotNil(t, sv.FindNamedElement("r2"))
 	assert.Nil(t, sv.FindNamedElement("r3"))
 }
+
+// TestTextSpanSpaceBBox tests that the white space between the spans of a
+// text (as in each line of a text that Inkscape saves) does not make the
+// box of the text include the origin.
+func TestTextSpanSpaceBBox(t *testing.T) {
+	sv := openString(t, `<svg width="200" height="200" viewBox="0 0 200 200">
+<text id="txt" x="100" y="100" font-size="10">
+  <tspan x="100" y="100">first</tspan>
+  <tspan x="100" y="120">second</tspan>
+</text>
+</svg>`)
+	sv.RenderImage()
+	tx := sv.FindNamedElement("txt").(*Text)
+	var spans math32.Box2
+	n := 0
+	for _, k := range tx.Children {
+		if kt := k.(*Text); kt.Text != "" {
+			if n == 0 {
+				spans = kt.BBox
+			} else {
+				spans = spans.Union(kt.BBox)
+			}
+			n++
+		}
+	}
+	require.GreaterOrEqual(t, n, 2, "the two lines (and the space between them)")
+	assert.Equal(t, spans, tx.BBox, "the box of the lines, not the origin")
+	assert.Greater(t, tx.BBox.Min.Y, float32(10), "%v", tx.BBox)
+}

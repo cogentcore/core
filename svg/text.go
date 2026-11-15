@@ -187,10 +187,12 @@ func (g *Text) SetNodePos(pos math32.Vector2) {
 	}
 }
 
-// LocalBBox does full text layout, but no transforms
+// LocalBBox does full text layout, but no transforms. The box of a text
+// with nothing to show (empty, or only white space, as between spans) is
+// empty, at its position, not at the origin.
 func (g *Text) LocalBBox(sv *SVG) math32.Box2 {
 	if g.Text == "" {
-		return math32.Box2{}
+		return math32.Box2{Min: g.Pos, Max: g.Pos}
 	}
 	pc := &g.Paint
 	fs := pc.Font
@@ -206,7 +208,7 @@ func (g *Text) LocalBBox(sv *SVG) math32.Box2 {
 		g.TextShaped.StartAtBaseline() // remove top-left offset
 		return g.TextShaped.Bounds.Translate(g.Pos.Sub(baseOff))
 	}
-	return g.TextShaped.Bounds
+	return math32.Box2{Min: g.Pos, Max: g.Pos}
 
 	// fmt.Println("baseoff:", baseOff)
 	// fmt.Println(pc.Text.FontSize, pc.Text.FontSize.Dots)
@@ -255,13 +257,38 @@ func (g *Text) LocalBBox(sv *SVG) math32.Box2 {
 func (g *Text) BBoxes(sv *SVG, parTransform math32.Matrix2) {
 	if g.IsParText() {
 		g.layoutSpans(sv)
-		g.BBoxesFromChildren(sv, parTransform)
+		g.spanBBoxes(sv, parTransform)
 		return
 	}
 	xf := parTransform.Mul(g.Paint.Transform)
 	ni := g.This.(Node)
 	lbb := ni.LocalBBox(sv)
 	g.BBox = lbb.MulMatrix2(xf)
+	g.VisBBox = sv.Geom.Box2().Intersect(g.BBox)
+}
+
+// spanBBoxes sets the boxes of the spans of a parent text, and its box
+// from those of the spans that have text: a span without text (as the
+// white space between spans, trimmed) has an empty box at the origin,
+// which is not part of the text.
+func (g *Text) spanBBoxes(sv *SVG, parTransform math32.Matrix2) {
+	xf := parTransform.Mul(g.Paint.Transform)
+	var bb math32.Box2
+	has := false
+	for _, kid := range g.Children {
+		ni := kid.(Node)
+		ni.BBoxes(sv, xf)
+		if kt, ok := kid.(*Text); ok && kt.Text == "" && !kt.HasChildren() {
+			continue
+		}
+		nb := ni.AsNodeBase()
+		if !has {
+			bb, has = nb.BBox, true
+		} else {
+			bb = bb.Union(nb.BBox)
+		}
+	}
+	g.BBox = bb
 	g.VisBBox = sv.Geom.Box2().Intersect(g.BBox)
 }
 
