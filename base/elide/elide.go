@@ -15,6 +15,9 @@ func End(s string, sz int) string {
 	if len(r) <= sz {
 		return s
 	}
+	if sz <= 0 {
+		return ""
+	}
 	return string(r[:sz-1]) + "…"
 }
 
@@ -28,6 +31,9 @@ func Middle(s string, sz int) string {
 	n := len(r)
 	if n <= sz {
 		return s
+	}
+	if sz <= 0 {
+		return ""
 	}
 	en := sz - 1
 	mid := en / 2

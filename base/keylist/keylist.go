@@ -200,7 +200,7 @@ func (kl *List[K, V]) RenameIndex(i int, key K) {
 // they are overwritten.  Use [List.Reset] first to get an exact copy.
 func (kl *List[K, V]) Copy(from *List[K, V]) {
 	for i, v := range from.Values {
-		kl.Set(kl.Keys[i], v)
+		kl.Set(from.Keys[i], v)
 	}
 }
 

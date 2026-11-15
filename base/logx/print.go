@@ -73,7 +73,7 @@ func Printf(level slog.Level, format string, a ...any) (n int, err error) {
 	if UserLevel > level {
 		return 0, nil
 	}
-	return fmt.Println(LevelColor(level, fmt.Sprintf(format, a...)))
+	return fmt.Print(LevelColor(level, fmt.Sprintf(format, a...)))
 }
 
 // PrintfDebug is equivalent to [Printf] with level [slog.LevelDebug].

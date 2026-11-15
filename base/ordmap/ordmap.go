@@ -247,7 +247,7 @@ func (om *Map[K, V]) String() string {
 func (om *Map[K, V]) GoString() string {
 	var zk K
 	var zv V
-	res := fmt.Sprintf("ordmap.Make([]ordmap.KeyVal[%T, %T]{\n", zk, zv)
+	res := fmt.Sprintf("ordmap.Make([]ordmap.KeyValue[%T, %T]{\n", zk, zv)
 	for _, kv := range om.Order {
 		res += fmt.Sprintf("{%#v, %#v},\n", kv.Key, kv.Value)
 	}

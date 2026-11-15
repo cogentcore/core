@@ -31,6 +31,7 @@ func FromBool[T Number](v bool) T {
 func SetFromBool[T Number](dst *T, b bool) {
 	if b {
 		*dst = 1
+		return
 	}
 	*dst = 0
 }

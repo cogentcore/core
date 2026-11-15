@@ -34,3 +34,19 @@ func TestTime(t *testing.T) {
 	assert.Zero(t, timer.Total)
 	assert.Zero(t, timer.N)
 }
+
+func TestTimeAvg(t *testing.T) {
+	var tm Time
+	assert.Equal(t, time.Duration(0), tm.Avg())
+	assert.Equal(t, time.Duration(0), tm.Stop(), "not started")
+	tm.Total = 4 * time.Second
+	tm.N = 2
+	assert.Equal(t, 2*time.Second, tm.Avg())
+	tm.ResetStart()
+	assert.Equal(t, 0, tm.N)
+	assert.False(t, tm.St.IsZero())
+	d := tm.Stop()
+	assert.GreaterOrEqual(t, d, time.Duration(0))
+	assert.Equal(t, 1, tm.N)
+	assert.Equal(t, d, tm.Avg())
+}
