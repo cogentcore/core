@@ -494,7 +494,7 @@ func (fp *FilePicker) readFiles() {
 		}
 		fi, ferr := fileinfo.NewFileInfo(path)
 		keep := ferr == nil
-		if fp.Filterer != nil {
+		if keep && fp.Filterer != nil { // (fi is nil for an error)
 			keep = fp.Filterer(fp, fi)
 		}
 		if keep {
