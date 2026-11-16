@@ -118,6 +118,9 @@ func TestTreeApp(t *testing.T) {
 		require.NotNil(t, app)
 		assert.True(t, app.IsApp())
 		assert.Equal(t, icons.Apps, app.Branch.IconOff)
+		// a branch made after the update of the node, as on its first one
+		assert.Equal(t, icons.Apps, app.IconClosed)
+		assert.Equal(t, icons.Apps, app.IconOpen)
 	}, func() {
 		src := b.Scene.RenderWindow().SystemWindow.Events()
 		click := func(n int) {
@@ -146,6 +149,9 @@ func TestTreeApp(t *testing.T) {
 		b.AsyncLock()
 		ft.AppsAsDirs = true
 		assert.False(t, app.IsApp())
+		app.Update()
+		assert.Equal(t, icons.Folder, app.IconClosed)
+		assert.Equal(t, icons.Folder, app.Branch.IconOff)
 		b.AsyncUnlock()
 		time.Sleep(600 * time.Millisecond) // (not a triple click)
 		click(1)

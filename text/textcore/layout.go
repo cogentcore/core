@@ -292,9 +292,13 @@ func (ed *Base) scrollCursorToCenter() bool {
 	return ed.scrollLineToCenter(ed.CursorPos)
 }
 
+// scrollCursorToTarget moves the cursor to its target, and scrolls to it,
+// unless the lines have been closed since the target was set.
 func (ed *Base) scrollCursorToTarget() {
-	// fmt.Println(ed, "to target:", ed.CursorTarg)
 	ed.targetSet = false
+	if ed.Lines == nil {
+		return
+	}
 	if ed.cursorTarget == textpos.PosErr {
 		ed.cursorEndDoc()
 		return

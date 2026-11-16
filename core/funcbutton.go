@@ -300,6 +300,19 @@ func (fb *FuncButton) goodContext() Widget {
 	return ctx
 }
 
+// mainScene returns the scene of the main stage of the scene of the button:
+// the scene of a menu is deleted when the menu closes, which is when its
+// button is clicked, so the value button of a solo argument (see
+// [FuncButton.CallFunc]) must use the main scene under the menu instead,
+// to be in a window when its dialog is accepted.
+func (fb *FuncButton) mainScene() *Scene {
+	sc := fb.Scene
+	if sc != nil && sc.Stage != nil && sc.Stage.Main != nil && sc.Stage.Main.Scene != nil {
+		return sc.Stage.Main.Scene
+	}
+	return sc
+}
+
 func (fb *FuncButton) callFuncShowReturns() {
 	if fb.AfterFunc != nil {
 		defer fb.AfterFunc()
@@ -386,7 +399,7 @@ func (fb *FuncButton) CallFunc() {
 				setArgs()
 				cwb.runInWindow(bt.AsWidget(), fb.callFuncShowReturns)
 			})
-			bt.Scene = fb.Scene // we must use this scene for context
+			bt.Scene = fb.mainScene() // we must use this scene for context
 			bt.Send(events.Click)
 			return
 		}
@@ -485,7 +498,7 @@ func (fb *FuncButton) showReturnsDialog(rets []reflect.Value) {
 		sv.UpdateWidget() // need to update first
 		bt := AsButton(sv.Child(1))
 		if bt != nil {
-			bt.Scene = fb.Scene // we must use this scene for context
+			bt.Scene = fb.mainScene() // we must use this scene for context
 			bt.Send(events.Click)
 			return
 		}

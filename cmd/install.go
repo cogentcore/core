@@ -5,7 +5,9 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -62,8 +64,7 @@ func Install(c *config.Config) error { //types:add
 				return err
 			}
 			app := filepath.Join("/Applications", c.Name+".app")
-			// cp writes through a symbolic link of AppGoSymlink
-			if err := removeSymlink(appExecutable(c, app)); err != nil {
+			if err := removeExecutable(appExecutable(c, app)); err != nil {
 				return err
 			}
 			err = exec.Run("cp", "-a", filepath.Join(c.Build.Output, c.Name+".app"), "/Applications")
@@ -96,10 +97,14 @@ func appExecutable(c *config.Config, app string) string {
 	return filepath.Join(app, "Contents", "MacOS", c.Name+".app")
 }
 
-// removeSymlink removes the given file if it is a symbolic link.
-func removeSymlink(file string) error {
-	if fi, err := os.Lstat(file); err == nil && fi.Mode()&os.ModeSymlink != 0 {
-		return os.Remove(file)
+// removeExecutable removes the given executable of an installed app, if
+// it exists, before a new one is copied there: cp writes through a symbolic
+// link of AppGoSymlink, and it writes over a file in place, which macOS
+// then kills when it starts, with an invalid code signature, as it keeps
+// the signature of the file that was there.
+func removeExecutable(file string) error {
+	if err := os.Remove(file); err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
 	}
 	return nil
 }

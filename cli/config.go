@@ -7,11 +7,13 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"slices"
 	"strings"
 
+	"cogentcore.org/core/base/iox/tomlx"
 	"cogentcore.org/core/base/logx"
 )
 
@@ -186,6 +188,16 @@ func config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 	}
 
 	slices.Reverse(opts.IncludePaths)
+
+	// the files of the user come first, so that the others override them
+	for _, fn := range opts.UserFiles {
+		err := tomlx.Open(cfg, fn)
+		if err == nil {
+			logx.PrintlnDebug("loaded user config file:", fn)
+		} else if !errors.Is(err, fs.ErrNotExist) {
+			errs = append(errs, fmt.Errorf("error loading user config file %q: %w", fn, err))
+		}
+	}
 
 	gotAny := false
 	for _, fn := range cfgFiles {

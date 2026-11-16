@@ -10,6 +10,7 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/rich"
 )
 
@@ -93,7 +94,15 @@ func (tf *TextField) updateTextInput() {
 	if tf.IsReadOnly() || !tf.StateIs(states.Focused) || tf.renderVisible == nil {
 		return
 	}
-	min := tf.charRenderPos(tf.cursorPos).ToPointFloor()
+	cmin := tf.charRenderPos(tf.cursorPos).ToPointFloor()
 	h := int(tf.renderVisible.LineHeight + 0.5)
-	tf.SetTextInput(image.Rectangle{Min: min, Max: min.Add(image.Pt(max(1, int(tf.CursorWidth.Dots)), h))})
+	ti := system.TextInput{Caret: image.Rectangle{Min: cmin, Max: cmin.Add(image.Pt(max(1, int(tf.CursorWidth.Dots)), h))}}
+	if !tf.NoEcho {
+		end := tf.cursorPos
+		if tf.composition.active {
+			end = tf.composition.start
+		}
+		ti.Before = system.TextInputBefore(tf.editText[:min(end, len(tf.editText))])
+	}
+	tf.SetTextInput(ti)
 }

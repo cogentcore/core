@@ -253,7 +253,9 @@ func (w *renderWindow) SetStageTitle(title string) {
 	} else if title != w.title {
 		title = title + " • " + w.title
 	}
-	w.SystemWindow.SetTitle(title)
+	if w.SystemWindow != nil {
+		w.SystemWindow.SetTitle(title)
+	}
 }
 
 // logicalDPI returns the current logical dots-per-inch resolution of the
@@ -542,17 +544,24 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 	case events.WindowResize:
 		e.SetHandled()
 		w.resized()
+		w.redrawAll()
 
 	case events.Window:
 		ev := e.(*events.WindowEvent)
 		switch ev.Action {
 		case events.WinClose:
+			// The system window is already closed (so it cannot be locked)
+			// when it was closed by this event loop, as by the OK button of
+			// a dialog: its close sends this event and destroys the window
+			// before the loop gets the event. It is still removed from the
+			// windows, raising the next one, and its event loop stops.
+			e.SetHandled()
+			w.flags.SetFlag(true, winStopEventLoop)
 			if w.SystemWindow.Lock() {
-				// fmt.Printf("got close event for window %v \n", w.name)
-				e.SetHandled()
-				w.flags.SetFlag(true, winStopEventLoop)
 				w.closed()
 				w.SystemWindow.Unlock()
+			} else {
+				w.closed()
 			}
 		case events.WinMinimize:
 			e.SetHandled()
@@ -575,6 +584,7 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			if DebugSettings.WindowEventTrace {
 				fmt.Printf("Win: %v got show event\n", w.name)
 			}
+			w.redrawAll()
 		case events.WinMove:
 			e.SetHandled()
 			// fmt.Printf("win move: %v\n", w.SystemWin.Position())

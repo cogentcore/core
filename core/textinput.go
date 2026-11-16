@@ -5,27 +5,26 @@
 package core
 
 import (
-	"image"
-
 	"cogentcore.org/core/system"
 )
 
 // SetTextInput sets the state of text input in the window of the widget
-// for the input method (IME) of the operating system, with the rectangle
-// of the text cursor, or the cursor of the input method within the text
-// being composed, in window coordinates (see [system.Window.SetTextInput]).
+// for the input method (IME) of the operating system: the rectangle of the
+// text cursor, or the cursor of the input method within the text being
+// composed, in window coordinates, and the text before it (see
+// [system.TextInput] and [system.Window.SetTextInput]).
 // Focused text widgets call it when their cursor moves, and it does
 // nothing if the state has not changed. The input method then sends the
 // text being composed as [events.Composition] events.
-func (wb *WidgetBase) SetTextInput(caret image.Rectangle) {
+func (wb *WidgetBase) SetTextInput(ti system.TextInput) {
 	rw := wb.textInputWindow()
 	if rw == nil {
 		return
 	}
-	if rw.textInput != nil && rw.textInput.Caret == caret && rw.textInputWidget == wb.This {
+	if rw.textInput != nil && *rw.textInput == ti && rw.textInputWidget == wb.This {
 		return
 	}
-	rw.textInput = &system.TextInput{Caret: caret}
+	rw.textInput = &ti
 	rw.textInputWidget = wb.This.(Widget)
 	rw.SystemWindow.SetTextInput(rw.textInput)
 }

@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
@@ -432,4 +433,71 @@ func TestTextFieldSlideOverDrag(t *testing.T) {
 		defer b.AsyncUnlock()
 		assert.True(t, tf.hasSelection(), "its text is selected")
 	})
+}
+
+// TestTextFieldScrollCursorIntoView tests that a focused text field that
+// grows as text is typed into it, at the bottom of a frame that scrolls,
+// scrolls its cursor into view, and again after its window gets smaller,
+// as when the virtual keyboard of a mobile platform is shown, but not
+// when the frame is scrolled away from it otherwise.
+func TestTextFieldScrollCursorIntoView(t *testing.T) {
+	b := NewBody()
+	height := float32(400)
+	b.Styler(func(s *styles.Style) {
+		s.Min.Set(units.Dp(300), units.Dp(height))
+		s.Max.Set(units.Dp(300), units.Dp(height))
+		s.Overflow.Set(styles.OverflowAuto)
+	})
+	for range 8 {
+		NewTextField(b)
+	}
+	tf := NewTextField(b)
+	tf.Styler(func(s *styles.Style) {
+		s.SetTextWrap(true)
+		s.Grow.Set(1, 0)
+	})
+	b.runAndShowNewWindow()
+	defer func() {
+		b.AsyncLock()
+		b.Close()
+		b.AsyncUnlock()
+	}()
+	rw := b.Scene.RenderWindow()
+	render := func() { // the events are handled, and it is rendered
+		b.waitNoEvents(rw)
+		time.Sleep(50 * time.Millisecond)
+		b.waitNoEvents(rw)
+	}
+	cursorShown := func() bool {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		y := tf.charRenderPos(tf.cursorPos).Y - float32(b.Scene.SceneGeom.Pos.Y)
+		cmin, cmax := b.Geom.contentRangeDim(math32.Y)
+		return y >= cmin && y+tf.lineHeight <= cmax
+	}
+	b.AsyncLock()
+	tf.SetFocus()
+	b.AsyncUnlock()
+	render()
+	src := rw.SystemWindow.Events()
+	for range 6 {
+		for _, r := range "The quick brown fox jumps over the lazy dog. " {
+			src.KeyChord(r, 0, 0)
+		}
+		render()
+		assert.True(t, cursorShown(), "the cursor is shown as the text field grows")
+	}
+	b.AsyncLock()
+	assert.Greater(t, tf.numLines, 3)
+	height = 250 // smaller, as above a virtual keyboard
+	b.Update()
+	b.AsyncUnlock()
+	render()
+	assert.True(t, cursorShown(), "the cursor is shown after the frame gets smaller")
+
+	b.AsyncLock()
+	b.Scrolls[math32.Y].setValueEvent(0) // scrolled away
+	b.AsyncUnlock()
+	render()
+	assert.False(t, cursorShown(), "not scrolled back to the cursor")
 }

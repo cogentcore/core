@@ -32,6 +32,13 @@ type Options struct {
 	// if needed.
 	DefaultEncoding string
 
+	// UserFiles are the absolute paths of the configuration files of the
+	// user, which are opened before all of the other configuration files,
+	// so that those override them, if they exist. They have the settings
+	// of the user for all projects, which are not committed with the
+	// configuration files of a project.
+	UserFiles []string
+
 	// DefaultFiles are the default configuration file paths
 	DefaultFiles []string
 

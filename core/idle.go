@@ -43,6 +43,16 @@ func (w *renderWindow) goIdle() {
 	}
 }
 
+// redrawAll makes the next render pass draw all of the scenes of the
+// window again, even if nothing in them changed, as the window may be
+// drawn to a new surface: on mobile, the system window of an app is made
+// again when it comes back from the background, with the same size, and
+// stayed blank, as the window went idle without drawing to it.
+func (w *renderWindow) redrawAll() {
+	w.flags.SetFlag(true, winRenderSkipped)
+	w.wake()
+}
+
 // idleUntilBlink pauses the paint events of the window until the next
 // blink of its active sprites, such as the text cursor, if it has focus.
 func (w *renderWindow) idleUntilBlink(top *Stage, blink time.Duration) {

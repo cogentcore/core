@@ -262,3 +262,18 @@ func TestReadOnlyClear(t *testing.T) {
 		assert.Equal(t, "\n", ed.Lines.String(), "one empty line")
 	})
 }
+
+// TestCursorTargetClosedLines tests that an editor whose lines are closed
+// after it is given a cursor target, before it renders again, does not
+// panic when it renders.
+func TestCursorTargetClosedLines(t *testing.T) {
+	b := core.NewBody()
+	ed := NewEditor(b)
+	ed.Lines.SetString("one\ntwo\nthree\n")
+	core.RenderImage(b, core.Locked(b, func() {
+		ed.SetCursorTarget(textpos.Pos{Line: 2})
+		ed.Lines.Close()
+		assert.Nil(t, ed.Lines, "dropped by the editor")
+		ed.NeedsRender()
+	}))
+}

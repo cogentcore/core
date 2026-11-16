@@ -238,6 +238,18 @@ static void sendTouches(int change, NSSet* touches) {
 
 @end
 
+// keyboardSent counts the changes of the text that the keyboard has sent as
+// key events, after sending them, on the main thread.
+static long keyboardSent;
+
+static void keyboardSentAdd(void) {
+    __atomic_add_fetch(&keyboardSent, 1, __ATOMIC_SEQ_CST);
+}
+
+long keyboardSentCount(void) {
+    return __atomic_load_n(&keyboardSent, __ATOMIC_SEQ_CST);
+}
+
 @implementation GoInputView
 
 - (BOOL)canBecomeFirstResponder {
@@ -248,6 +260,7 @@ static void sendTouches(int change, NSSet* touches) {
 // keyboards), which the text field does not insert, as the Enter key.
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
     keyboardTyped((char *)"\n");
+    keyboardSentAdd();
     return NO;
 }
 
@@ -309,6 +322,9 @@ static int runeCount(NSString *s) {
     if (inserted.length > 0) {
         keyboardTyped((char *)[inserted UTF8String]);
     }
+    if (deleted.length > 0 || inserted.length > 0) {
+        keyboardSentAdd();
+    }
     self.committed = com;
     if (comp.length > 0 && ![comp isEqualToString:self.composition]) {
         self.composition = comp;
@@ -350,6 +366,56 @@ UIEdgeInsets getDevicePadding() {
 bool isDark() {
     UIViewController *rootVC = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
     return rootVC.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark;
+}
+
+// setTextBefore sets the text of the input view to the given text before
+// the cursor in the focused text widget (after the placeholder space; see
+// resetText), as the context of the predictions and corrections of the
+// keyboard, if it differs, as after the cursor moves or the text changes
+// other than by the keyboard. The keyboard otherwise replaces words of the
+// text it typed, not those around the cursor: accepting a prediction then
+// garbled the text. It does nothing while text is being composed.
+// It is also the text that showKeyboard starts with, which can run after it.
+// It is only set if the keyboard has not changed the text since the given
+// count of the changes that it sent (see keyboardSentCount), which the
+// text before the cursor includes: it is otherwise out of date, and setting
+// it would undo the keys typed since then.
+static NSString *textBefore; // (on the main thread)
+
+// The text before the cursor is the end of a longer text if truncated is
+// true: it is then the same if the text of the input view ends with it.
+void setTextBefore(char *before, long sent, int truncated) {
+    GoAppAppDelegate *appDelegate = (GoAppAppDelegate *)[[UIApplication sharedApplication] delegate];
+    GoInputView *view = appDelegate.controller.inputView;
+    NSString *text = [@" " stringByAppendingString:[NSString stringWithUTF8String:before] ?: @""];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (keyboardSentCount() != sent) {
+            return;
+        }
+        [textBefore release];
+        textBefore = [text copy];
+        UITextRange *marked = view.markedTextRange;
+        if ((marked != nil && !marked.isEmpty) || view.composition.length > 0) {
+            return;
+        }
+        if ([view.text isEqualToString:view.committed] && ([view.committed isEqualToString:text] ||
+            (truncated && [view.committed hasSuffix:[text substringFromIndex:1]]))) {
+            return;
+        }
+        // It is replaced as the keyboard edits it, so that the keyboard
+        // keeps typing into it, which it does not after setting its text.
+        // It is committed first, so that its change sends no keys.
+        // The keyboard is told that the text changes, so that it reads it
+        // again for its predictions, which otherwise continue from the
+        // word it last typed.
+        view.committed = text;
+        [view.inputDelegate selectionWillChange:view];
+        [view.inputDelegate textWillChange:view];
+        UITextRange *all = [view textRangeFromPosition:view.beginningOfDocument toPosition:view.endOfDocument];
+        [view replaceRange:all withText:text]; // (the cursor is at its end)
+        [view.inputDelegate textDidChange:view];
+        [view.inputDelegate selectionDidChange:view];
+    });
 }
 
 void showKeyboard(int keyboardType) {
@@ -396,6 +462,10 @@ void showKeyboard(int keyboardType) {
         // refresh settings if keyboard is already open
         [view reloadInputViews];
         [view resetText];
+        if (textBefore != nil) { // the text before the cursor, if already set
+            view.text = textBefore;
+            view.committed = textBefore;
+        }
 
         BOOL ret = [view becomeFirstResponder];
     });

@@ -40,6 +40,8 @@ package android
 
 void showKeyboard(JNIEnv* env, int keyboardType);
 void hideKeyboard(JNIEnv* env);
+void setTextBefore(JNIEnv *env, const jchar *before, int n, long sent, int truncated);
+long keyboardSentCount(JNIEnv *env);
 */
 import "C"
 import (
@@ -50,6 +52,8 @@ import (
 	"runtime"
 	"runtime/debug"
 	"time"
+	"unicode/utf16"
+	"unicode/utf8"
 	"unsafe"
 
 	"cogentcore.org/core/events"
@@ -307,6 +311,37 @@ func (a *App) ShowVirtualKeyboard(typ styles.VirtualKeyboards) {
 	})
 	if err != nil {
 		log.Fatalf("app: %v", err)
+	}
+}
+
+// SetTextInput sets the text of the keyboard to the text before the cursor
+// (see [system.TextInput.Before]), for its suggestions and corrections,
+// unless it does not yet include keys that the keyboard sent: it is then
+// set again once they are handled, as they change it.
+func (w *Window) SetTextInput(ti *system.TextInput) {
+	if ti == nil {
+		return
+	}
+	before := utf16.Encode([]rune(ti.Before))
+	truncated := 0
+	if utf8.RuneCountInString(ti.Before) >= system.TextInputBeforeMax {
+		truncated = 1
+	}
+	err := mobileinit.RunOnJVM(func(vm, jniEnv, ctx uintptr) error {
+		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
+		sent := C.keyboardSentCount(env)           // (before the keys are looked for)
+		if base.PendingKeys(&w.App.Event.Deque) {
+			return nil
+		}
+		var p *C.jchar
+		if len(before) > 0 {
+			p = (*C.jchar)(unsafe.Pointer(&before[0]))
+		}
+		C.setTextBefore(env, p, C.int(len(before)), sent, C.int(truncated))
+		return nil
+	})
+	if err != nil {
+		slog.Error("app: setting the text of the keyboard", "err", err)
 	}
 }
 

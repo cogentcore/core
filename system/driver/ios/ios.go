@@ -30,6 +30,8 @@ uint64_t threadID();
 UIEdgeInsets getDevicePadding();
 bool isDark();
 void showKeyboard(int keyboardType);
+void setTextBefore(char *before, long sent, int truncated);
+long keyboardSentCount(void);
 void hideKeyboard();
 uintptr_t beginBackgroundTask(char *name);
 void endBackgroundTask(uintptr_t tid);
