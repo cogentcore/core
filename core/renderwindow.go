@@ -253,7 +253,9 @@ func (w *renderWindow) SetStageTitle(title string) {
 	} else if title != w.title {
 		title = title + " • " + w.title
 	}
-	w.SystemWindow.SetTitle(title)
+	if w.SystemWindow != nil {
+		w.SystemWindow.SetTitle(title)
+	}
 }
 
 // logicalDPI returns the current logical dots-per-inch resolution of the

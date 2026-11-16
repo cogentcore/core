@@ -248,30 +248,36 @@ func (sc *Scene) Init() {
 		s.Padding.Set(units.Dp(8))
 	})
 	// the title of the window is that of its main stage on top: popups,
-	// such as snackbars, which have no title of their own, do not change it
+	// such as snackbars, which have no title of their own, do not change it.
+	// It is the window of the scene, which need not be the current window:
+	// a dialog run from the menu search opens its own window before the menu
+	// search closes.
 	sc.OnShow(func(e events.Event) {
 		if sc.Stage == nil || sc.Stage.Type.isPopup() {
 			return
 		}
-		getCurrentRenderWindow().SetStageTitle(sc.Stage.Title)
+		if rw := sc.RenderWindow(); rw != nil {
+			rw.SetStageTitle(sc.Stage.Title)
+		}
 	})
 	sc.OnClose(func(e events.Event) {
 		if sc.Stage == nil || sc.Stage.Type.isPopup() {
 			return
 		}
 		sm := sc.Stage.Mains
-		if sm == nil {
+		if sm == nil || sm.renderWindow == nil {
 			return
 		}
 		sm.Lock()
 		defer sm.Unlock()
 
-		if sm.stack.Len() < 2 {
-			return
+		// the stage that will be visible next: the top one other than this
+		for i := sm.stack.Len() - 1; i >= 0; i-- {
+			if st := sm.stack.Values[i]; st != sc.Stage {
+				sm.renderWindow.SetStageTitle(st.Title)
+				return
+			}
 		}
-		// the stage that will be visible next
-		st := sm.stack.Values[sm.stack.Len()-2]
-		getCurrentRenderWindow().SetStageTitle(st.Title)
 	})
 	sc.Updater(func() {
 		if TheApp.Platform() == system.Offscreen {
