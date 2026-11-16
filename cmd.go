@@ -15,6 +15,9 @@ import (
 
 func main() {
 	opts := cli.DefaultOptions("Cogent Core", "Command line tools for developing apps and libraries using the Cogent Core framework.")
+	if uf := config.UserFile(); uf != "" {
+		opts.UserFiles = []string{uf} // (overridden by the files of the project)
+	}
 	opts.DefaultFiles = []string{"core.toml"}
 	opts.SearchUp = true
 	cmd.SetFFmpegEnv() // the FFmpeg of core setup -video, for building apps with video

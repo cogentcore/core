@@ -148,6 +148,8 @@ For macOS, `core install` means running `core pack` and then copying the resulti
 
 For an app that is updated often, `AppGoSymlink = true` in its `core.toml` makes `core install` on macOS also install it with `go install`, and make the executable of the app in `Applications` a symbolic link to that one, so that `go install` is enough to update the app after that.
 
+Settings like this one are often your own, not those of the project, so the `core` command also reads a `core.toml` of yours for all projects, before the `core.toml` of the project, which overrides it: `~/Library/Cogent Core/core.toml` on macOS, `~/.config/Cogent Core/core.toml` on Linux, and `AppData/Roaming/Cogent Core/core.toml` in your home directory on Windows. For example, with `AppGoSymlink = true` in it, `core install` makes the symbolic link for all of your apps, except those with `AppGoSymlink = false` in their `core.toml`.
+
 `Opens` in the `core.toml` of an app lists the types of files that it opens, which `core pack` and `core install` declare, so that the system offers the app in its "Open with" choices for those files, without making it their default app: categories of files (such as `Code` or `Text`) or known types of files (such as `Markdown` or `TeX`), as in [[doc:base/fileinfo]]. For example, Cogent Code has `Opens = ["Code", "Text", "Markdown", "TeX"]` (and more). The app gets the files to open as [[doc:events.OSOpenFiles]] events, or as arguments on Linux.
 
 To silence this annoying warning on Mac: `ld: warning: ignoring duplicate libraries: '-lobjc'` do this in the terminal:

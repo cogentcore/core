@@ -264,6 +264,28 @@ type ContentCode struct { //types:add
 	Interpret []string
 }
 
+// UserFile returns the path of the configuration file of the user for all
+// projects, which is opened before the core.toml files of a project, so
+// that those override it: core.toml in the Cogent Core data directory of
+// the user (~/Library/Cogent Core on macOS, ~/.config/Cogent Core on Linux,
+// and AppData/Roaming/Cogent Core on Windows), as for options of the user
+// that are not committed with a project, such as AppGoSymlink.
+// It is "" if the home directory of the user is unknown.
+func UserFile() string {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return ""
+	}
+	dir := filepath.Join(home, ".config")
+	switch runtime.GOOS {
+	case "darwin":
+		dir = filepath.Join(home, "Library")
+	case "windows":
+		dir = filepath.Join(home, "AppData", "Roaming")
+	}
+	return filepath.Join(dir, "Cogent Core", "core.toml")
+}
+
 func (c *Config) OnConfig(cmd string) error {
 	// if we have no target, we assume it is our current platform,
 	// unless we are in init, in which case we do not want to set

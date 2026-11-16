@@ -7,6 +7,7 @@ package cli
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -376,6 +377,34 @@ func TestConfigOpen(t *testing.T) {
 	_, err = config(opts, cfg)
 	if err != nil {
 		t.Error(err)
+	}
+}
+
+// TestConfigUserFiles tests the configuration files of the user, which are
+// overridden by the default files, and can be missing.
+func TestConfigUserFiles(t *testing.T) {
+	args := os.Args
+	defer func() { os.Args = args }()
+	os.Args = []string{"test"}
+	dir := t.TempDir()
+	user := filepath.Join(dir, "user.toml")
+	require.NoError(t, os.WriteFile(user, []byte("Note = \"user\"\nNData = 3\n"), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "proj.toml"), []byte("NData = 12\n"), 0o644))
+	opts := DefaultOptions("Test")
+	opts.IncludePaths = []string{dir}
+	opts.UserFiles = []string{filepath.Join(dir, "missing.toml"), user}
+	opts.DefaultFiles = []string{"proj.toml"}
+	cfg := &TestConfig{}
+	_, err := config(opts, cfg)
+	require.NoError(t, err)
+	assert.Equal(t, "user", cfg.Note)
+	assert.Equal(t, 12, cfg.NData)
+
+	// an existing user file with a syntax error is reported
+	require.NoError(t, os.WriteFile(user, []byte("Note = \n"), 0o644))
+	_, err = config(opts, &TestConfig{})
+	if assert.Error(t, err) {
+		assert.Contains(t, err.Error(), "user.toml")
 	}
 }
 
