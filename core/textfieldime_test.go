@@ -56,3 +56,48 @@ func TestTextFieldCompose(t *testing.T) {
 		assert.Equal(t, " 日本world", string(tf.editText))
 	})
 }
+
+// TestTextFieldTextInputBefore tests that a focused text field sets the
+// text before its cursor in the text input state of its window, which
+// the keyboard of iOS uses for its predictions: after the cursor moves,
+// as by a tap, before the text being composed, and none for a password.
+func TestTextFieldTextInputBefore(t *testing.T) {
+	b := NewBody()
+	tf := NewTextField(b).SetText("Milk and eggs")
+	pw := NewTextField(b).SetTypePassword().SetText("secret")
+	before := func() string {
+		rw := b.Scene.RenderWindow()
+		if rw.textInput == nil {
+			return "<none>"
+		}
+		return rw.textInput.Before
+	}
+	b.runAndShowNewWindow()
+	defer func() {
+		b.AsyncLock()
+		b.Close()
+		b.AsyncUnlock()
+	}()
+	locked := func(fun func()) {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		fun()
+	}
+	locked(func() {
+		tf.SetFocus()
+		tf.cursorPos = 8
+		tf.updateTextInput()
+		assert.Equal(t, "Milk and", before())
+		tf.cursorPos = 4 // moved, as by a tap
+		tf.updateTextInput()
+		assert.Equal(t, "Milk", before())
+		tf.HandleEvent(events.NewTextComposition("にほん", 3, 3))
+		tf.updateTextInput()
+		assert.Equal(t, "Milk", before(), "before the text being composed")
+		tf.HandleEvent(events.NewTextComposition("", 0, 0))
+		pw.SetFocus()
+		pw.cursorPos = 6
+		pw.updateTextInput()
+		assert.Equal(t, "", before(), "not the text of a password")
+	})
+}

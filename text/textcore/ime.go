@@ -10,6 +10,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textpos"
@@ -127,6 +128,11 @@ func (ed *Base) updateTextInput() {
 			pos = p
 		}
 	}
-	min := pos.ToPointFloor()
-	ed.SetTextInput(image.Rectangle{Min: min, Max: min.Add(ed.charSize.ToPointCeil())})
+	cmin := pos.ToPointFloor()
+	ti := system.TextInput{Caret: image.Rectangle{Min: cmin, Max: cmin.Add(ed.charSize.ToPointCeil())}}
+	if ed.Lines != nil && ipos.Line >= 0 && ipos.Line < ed.Lines.NumLines() {
+		line := ed.Lines.Line(ipos.Line) // (the text being composed is not in it)
+		ti.Before = system.TextInputBefore(line[:max(0, min(ipos.Char, len(line)))])
+	}
+	ed.SetTextInput(ti)
 }
