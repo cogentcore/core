@@ -368,11 +368,14 @@ func (fn *Node) setFileIcon() {
 		}
 	}
 	fn.IconLeaf = fn.Info.Ic
+	on, off := icons.FolderOpen, icons.Folder
+	if fn.IsApp() {
+		on, off = icons.Apps, icons.Apps
+	}
+	// the branch is made with these, when it is made after this update,
+	// as on the first one; an app had the icon of a folder until the next
+	fn.IconOpen, fn.IconClosed = on, off
 	if br := fn.Branch; br != nil {
-		on, off := icons.FolderOpen, icons.Folder
-		if fn.IsApp() {
-			on, off = icons.Apps, icons.Apps
-		}
 		if br.IconIndeterminate != fn.IconLeaf || br.IconOff != off {
 			br.SetIconOn(on).SetIconOff(off).SetIconIndeterminate(fn.IconLeaf)
 			br.UpdateTree()
