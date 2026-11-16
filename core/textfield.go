@@ -1333,7 +1333,10 @@ func (tf *TextField) scrollCursorIntoView() {
 	tf.cursorShown = cs
 	pos := tf.charRenderPos(tf.cursorPos).ToPointFloor().Sub(tf.Scene.SceneGeom.Pos) // (in the scene)
 	box := image.Rectangle{Min: pos, Max: pos.Add(image.Pt(max(1, int(tf.CursorWidth.Dots)), int(math32.Ceil(tf.lineHeight))))}
-	fr.ScrollToBox(box)
+	// after the render: this is called while the text field renders, and
+	// scrolling can update it, as the rows of a list are when it scrolls,
+	// which cleared its text as it was rendered (a panic)
+	tf.Defer(func() { fr.ScrollToBox(box) })
 }
 
 // renderSelect renders the selected region, if any, underneath the text
