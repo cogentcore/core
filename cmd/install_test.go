@@ -34,8 +34,11 @@ func TestGoSymlinkApp(t *testing.T) {
 	require.NoError(t, os.MkdirAll(filepath.Dir(exe), 0o755))
 	require.NoError(t, os.WriteFile(exe, []byte("packed"), 0o755))
 
-	require.NoError(t, removeSymlink(exe))
-	assert.FileExists(t, exe, "not a symbolic link")
+	// a packed executable is removed too, so that cp does not write over it
+	// in place, which macOS kills as having an invalid signature
+	require.NoError(t, removeExecutable(exe))
+	assert.NoFileExists(t, exe)
+	require.NoError(t, removeExecutable(exe)) // none is fine
 
 	require.NoError(t, goSymlinkApp(c, app))
 	target, err := os.Readlink(exe)
@@ -44,7 +47,7 @@ func TestGoSymlinkApp(t *testing.T) {
 	assert.FileExists(t, target, "installed by go install")
 
 	require.NoError(t, goSymlinkApp(c, app)) // again
-	require.NoError(t, removeSymlink(exe))
+	require.NoError(t, removeExecutable(exe))
 	assert.NoFileExists(t, exe)
 	assert.FileExists(t, target, "the installed one stays")
 }
