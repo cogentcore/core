@@ -64,7 +64,11 @@ func SpritesSource(stage *Stage, mainScene *Scene) composer.Source {
 	stage.Sprites.Lock()
 	defer stage.Sprites.Unlock()
 
-	sz := math32.FromPoint(mainScene.SceneGeom.Size)
+	// Sprites are drawn in window coordinates, so the painter covers the
+	// scene from the top left of the window, as the scene is offset in it
+	// by the safe area on mobile platforms: it was the size of the scene,
+	// which clipped the sprites (such as a text cursor) below that height.
+	sz := math32.FromPoint(mainScene.SceneGeom.Pos.Add(mainScene.SceneGeom.Size))
 	if stage.spritePainter == nil || stage.spritePainter.Size != sz {
 		stage.spritePainter = paint.NewPainter(sz)
 		stage.spritePainter.UnitContext = mainScene.Styles.UnitContext

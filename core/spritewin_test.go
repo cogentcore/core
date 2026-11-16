@@ -6,7 +6,12 @@ package core
 
 import (
 	"image"
+	"image/color"
 	"testing"
+
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint"
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/keymap"
@@ -119,4 +124,27 @@ func TestWindowZoomTitle(t *testing.T) {
 		assert.Equal(t, "newname", w.name)
 		assert.Equal(t, "newname", w.name)
 	}))
+}
+
+// TestSpritesSceneOffset tests that sprites are drawn in window
+// coordinates over all of a scene that is offset in its window, as by
+// the safe area on mobile platforms: they were clipped at the height of
+// the scene from the top of the window, as a text cursor on the lower
+// lines of a text field.
+func TestSpritesSceneOffset(t *testing.T) {
+	sc := NewScene()
+	sc.SceneGeom = math32.Geom2DInt{Pos: image.Pt(0, 100), Size: image.Pt(200, 200)}
+	st := &Stage{}
+	sp := NewSprite("box", func(pc *paint.Painter) {
+		pc.Fill.Color = colors.Uniform(color.RGBA{255, 0, 0, 255})
+		pc.Rectangle(10, 250, 20, 20) // in the scene, below its height
+		pc.Draw()
+	})
+	sp.Active = true
+	st.Sprites.Add(sp)
+	src := SpritesSource(st, sc).(*paintSource)
+	img := paint.NewImageRenderer(st.spritePainter.Size).Render(src.render).Image()
+	assert.Equal(t, image.Rect(0, 0, 200, 300), img.Bounds())
+	r, _, _, _ := img.At(20, 260).RGBA()
+	assert.Equal(t, uint32(0xffff), r, "the sprite below the height of the scene is drawn")
 }
