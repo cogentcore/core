@@ -547,12 +547,18 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 		ev := e.(*events.WindowEvent)
 		switch ev.Action {
 		case events.WinClose:
+			// The system window is already closed (so it cannot be locked)
+			// when it was closed by this event loop, as by the OK button of
+			// a dialog: its close sends this event and destroys the window
+			// before the loop gets the event. It is still removed from the
+			// windows, raising the next one, and its event loop stops.
+			e.SetHandled()
+			w.flags.SetFlag(true, winStopEventLoop)
 			if w.SystemWindow.Lock() {
-				// fmt.Printf("got close event for window %v \n", w.name)
-				e.SetHandled()
-				w.flags.SetFlag(true, winStopEventLoop)
 				w.closed()
 				w.SystemWindow.Unlock()
+			} else {
+				w.closed()
 			}
 		case events.WinMinimize:
 			e.SetHandled()

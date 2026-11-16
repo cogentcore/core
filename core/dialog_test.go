@@ -6,7 +6,12 @@ package core
 
 import (
 	"image"
+	"slices"
 	"testing"
+	"time"
+
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
@@ -53,4 +58,40 @@ func TestDialogMinSize(t *testing.T) {
 	big := sizeOf(math32.Vec2(700, 500))
 	assert.GreaterOrEqual(t, float32(big.X), 700*dp)
 	assert.GreaterOrEqual(t, float32(big.Y), 500*dp)
+}
+
+// TestDialogWindowCloseFromOwnLoop tests that a dialog in a new window that
+// is closed by its own event loop, as by a key that presses its OK button,
+// is removed from the windows, and its event loop stops: its system window
+// is closed before the loop gets the close event, so it cannot be locked
+// then. It stayed, keeping the keyboard focus of the system from the
+// window behind it.
+func TestDialogWindowCloseFromOwnLoop(t *testing.T) {
+	b := NewBody()
+	b.runAndShowNewWindow()
+	defer func() {
+		b.AsyncLock()
+		b.Close()
+		b.AsyncUnlock()
+	}()
+	d := NewBody("dialog")
+	NewText(d).SetText("Dialog")
+	d.AddBottomBar(func(bar *Frame) {
+		d.AddCancel(bar)
+		d.AddOK(bar)
+	})
+	showed := make(chan struct{})
+	d.OnFinal(events.Show, func(e events.Event) { close(showed) })
+	b.AsyncLock()
+	d.NewWindowDialog(b).Run()
+	b.AsyncUnlock()
+	<-showed
+	dw := d.Scene.RenderWindow()
+	assert.NotSame(t, b.Scene.RenderWindow(), dw, "in a new window")
+	dw.SystemWindow.Events().KeyChord(0, key.CodeReturnEnter, key.Meta) // the OK button
+	deadline := time.Now().Add(5 * time.Second)
+	for slices.Contains(AllRenderWindows.windows(), dw) && time.Now().Before(deadline) {
+		time.Sleep(10 * time.Millisecond)
+	}
+	assert.NotContains(t, AllRenderWindows.windows(), dw, "the dialog window is closed")
 }
