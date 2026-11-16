@@ -544,6 +544,7 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 	case events.WindowResize:
 		e.SetHandled()
 		w.resized()
+		w.redrawAll()
 
 	case events.Window:
 		ev := e.(*events.WindowEvent)
@@ -583,6 +584,7 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 			if DebugSettings.WindowEventTrace {
 				fmt.Printf("Win: %v got show event\n", w.name)
 			}
+			w.redrawAll()
 		case events.WinMove:
 			e.SetHandled()
 			// fmt.Printf("win move: %v\n", w.SystemWin.Position())
