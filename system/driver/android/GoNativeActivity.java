@@ -43,6 +43,7 @@ import android.view.GestureDetector;
 import android.view.ScaleGestureDetector;
 import android.view.MotionEvent;
 import android.widget.EditText;
+import java.util.concurrent.atomic.AtomicLong;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -74,6 +75,15 @@ public class GoNativeActivity extends NativeActivity {
 
 	// textChangePending is whether textChanged has been posted.
 	private boolean textChangePending = false;
+
+	// keyboardSent counts the changes of the text that the keyboard has
+	// sent as key events, after sending them (see setTextBefore).
+	private static final AtomicLong keyboardSent = new AtomicLong();
+
+	// textBefore is the text that mTextEdit was last set to by
+	// setTextBefore, which doShowKeyboard starts with, as it can run after
+	// it, or null if it has not been set.
+	private String textBefore = null;
 
 	public GoNativeActivity() {
 		super();
@@ -145,6 +155,7 @@ public class GoNativeActivity extends NativeActivity {
 					public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 						if (actionId == EditorInfo.IME_ACTION_DONE) {
 							keyboardTyped("\n");
+							keyboardSent.incrementAndGet();
 						}
 						return false;
 					}
@@ -152,6 +163,9 @@ public class GoNativeActivity extends NativeActivity {
 
 				// always place one character so all keyboards can send backspace
 				resetText();
+				if (textBefore != null) { // the text before the cursor, if already set
+					setEditText(textBefore);
+				}
 
 				mTextEdit.setVisibility(View.VISIBLE);
 				mTextEdit.bringToFront();
@@ -207,6 +221,63 @@ public class GoNativeActivity extends NativeActivity {
 		});
 	}
 
+	// keyboardSentCount returns the count of the changes of the text that the
+	// keyboard has sent as key events (see setTextBefore).
+	static long keyboardSentCount() {
+		return keyboardSent.get();
+	}
+
+	// setTextBefore sets the text of mTextEdit to the given text before the
+	// cursor in the focused text widget (after the placeholder space; see
+	// resetText), as the context of the suggestions and corrections of the
+	// keyboard, if it differs, as after the cursor moves or the text changes
+	// other than by the keyboard. The keyboard otherwise replaces words of
+	// the text it typed, not those around the cursor: accepting a suggestion
+	// then garbled the text. It is only set if the keyboard has not changed
+	// the text since the given count of the changes that it sent, which the
+	// text before the cursor includes: it is otherwise out of date, and
+	// setting it would undo the keys typed since then. The text before the
+	// cursor is the end of a longer text if truncated is true: it is then the
+	// same if the text of mTextEdit ends with it. It does nothing while text
+	// is being composed.
+	static void setTextBefore(String before, long sent, boolean truncated) {
+		goNativeActivity.doSetTextBefore(before, sent, truncated);
+	}
+
+	void doSetTextBefore(final String before, final long sent, final boolean truncated) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (mTextEdit == null || keyboardSent.get() != sent || textChangePending) {
+					return;
+				}
+				String text = " " + before;
+				textBefore = text;
+				Editable s = mTextEdit.getText();
+				if (!composition.isEmpty() || BaseInputConnection.getComposingSpanStart(s) >= 0) {
+					return;
+				}
+				if (s.toString().equals(committed) && (committed.equals(text) || (truncated && committed.endsWith(before)))) {
+					return;
+				}
+				setEditText(text);
+				// the keyboard reads the text again, for its suggestions
+				InputMethodManager m = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				m.restartInput(mTextEdit);
+			}
+		});
+	}
+
+	// setEditText sets the text of mTextEdit to the given committed text,
+	// with the cursor at its end, without sending it as typed text.
+	void setEditText(String text) {
+		ignoreKey = true;
+		mTextEdit.setText(text);
+		mTextEdit.setSelection(text.length());
+		ignoreKey = false;
+		committed = text;
+	}
+
 	// resetText resets the text of mTextEdit to one placeholder character,
 	// so that all keyboards can send backspace, ending any composition.
 	// It is a space, as keyboards do not compose words after other
@@ -258,6 +329,9 @@ public class GoNativeActivity extends NativeActivity {
 		String inserted = com.substring(pre, com.length() - suf);
 		if (!inserted.isEmpty()) {
 			keyboardTyped(inserted);
+		}
+		if (!deleted.isEmpty() || !inserted.isEmpty()) {
+			keyboardSent.incrementAndGet();
 		}
 		committed = com;
 		if (!comp.isEmpty() && !comp.equals(composition)) {

@@ -63,6 +63,8 @@ static jmethodID find_static_method(JNIEnv *env, jclass clazz, const char *name,
 static jmethodID key_rune_method;
 static jmethodID show_keyboard_method;
 static jmethodID hide_keyboard_method;
+static jmethodID set_text_before_method;
+static jmethodID keyboard_sent_count_method;
 
 jint JNI_OnLoad(JavaVM *vm, void *reserved)
 {
@@ -107,6 +109,8 @@ void ANativeActivity_onCreate(ANativeActivity *activity, void *savedState, size_
 		key_rune_method = find_static_method(env, current_class, "getRune", "(III)I");
 		show_keyboard_method = find_static_method(env, current_class, "showKeyboard", "(I)V");
 		hide_keyboard_method = find_static_method(env, current_class, "hideKeyboard", "()V");
+		set_text_before_method = find_static_method(env, current_class, "setTextBefore", "(Ljava/lang/String;JZ)V");
+		keyboard_sent_count_method = find_static_method(env, current_class, "keyboardSentCount", "()J");
 
 		setCurrentContext(activity->vm, (*env)->NewGlobalRef(env, activity->clazz));
 
@@ -185,6 +189,22 @@ void hideKeyboard(JNIEnv *env)
 		env,
 		current_class,
 		hide_keyboard_method);
+}
+
+// setTextBefore sets the text of the keyboard to the given text before the
+// cursor, of n UTF-16 units (see GoNativeActivity.setTextBefore).
+void setTextBefore(JNIEnv *env, const jchar *before, int n, long sent, int truncated)
+{
+	jstring s = (*env)->NewString(env, before, n);
+	(*env)->CallStaticVoidMethod(env, current_class, set_text_before_method, s, (jlong)sent, (jboolean)truncated);
+	(*env)->DeleteLocalRef(env, s);
+}
+
+// keyboardSentCount returns the count of the changes of the text that the
+// keyboard has sent (see GoNativeActivity.keyboardSentCount).
+long keyboardSentCount(JNIEnv *env)
+{
+	return (long)(*env)->CallStaticLongMethod(env, current_class, keyboard_sent_count_method);
 }
 
 void Java_org_golang_app_GoNativeActivity_insetsChanged(JNIEnv *env, jclass clazz, int top, int bottom, int left, int right)

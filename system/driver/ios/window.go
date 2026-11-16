@@ -17,7 +17,6 @@ import (
 	"unicode/utf8"
 	"unsafe"
 
-	"cogentcore.org/core/events"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/driver/base"
 )
@@ -36,7 +35,7 @@ func (w *Window) SetTextInput(ti *system.TextInput) {
 		return
 	}
 	sent := C.keyboardSentCount() // (before the keys are looked for)
-	if pendingKeys(&w.App.Event.Deque) {
+	if base.PendingKeys(&w.App.Event.Deque) {
 		return
 	}
 	truncated := 0
@@ -46,19 +45,4 @@ func (w *Window) SetTextInput(ti *system.TextInput) {
 	cs := C.CString(ti.Before)
 	defer C.free(unsafe.Pointer(cs))
 	C.setTextBefore(cs, sent, C.int(truncated))
-}
-
-// pendingKeys returns whether the given queue has key events that have
-// not been handled yet.
-func pendingKeys(q *events.Deque) bool {
-	q.LockAndInit()
-	defer q.Mu.Unlock()
-	for _, evs := range [][]events.Event{q.Front, q.Back} {
-		for _, e := range evs {
-			if _, ok := e.(*events.Key); ok {
-				return true
-			}
-		}
-	}
-	return false
 }
