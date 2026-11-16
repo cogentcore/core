@@ -170,6 +170,10 @@ type TextField struct { //core:embedder
 	// number of lines from last render update, for word-wrap version
 	numLines int
 
+	// cursorShown is the state for which the cursor was last scrolled
+	// into view (see [TextField.scrollCursorIntoView]).
+	cursorShown textFieldCursorShown
+
 	// lineHeight is the line height cached during styling.
 	lineHeight float32
 
@@ -1295,6 +1299,41 @@ func (tf *TextField) updateCursorPosition() {
 		tf.startCursor()
 	}
 	tf.updateTextInput()
+	tf.scrollCursorIntoView()
+}
+
+// textFieldCursorShown is the state of a [TextField] for which its cursor
+// was scrolled into view: its position in the text, the length of the
+// text, the position of the cursor in the text field, and the sizes of
+// the text field, of the frame that it scrolls in, and of the scene, none
+// of which change as it is scrolled.
+type textFieldCursorShown struct {
+	pos, n                          int
+	cursor                          math32.Vector2
+	fieldSize, frameSize, sceneSize math32.Vector2
+}
+
+// scrollCursorIntoView scrolls the frame that the text field is in so that
+// its cursor is visible, if the cursor moved, the text changed, or the
+// text field, the frame or the scene was resized since it last did, as
+// when the text field grows with the text that is typed into it, or the
+// scene gets smaller as the virtual keyboard of a mobile platform is
+// shown. It does not otherwise, so that the frame can be scrolled away
+// from the cursor of a focused text field.
+func (tf *TextField) scrollCursorIntoView() {
+	fr := tf.parentScrollFrame()
+	if fr == nil {
+		return
+	}
+	cs := textFieldCursorShown{pos: tf.cursorPos, n: len(tf.editText), cursor: tf.relCharPos(tf.dispRange.Start, tf.cursorPos),
+		fieldSize: tf.Geom.Size.Actual.Total, frameSize: fr.Geom.Size.Actual.Content, sceneSize: math32.FromPoint(tf.Scene.SceneGeom.Size)}
+	if cs == tf.cursorShown {
+		return
+	}
+	tf.cursorShown = cs
+	pos := tf.charRenderPos(tf.cursorPos).ToPointFloor().Sub(tf.Scene.SceneGeom.Pos) // (in the scene)
+	box := image.Rectangle{Min: pos, Max: pos.Add(image.Pt(max(1, int(tf.CursorWidth.Dots)), int(math32.Ceil(tf.lineHeight))))}
+	fr.ScrollToBox(box)
 }
 
 // renderSelect renders the selected region, if any, underneath the text
@@ -1684,6 +1723,7 @@ func (tf *TextField) handleKeyEvents() {
 	})
 	tf.OnFocus(func(e events.Event) {
 		tf.accepted = false
+		tf.cursorShown = textFieldCursorShown{}
 		if tf.IsReadOnly() {
 			e.SetHandled()
 		} else {
