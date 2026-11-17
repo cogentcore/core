@@ -66,6 +66,7 @@ func TestWindowTitle(t *testing.T) {
 // including one that runs a dialog, also in a window of its own, which is
 // the current window when the menu search is closed.
 func TestWindowTitleMenuSearch(t *testing.T) {
+	skipOnWeb(t, "there is one window")
 	b := NewBody("App")
 	var winDlg *Body
 	b.Scene.AddContextMenu(func(m *Scene, _ image.Point) {
