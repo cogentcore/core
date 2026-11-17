@@ -304,7 +304,7 @@ func (lb *ListBase) Init() {
 	lb.On(events.MouseMove, func(e events.Event) {
 		row, _, isValid := lb.rowFromEventPos(e)
 		prevHoverRow := lb.hoverRow
-		if !isValid {
+		if !isValid || TheApp.SystemPlatform().IsMobile() { // (no hover for touch)
 			lb.hoverRow = -1
 			lb.Styles.Cursor = lb.normalCursor
 		} else {
@@ -324,7 +324,7 @@ func (lb *ListBase) Init() {
 		pt := lb.PointToRelPos(e.Pos())
 		lb.ListGrid.AutoScroll(math32.FromPoint(pt))
 		prevHoverRow := lb.hoverRow
-		if !isValid {
+		if !isValid || TheApp.SystemPlatform().IsMobile() { // (no hover for touch)
 			lb.hoverRow = -1
 			lb.Styles.Cursor = lb.normalCursor
 		} else {
@@ -567,8 +567,22 @@ func (lb *ListBase) MakeGrid(p *tree.Plan, maker func(p *tree.Plan)) {
 		w.OnClick(oc)
 		w.On(events.MouseDown, func(e events.Event) {
 			// value widgets such as text fields handle the clicks into them
-			// (the context menu selects for a right click, see contextSelectRow)
-			if lb.IsReadOnly() || lb.SelectMode || e.SelectMode() != events.SelectOne || e.MouseButton() != events.Left {
+			// (the context menu selects for a right click, see contextSelectRow);
+			// on mobile, a press can start a scroll, and a tap selects as a click
+			if lb.IsReadOnly() || lb.SelectMode || e.SelectMode() != events.SelectOne || e.MouseButton() != events.Left || TheApp.SystemPlatform().IsMobile() {
+				return
+			}
+			if row, _, isValid := w.indexFromPixel(e.Pos()); isValid {
+				lb.selectIndexQuiet(row + lb.StartIndex)
+			}
+		})
+		w.On(events.MouseUp, func(e events.Event) {
+			// on mobile, a tap selects its row when it is released, unless
+			// it was the slide of a scroll (see the MouseDown above)
+			if !TheApp.SystemPlatform().IsMobile() || lb.IsReadOnly() || lb.SelectMode || e.MouseButton() != events.Left {
+				return
+			}
+			if em := lb.Events(); em == nil || !tree.IsNil(em.slide) {
 				return
 			}
 			if row, _, isValid := w.indexFromPixel(e.Pos()); isValid {
@@ -2293,6 +2307,9 @@ func (lg *ListGrid) ScrollChanged(d math32.Dims, sb *Slider) {
 	ls.StartIndex = int(floor)
 	lg.Geom.Scroll.Y = (floor - quo) * rht
 	ls.ApplyScenePos()
+	// the row under the pointer is not highlighted while scrolling,
+	// as it would show other items, until the pointer moves again
+	ls.hoverRow = -1
 	if tt, ok := ls.This.(*TreeTable); ok && tt.HideGroupValues {
 		// the rows have other widgets for the items of groups,
 		// whose values are hidden, which are new, so they need to be

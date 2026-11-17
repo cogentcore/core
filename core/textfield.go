@@ -230,6 +230,12 @@ func (tf *TextField) Init() {
 	tf.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
 		s.SetAbilities(false, abilities.ScrollableUnattended)
+		if TheApp.SystemPlatform().IsMobile() {
+			// a drag scrolls what it is in, as in the rows of a list,
+			// instead of selecting text, which is done by a double tap
+			// or the context menu (of a long press), as on iOS
+			s.SetAbilities(false, abilities.Slideable)
+		}
 		tf.CursorWidth.Dp(1)
 		tf.PlaceholderColor = colors.Scheme.OnSurfaceVariant
 		tf.CursorColor = colors.Scheme.Primary.Base

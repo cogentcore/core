@@ -1359,3 +1359,51 @@ func TestTreeTableWheelEndsEdit(t *testing.T) {
 		}
 	})
 }
+
+// TestTreeTableScrollSelectedBackground tests that the background of the
+// cells of the selected item, set when they are styled, goes with the item
+// as the rows are scrolled, and that no row is highlighted as hovered: it
+// stayed in the rows where it was, showing other items, until an update.
+func TestTreeTableScrollSelectedBackground(t *testing.T) {
+	tasks := make([]*task, 30)
+	for i := range tasks {
+		tasks[i] = &task{Name: fmt.Sprintf("t%d", i)}
+	}
+	b := NewBody()
+	b.Styler(func(s *styles.Style) {
+		s.Min.Set(units.Dp(300), units.Dp(400))
+		s.Max.Set(units.Dp(300), units.Dp(400))
+	})
+	tt := NewTreeTable(b).SetItems(&tasks)
+	sel := 3
+	var selBgs []image.Image
+	cellBackground := func(si int) image.Image {
+		nw, idxOff := tt.RowWidgetNs()
+		row := si - tt.StartIndex
+		return tt.ListGrid.Child(row*nw + idxOff).(Widget).AsWidget().Styles.ActualBackground
+	}
+	RenderImage(b, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		tt.selectIndexQuiet(sel)
+		tt.hoverRow = 4
+		tt.Restyle()
+	}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		selBg := cellBackground(sel)
+		require.NotEqual(t, selBg, cellBackground(sel+2), "the selected item has its own background")
+		sb := tt.ListGrid.Scrolls[math32.Y]
+		require.NotNil(t, sb)
+		sb.setValueEvent(sb.Value + 2*tt.ListGrid.rowHeight)
+		require.Equal(t, 2, tt.StartIndex)
+		selBgs = append(selBgs, selBg)
+	}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		selBg := selBgs[0]
+		assert.Equal(t, selBg, cellBackground(sel), "the selected item keeps its background")
+		assert.NotEqual(t, selBg, cellBackground(sel+2), "the item now in its old row does not have it")
+		assert.Equal(t, -1, tt.hoverRow, "no hovered row")
+	})
+}

@@ -490,6 +490,12 @@ func (em *Events) handlePosEvent(e events.Event) {
 			em.repeatClick = repeatClick
 			em.startRepeatClickTimer()
 		}
+		// a long press of an earlier press whose release went elsewhere
+		// (as to a menu that it opened) is over: otherwise this press of
+		// the same widget would continue it, and its click would be lost
+		if !tree.IsNil(em.longPressWidget) && em.longPressTimer == nil {
+			em.cancelLongPress()
+		}
 		em.handleLongPress(e)
 	case events.MouseMove:
 		hovs := make([]Widget, 0, len(em.mouseInBBox))
@@ -585,6 +591,11 @@ func (em *Events) handlePosEvent(e events.Event) {
 		if !tree.IsNil(em.slide) {
 			em.slide.AsWidget().Send(events.SlideStop, e)
 			e.SetHandled()
+			// the widget pressed where the slide started, as a text field
+			// in the rows of a list being scrolled, is no longer pressed
+			if !tree.IsNil(em.press) && em.press != em.slide {
+				em.press.AsWidget().Send(events.MouseUp, e)
+			}
 			em.slide = nil
 			em.press = nil
 		}
@@ -651,9 +662,19 @@ func (em *Events) handlePosEvent(e events.Event) {
 		em.cancelLongPress()
 		// a mouse up event acts also acts as a mouse leave
 		// event on mobile, as that is needed to clear any
-		// hovered state (on a touch device, including on the web)
-		if !tree.IsNil(up) && TheApp.SystemPlatform().IsMobile() {
-			up.AsWidget().Send(events.MouseLeave, e)
+		// hovered state (on a touch device, including on the web),
+		// of all of the hovered widgets, which are those where the
+		// touch started if it moved, as in a scroll
+		if TheApp.SystemPlatform().IsMobile() {
+			if !tree.IsNil(up) && !slices.Contains(em.hovers, up) {
+				up.AsWidget().Send(events.MouseLeave, e)
+			}
+			for _, h := range em.hovers {
+				if !tree.IsNil(h) {
+					h.AsWidget().Send(events.MouseLeave, e)
+				}
+			}
+			em.hovers = nil
 		}
 	case events.Scroll:
 		switch {
