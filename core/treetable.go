@@ -660,8 +660,8 @@ func (tt *TreeTable) DeleteAt(idx int) {
 	tt.UpdateChange()
 }
 
-// deleteSelected deletes the selected items, with their children.
-func (tt *TreeTable) deleteSelected() {
+// DeleteSelected deletes the selected items, with their children.
+func (tt *TreeTable) DeleteSelected() {
 	for _, idx := range tt.SelectedIndexesList(true) { // last first, so the others stay
 		tt.DeleteAt(idx)
 	}
@@ -1441,7 +1441,7 @@ func (tt *TreeTable) keyInput(e events.Event) {
 	}
 	switch kf {
 	case keymap.Delete: // after the edits of a text field are accepted
-		tt.deleteSelected()
+		tt.DeleteSelected()
 		tt.IndexGrabFocus(tt.SelectedIndex) // if the focus was in the last row
 	case keymap.Insert:
 		tt.InsertBefore(idx)
@@ -1482,7 +1482,7 @@ func (tt *TreeTable) contextMenu(m *Scene, pos image.Point) {
 			tt.AddChild(idx)
 		})
 		NewButton(m).SetText("Delete").SetIcon(icons.Delete).SetKey(keymap.Delete).OnClick(func(e events.Event) {
-			tt.deleteSelected()
+			tt.DeleteSelected()
 		})
 		NewSeparator(m)
 		NewButton(m).SetText("Indent").SetIcon(icons.FormatIndentIncrease).OnClick(func(e events.Event) {
