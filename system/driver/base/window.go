@@ -312,16 +312,18 @@ func (w *Window[A]) MarkClosing() bool {
 // for [Window.Close] after [Window.MarkClosing].
 func (w *Window[A]) CloseBase() {
 	// base implementation doesn't actually close any system windows,
-	// but platform-specific implementations can
-	w.This.Events().Window(events.WinClose)
-
-	w.WinClose <- struct{}{}
-
+	// but platform-specific implementations can.
+	// The window is removed from the app before its WinClose event is sent:
+	// the event stops the event loop of the window (in core), and the app
+	// quits once the loops of all of its windows stop, which fails while a
+	// closing window is still in the app (see [AppMulti.QuitClean]).
 	w.Mu.Lock()
-	defer w.Mu.Unlock()
-
 	w.CloseClean()
 	w.App.RemoveWindow(w.This)
+	w.Mu.Unlock()
+
+	w.This.Events().Window(events.WinClose)
+	w.WinClose <- struct{}{}
 }
 
 func (w *Window[A]) SetCursorEnabled(enabled, raw bool) {

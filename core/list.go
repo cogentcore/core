@@ -304,7 +304,7 @@ func (lb *ListBase) Init() {
 	lb.On(events.MouseMove, func(e events.Event) {
 		row, _, isValid := lb.rowFromEventPos(e)
 		prevHoverRow := lb.hoverRow
-		if !isValid {
+		if !isValid || TheApp.SystemPlatform().IsMobile() { // (no hover for touch)
 			lb.hoverRow = -1
 			lb.Styles.Cursor = lb.normalCursor
 		} else {
@@ -324,7 +324,7 @@ func (lb *ListBase) Init() {
 		pt := lb.PointToRelPos(e.Pos())
 		lb.ListGrid.AutoScroll(math32.FromPoint(pt))
 		prevHoverRow := lb.hoverRow
-		if !isValid {
+		if !isValid || TheApp.SystemPlatform().IsMobile() { // (no hover for touch)
 			lb.hoverRow = -1
 			lb.Styles.Cursor = lb.normalCursor
 		} else {
@@ -567,8 +567,22 @@ func (lb *ListBase) MakeGrid(p *tree.Plan, maker func(p *tree.Plan)) {
 		w.OnClick(oc)
 		w.On(events.MouseDown, func(e events.Event) {
 			// value widgets such as text fields handle the clicks into them
-			// (the context menu selects for a right click, see contextSelectRow)
-			if lb.IsReadOnly() || lb.SelectMode || e.SelectMode() != events.SelectOne || e.MouseButton() != events.Left {
+			// (the context menu selects for a right click, see contextSelectRow);
+			// on mobile, a press can start a scroll, and a tap selects as a click
+			if lb.IsReadOnly() || lb.SelectMode || e.SelectMode() != events.SelectOne || e.MouseButton() != events.Left || TheApp.SystemPlatform().IsMobile() {
+				return
+			}
+			if row, _, isValid := w.indexFromPixel(e.Pos()); isValid {
+				lb.selectIndexQuiet(row + lb.StartIndex)
+			}
+		})
+		w.On(events.MouseUp, func(e events.Event) {
+			// on mobile, a tap selects its row when it is released, unless
+			// it was the slide of a scroll (see the MouseDown above)
+			if !TheApp.SystemPlatform().IsMobile() || lb.IsReadOnly() || lb.SelectMode || e.MouseButton() != events.Left {
+				return
+			}
+			if em := lb.Events(); em == nil || !tree.IsNil(em.slide) {
 				return
 			}
 			if row, _, isValid := w.indexFromPixel(e.Pos()); isValid {
@@ -1961,6 +1975,12 @@ func (lb *ListBase) keepFocusedItem(idx, pos int, ed *cellEdit, foc Widget, scro
 	em.focus = nil // (without the focus lost event)
 	if foc.AsTree().This != nil {
 		foc.AsWidget().SetState(false, states.Focused)
+		// the edit goes with the focus, so it must not stay in the
+		// widget left behind, which is for another item now
+		if tf, ok := foc.(*TextField); ok {
+			tf.revert()
+			tf.stopCursor()
+		}
 	}
 	lb.Defer(func() { // (once it is laid out, for scrolling to it)
 		lb.updateScroll()
@@ -2172,6 +2192,35 @@ func (lg *ListGrid) Init() {
 	lg.Styler(func(s *styles.Style) {
 		s.Display = styles.Grid
 	})
+	// (these run before the scrolling of the frame, added before them)
+	lg.On(events.Scroll, func(e events.Event) {
+		if lg.AbilityIs(abilities.ScrollableUnattended) || lg.StateIs(states.Focused) || lg.StateIs(states.Attended) {
+			lg.endEdit()
+		}
+	})
+	lg.On(events.SlideStart, func(e events.Event) {
+		if TheApp.SystemPlatform().IsMobile() { // (a scroll on mobile)
+			lg.endEdit()
+		}
+	})
+}
+
+// endEdit applies the edit of the text field of a cell with the focus,
+// and clears the focus, as the user starts scrolling the rows: the rows
+// are widgets for other items as they scroll.
+func (lg *ListGrid) endEdit() {
+	if !lg.HasScroll[math32.Y] {
+		return
+	}
+	ls := lg.list()
+	_, _, foc := ls.focusedCell()
+	if _, ok := foc.(*TextField); !ok {
+		return
+	}
+	commitEdit(foc)
+	if em := ls.Events(); em != nil && em.focus == foc {
+		em.setFocus(nil)
+	}
 }
 
 func (lg *ListGrid) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2 {
@@ -2258,6 +2307,9 @@ func (lg *ListGrid) ScrollChanged(d math32.Dims, sb *Slider) {
 	ls.StartIndex = int(floor)
 	lg.Geom.Scroll.Y = (floor - quo) * rht
 	ls.ApplyScenePos()
+	// the row under the pointer is not highlighted while scrolling,
+	// as it would show other items, until the pointer moves again
+	ls.hoverRow = -1
 	if tt, ok := ls.This.(*TreeTable); ok && tt.HideGroupValues {
 		// the rows have other widgets for the items of groups,
 		// whose values are hidden, which are new, so they need to be

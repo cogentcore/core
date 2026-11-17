@@ -478,6 +478,24 @@ func (tt *TreeTable) edited(item reflect.Value) {
 	})
 }
 
+// moved updates the rows after the given item is moved, or pasted, as
+// [TreeTable.edited] does, except on mobile, where it only selects the
+// item: focusing the text field of its cell, as for a new item to type
+// into, would show the virtual keyboard.
+func (tt *TreeTable) moved(item reflect.Value) {
+	if !TheApp.SystemPlatform().IsMobile() {
+		tt.edited(item)
+		return
+	}
+	tt.sortItems()
+	tt.updateRows()
+	if idx := tt.rowOf(item); idx >= 0 {
+		tt.selectIndexQuiet(idx)
+		tt.ScrollToIndexNoUpdate(idx)
+	}
+	tt.UpdateChange()
+}
+
 // valueChanged sorts the items again after the value of a cell in the
 // given row is changed by the user, if they are sorted (as by a check box
 // for done items that go to the end), and if its item moves, selects it,
@@ -660,8 +678,8 @@ func (tt *TreeTable) DeleteAt(idx int) {
 	tt.UpdateChange()
 }
 
-// deleteSelected deletes the selected items, with their children.
-func (tt *TreeTable) deleteSelected() {
+// DeleteSelected deletes the selected items, with their children.
+func (tt *TreeTable) DeleteSelected() {
 	for _, idx := range tt.SelectedIndexesList(true) { // last first, so the others stay
 		tt.DeleteAt(idx)
 	}
@@ -683,7 +701,7 @@ func (tt *TreeTable) Indent(idx int) {
 	ch := tt.children(parent)
 	insertItem(ch, ch.Len(), item)
 	tt.setItemClosed(parent, false)
-	tt.edited(item)
+	tt.moved(item)
 }
 
 // Outdent moves the item at the given row index out of its parent,
@@ -697,7 +715,7 @@ func (tt *TreeTable) Outdent(idx int) {
 	psl, pk := tt.siblingsOf(tt.rowOf(r.parent))
 	deleteItem(sl, k)
 	insertItem(psl, pk+1, r.item)
-	tt.edited(r.item)
+	tt.moved(r.item)
 }
 
 // MoveItemUp moves the item at the given row index before
@@ -721,7 +739,7 @@ func (tt *TreeTable) moveItem(idx, delta int) {
 	sl, k := tt.siblingsOf(idx)
 	if j := k + delta; j >= 0 && j < sl.Len() {
 		reflect.Swapper(sl.Interface())(k, j)
-		tt.edited(tt.rows[idx].item)
+		tt.moved(tt.rows[idx].item)
 	}
 }
 
@@ -961,7 +979,7 @@ func (tt *TreeTable) pasteItems(md mimedata.Mimes, sl reflect.Value, k int) {
 		insertItem(sl, k+i, item)
 	}
 	if len(items) > 0 {
-		tt.edited(items[0])
+		tt.moved(items[0])
 	}
 }
 
@@ -1010,7 +1028,7 @@ func (tt *TreeTable) PasteAssign(md mimedata.Mimes, idx int) {
 	}
 	item := tt.rows[idx].item
 	item.Elem().Set(items[0].Elem())
-	tt.edited(item)
+	tt.moved(item)
 }
 
 // makeTreePasteMenu makes the menu of the ways to paste the given mime
@@ -1441,7 +1459,7 @@ func (tt *TreeTable) keyInput(e events.Event) {
 	}
 	switch kf {
 	case keymap.Delete: // after the edits of a text field are accepted
-		tt.deleteSelected()
+		tt.DeleteSelected()
 		tt.IndexGrabFocus(tt.SelectedIndex) // if the focus was in the last row
 	case keymap.Insert:
 		tt.InsertBefore(idx)
@@ -1482,7 +1500,7 @@ func (tt *TreeTable) contextMenu(m *Scene, pos image.Point) {
 			tt.AddChild(idx)
 		})
 		NewButton(m).SetText("Delete").SetIcon(icons.Delete).SetKey(keymap.Delete).OnClick(func(e events.Event) {
-			tt.deleteSelected()
+			tt.DeleteSelected()
 		})
 		NewSeparator(m)
 		NewButton(m).SetText("Indent").SetIcon(icons.FormatIndentIncrease).OnClick(func(e events.Event) {

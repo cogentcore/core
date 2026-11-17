@@ -404,7 +404,22 @@ func (wb *WidgetBase) handleLongHoverTooltip() {
 			return
 		}
 
+		var pops *stages
+		var before *Stage
+		if st := wb.Scene.Stage; st != nil && st.popups != nil {
+			pops = st.popups
+			before = pops.top()
+		}
 		wb.Send(events.ContextMenu, e)
+		// the finger is still down: the menu is opened by the press (see
+		// [Stage.pressOpened]), so its release does not close it (as a
+		// click off it) and is that of the press, and a drag to an item
+		// and a release there clicks it
+		if pops != nil {
+			if top := pops.top(); top != nil && top != before && top.Type == MenuStage {
+				top.pressOpened = true
+			}
+		}
 		wi := wb.This.(Widget)
 		tt, pos := wi.WidgetTooltip(e.Pos())
 		if tt == "" {

@@ -294,8 +294,10 @@ func (ls *Lines) insertLineSlices(tbe *textpos.Edit) {
 
 	ls.markupEdits = append(ls.markupEdits, tbe)
 	if nsz > 0 {
+		tags := ls.splitTags(tbe)
 		ls.markup = slices.Insert(ls.markup, stln, make([]rich.Text, nsz)...)
 		ls.tags = slices.Insert(ls.tags, stln, make([]lexer.Line, nsz)...)
+		ls.tags[stln-1], ls.tags[stln+nsz-1] = tags[0], tags[1]
 		ls.hiTags = slices.Insert(ls.hiTags, stln, make([]lexer.Line, nsz)...)
 		ls.virtual = slices.Insert(ls.virtualLinesFor(len(ls.tags)-nsz), stln, make([][]virtualText, nsz)...)
 
@@ -318,8 +320,10 @@ func (ls *Lines) linesDeleted(tbe *textpos.Edit) {
 	stln := tbe.Region.Start.Line
 	edln := tbe.Region.End.Line
 	if edln > stln {
+		tags := ls.joinTags(tbe)
 		ls.markup = append(ls.markup[:stln], ls.markup[edln:]...)
 		ls.tags = append(ls.tags[:stln], ls.tags[edln:]...)
+		ls.tags[stln] = tags
 		ls.hiTags = append(ls.hiTags[:stln], ls.hiTags[edln:]...)
 		if len(ls.virtual) > edln {
 			ls.virtual = append(ls.virtual[:stln], ls.virtual[edln:]...)
@@ -335,6 +339,51 @@ func (ls *Lines) linesDeleted(tbe *textpos.Edit) {
 	st := tbe.Region.Start.Line
 	ls.markupLines(st, st)
 	ls.startDelayedReMarkup()
+}
+
+// splitTags returns the tags of the start line of the given edit that
+// inserts lines, before it is applied to them, for that line and for the
+// last line of the inserted text: the tags after the start of the insert
+// go with the rest of the start line, to the end of the inserted text.
+// The tags of the other lines stay with their lines, but a split line kept
+// all of its tags at their positions, with the text after them moved to
+// another line, until they were set again (as the semantic tokens of a
+// language server are, after a delay).
+func (ls *Lines) splitTags(tbe *textpos.Edit) [2]lexer.Line {
+	var res [2]lexer.Line
+	st, ed := tbe.Region.Start, tbe.Region.End
+	for _, tg := range ls.adjustedTagsLine(ls.tags[st.Line], st.Line) {
+		var ntr *lexer.Lex
+		switch {
+		case tg.End <= st.Char:
+			ntr = res[0].AddLex(tg.Token, tg.Start, tg.End)
+		case tg.Start >= st.Char:
+			ntr = res[1].AddLex(tg.Token, ed.Char+tg.Start-st.Char, ed.Char+tg.End-st.Char)
+		default: // the part on the start line
+			ntr = res[0].AddLex(tg.Token, tg.Start, st.Char)
+		}
+		ntr.Time.Now() // (after the edit)
+	}
+	return res
+}
+
+// joinTags returns the tags of the start line of the given edit that
+// deletes lines, before it is applied to them, with those of the rest of
+// its end line, which joins the start line (see [Lines.splitTags]).
+func (ls *Lines) joinTags(tbe *textpos.Edit) lexer.Line {
+	var res lexer.Line
+	st, ed := tbe.Region.Start, tbe.Region.End
+	for _, tg := range ls.adjustedTagsLine(ls.tags[st.Line], st.Line) {
+		if s := min(tg.Start, st.Char); s < min(tg.End, st.Char) {
+			res.AddLex(tg.Token, s, min(tg.End, st.Char)).Time.Now()
+		}
+	}
+	for _, tg := range ls.adjustedTagsLine(ls.tags[ed.Line], ed.Line) {
+		if s := max(tg.Start, ed.Char); s < max(tg.End, ed.Char) {
+			res.AddLex(tg.Token, st.Char+s-ed.Char, st.Char+max(tg.End, ed.Char)-ed.Char).Time.Now()
+		}
+	}
+	return res
 }
 
 // adjustedTags updates tag positions for edits, for given list of tags

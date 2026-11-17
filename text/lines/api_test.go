@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/textpos"
 	"cogentcore.org/core/text/token"
@@ -385,4 +386,42 @@ func TestLinesTransposeWord(t *testing.T) {
 	lns, _ := newTestLines(t, "a b")
 	_, ok := lns.TransposeWord(textpos.Pos{Line: 5})
 	assert.False(t, ok, "an invalid position")
+}
+
+// TestTagsSplitJoinLines tests that the tags of a line go with its text
+// when it is split by an inserted line break, and when it is joined with
+// the next line by a deleted one. A split line kept all of its tags, at
+// their positions, until they were set again (as the semantic tokens of a
+// language server are, after a delay).
+func TestTagsSplitJoinLines(t *testing.T) {
+	lns, _ := newTestLines(t, "tr := pt.Trace(x)\nend\n")
+	tag := func(st, ed int) *lexer.Lex {
+		lx := lexer.NewLex(token.KeyToken{Token: token.NameVar}, st, ed)
+		lx.Time.Now()
+		return &lx
+	}
+	words := func(ln int) []string {
+		var ws []string
+		txt := lns.Line(ln)
+		for _, tg := range lns.AdjustedTags(ln) {
+			ws = append(ws, string(txt[tg.Start:tg.End]))
+		}
+		return ws
+	}
+	lns.SetTags(0, lexer.Line{*tag(0, 2), *tag(6, 8), *tag(9, 14), *tag(15, 16)})
+	assert.Equal(t, []string{"tr", "pt", "Trace", "x"}, words(0))
+
+	// a line break typed before pt, with an indent
+	lns.InsertText(textpos.Pos{Line: 0, Char: 6}, []rune("x := 1\n\t"))
+	assert.Equal(t, "tr := x := 1", string(lns.Line(0)))
+	assert.Equal(t, "\tpt.Trace(x)", string(lns.Line(1)))
+	assert.Equal(t, []string{"tr"}, words(0))
+	assert.Equal(t, []string{"pt", "Trace", "x"}, words(1))
+	assert.Empty(t, words(2))
+
+	// joined again
+	lns.DeleteText(textpos.Pos{Line: 0, Char: 6}, textpos.Pos{Line: 1, Char: 1})
+	assert.Equal(t, "tr := pt.Trace(x)", string(lns.Line(0)))
+	assert.Equal(t, []string{"tr", "pt", "Trace", "x"}, words(0))
+	assert.Empty(t, words(1))
 }

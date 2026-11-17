@@ -67,6 +67,7 @@ func TestDialogMinSize(t *testing.T) {
 // then. It stayed, keeping the keyboard focus of the system from the
 // window behind it.
 func TestDialogWindowCloseFromOwnLoop(t *testing.T) {
+	skipOnWeb(t, "there is one window")
 	b := NewBody()
 	b.runAndShowNewWindow()
 	defer func() {

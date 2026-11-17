@@ -7,6 +7,7 @@ package core
 import (
 	"image"
 	"testing"
+	"time"
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
@@ -14,6 +15,7 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestHandleWidgetState(t *testing.T) {
@@ -153,4 +155,52 @@ func ExampleWidgetBase_AddCloseDialog() {
 		return true
 	})
 	b.RunMainWindow()
+}
+
+// TestLongPressMenuThenClick tests that a click on a widget counts after a
+// long press of it opened a menu under the pointer, as on mobile, which
+// got the release. The long press was not ended, and the next press of
+// the widget continued it, so that its click was lost.
+func TestLongPressMenuThenClick(t *testing.T) {
+	lpt := TimingSettings.LongPressTime
+	TimingSettings.LongPressTime = 50 * time.Millisecond
+	defer func() { TimingSettings.LongPressTime = lpt }()
+	b := NewBody()
+	bt := NewButton(b).SetText("Button")
+	clicks := 0
+	bt.OnClick(func(e events.Event) { clicks++ })
+	var menu *Stage
+	bt.On(events.LongPressStart, func(e events.Event) {
+		menu = NewMenu(func(m *Scene, _ image.Point) {
+			NewButton(m).SetText("Item")
+		}, bt, bt.ContextMenuPos(e))
+		menu.Run()
+	})
+	RenderImage(b, func() {}, func() {
+		b.AsyncLock()
+		bb := bt.Geom.TotalBBox
+		b.AsyncUnlock()
+		pt := bb.Min.Add(bb.Size().Div(2))
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		src.MouseButton(events.MouseDown, events.Left, pt, 0)
+		require.Eventually(t, func() bool {
+			b.AsyncLock()
+			defer b.AsyncUnlock()
+			return menu != nil
+		}, 2*time.Second, 10*time.Millisecond, "the long press opens the menu")
+		time.Sleep(100 * time.Millisecond)
+		src.MouseButton(events.MouseUp, events.Left, pt, 0) // (to the menu)
+		time.Sleep(100 * time.Millisecond)
+		b.AsyncLock()
+		menu.ClosePopup()
+		b.AsyncUnlock()
+		time.Sleep(100 * time.Millisecond)
+		src.MouseButton(events.MouseDown, events.Left, pt, 0)
+		src.MouseButton(events.MouseUp, events.Left, pt, 0)
+		assert.Eventually(t, func() bool {
+			b.AsyncLock()
+			defer b.AsyncUnlock()
+			return clicks == 1
+		}, 2*time.Second, 10*time.Millisecond, "the click counts")
+	})
 }
