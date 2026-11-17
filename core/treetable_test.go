@@ -1245,3 +1245,117 @@ func TestTreeTableMoveSelected(t *testing.T) {
 		assert.Equal(t, []string{"B", "C"}, selNames())
 	})
 }
+
+// TestTreeTableScrollEdit tests that the text being typed into a focused
+// item stays with the item as the table is scrolled a row at a time, with
+// the focus moving to the cell of the item in the rows. The text fields
+// of the rows left behind are of other items and kept the text, as if
+// typed into them, and it was saved into all the items scrolled across.
+func TestTreeTableScrollEdit(t *testing.T) {
+	tasks := make([]*task, 30)
+	for i := range tasks {
+		tasks[i] = &task{Name: fmt.Sprintf("t%d", i)}
+	}
+	b := NewBody()
+	b.Styler(func(s *styles.Style) {
+		s.Min.Set(units.Dp(300), units.Dp(400))
+		s.Max.Set(units.Dp(300), units.Dp(400))
+	})
+	tt := NewTreeTable(b).SetItems(&tasks)
+	edit := 3
+	scroll := func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		sb := tt.ListGrid.Scrolls[math32.Y]
+		require.NotNil(t, sb)
+		sb.setValueEvent(sb.Value + tt.ListGrid.rowHeight)
+	}
+	RenderImage(b, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		tt.IndexGrabFocus(edit)
+	}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		_, _, foc := tt.focusedCell()
+		tf, ok := foc.(*TextField)
+		require.True(t, ok, "a text field is focused")
+		tf.HandleEvent(events.NewKey(events.KeyChord, 'z', key.CodeZ, 0))
+	}, scroll, scroll, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		require.Equal(t, 2, tt.StartIndex)
+		idx, _, foc := tt.focusedCell()
+		assert.Equal(t, edit, idx, "the focus stays on the item")
+		tt.ListGrid.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+			if tf, ok := cw.(*TextField); ok && cw != foc {
+				assert.False(t, tf.edited, "no edit left in another row: %q", string(tf.editText))
+				tf.editDone() // as when the window is closed
+			}
+			return true
+		})
+		foc.(*TextField).editDone()
+		for i, tk := range tasks {
+			want := fmt.Sprintf("t%d", i)
+			if i == edit {
+				want = "z" + want // (typed at the start)
+			}
+			assert.Equal(t, want, tk.Name)
+		}
+	})
+}
+
+// TestTreeTableWheelEndsEdit tests that scrolling the rows with the
+// wheel applies the edit of a focused text field and clears the focus,
+// before the rows become widgets for other items.
+func TestTreeTableWheelEndsEdit(t *testing.T) {
+	tasks := make([]*task, 30)
+	for i := range tasks {
+		tasks[i] = &task{Name: fmt.Sprintf("t%d", i)}
+	}
+	b := NewBody()
+	b.Styler(func(s *styles.Style) {
+		s.Min.Set(units.Dp(300), units.Dp(400))
+		s.Max.Set(units.Dp(300), units.Dp(400))
+	})
+	tt := NewTreeTable(b).SetItems(&tasks)
+	edit := 3
+	RenderImage(b, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		tt.IndexGrabFocus(edit)
+	}, func() {
+		b.AsyncLock()
+		_, _, foc := tt.focusedCell()
+		tf, ok := foc.(*TextField)
+		b.AsyncUnlock()
+		require.True(t, ok, "a text field is focused")
+		b.AsyncLock()
+		tf.HandleEvent(events.NewKey(events.KeyChord, 'z', key.CodeZ, 0))
+		bb := tt.ListGrid.Geom.TotalBBox
+		b.AsyncUnlock()
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		for range 3 {
+			src.Scroll(bb.Min.Add(bb.Size().Div(2)), math32.Vec2(0, 25))
+			time.Sleep(100 * time.Millisecond)
+		}
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		assert.Greater(t, tt.StartIndex, 0, "scrolled")
+		_, _, foc = tt.focusedCell()
+		assert.Nil(t, foc, "no focused cell")
+		tt.ListGrid.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+			if tf, ok := cw.(*TextField); ok {
+				assert.False(t, tf.edited, "no edit in a row: %q", string(tf.editText))
+			}
+			return true
+		})
+		for i, tk := range tasks {
+			want := fmt.Sprintf("t%d", i)
+			if i == edit {
+				want = "z" + want // (typed at the start)
+			}
+			assert.Equal(t, want, tk.Name, "applied to its item only")
+		}
+	})
+}
