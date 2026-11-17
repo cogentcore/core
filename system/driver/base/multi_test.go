@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/driver/offscreen"
 	"github.com/stretchr/testify/assert"
@@ -132,4 +133,25 @@ func TestRunOnMain(t *testing.T) {
 	a.RunOnMain(func() { ran = true })
 	assert.True(t, ran, "run at once without a main loop")
 
+}
+
+// TestAppCloseRemovesFirst tests that a closed window is removed from the
+// app before its WinClose event is sent: the event stops the event loop
+// of the window in core, and the app quits once the loop of its last
+// window stops, which fails if the window is still in the app then
+// (leaving a process with no windows that never quits).
+func TestAppCloseRemovesFirst(t *testing.T) {
+	w := newWindow(t, "last", image.Pt(100, 100))
+	nwin := make(chan int, 1)
+	go func() {
+		for {
+			e := w.Events().Deque.NextEvent()
+			if we, ok := e.(*events.WindowEvent); ok && we.Action == events.WinClose {
+				nwin <- system.TheApp.NWindows()
+				return
+			}
+		}
+	}()
+	w.Close()
+	assert.Equal(t, 0, <-nwin, "the windows of the app when it gets WinClose")
 }
