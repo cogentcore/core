@@ -403,14 +403,20 @@ func (tm *Terminal) send(b []byte, user bool) {
 	if user {
 		tm.userInput(b)
 	}
+	// Whether Control+C is an interrupt is decided before the input is
+	// sent, as the program can read it right away and change the mode
+	// (as when it reads one raw byte and then restores the terminal).
+	interrupt := false
+	if user && tm.Func != nil && len(tm.interruptFuncs) > 0 && slices.Contains(b, 0x03) {
+		p := tm.pty
+		interrupt = p != nil && tm.IsRunning() && p.Signals()
+	}
 	if iq := tm.input.Load(); iq != nil {
 		iq.send(b)
 	}
-	if user && tm.Func != nil && len(tm.interruptFuncs) > 0 && slices.Contains(b, 0x03) {
-		if p := tm.pty; p != nil && tm.IsRunning() && p.Signals() {
-			for _, fun := range tm.interruptFuncs {
-				fun()
-			}
+	if interrupt {
+		for _, fun := range tm.interruptFuncs {
+			fun()
 		}
 	}
 }
