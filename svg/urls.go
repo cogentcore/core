@@ -67,19 +67,37 @@ func NameID(nm string, id int) string {
 
 // GatherIDs gathers all the numeric id suffixes currently in use.
 // It automatically renames any that are not unique or empty.
+// The ids in use are all registered before any new one is made,
+// so that a new id never takes that of a node later in the tree
+// (which would then be renamed in turn).
 func (sv *SVG) GatherIDs() {
 	sv.UniqueIDs = make(map[int]struct{})
+	var renew []Node
 	for n := range sv.Root.All() {
-		sv.NodeEnsureUniqueID(n.(Node))
+		if nd := n.(Node); !sv.registerID(nd) {
+			renew = append(renew, nd)
+		}
+	}
+	for _, n := range renew {
+		sv.newNodeID(n)
 	}
 }
 
 // NodeEnsureUniqueID ensures that the given node has a unique ID.
 // Call this on any newly created nodes.
 func (sv *SVG) NodeEnsureUniqueID(n Node) {
+	if !sv.registerID(n) {
+		sv.newNodeID(n)
+	}
+}
+
+// registerID registers the numeric id of the name of the given node as in
+// use, renaming it to its element name and that id as needed, and returns
+// false if it needs a new id, because it has none or that of another node.
+func (sv *SVG) registerID(n Node) bool {
 	elnm := n.SVGName()
 	if elnm == "" {
-		return
+		return true
 	}
 	nb := n.AsNodeBase()
 	elpfx, id := SplitNameID(elnm, nb.Name)
@@ -89,45 +107,41 @@ func (sv *SVG) NodeEnsureUniqueID(n Node) {
 			if id > 0 {
 				sv.UniqueIDs[id] = struct{}{}
 			}
-			return
+			return true
 		}
 		_, id = SplitNameIDDig(nb.Name)
 		if id > 0 {
 			nb.SetName(NameID(elnm, id))
 		}
 	}
-	_, exists := sv.UniqueIDs[id]
-	if id <= 0 || exists {
-		id = sv.NewUniqueID() // automatically registers it
-		nb.SetName(NameID(elnm, id))
-	} else {
-		sv.UniqueIDs[id] = struct{}{}
+	if _, exists := sv.UniqueIDs[id]; id <= 0 || exists {
+		return false
 	}
+	sv.UniqueIDs[id] = struct{}{}
+	return true
 }
 
-// NewUniqueID returns a new unique numerical id number, for naming an object
+// newNodeID names the given node with its element name and a new unique id.
+func (sv *SVG) newNodeID(n Node) {
+	n.AsNodeBase().SetName(NameID(n.SVGName(), sv.NewUniqueID()))
+}
+
+// NewUniqueID returns a new unique numerical id number, for naming an object.
+// It is never 0, which is the id of a name without a number. It is random,
+// below 1000 for a drawing with less than 100 ids, and otherwise in a range
+// that is at least 10 times the number of ids, so most of it is free.
 func (sv *SVG) NewUniqueID() int {
 	if sv.UniqueIDs == nil {
 		sv.GatherIDs()
 	}
-	sz := len(sv.UniqueIDs)
-	var nid int
+	n := max(999, 10*len(sv.UniqueIDs))
 	for {
-		switch {
-		case sz >= 10000:
-			nid = rand.Intn(sz * 100)
-		case sz >= 1000:
-			nid = rand.Intn(10000)
-		default:
-			nid = rand.Intn(1000)
+		nid := 1 + rand.Intn(n)
+		if _, has := sv.UniqueIDs[nid]; !has {
+			sv.UniqueIDs[nid] = struct{}{}
+			return nid
 		}
-		if _, has := sv.UniqueIDs[nid]; has {
-			continue
-		}
-		break
 	}
-	sv.UniqueIDs[nid] = struct{}{}
-	return nid
 }
 
 // FindDefByName finds Defs item by name, using cached indexes for speed.

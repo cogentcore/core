@@ -73,6 +73,39 @@ func TestNameIDs(t *testing.T) {
 	assert.Nil(t, sv.NodeFindURL(c, "none"))
 }
 
+// TestGatherIDsKeepsNames tests that the nodes without an id that come
+// before the named nodes (the root, and a circle) do not get the id of one
+// of them, which then had to be renamed: with all the ids below 1000 but
+// one in use, a new id taken before they are registered would very likely
+// be one of theirs.
+func TestGatherIDsKeepsNames(t *testing.T) {
+	sv := NewSVG(math32.Vec2(100, 100))
+	first := NewCircle(sv.Root)
+	first.SetName("circle")
+	var rects []*Rect
+	for id := 1; id < 1000; id++ {
+		if id == 500 {
+			continue
+		}
+		r := NewRect(sv.Root)
+		r.SetName(NameID("rect", id))
+		rects = append(rects, r)
+	}
+	sv.GatherIDs()
+	for i, r := range rects {
+		id := i + 1
+		if id >= 500 {
+			id++
+		}
+		if !assert.Equal(t, NameID("rect", id), r.Name) {
+			break
+		}
+	}
+	ok, id := SplitNameID("circle", first.Name)
+	assert.True(t, ok && id > 0, first.Name)
+	assert.Equal(t, 998+2, len(sv.UniqueIDs), "the rects, the circle, and the root")
+}
+
 // TestGradientsForNodes tests making and updating the gradients
 // specific to nodes, as a drawing app does.
 func TestGradientsForNodes(t *testing.T) {
