@@ -28,13 +28,6 @@ func IsJS(c *config.Config) bool {
 	return len(c.Build.Target) > 0 && c.Build.Target[0].OS == "js"
 }
 
-// jsPackageJSON is the package.json used for bundling the GoScript output,
-// which contains the npm dependencies of the GoScript runtime, as listed in
-// the dependencies of GoScript's own package.json: its crypto packages use
-// the @noble libraries and its compression packages use pako.
-const jsPackageJSON = `{"type":"module","private":true,"dependencies":{"@noble/ciphers":"2.2.0","@noble/hashes":"2.2.0","pako":"3.0.2"}}
-`
-
 // jsTSConfig is the tsconfig.json used for bundling the GoScript output,
 // which maps the @goscript imports to the compiled output.
 const jsTSConfig = `{
@@ -108,10 +101,20 @@ func buildJS(c *config.Config) error {
 
 	// The dependencies are installed again when the package.json changes,
 	// so that a cached work directory gets newly added dependencies.
+	// They are those of the package.json of GoScript, so that they always
+	// match its runtime.
+	gsm, err := goscriptPackageJSON()
+	if err != nil {
+		return err
+	}
+	pkgData, err := jsPackageJSON(gsm)
+	if err != nil {
+		return err
+	}
 	pkgJSON := filepath.Join(work, "package.json")
 	oldPkgJSON, _ := os.ReadFile(pkgJSON)
-	install := string(oldPkgJSON) != jsPackageJSON
-	err = os.WriteFile(pkgJSON, []byte(jsPackageJSON), 0666)
+	install := string(oldPkgJSON) != string(pkgData)
+	err = os.WriteFile(pkgJSON, pkgData, 0666)
 	if err != nil {
 		return err
 	}
