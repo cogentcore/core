@@ -7,11 +7,14 @@ package core
 import (
 	"image"
 	"slices"
+	"strings"
 	"sync"
 	"testing"
 	"time"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
 )
@@ -151,4 +154,48 @@ func TestMenuSearchItemDialog(t *testing.T) {
 	rc.Lock()
 	b.Close()
 	rc.Unlock()
+}
+
+// TestMenuInDialogAtPosition tests that a menu for a widget in a dialog,
+// as the completion menu of its text field, is at its position below the
+// field, in the window, with the full height of its items, when it is wider
+// than the dialog. It was put at the corner of the dialog as a big popup,
+// as wide as the dialog, with a horizontal scroll bar taking its height.
+func TestMenuInDialogAtPosition(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) {
+		s.Min.Set(units.Dp(1000), units.Dp(700))
+	})
+	NewText(b).SetText("main")
+	var tf *TextField
+	var menu *Stage
+	var item *Button
+	RenderImage(b, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		d := NewBody("Search")
+		tf = NewTextField(d)
+		d.AddBottomBar(func(bar *Frame) { d.AddCancel(bar) })
+		d.RunDialog(b)
+	}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		long := "(*PathParams) SynScale [func(ctx *Context, rlay *Layer, slay *Layer, path *Path) " + strings.Repeat("x", 200) + "]"
+		bb := tf.Geom.TotalBBox.Add(tf.Scene.SceneGeom.Pos) // (in the window)
+		menu = NewMenu(func(m *Scene, _ image.Point) {
+			item = NewButton(m).SetText(long)
+		}, tf, image.Pt(bb.Min.X, bb.Max.Y))
+		menu.Run()
+	}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		win := b.Scene.SceneGeom
+		dlg := tf.Scene.SceneGeom
+		mg := menu.Scene.SceneGeom
+		fieldBottom := tf.Geom.TotalBBox.Max.Y + dlg.Pos.Y
+		assert.Equal(t, fieldBottom, mg.Pos.Y, "below the field")
+		assert.Greater(t, mg.Size.X, dlg.Size.X, "wider than the dialog")
+		assert.LessOrEqual(t, mg.Pos.X+mg.Size.X, win.Size.X, "in the window")
+		assert.GreaterOrEqual(t, mg.Size.Y, int(item.Geom.Size.Actual.Total.Y+menu.Scene.Styles.ScrollbarWidth.Dots), "the item and the scroll bar fit")
+	})
 }

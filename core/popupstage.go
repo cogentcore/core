@@ -75,7 +75,9 @@ func (st *Stage) runPopup() *Stage {
 	sc.SceneGeom.Size = maxGeom.Size
 	sc.SceneGeom.Pos = st.Pos
 	sz := sc.contentSize(maxGeom.Size)
-	bigPopup := usingWinGeom && 4*sz.X*sz.Y > 3*msc.SceneGeom.Size.X*msc.SceneGeom.Size.Y // reasonable fraction
+	// a menu is at its position (as below the text field of a completer),
+	// in the window, even if it is bigger than a dialog that it is for
+	bigPopup := st.Type != MenuStage && usingWinGeom && 4*sz.X*sz.Y > 3*msc.SceneGeom.Size.X*msc.SceneGeom.Size.Y // reasonable fraction
 	scrollWd := int(sc.Styles.ScrollbarWidth.Dots)
 	fontHt := sc.Styles.Font.FontHeight()
 	if fontHt == 0 {
@@ -87,6 +89,9 @@ func (st *Stage) runPopup() *Stage {
 		sz.X += scrollWd * 2
 		maxht := int(float32(AppearanceSettings.MenuMax) * fontHt)
 		sz.Y = min(maxht, sz.Y)
+		if sz.X > maxGeom.Size.X { // room for the horizontal scroll bar
+			sz.Y += scrollWd
+		}
 	case SnackbarStage:
 		b := msc.SceneGeom.Bounds()
 		// Go in the middle [(max - min) / 2], and then subtract
@@ -131,6 +136,8 @@ func (st *Stage) runPopup() *Stage {
 			tpos.Y = 0
 		}
 		sc.SceneGeom.Pos = tpos
+	} else if st.Type == MenuStage {
+		sc.fitInWindow(maxGeom)
 	} else {
 		sc.fitInWindow(msc.SceneGeom)
 	}
