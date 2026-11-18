@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package sharedfile provides a JSON file of data that is shared by several
+// Package sharedfile provides a file of data (JSON by default) that is shared by several
 // processes, such as different Cogent Core apps, like the sort orders of
 // directories and the geometry of windows. The data is read again when
 // another process has changed the file, and the file is written with a
@@ -37,6 +37,13 @@ type File[T any] struct {
 	// It is replaced by a new value when the file is read again, so it
 	// must only be changed by [File.Update].
 	Data T
+
+	// Encode and Decode, if set, write and read the data in another
+	// format than JSON, which is used for each that is not set, such as
+	// a text file of lines. Decode returns what it could read along with
+	// any error.
+	Encode func(d T) ([]byte, error)
+	Decode func(b []byte) (T, error)
 
 	// file is the path of the file that was last read or written.
 	file string
@@ -117,8 +124,7 @@ func (f *File[T]) reload() (readErr bool, err error) {
 	// the data are decoded into a new value, so that nothing is kept from
 	// before, and the state is recorded even when it is not valid, so it
 	// is not read again until it changes
-	var d T
-	err = json.Unmarshal(b, &d)
+	d, err := f.decode(b)
 	f.Data, f.file, f.info = d, f.Path, info
 	return false, err
 }
@@ -159,7 +165,7 @@ func (f *File[T]) Update(change func(d *T)) error {
 
 	// the file is written whole, then renamed, so that other processes
 	// never read a partial file
-	b, err := json.MarshalIndent(f.Data, "", "\t")
+	b, err := f.encode()
 	if err != nil {
 		return err
 	}
@@ -175,6 +181,26 @@ func (f *File[T]) Update(change func(d *T)) error {
 		f.file, f.info = f.Path, info
 	}
 	return nil
+}
+
+// encode returns the data as written to the file: with [File.Encode],
+// or as indented JSON.
+func (f *File[T]) encode() ([]byte, error) {
+	if f.Encode != nil {
+		return f.Encode(f.Data)
+	}
+	return json.MarshalIndent(f.Data, "", "\t")
+}
+
+// decode returns the data read from the file: with [File.Decode], or as
+// JSON, into a new value, so that nothing is kept from before.
+func (f *File[T]) decode(b []byte) (T, error) {
+	if f.Decode != nil {
+		return f.Decode(b)
+	}
+	var d T
+	err := json.Unmarshal(b, &d)
+	return d, err
 }
 
 // LockStale is how long a lock file can exist before it is taken as left
