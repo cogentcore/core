@@ -6,23 +6,18 @@ package spell
 
 import (
 	"embed"
-	"log"
 	"log/slog"
-	"os"
+	"maps"
 	"strings"
 	"sync"
-	"time"
 
+	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/sharedfile"
 	"cogentcore.org/core/text/parse/lexer"
 )
 
 //go:embed dict_en_us
 var embedDict embed.FS
-
-// SaveAfterLearnIntervalSecs is number of seconds since
-// dict file has been opened / saved
-// above which model is saved after learning.
-const SaveAfterLearnIntervalSecs = 20
 
 // Spell is the global shared spell
 var Spell *SpellData
@@ -30,10 +25,13 @@ var Spell *SpellData
 // SpellData is a spell checker. It uses the operating system spell checker
 // when available (see [UseNative]), in which case learned words go to the
 // system user dictionary. Otherwise it uses a built-in English dictionary,
-// with learned words saved in UserFile.
+// with learned words saved in UserFile, which is shared by all apps: it is
+// read again when another app has changed it, and the words learned and
+// deleted are saved right away, with those of the other apps (see
+// [sharedfile]).
 type SpellData struct {
 	// UserFile is path to user's dictionary where learned words go,
-	// only for the built-in checker.
+	// only for the built-in checker: a list of words, one per line.
 	UserFile string
 
 	// native is the operating system spell checker, if available.
@@ -47,10 +45,17 @@ type SpellData struct {
 	// for the native checker.
 	ignore Dict
 
-	model     *Model
-	openTime  time.Time    // ModTime() on file
-	learnTime time.Time    // last time when a Learn function was called 	-- last mod to model -- zero if not mod
-	mu        sync.RWMutex // we need our own mutex in case of loading a new model
+	model *Model
+
+	// user is the shared file of the user dictionary.
+	user sharedfile.File[Dict]
+
+	// added and deleted are the words learned and deleted since the user
+	// dictionary was last saved, which are applied to the words of its
+	// file when it is saved, so that those of other apps are kept.
+	added, deleted Dict
+
+	mu sync.RWMutex // we need our own mutex in case of loading a new model
 }
 
 // maxKnownCache is the maximum number of words in the native known cache.
@@ -70,26 +75,38 @@ func NewSpell(userFile string) *SpellData {
 		slog.Error(err.Error())
 		return nil
 	}
-	sp := &SpellData{UserFile: userFile}
-	sp.ResetLearnTime()
+	sp := &SpellData{UserFile: userFile, added: Dict{}, deleted: Dict{}}
 	sp.model = NewModel()
-	sp.openTime = time.Date(2024, 06, 30, 00, 00, 00, 0, time.UTC)
-	sp.OpenUser()
-	sp.model.SetDicts(d, sp.model.UserDict)
+	uf := sp.userFile()
+	errors.Log(uf.Reload())
+	sp.model.SetDicts(d, cloneDict(uf.Data))
 	return sp
 }
 
-// modTime returns the modification time of given file path
-func modTime(path string) (time.Time, error) {
-	info, err := os.Stat(path)
-	if err != nil {
-		return time.Time{}, err
+// userFile returns the shared file of the user dictionary, with the path
+// of [SpellData.UserFile], which can be changed.
+func (sp *SpellData) userFile() *sharedfile.File[Dict] {
+	sp.user.Path = sp.UserFile
+	sp.user.Encode = func(d Dict) ([]byte, error) {
+		return []byte(strings.Join(d.List(), "\n")), nil // as Dict.Save
 	}
-	return info.ModTime(), nil
+	sp.user.Decode = func(b []byte) (Dict, error) {
+		d := Dict{}
+		for _, w := range strings.Split(string(b), "\n") {
+			if w = strings.TrimSpace(w); w != "" {
+				d.Add(w)
+			}
+		}
+		return d, nil
+	}
+	return &sp.user
 }
 
-func (sp *SpellData) ResetLearnTime() {
-	sp.learnTime = time.Time{}
+// cloneDict returns a copy of the given dictionary, which is empty if nil.
+func cloneDict(d Dict) Dict {
+	c := make(Dict, len(d))
+	maps.Copy(c, d)
+	return c
 }
 
 // IsNative returns true if the operating system spell checker is being used.
@@ -97,7 +114,8 @@ func (sp *SpellData) IsNative() bool {
 	return sp != nil && sp.native != nil
 }
 
-// OpenUser opens user dictionary of words, for the built-in checker.
+// OpenUser opens user dictionary of words, for the built-in checker,
+// if it has changed since it was last read.
 func (sp *SpellData) OpenUser() error {
 	if sp.native != nil {
 		return nil
@@ -110,71 +128,84 @@ func (sp *SpellData) OpenUser() error {
 // openUser is the implementation of [SpellData.OpenUser], called with
 // the mutex locked.
 func (sp *SpellData) openUser() error {
-	d, err := OpenDict(sp.UserFile)
-	if err != nil {
-		// slog.Error(err.Error())
-		sp.model.UserDict = make(Dict)
-		return err
-	}
-	// note: does not have suggestions for new words
-	// future impl will not precompile suggs so it is not worth it
-	sp.openTime, err = modTime(sp.UserFile)
-	sp.model.UserDict = d
+	uf := sp.userFile()
+	err := uf.Reload()
+	sp.setUser()
 	return err
 }
 
-// OpenUserCheck checks if the current user dict file has been modified
-// since last open time and re-opens it if so.
+// setUser sets the user dictionary of the model to that of its file, with
+// the words learned and deleted since it was last saved. Called with the
+// mutex locked.
+func (sp *SpellData) setUser() {
+	d := cloneDict(sp.user.Data)
+	for w := range sp.added {
+		d.Add(w)
+	}
+	for w := range sp.deleted {
+		delete(d, w)
+	}
+	sp.model.setUserDict(d)
+}
+
+// OpenUserCheck opens the user dictionary again if its file has been
+// changed (by another app) since it was last read or saved.
 func (sp *SpellData) OpenUserCheck() error {
 	if sp == nil || sp.native != nil || sp.UserFile == "" {
 		return nil
 	}
 	sp.mu.Lock()
 	defer sp.mu.Unlock()
-	tm, err := modTime(sp.UserFile)
-	if err != nil {
-		return err
-	}
-	if tm.After(sp.openTime) {
-		sp.openUser() // (the mutex is locked)
-		sp.openTime = tm
-		// log.Printf("opened newer spell file: %s\n", openTime.String())
-	}
-	return err
-}
-
-// SaveUser saves the user dictionary
-// note: this will overwrite any existing file; be sure to have opened
-// the current file before making any changes.
-func (sp *SpellData) SaveUser() error {
-	sp.mu.Lock() // (it sets the times)
-	defer sp.mu.Unlock()
-
-	if sp.native != nil || sp.model == nil {
+	if !sp.userFile().Changed() {
 		return nil
 	}
-	sp.ResetLearnTime()
-	err := sp.model.UserDict.Save(sp.UserFile)
-	if err == nil {
-		sp.openTime, err = modTime(sp.UserFile)
-	} else {
-		log.Printf("spell.Spell: Error saving file %q: %v\n", sp.UserFile, err)
-	}
-	return err
+	return sp.openUser()
 }
 
-// SaveUserIfLearn saves the user dictionary
-// if learning has occurred since last save / open.
-// If no changes also checks if file has been modified and opens it if so.
+// SaveUser saves the words learned and deleted since the user dictionary
+// was last saved to its file, with the words of its file, which another
+// app may have changed, which are then those of the user dictionary.
+func (sp *SpellData) SaveUser() error {
+	sp.mu.Lock()
+	defer sp.mu.Unlock()
+	if sp.native != nil || sp.model == nil || sp.UserFile == "" {
+		return nil
+	}
+	err := sp.userFile().Update(func(d *Dict) {
+		if *d == nil {
+			*d = Dict{}
+		}
+		for w := range sp.added {
+			d.Add(w)
+		}
+		for w := range sp.deleted {
+			delete(*d, w)
+		}
+	})
+	if err != nil {
+		slog.Error("spell: error saving the user dictionary", "file", sp.UserFile, "err", err)
+		return err // (the words are saved next time)
+	}
+	clear(sp.added)
+	clear(sp.deleted)
+	sp.setUser()
+	return nil
+}
+
+// SaveUserIfLearn saves the user dictionary if words have been learned or
+// deleted since it was last saved, and otherwise opens it again if its file
+// has changed.
 func (sp *SpellData) SaveUserIfLearn() error {
 	if sp == nil || sp.native != nil || sp.UserFile == "" {
 		return nil
 	}
-	if sp.learnTime.IsZero() {
+	sp.mu.RLock()
+	changed := len(sp.added) > 0 || len(sp.deleted) > 0
+	sp.mu.RUnlock()
+	if !changed {
 		return sp.OpenUserCheck()
 	}
-	sp.SaveUser()
-	return nil
+	return sp.SaveUser()
 }
 
 // CheckWord checks a single word and returns suggestions if word is unknown.
@@ -281,20 +312,15 @@ func (sp *SpellData) AddWord(word string) {
 		sp.clearKnown()
 		return
 	}
-	if sp.learnTime.IsZero() {
-		sp.OpenUserCheck() // be sure we have latest before learning!
-	}
 	sp.mu.Lock()
 	lword := strings.ToLower(word)
-	sp.model.AddWord(lword)
-	sp.learnTime = time.Now()
-	sint := sp.learnTime.Sub(sp.openTime) / time.Second
-	sp.mu.Unlock()
-
-	if sp.UserFile != "" && sint > SaveAfterLearnIntervalSecs {
-		sp.SaveUser()
-		// log.Printf("spell.LearnWord: saved updated model after %d seconds\n", sint)
+	if !sp.model.Dict.Exists(lword) { // (words of the dictionary are not learned)
+		sp.model.AddWord(lword)
+		sp.added.Add(lword)
+		delete(sp.deleted, lword)
 	}
+	sp.mu.Unlock()
+	sp.SaveUser()
 }
 
 // DeleteWord removes word from the user dictionary,
@@ -305,20 +331,13 @@ func (sp *SpellData) DeleteWord(word string) {
 		sp.clearKnown()
 		return
 	}
-	if sp.learnTime.IsZero() {
-		sp.OpenUserCheck() // be sure we have latest before learning!
-	}
-
 	sp.mu.Lock()
 	lword := strings.ToLower(word)
 	sp.model.Delete(lword)
-	sp.learnTime = time.Now()
-	sint := sp.learnTime.Sub(sp.openTime) / time.Second
+	sp.deleted.Add(lword)
+	delete(sp.added, lword)
 	sp.mu.Unlock()
-
-	if sp.UserFile != "" && sint > SaveAfterLearnIntervalSecs {
-		sp.SaveUser()
-	}
+	sp.SaveUser()
 }
 
 // clearKnown clears the native known word cache.

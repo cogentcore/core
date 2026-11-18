@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -157,4 +158,23 @@ func TestLockTimeout(t *testing.T) {
 	defer unlock()
 	_, err = Lock(fn)
 	assert.Error(t, err)
+}
+
+// TestEncodeDecode tests a file in another format than JSON: lines of text.
+func TestEncodeDecode(t *testing.T) {
+	fn := filepath.Join(t.TempDir(), "lines.txt")
+	lines := func() File[[]string] {
+		return File[[]string]{Path: fn,
+			Encode: func(d []string) ([]byte, error) { return []byte(strings.Join(d, "\n")), nil },
+			Decode: func(b []byte) ([]string, error) { return strings.Split(string(b), "\n"), nil },
+		}
+	}
+	a, b := lines(), lines()
+	assert.NoError(t, a.Update(func(d *[]string) { *d = append(*d, "one") }))
+	assert.NoError(t, b.Update(func(d *[]string) { *d = append(*d, "two") }))
+	got, err := os.ReadFile(fn)
+	assert.NoError(t, err)
+	assert.Equal(t, "one\ntwo", string(got), "with the change of the other")
+	assert.NoError(t, a.Reload())
+	assert.Equal(t, []string{"one", "two"}, a.Data)
 }

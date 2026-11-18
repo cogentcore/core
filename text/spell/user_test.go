@@ -39,7 +39,6 @@ func TestUserDict(t *testing.T) {
 	sp.AddWord("Florbit")
 	_, known = sp.CheckWord("florbit")
 	assert.True(t, known, "learned")
-	require.NoError(t, sp.SaveUserIfLearn())
 	d, err := OpenDict(fn)
 	require.NoError(t, err)
 	assert.Contains(t, d, "florbit", "saved")
@@ -47,7 +46,6 @@ func TestUserDict(t *testing.T) {
 	sp.DeleteWord("florbit")
 	_, known = sp.CheckWord("florbit")
 	assert.False(t, known, "deleted")
-	require.NoError(t, sp.SaveUser())
 	d, err = OpenDict(fn)
 	require.NoError(t, err)
 	assert.NotContains(t, d, "florbit", "the deleted word is not saved")
@@ -55,9 +53,7 @@ func TestUserDict(t *testing.T) {
 
 	// another program (or instance) changes the file, which is opened
 	// again (this deadlocked before)
-	later := time.Now().Add(time.Hour)
 	require.NoError(t, os.WriteFile(fn, []byte("zorbly\nquimble\n"), 0o644))
-	require.NoError(t, os.Chtimes(fn, later, later))
 	done := make(chan error, 1)
 	go func() { done <- sp.OpenUserCheck() }()
 	select {
@@ -67,6 +63,8 @@ func TestUserDict(t *testing.T) {
 		t.Fatal("OpenUserCheck deadlocked")
 	}
 	assert.Contains(t, sp.model.UserDict, "quimble")
+	_, known = sp.CheckWord("quimble")
+	assert.True(t, known, "learned by the other program")
 	require.NoError(t, sp.SaveUserIfLearn(), "nothing learned: checks the file")
 
 	var nilsp *SpellData
@@ -82,7 +80,33 @@ func TestOpenUserMissing(t *testing.T) {
 	sp := NewSpell(filepath.Join(t.TempDir(), "none.txt"))
 	require.NotNil(t, sp)
 	assert.Empty(t, sp.model.UserDict)
-	assert.Error(t, sp.OpenUserCheck())
+	assert.NoError(t, sp.OpenUserCheck(), "no words learned yet")
+}
+
+// TestUserDictShared tests two spell checkers (as of two apps) with the
+// same user dictionary file, which each keep the words of the other when
+// they save it, and know them when they open it again.
+func TestUserDictShared(t *testing.T) {
+	a, fn := newUserSpell(t)
+	b := NewSpell(fn)
+	a.AddWord("glorp")
+	b.AddWord("snirkle")
+	b.DeleteWord("zorbly")
+	d, err := OpenDict(fn)
+	require.NoError(t, err)
+	assert.Equal(t, []string{"glorp", "snirkle"}, d.List(), "the words of both")
+	_, known := b.CheckWord("glorp")
+	assert.True(t, known, "read when saving")
+
+	require.NoError(t, a.OpenUserCheck())
+	for w, want := range map[string]bool{"glorp": true, "snirkle": true, "zorbly": false} {
+		_, known := a.CheckWord(w)
+		assert.Equal(t, want, known, w)
+	}
+	a.AddWord("the") // a word of the dictionary is not learned
+	d, err = OpenDict(fn)
+	require.NoError(t, err)
+	assert.NotContains(t, d, "the")
 }
 
 // TestModelEdits tests the Levenshtein distance and the suggestions of

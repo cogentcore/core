@@ -109,6 +109,26 @@ func (md *Model) Delete(term string) {
 	md.Unlock()
 }
 
+// setUserDict sets the user dictionary to the given one, as read again
+// from its file, which can have words learned or deleted by another app:
+// they are added to or deleted from the dictionary too.
+func (md *Model) setUserDict(user Dict) {
+	old := md.UserDict
+	for w := range old {
+		if !user.Exists(w) {
+			md.Delete(w)
+		}
+	}
+	for w := range user {
+		if !old.Exists(w) {
+			md.AddWord(w)
+		}
+	}
+	md.Lock()
+	md.UserDict = user
+	md.Unlock()
+}
+
 // For a given term, create the partially deleted lookup keys
 func (md *Model) createSuggestKeys(term string) {
 	edits := md.EditsMulti(term, md.Depth)
