@@ -14,6 +14,8 @@ import (
 
 	"cogentcore.org/core/base/dirsort"
 	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/base/sharedfile"
+	"cogentcore.org/core/styles/units"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -105,4 +107,54 @@ func TestFilePickerWatch(t *testing.T) {
 	rc.Lock()
 	b.Close()
 	rc.Unlock()
+}
+
+// TestFilePickerColumnWidths tests that the widths of the columns of the
+// files that the user sets are saved in the [FilePickerSettings] file, for
+// the file pickers opened after, also when another app changed them.
+func TestFilePickerColumnWidths(t *testing.T) {
+	skipOnWeb(t, "uses temporary directories of the operating system")
+	dir := t.TempDir()
+	os.WriteFile(filepath.Join(dir, "a.txt"), []byte("a"), 0644)
+	t.Cleanup(func() { // the other tests have the automatic widths
+		updateFilePickerSettings(func(s *FilePickerSettings) { *s = FilePickerSettings{} })
+	})
+	other := sharedfile.File[FilePickerSettings]{Path: filePickerSettingsPath()}
+	column := func(tb *Table, name string) int {
+		return slices.IndexFunc(tb.visibleFields, func(f reflect.StructField) bool { return f.Name == name })
+	}
+	picker := func(fun func(tb *Table)) {
+		b := NewBody()
+		fp := NewFilePicker(b).SetFilename(dir + string(filepath.Separator))
+		RenderImage(b, func() {}, func() {
+			b.AsyncLock() // (it is rendered meanwhile)
+			defer b.AsyncUnlock()
+			fun(fp.filesTable)
+		})
+	}
+
+	// set by dragging the handle of the column (see Table.makeColumnHandle)
+	picker(func(tb *Table) {
+		assert.Empty(t, tb.ColumnWidths)
+		tb.setColumnWidth(column(tb, "Name"), 300*tb.Styles.UnitContext.Dots(units.UnitDp))
+		tb.SendChange()
+	})
+	assert.NoError(t, other.Reload())
+	assert.Equal(t, map[string]float32{"Name": 300}, other.Data.ColumnWidths, "saved")
+	picker(func(tb *Table) {
+		assert.Equal(t, map[string]float32{"Name": 300}, tb.ColumnWidths, "in a new file picker")
+	})
+
+	// changed by another app
+	assert.NoError(t, other.Update(func(s *FilePickerSettings) {
+		s.ColumnWidths = map[string]float32{"Name": 200, "Size": 80}
+	}))
+	picker(func(tb *Table) {
+		assert.Equal(t, map[string]float32{"Name": 200, "Size": 80}, tb.ColumnWidths, "read again")
+		// the automatic width again, by double clicking on the handle
+		delete(tb.ColumnWidths, "Size")
+		tb.SendChange()
+	})
+	assert.NoError(t, other.Reload())
+	assert.Equal(t, map[string]float32{"Name": 200}, other.Data.ColumnWidths)
 }

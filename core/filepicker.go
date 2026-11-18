@@ -11,6 +11,7 @@ import (
 	"io/fs"
 	"log"
 	"log/slog"
+	"maps"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -289,6 +290,16 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 		fp.filesTable = w
 		w.SetReadOnly(true)
 		w.SetSlice(&fp.files)
+		// the widths of the columns that the user sets are kept for all
+		// file pickers, of all apps (see [FilePickerSettings]); the table
+		// only sends a change for them, as it is read only
+		w.ColumnWidths = loadFilePickerSettings().ColumnWidths
+		w.OnChange(func(e events.Event) {
+			widths := maps.Clone(w.ColumnWidths)
+			errors.Log(updateFilePickerSettings(func(s *FilePickerSettings) {
+				s.ColumnWidths = widths
+			}))
+		})
 		w.SelectedField = "Name"
 		w.SelectedValue = fp.selectedFilename
 		// sorted in the sort order of the directory, which the user sets for
