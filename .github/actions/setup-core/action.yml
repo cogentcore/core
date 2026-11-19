@@ -69,25 +69,15 @@ runs:
         echo "packages: $packages"
         echo "packages=$packages" >> "$GITHUB_OUTPUT"
 
-    # cache-apt-pkgs-action downloads the packages with apt-fast, which uses
-    # all of the mirrors of the runners, and does not fall back to another
-    # mirror when one does not have a package version (as apt does). The
-    # security mirror (security.ubuntu.com) only has some of them (returning
-    # 404 for the others), so it is removed: the other mirrors (the Azure
-    # mirror and archive.ubuntu.com) also have the security updates.
-    - name: Remove the security apt mirror
+    # cache-apt-pkgs-action does not update the apt package lists on GitHub
+    # runners (it assumes that they are fresh), but those of the runner image
+    # can be stale: listing package versions that have since been replaced
+    # and removed from the mirrors, which then fail to download (404). The
+    # package versions are part of the cache key, so the cache is also
+    # renewed when they change.
+    - name: Update the apt package lists
       shell: bash
-      run: |
-        if [ -f /etc/apt/apt-mirrors.txt ]; then
-          sudo sed -i '/security\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
-          cat /etc/apt/apt-mirrors.txt
-        fi
-        for f in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do
-          if [ -f "$f" ] && grep -q 'security\.ubuntu\.com' "$f"; then
-            sudo sed -i 's|https\?://security\.ubuntu\.com/ubuntu|http://azure.archive.ubuntu.com/ubuntu|g' "$f"
-            echo "updated $f"
-          fi
-        done
+      run: sudo apt-get update
 
     - name: Install and cache the system packages
       id: cache
