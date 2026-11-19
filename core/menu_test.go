@@ -178,6 +178,15 @@ func TestMenuInDialogAtPosition(t *testing.T) {
 		d.AddBottomBar(func(bar *Frame) { d.AddCancel(bar) })
 		d.RunDialog(b)
 	}, func() {
+		// the dialog is rendered until its position is final, as the menu is
+		// placed at the field (it could move after, when CI is slow)
+		rw := b.Scene.RenderWindow()
+		for range 5 {
+			rw.waitRenderDone()
+			rw.renderWindow()
+		}
+		rw.waitRenderDone()
+	}, func() {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		long := "(*PathParams) SynScale [func(ctx *Context, rlay *Layer, slay *Layer, path *Path) " + strings.Repeat("x", 200) + "]"
