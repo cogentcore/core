@@ -43,7 +43,7 @@ inputs:
     default: 'false'
   cache-version:
     description: The version of the package cache; change it to force a new cache.
-    default: '2'
+    default: '3'
 
 runs:
   using: composite
@@ -69,10 +69,26 @@ runs:
         echo "packages: $packages"
         echo "packages=$packages" >> "$GITHUB_OUTPUT"
 
-    # Note: the apt mirror priorities of the runners must not be changed
-    # (as was done for apt before): cache-apt-pkgs-action downloads the
-    # packages with apt-fast, which does not fall back to another mirror,
-    # and the security mirror only has some of the package versions.
+    # cache-apt-pkgs-action downloads the packages with apt-fast, which uses
+    # all of the mirrors of the runners, and does not fall back to another
+    # mirror when one does not have a package version (as apt does). The
+    # security mirror (security.ubuntu.com) only has some of them (returning
+    # 404 for the others), so it is removed: the other mirrors (the Azure
+    # mirror and archive.ubuntu.com) also have the security updates.
+    - name: Remove the security apt mirror
+      shell: bash
+      run: |
+        if [ -f /etc/apt/apt-mirrors.txt ]; then
+          sudo sed -i '/security\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+          cat /etc/apt/apt-mirrors.txt
+        fi
+        for f in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do
+          if [ -f "$f" ] && grep -q 'security\.ubuntu\.com' "$f"; then
+            sudo sed -i 's|https\?://security\.ubuntu\.com/ubuntu|http://azure.archive.ubuntu.com/ubuntu|g' "$f"
+            echo "updated $f"
+          fi
+        done
+
     - name: Install and cache the system packages
       id: cache
       uses: awalsh128/cache-apt-pkgs-action@v1
