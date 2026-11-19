@@ -43,24 +43,11 @@ inputs:
     default: 'false'
   cache-version:
     description: The version of the package cache; change it to force a new cache.
-    default: '1'
+    default: '2'
 
 runs:
   using: composite
   steps:
-    # Faster and more reliable apt mirrors on GitHub runners, based on
-    # https://github.com/CrowdStrike/glide-core/pull/1113 (see
-    # https://github.com/actions/runner-images/issues/7048)
-    - name: Change apt mirror priorities
-      shell: bash
-      run: |
-        if [ -f /etc/apt/apt-mirrors.txt ]; then
-          sudo sed -i '/archive.ubuntu.com\/ubuntu\/\tpriority/ s/priority:2/priority:0/' /etc/apt/apt-mirrors.txt
-          sudo sed -i '/azure.archive.ubuntu.com\/ubuntu\/\tpriority/ s/priority:0/priority:1/' /etc/apt/apt-mirrors.txt
-          sudo sed -i '/security.ubuntu.com\/ubuntu\/\tpriority/ s/priority:3/priority:2/' /etc/apt/apt-mirrors.txt
-          cat /etc/apt/apt-mirrors.txt
-        fi
-
     - name: Install the core command
       shell: bash
       env:
@@ -82,12 +69,32 @@ runs:
         echo "packages: $packages"
         echo "packages=$packages" >> "$GITHUB_OUTPUT"
 
+    # Note: the apt mirror priorities of the runners must not be changed
+    # (as was done for apt before): cache-apt-pkgs-action downloads the
+    # packages with apt-fast, which does not fall back to another mirror,
+    # and the security mirror only has some of the package versions.
     - name: Install and cache the system packages
+      id: cache
       uses: awalsh128/cache-apt-pkgs-action@v1
       with:
         packages: ${{ steps.packages.outputs.packages }}
         version: ${{ inputs.cache-version }}
         execute_install_scripts: ${{ inputs.execute-install-scripts }}
+
+    # cache-apt-pkgs-action reports success even when the packages fail to
+    # install, and then saves the empty result in the cache, which later runs
+    # restore: so check that they were installed. After a failed install, the
+    # cache-version must be changed to install them again.
+    - name: Check the system packages
+      shell: bash
+      env:
+        INSTALLED: ${{ steps.cache.outputs.all-package-version-list }}
+      run: |
+        if [ -z "$INSTALLED" ]; then
+          echo "::error::the system packages were not installed: see the log of cache-apt-pkgs-action above; if it restored them from a cache of a failed install, change the cache-version input of setup-core"
+          exit 1
+        fi
+        echo "installed: $INSTALLED"
 
     - name: Install the Go tools
       if: inputs.tools == 'true'
