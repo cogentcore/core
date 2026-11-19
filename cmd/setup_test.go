@@ -6,6 +6,8 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -28,4 +30,21 @@ func TestLinuxDistroString(t *testing.T) {
 	}
 	assert.Equal(t, expectedlinuxDistroString, str)
 	fmt.Println("Current linux distro string:\n\n" + str)
+}
+
+// TestFindLinuxDistro checks that the Linux distribution is found from
+// the package manager that is installed, with a fake package manager
+// as the only executable in the PATH.
+func TestFindLinuxDistro(t *testing.T) {
+	for _, tool := range []string{"apt", "dnf", "nix-shell"} {
+		dir := t.TempDir()
+		assert.NoError(t, os.WriteFile(filepath.Join(dir, tool), []byte("#!/bin/sh\n"), 0o755))
+		t.Setenv("PATH", dir)
+		ld := findLinuxDistro()
+		if assert.NotNil(t, ld, tool) {
+			assert.Equal(t, tool, ld.tool)
+		}
+	}
+	t.Setenv("PATH", t.TempDir())
+	assert.Nil(t, findLinuxDistro())
 }

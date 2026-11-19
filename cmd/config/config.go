@@ -88,6 +88,15 @@ type Config struct { //types:add
 	// that core test js uses.
 	JS bool `cmd:"setup"`
 
+	// Print prints (setup) the system packages that setup installs for the
+	// current platform, separated by spaces, without installing anything:
+	// on Linux, the packages for the package manager of its distribution
+	// (nothing on other platforms). Continuous integration workflows use
+	// it to install and cache the packages (as the setup-core action of
+	// the cogentcore/core repository does), so that the list is only
+	// defined here. Use it with -q, so that only the packages are printed.
+	Print bool `cmd:"setup"`
+
 	// the configuration options for the build, install, run, and pack commands
 	// (and the target platform of the test command)
 	Build Build `cmd:"build,install,run,pack,test"`
