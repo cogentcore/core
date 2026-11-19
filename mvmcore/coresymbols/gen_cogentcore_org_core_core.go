@@ -136,6 +136,7 @@ func RecycleTabWidget[T tree.NodeValue](ts *Tabs, name string) *T {
 			"FilePickerDirOnlyFilter":       reflect.ValueOf(p_cogentcore_org_core_core.FilePickerDirOnlyFilter),
 			"FilePickerExtensionOnlyFilter": reflect.ValueOf(p_cogentcore_org_core_core.FilePickerExtensionOnlyFilter),
 			"FilePickerFilterer":            reflect.ValueOf((*p_cogentcore_org_core_core.FilePickerFilterer)(nil)),
+			"FilePickerSettings":            reflect.ValueOf((*p_cogentcore_org_core_core.FilePickerSettings)(nil)),
 			"Filename":                      reflect.ValueOf((*p_cogentcore_org_core_core.Filename)(nil)),
 			"FixedContainer":                reflect.ValueOf((*p_cogentcore_org_core_core.FixedContainer)(nil)),
 			"FontButton":                    reflect.ValueOf((*p_cogentcore_org_core_core.FontButton)(nil)),

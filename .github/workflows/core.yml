@@ -39,11 +39,11 @@ jobs:
         with:
           go-version: '1.27.0'
 
-      - name: Change Mirror Priorities
-        uses: ./.github/actions/apt-mirrors
-
-      - name: Install Core
-        run: go install && core setup
+      - name: Set up Core
+        uses: ./.github/actions/setup-core
+        with:
+          core-version: local
+          tools: true
 
       - name: Build Docs
         run: core build js -dir docs -o static -vanity-url cogentcore.org/core -github-vanity-repository cogentcore/core

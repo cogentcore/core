@@ -28,7 +28,13 @@ import (
 // [web.SetupJS]).
 // With the androidsim option, it also installs the Android SDK and makes
 // an Android virtual device for the emulator (see [mobile.SetupAndroidSim]).
+// With the print option, it only prints the system packages that it
+// installs for the current platform (see [SetupPackages]).
 func Setup(c *config.Config) error { //types:add
+	if c.Print {
+		fmt.Println(strings.Join(SetupPackages(), " "))
+		return nil
+	}
 	err := setupPlatform()
 	if c.Video {
 		if verr := setupFFmpeg(false); verr != nil {
@@ -70,29 +76,46 @@ func setupPlatform() error {
 		}
 		return nil
 	case "linux":
-		for _, ld := range linuxDistros {
-			_, err := exec.LookPath(ld.tool)
-			if err != nil {
-				continue // package manager not found
-			}
-			if ld.tool == "apt" { // special case for apt
-				err := vc.Run("sudo", "apt", "update")
-				if err != nil {
-					return err
-				}
-			}
-			cmd, args := ld.cmd()
-			err = vc.Run(cmd, args...)
-			if err != nil {
-				return err // package installation failed
-			}
-			return nil // success
+		ld := findLinuxDistro()
+		if ld == nil {
+			return errors.New("unknown Linux distro; please file a bug report at https://github.com/cogentcore/core/issues")
 		}
-		return errors.New("unknown Linux distro; please file a bug report at https://github.com/cogentcore/core/issues")
+		if ld.tool == "apt" { // special case for apt
+			err := vc.Run("sudo", "apt", "update")
+			if err != nil {
+				return err
+			}
+		}
+		cmd, args := ld.cmd()
+		return vc.Run(cmd, args...)
 	case "windows":
 		return setupWindows(vc)
 	}
 	return fmt.Errorf("platform %q not supported for core setup", runtime.GOOS)
+}
+
+// SetupPackages returns the system packages that setup installs for the
+// current platform: on Linux, the packages for the package manager of its
+// distribution, and nil on other platforms or an unknown distribution.
+func SetupPackages() []string {
+	if runtime.GOOS != "linux" {
+		return nil
+	}
+	if ld := findLinuxDistro(); ld != nil {
+		return ld.packages
+	}
+	return nil
+}
+
+// findLinuxDistro returns the supported Linux distribution whose package
+// manager is installed, or nil if there is none.
+func findLinuxDistro() *linuxDistro {
+	for _, ld := range linuxDistros {
+		if _, err := exec.LookPath(ld.tool); err == nil {
+			return ld
+		}
+	}
+	return nil
 }
 
 // linuxDistro represents the data needed to install dependencies for a specific Linux

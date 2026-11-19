@@ -1,0 +1,95 @@
+name: Set up Cogent Core
+description: >-
+  Installs the core command and the system packages that Cogent Core needs
+  on Linux (as core setup does), caching the packages across runs, and
+  optionally the Go tools for developing with Cogent Core. The packages
+  are listed by core setup -print, so they are only defined in core itself.
+  Go must be set up first (actions/setup-go).
+
+# Usage, in any repository:
+#
+#   - uses: cogentcore/core/.github/actions/setup-core@main
+#     with:
+#       extra-packages: libasound2-dev   # optional
+#       tools: true                      # optional
+#
+# and in the core repository itself, to use its own version of the core
+# command (as for testing changes to the packages in a pull request):
+#
+#   - uses: ./.github/actions/setup-core
+#     with:
+#       core-version: local
+
+inputs:
+  core-version:
+    description: >-
+      The version of the core command to install (go install
+      cogentcore.org/core@version), or local to install it from the
+      checked-out repository (for the core repository itself).
+    default: main
+  extra-packages:
+    description: Additional apt packages to install and cache, separated by spaces.
+    default: ''
+  tools:
+    description: >-
+      Whether to install the Go tools for developing with Cogent Core
+      (goimports, goalimports, and goalls), with core update.
+    default: 'false'
+  execute-install-scripts:
+    description: >-
+      Whether to run the install scripts of the packages when they are
+      restored from the cache (see awalsh128/cache-apt-pkgs-action), as for
+      libraries that are used at run time, not just to build.
+    default: 'false'
+  cache-version:
+    description: The version of the package cache; change it to force a new cache.
+    default: '1'
+
+runs:
+  using: composite
+  steps:
+    # Faster and more reliable apt mirrors on GitHub runners, based on
+    # https://github.com/CrowdStrike/glide-core/pull/1113 (see
+    # https://github.com/actions/runner-images/issues/7048)
+    - name: Change apt mirror priorities
+      shell: bash
+      run: |
+        if [ -f /etc/apt/apt-mirrors.txt ]; then
+          sudo sed -i '/archive.ubuntu.com\/ubuntu\/\tpriority/ s/priority:2/priority:0/' /etc/apt/apt-mirrors.txt
+          sudo sed -i '/azure.archive.ubuntu.com\/ubuntu\/\tpriority/ s/priority:0/priority:1/' /etc/apt/apt-mirrors.txt
+          sudo sed -i '/security.ubuntu.com\/ubuntu\/\tpriority/ s/priority:3/priority:2/' /etc/apt/apt-mirrors.txt
+          cat /etc/apt/apt-mirrors.txt
+        fi
+
+    - name: Install the core command
+      shell: bash
+      env:
+        CORE_VERSION: ${{ inputs.core-version }}
+      run: |
+        if [ "$CORE_VERSION" = local ]; then
+          go install .
+        else
+          go install "cogentcore.org/core@$CORE_VERSION"
+        fi
+
+    - name: List the system packages
+      id: packages
+      shell: bash
+      env:
+        EXTRA_PACKAGES: ${{ inputs.extra-packages }}
+      run: |
+        packages="$(core setup -print -q) $EXTRA_PACKAGES"
+        echo "packages: $packages"
+        echo "packages=$packages" >> "$GITHUB_OUTPUT"
+
+    - name: Install and cache the system packages
+      uses: awalsh128/cache-apt-pkgs-action@v1
+      with:
+        packages: ${{ steps.packages.outputs.packages }}
+        version: ${{ inputs.cache-version }}
+        execute_install_scripts: ${{ inputs.execute-install-scripts }}
+
+    - name: Install the Go tools
+      if: inputs.tools == 'true'
+      shell: bash
+      run: core update

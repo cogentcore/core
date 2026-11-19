@@ -31,20 +31,20 @@ jobs:
       with:
         go-version: '1.27.0'
 
-    - name: Change Mirror Priorities
-      uses: ./.github/actions/apt-mirrors
-
+    # The system packages, from this version of core (so that changes to them are
+    # tested), plus the audio dependencies (video), and Xvfb, a display for the
+    # tests of the desktop driver; Mesa (mesa-vulkan-drivers) has a software GPU
+    # (lavapipe, a Vulkan driver), which the tests of gpu and xyz use with WebGPU.
+    # The install scripts are run when the packages are restored from the cache,
+    # as the tests use these libraries at run time, not just to build.
+    # Also the core command, and its Go tools (goimports, goalimports, goalls).
     - name: Set up Core
-      run: go install && core setup
-
-    - name: Install audio dependencies (video)
-      run: sudo apt-get install -y libasound2-dev
-
-    # Mesa has a software GPU (lavapipe, a Vulkan driver), which the tests
-    # of gpu and xyz use with WebGPU, and Xvfb is a display for the tests of
-    # the desktop driver
-    - name: Install software GPU and display (gpu, xyz, desktop)
-      run: sudo apt-get install -y mesa-vulkan-drivers xvfb
+      uses: ./.github/actions/setup-core
+      with:
+        core-version: local
+        extra-packages: libasound2-dev xvfb
+        tools: true
+        execute-install-scripts: true
 
     # apt does not have the FFmpeg version that go-astiav requires, so it is
     # built from source, as in the CI of go-astiav, and cached
@@ -67,8 +67,8 @@ jobs:
 
     - name: Set FFmpeg environment variables
       run: |
-        echo "PKG_CONFIG_PATH=$FFMPEG_PATH/lib/pkgconfig" >> $GITHUB_ENV
-        echo "LD_LIBRARY_PATH=$FFMPEG_PATH/lib" >> $GITHUB_ENV
+        echo "PKG_CONFIG_PATH=$FFMPEG_PATH/lib/pkgconfig" >> "$GITHUB_ENV"
+        echo "LD_LIBRARY_PATH=$FFMPEG_PATH/lib" >> "$GITHUB_ENV"
 
     - name: Build
       run: go build -v ./...
@@ -86,7 +86,7 @@ jobs:
 
     - name: Set CORE_UPDATE_TESTDATA env var
       if: inputs.updateTestdata
-      run: echo "CORE_UPDATE_TESTDATA=true" >> $GITHUB_ENV
+      run: echo "CORE_UPDATE_TESTDATA=true" >> "$GITHUB_ENV"
 
     # All of the packages that build on linux are tested (the drivers of
     # the mobile and web platforms are tested on those platforms: see
@@ -102,7 +102,10 @@ jobs:
     - name: Test
       env:
         CORE_REQUIRE_GPU: "true"
-      run: xvfb-run -a -s "-screen 0 1280x1024x24" go test -short -v $(go list ./... | grep -v '/system/driver/desktop$') -coverprofile cover.raw.out -timeout 2m
+      run: |
+        # the package list is split into separate arguments on purpose
+        # shellcheck disable=SC2046
+        xvfb-run -a -s "-screen 0 1280x1024x24" go test -short -v $(go list ./... | grep -v '/system/driver/desktop$') -coverprofile cover.raw.out -timeout 2m
 
     # generated code (files with the standard "Code generated ... DO NOT
     # EDIT." header) is left out of the coverage report
