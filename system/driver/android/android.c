@@ -313,3 +313,75 @@ void setClipboardContent(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, ch
 	jstring str = (*env)->NewStringUTF(env, content);
 	(*env)->CallVoidMethod(env, mgr, setText, str);
 }
+
+// notifyStrings returns a new array of n Java strings, from the strings in
+// the UTF-16 buffer, at the given index with their lengths, taking every
+// third string from it (see notifyCall).
+static jobjectArray notifyStrings(JNIEnv *env, int n, const jchar *buf, const int *lens, int first)
+{
+	jclass strc = (*env)->FindClass(env, "java/lang/String");
+	jobjectArray arr = (*env)->NewObjectArray(env, n, strc, NULL);
+	int off = 0;
+	for (int i = 0; i < 3 * n; i++)
+	{
+		if (i % 3 == first)
+		{
+			jstring s = (*env)->NewString(env, buf + off, lens[i]);
+			(*env)->SetObjectArrayElement(env, arr, i / 3, s);
+			(*env)->DeleteLocalRef(env, s);
+		}
+		off += lens[i];
+	}
+	(*env)->DeleteLocalRef(env, strc);
+	return arr;
+}
+
+// notifyCall shows a notification now if show is set, and otherwise
+// schedules n notifications at the given Unix times in milliseconds
+// (see GoNativeActivity.notifyShow and notifySync). The UTF-16 buffer has
+// the ID, title, and body of each notification, with their lengths.
+void notifyCall(JNIEnv *env, int show, int n, const jchar *buf, const int *lens, const long long *times)
+{
+	jobjectArray ids = notifyStrings(env, n, buf, lens, 0);
+	jobjectArray titles = notifyStrings(env, n, buf, lens, 1);
+	jobjectArray bodies = notifyStrings(env, n, buf, lens, 2);
+	if (show)
+	{
+		jmethodID m = find_static_method(env, current_class, "notifyShow", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+		(*env)->CallStaticVoidMethod(env, current_class, m,
+			(*env)->GetObjectArrayElement(env, ids, 0),
+			(*env)->GetObjectArrayElement(env, titles, 0),
+			(*env)->GetObjectArrayElement(env, bodies, 0));
+	}
+	else
+	{
+		jlongArray jt = (*env)->NewLongArray(env, n);
+		(*env)->SetLongArrayRegion(env, jt, 0, n, (const jlong *)times);
+		jmethodID m = find_static_method(env, current_class, "notifySync", "([Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;[J)V");
+		(*env)->CallStaticVoidMethod(env, current_class, m, ids, titles, bodies, jt);
+		(*env)->DeleteLocalRef(env, jt);
+	}
+	(*env)->DeleteLocalRef(env, ids);
+	(*env)->DeleteLocalRef(env, titles);
+	(*env)->DeleteLocalRef(env, bodies);
+}
+
+// notifyRequestPermission asks for permission to show notifications
+// (see GoNativeActivity.notifyRequestPermission).
+void notifyRequestPermission(JNIEnv *env)
+{
+	jmethodID m = find_static_method(env, current_class, "notifyRequestPermission", "()V");
+	(*env)->CallStaticVoidMethod(env, current_class, m);
+}
+
+void Java_org_golang_app_GoNativeActivity_notifyPermission(JNIEnv *env, jclass clazz, jboolean allowed)
+{
+	androidNotifyPermission((bool)allowed);
+}
+
+void Java_org_golang_app_GoNativeActivity_notifyClicked(JNIEnv *env, jclass clazz, jstring id)
+{
+	const char *cstr = (*env)->GetStringUTFChars(env, id, JNI_FALSE);
+	androidNotifyClicked((char *)cstr);
+	(*env)->ReleaseStringUTFChars(env, id, cstr);
+}

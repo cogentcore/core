@@ -221,6 +221,11 @@ func (a *App) Cursor(win system.Window) system.Cursor {
 	return &system.CursorBase{}
 }
 
+func (a *App) Notifier() system.Notifier {
+	// not supported by default
+	return &system.NotifierBase{}
+}
+
 func (a *App) ShowVirtualKeyboard(typ styles.VirtualKeyboards) {
 	// no-op by default
 }

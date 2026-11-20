@@ -61,6 +61,7 @@ var manifestTmpl = template.Must(template.New("manifest").Parse(`
 	android:versionCode="1"
 	android:versionName="1.0">
 
+	<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 	<application android:label="{{.Name}}" android:debuggable="true">
 	<activity android:name="org.golang.app.GoNativeActivity"
 		android:label="{{.Name}}"
@@ -71,5 +72,6 @@ var manifestTmpl = template.Must(template.New("manifest").Parse(`
 			<category android:name="android.intent.category.LAUNCHER" />
 		</intent-filter>
 	</activity>
+	<receiver android:name="org.golang.app.NotifyReceiver" android:exported="false" />
 	</application>
 </manifest>`))

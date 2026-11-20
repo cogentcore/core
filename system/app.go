@@ -133,6 +133,10 @@ type App interface {
 	// of the given window.
 	Cursor(win Window) Cursor
 
+	// Notifier returns the [Notifier] for showing notifications with the
+	// notification system of the operating system.
+	Notifier() Notifier
+
 	// DataDir returns the OS-specific data directory: Mac: ~/Library,
 	// Linux: ~/.config, Windows: ~/AppData/Roaming
 	DataDir() string
