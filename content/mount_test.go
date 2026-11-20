@@ -6,6 +6,7 @@ package content
 
 import (
 	"io/fs"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -144,4 +145,26 @@ func countImages(ct *Content) int {
 		return true
 	})
 	return n
+}
+
+// TestResourceLinks tests that a link to a resource file in a directory,
+// such as a PDF, still saves and opens the file, alongside page URLs with
+// slashes (pages in mounts), which open the pages.
+func TestResourceLinks(t *testing.T) {
+	t.Chdir(t.TempDir()) // the resources directory is saved in the current one
+	root := fstest.MapFS{
+		"home.md":          {Data: []byte("+++\nURL = \"\"\n+++\n\nSee [the paper](papers/paper.pdf).\n")},
+		"papers/paper.pdf": {Data: []byte("%PDF-1.4 test")},
+	}
+	ct := NewContent(core.NewBody()).SetSource(NewMountFS(root).Mount("docs/lists", mountLists))
+	ct.Open("papers/paper.pdf")
+	b, err := os.ReadFile(filepath.Join("resources", "paper.pdf"))
+	require.NoError(t, err, "the PDF is saved to open it")
+	assert.Equal(t, "%PDF-1.4 test", string(b))
+	assert.Equal(t, "", ct.current.Page.URL, "still on the home page")
+
+	ct.Open("docs/lists")
+	assert.Equal(t, "docs/lists", ct.current.Page.URL, "a page URL opens the page")
+	_, err = os.Stat(filepath.Join("resources", "lists"))
+	assert.ErrorIs(t, err, fs.ErrNotExist)
 }
