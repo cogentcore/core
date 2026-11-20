@@ -24,6 +24,11 @@ var (
 	// It is set by a linker flag in the core command line tool.
 	AppAbout string
 
+	// AppHelp, if set, opens the help of the current app, in the context
+	// of the given widget, from the Help item of the app menu, as the
+	// content package does for the documentation of the app.
+	AppHelp func(ctx Widget)
+
 	// AppIcon is the svg icon for the current app.
 	// It is set by a linker flag in the core command line tool.
 	// It defaults to [icons.CogentCore] otherwise.

@@ -119,6 +119,10 @@ type Content struct {
 	// elements that are not appropriate for that.
 	inPDFRender bool
 
+	// noWebURL is whether the content does not use the URL of the web page,
+	// as for the help of an app (see [OpenHelp]), whose own URL it is.
+	noWebURL bool
+
 	// The previous and next page, if applicable. They must be stored on this struct
 	// to avoid stale local closure variables.
 	prevPage, nextPage *bcontent.Page
