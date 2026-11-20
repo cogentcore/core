@@ -67,6 +67,11 @@ type Content struct {
 	// pagesByURL has the [bcontent.Page] for each [bcontent.Page.URL].
 	pagesByURL map[string]*bcontent.Page
 
+	// pageBases are the base URLs of the pages in the mounts of a [MountFS]
+	// source, the directories of their files, against which the relative
+	// URLs of their resources are resolved.
+	pageBases map[*bcontent.Page]string
+
 	// pagesByCategory has the [bcontent.Page]s for each of all [bcontent.Page.Categories].
 	pagesByCategory map[string][]*bcontent.Page
 
@@ -387,6 +392,9 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 	ct.pagesByName = map[string]*bcontent.Page{}
 	ct.pagesByURL = map[string]*bcontent.Page{}
 	ct.pagesByCategory = map[string][]*bcontent.Page{}
+	ct.pageBases = map[*bcontent.Page]string{}
+	mfs, _ := source.(*MountFS)
+	var mounted []*bcontent.Page // pages in mounts, named after the others
 	errors.Log(fs.WalkDir(ct.Source, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -401,18 +409,26 @@ func (ct *Content) SetSource(source fs.FS) *Content {
 		if ext != ".md" && ext != ".html" {
 			return nil
 		}
+		if mfs != nil {
+			if mt, rel := mfs.mountOf(path); mt != nil {
+				pg, err := ct.newMountedPage(mt, rel)
+				if err != nil {
+					return err
+				}
+				mounted = append(mounted, pg)
+				return nil
+			}
+		}
 		pg, err := bcontent.NewPage(ct.Source, path)
 		if err != nil {
 			return err
 		}
-		ct.pages = append(ct.pages, pg)
-		ct.pagesByName[strings.ToLower(pg.Name)] = pg
-		ct.pagesByURL[pg.URL] = pg
-		for _, cat := range pg.Categories {
-			ct.pagesByCategory[cat] = append(ct.pagesByCategory[cat], pg)
-		}
+		ct.addPage(pg)
 		return nil
 	}))
+	if mfs != nil {
+		ct.addMountedPages(mfs, mounted)
+	}
 	ct.categories = maps.Keys(ct.pagesByCategory)
 	slices.SortFunc(ct.categories, func(a, b string) int {
 		if a == "Other" {
@@ -538,6 +554,9 @@ func (ct *Content) loadPage(w *core.Frame) error {
 		ct.Context.StageSize = ct.stageSize()
 		ct.leftScroll = ct.leftFrame.Geom.Scroll.Y
 	}
+	// The relative URLs of the resources of a page in a mount of a MountFS
+	// are relative to the page.
+	ct.Context.PageURL = ct.pageBase(ct.current.Page)
 	err = htmlcore.ReadMD(ct.Context, w, b)
 	ct.Context.StageSize = 0
 	if err != nil {
@@ -829,6 +848,9 @@ func (ct *Content) embedPage(ctx *htmlcore.Context) error {
 	lead, _, _ := bytes.Cut(b, []byte("\n#"))
 	heading := fmt.Sprintf("## %s\n\n*Main page: [[%s]]*\n\n", title, pg.Name)
 	res := append([]byte(heading), lead...)
+	base := ctx.PageURL
+	ctx.PageURL = ct.pageBase(pg)
+	defer func() { ctx.PageURL = base }()
 	return htmlcore.ReadMD(ctx, ctx.BlockParent, res)
 }
 
