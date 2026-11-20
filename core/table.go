@@ -182,6 +182,8 @@ func (tb *Table) Init() {
 
 // StyleValue performs additional value widget styling
 func (tb *Table) StyleValue(w Widget, s *styles.Style, row, col int) {
+	// one line, as for the switches of bit flags
+	s.Wrap = false
 	if tb.columnWidth(col) > 0 { // see ListGrid.fixColumnWidths
 		s.SetTextWrap(false)
 		return
@@ -517,11 +519,12 @@ func (tb *Table) makeFieldValue(p *tree.Plan, i, fli int) {
 	valnm := fmt.Sprintf("value-%d-%s-%s", fli, itxt, reflectx.ShortTypeName(field.Type))
 	tags := field.Tag
 	if uv.Kind() == reflect.Slice || uv.Kind() == reflect.Map {
+		// after the field's own tags, which are kept and take precedence
 		ni := reflect.StructTag(`display:"no-inline" new-window:"+"`)
 		if tags == "" {
-			tags += " " + ni
-		} else {
 			tags = ni
+		} else {
+			tags += " " + ni
 		}
 	}
 	readOnlyTag := tags.Get("edit") == "-"

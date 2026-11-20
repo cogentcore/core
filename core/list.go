@@ -192,7 +192,8 @@ type ListBase struct { //core:no-new
 	// currently hovered row
 	hoverRow int
 
-	// list of currently dragged indexes
+	// draggedIndexes are the indexes of the items being dragged from
+	// the list, which are deleted after a move (see [ListBase.dragStart]).
 	draggedIndexes []int
 
 	// VisibleRows is the total number of rows visible in allocated display size.
@@ -399,6 +400,7 @@ func (lb *ListBase) StyleValue(w Widget, s *styles.Style, row, col int) {
 		hv := units.Ch(float32(lb.maxWidth))
 		s.Min.X.Value = max(s.Min.X.Value, hv.Convert(s.Min.X.Unit, &s.UnitContext).Value)
 	}
+	s.Wrap = false // one line, as for the switches of bit flags
 	s.SetTextWrap(false)
 }
 
@@ -741,9 +743,6 @@ func (lb *ListBase) MakeGridIndex(p *tree.Plan, i, si int, itxt string, invis bo
 			})
 			w.On(events.Drop, func(e events.Event) {
 				lb.dragDrop(e)
-			})
-			w.On(events.DropDeleteSource, func(e events.Event) {
-				lb.dropDeleteSource(e)
 			})
 		}
 		w.Updater(func() {
@@ -1622,29 +1621,24 @@ func (lb *ListBase) duplicate() int { //types:add
 
 //////// Drag-n-Drop
 
-// selectRowIfNone selects the row the mouse is on if there
-// are no currently selected items.  Returns false if no valid mouse row.
-func (lb *ListBase) selectRowIfNone(e events.Event) bool {
-	nitms := len(lb.SelectedIndexes)
-	if nitms > 0 {
-		return true
-	}
-	row, _, isValid := lb.ListGrid.indexFromPixel(e.Pos())
+// dragSelectRow selects the row where the given drag started, where the
+// mouse was pressed, if it is not selected already, so that the row that is
+// dragged is the one that was pressed, and returns false if there is none.
+// It replaces the selection, rather than extending it with the modifier
+// keys of the drag, which choose whether the drop copies or moves.
+func (lb *ListBase) dragSelectRow(e events.Event) bool {
+	row, _, isValid := lb.ListGrid.indexFromPixel(e.StartPos())
 	if !isValid {
 		return false
 	}
-	lb.updateSelectRow(row, e.SelectMode())
+	if !lb.indexIsSelected(row + lb.StartIndex) {
+		lb.updateSelectRow(row, events.SelectOne)
+	}
 	return true
 }
 
-// mousePosInGrid returns true if the event mouse position is
-// located within the slicegrid.
-func (lb *ListBase) mousePosInGrid(e events.Event) bool {
-	return lb.ListGrid.mousePosInGrid(e.Pos())
-}
-
 func (lb *ListBase) dragStart(e events.Event) {
-	if !lb.selectRowIfNone(e) || !lb.mousePosInGrid(e) {
+	if !lb.dragSelectRow(e) {
 		return
 	}
 	ixs := lb.SelectedIndexesList(reflectx.Ascending)
@@ -1652,12 +1646,14 @@ func (lb *ListBase) dragStart(e events.Event) {
 		return
 	}
 	md := lb.This.(Lister).CopySelectToMime()
+	// the list is the source of the drag, which gets the DropDeleteSource
+	// of a move, with the image of the first row, and it keeps the indexes
+	// of the dragged items, to delete them after a move
 	w, ok := lb.rowFirstWidget(ixs[0] - lb.StartIndex)
 	if ok {
-		lb.Scene.Events.DragStart(w, md, e)
+		lb.draggedIndexes = ixs
+		lb.Scene.Events.dragStartFrom(lb.This.(Widget), w, md, e)
 		e.SetHandled()
-		// } else {
-		// 	fmt.Println("List DND programmer error")
 	}
 }
 
@@ -1669,9 +1665,10 @@ func (lb *ListBase) dragDrop(e events.Event) {
 	pos := de.Pos()
 	idx, ok := lb.indexFromPos(pos.Y)
 	if ok {
-		// sv.DraggedIndexes = nil
 		lb.tmpIndex = idx
-		lb.saveDraggedIndexes(idx)
+		if de.Source == lb.This {
+			lb.shiftDraggedIndexes(idx)
+		}
 		md := de.Data.(mimedata.Mimes)
 		mf := func(m *Scene, pos image.Point) {
 			lb.Scene.Events.DragMenuAddModText(m, de.DropMod)
@@ -1698,6 +1695,9 @@ func (lb *ListBase) dropDeleteSource(_ events.Event) {
 		tl.dropDeleteItems()
 		return
 	}
+	if len(lb.draggedIndexes) == 0 {
+		return
+	}
 	sort.Slice(lb.draggedIndexes, func(i, j int) bool {
 		return lb.draggedIndexes[i] > lb.draggedIndexes[j]
 	})
@@ -1709,21 +1709,14 @@ func (lb *ListBase) dropDeleteSource(_ events.Event) {
 	lb.SelectIndexEvent(idx, events.SelectOne)
 }
 
-// saveDraggedIndexes saves selectedindexes into dragged indexes
-// taking into account insertion at idx
-func (lb *ListBase) saveDraggedIndexes(idx int) {
-	sz := len(lb.SelectedIndexes)
-	if sz == 0 {
-		lb.draggedIndexes = nil
-		return
-	}
-	ixs := lb.SelectedIndexesList(reflectx.Ascending)
-	lb.draggedIndexes = make([]int, len(ixs))
-	for i, ix := range ixs {
+// shiftDraggedIndexes shifts the dragged indexes for the insertion of
+// the dragged items at the given index of the same list, as for a move
+// within it, so that they are the indexes of the items to delete after it.
+func (lb *ListBase) shiftDraggedIndexes(idx int) {
+	sz := len(lb.draggedIndexes)
+	for i, ix := range lb.draggedIndexes {
 		if ix > idx {
 			lb.draggedIndexes[i] = ix + sz // make room for insertion
-		} else {
-			lb.draggedIndexes[i] = ix
 		}
 	}
 }

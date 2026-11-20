@@ -1099,22 +1099,29 @@ func (em *Events) dragStartCheck(e events.Event, dur time.Duration, dist int) bo
 // and storing the data for later use during Drop.
 // A drag does not officially start until this is called.
 func (em *Events) DragStart(w Widget, data any, e events.Event) {
+	em.dragStartFrom(w, w, data, e)
+}
+
+// dragStartFrom starts a drag from the given source widget, which gets the
+// events of the drag, as [events.DropDeleteSource], with the image of the
+// given widget, which can be a part of it, as for a row of a list.
+func (em *Events) dragStartFrom(source, image Widget, data any, e events.Event) {
 	ms := em.scene.Stage.Main
 	if ms == nil {
 		return
 	}
-	em.drag = w
+	em.drag = source
 	em.dragData = data
 	em.slide = nil // a drag replaces any slide in progress
 	em.dragFiles = nil
-	if fd, ok := w.(FileDragger); ok {
+	if fd, ok := source.(FileDragger); ok {
 		em.dragFiles = fd.DragFiles()
 	}
 	em.dragOS = false
-	em.dragMoves = dragMovesFrom(w)
+	em.dragMoves = dragMovesFrom(source)
 	em.dragCopy = events.DropModFor(e.Modifiers(), em.dragMoves) == events.DropCopy
 	// TODO: maybe show the number of items being dragged
-	em.dragImage = clone.AsRGBA(gradient.ApplyOpacity(grabRenderFrom(w), 0.5))
+	em.dragImage = clone.AsRGBA(gradient.ApplyOpacity(grabRenderFrom(image), 0.5))
 	em.addDragSprites(e.WindowPos())
 }
 

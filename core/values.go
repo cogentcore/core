@@ -26,6 +26,11 @@ import (
 type ListButton struct {
 	Button
 	Slice any
+
+	// DragMoves is whether dragging the rows of the list moves them by
+	// default (see [ListBase.DragMoves]), as set by the drag-moves:"+"
+	// struct tag.
+	DragMoves bool
 }
 
 func (lb *ListButton) WidgetValue() any { return &lb.Slice }
@@ -41,12 +46,14 @@ func (lb *ListButton) Init() {
 		if up.Type().Kind() != reflect.Array && reflectx.NonPointerType(reflectx.SliceElementType(lb.Slice)).Kind() == reflect.Struct {
 			tb := NewTable(d).SetSlice(lb.Slice)
 			tb.SetValueTitle(lb.ValueTitle).SetReadOnly(lb.IsReadOnly())
+			tb.DragMoves = lb.DragMoves
 			d.AddTopBar(func(bar *Frame) {
 				NewToolbar(bar).Maker(tb.MakeToolbar)
 			})
 		} else {
 			sv := NewList(d).SetSlice(lb.Slice)
 			sv.SetValueTitle(lb.ValueTitle).SetReadOnly(lb.IsReadOnly())
+			sv.DragMoves = lb.DragMoves
 			d.AddTopBar(func(bar *Frame) {
 				NewToolbar(bar).Maker(sv.MakeToolbar)
 			})
