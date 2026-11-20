@@ -24,8 +24,9 @@ var (
 )
 
 // CaseSensitive specifies whether a search is case-sensitive: [UseCase] or
-// [IgnoreCase].
-type CaseSensitive bool
+// [IgnoreCase]. It is [textpos.CaseSensitive], which the text search
+// functions use.
+type CaseSensitive = textpos.CaseSensitive
 
 // SelectionReset specifies whether a select function resets the selection
 // ([SelectReset]) or sets it ([SelectSet]).
@@ -38,11 +39,11 @@ type SelectionScroll bool
 const (
 	// UseCase can be used as arg for [Search] functions,
 	// to use case-sensitive search.
-	UseCase CaseSensitive = true
+	UseCase = textpos.UseCase
 
 	// IgnoreCase can be used as arg for [Search] functions
 	// to use case-insensitive search.
-	IgnoreCase CaseSensitive = false
+	IgnoreCase = textpos.IgnoreCase
 
 	// SelectReset can be used as reset arg for Select functions,
 	// to reset the selection.
@@ -188,10 +189,10 @@ func Search(w Widget, find string, useCase CaseSensitive) {
 	}
 
 	sel := func() {
-		SearchSelect(res, idx, false) // not reset
+		SearchSelect(res, idx, SelectSet) // not reset
 	}
 	unSel := func() {
-		SearchSelect(res, idx, true) // reset
+		SearchSelect(res, idx, SelectReset) // reset
 	}
 	search()
 	sel()

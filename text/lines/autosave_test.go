@@ -30,9 +30,9 @@ func TestAutosaveConcurrentEdits(t *testing.T) {
 	for i := range 400 {
 		ln := ls.NumLines() - 2
 		if i%2 == 0 { // delete a line near the end
-			ls.ReplaceText(textpos.Pos{Line: ln}, textpos.Pos{Line: ln + 1}, textpos.Pos{Line: ln}, "", false)
+			ls.ReplaceText(textpos.Pos{Line: ln}, textpos.Pos{Line: ln + 1}, textpos.Pos{Line: ln}, "", ReplaceNoMatchCase)
 		} else { // and add one back
-			ls.ReplaceText(textpos.Pos{Line: ln}, textpos.Pos{Line: ln}, textpos.Pos{Line: ln}, "new\n", false)
+			ls.ReplaceText(textpos.Pos{Line: ln}, textpos.Pos{Line: ln}, textpos.Pos{Line: ln}, "new\n", ReplaceNoMatchCase)
 		}
 	}
 	assert.Equal(t, 500, ls.NumLines())

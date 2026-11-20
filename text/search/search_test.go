@@ -5,61 +5,87 @@
 package search
 
 import (
+	"strings"
 	"testing"
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/text/textpos"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSearchPaths(t *testing.T) {
 	core.SystemSettings.BigFileSize = 10000000
-	res, err := Paths([]string{"./"}, "package search", false, false, []fileinfo.Known{fileinfo.Go})
+	res, err := Paths([]string{"./"}, "package search", textpos.UseCase, false, []fileinfo.Known{fileinfo.Go})
 	assert.NoError(t, err)
 	// for _, r := range res {
 	// 	fmt.Println(r.String())
 	// }
 	assert.Equal(t, 4, len(res))
 
-	res, err = Paths([]string{"./"}, "package search", false, false, []fileinfo.Known{fileinfo.C})
+	res, err = Paths([]string{"./"}, "package search", textpos.UseCase, false, []fileinfo.Known{fileinfo.C})
 	assert.NoError(t, err)
 	assert.Equal(t, 0, len(res))
 
-	res, err = Paths([]string{"./"}, "package .*", false, true, nil)
+	res, err = Paths([]string{"./"}, "package .*", textpos.UseCase, true, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, 4, len(res))
 
-	res, err = Paths([]string{"./"}, "package search", false, false, []fileinfo.Known{fileinfo.Go}, "*.go")
+	res, err = Paths([]string{"./"}, "package search", textpos.UseCase, false, []fileinfo.Known{fileinfo.Go}, "*.go")
 	assert.NoError(t, err)
 	assert.Equal(t, 0, len(res))
 
-	res, err = Paths([]string{"./"}, "package search", false, false, []fileinfo.Known{fileinfo.Go}, "all.go")
+	res, err = Paths([]string{"./"}, "package search", textpos.UseCase, false, []fileinfo.Known{fileinfo.Go}, "all.go")
 	assert.NoError(t, err)
 	assert.Equal(t, 3, len(res))
 }
 
 func TestSearchAll(t *testing.T) {
 	core.SystemSettings.BigFileSize = 10000000
-	res, err := All("./", "package search", false, false, []fileinfo.Known{fileinfo.Go})
+	res, err := All("./", "package search", textpos.UseCase, false, []fileinfo.Known{fileinfo.Go})
 	assert.NoError(t, err)
 	// for _, r := range res {
 	// 	fmt.Println(r.String())
 	// }
 	assert.Equal(t, 4, len(res))
 
-	res, err = All("./", "package search", false, false, []fileinfo.Known{fileinfo.C})
+	res, err = All("./", "package search", textpos.UseCase, false, []fileinfo.Known{fileinfo.C})
 	assert.NoError(t, err)
 	assert.Equal(t, 0, len(res))
 
-	res, err = All("./", "package .*", false, true, nil)
+	res, err = All("./", "package .*", textpos.UseCase, true, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, 4, len(res))
 
-	res, err = All("./", "package search", false, false, []fileinfo.Known{fileinfo.Go}, "*.go")
+	res, err = All("./", "package search", textpos.UseCase, false, []fileinfo.Known{fileinfo.Go}, "*.go")
 	assert.NoError(t, err)
 	assert.Equal(t, 0, len(res))
 
-	res, err = All("./", "package search", false, false, []fileinfo.Known{fileinfo.Go}, "all.go")
+	res, err = All("./", "package search", textpos.UseCase, false, []fileinfo.Known{fileinfo.Go}, "all.go")
 	assert.NoError(t, err)
 	assert.Equal(t, 3, len(res))
+}
+
+// TestSearchCase tests case-sensitive and case-insensitive searches.
+func TestSearchCase(t *testing.T) {
+	src := "Apple apple\nAPPLE pear"
+	n, _ := Reader(strings.NewReader(src), []byte("apple"), textpos.UseCase)
+	assert.Equal(t, 1, n)
+	n, ms := Reader(strings.NewReader(src), []byte("apple"), textpos.IgnoreCase)
+	assert.Equal(t, 3, n)
+	assert.Equal(t, 1, ms[2].Region.Start.Line)
+
+	lns := [][]rune{[]rune("Apple apple"), []rune("APPLE pear")}
+	n, _ = RuneLines(lns, []byte("APPLE"), textpos.UseCase)
+	assert.Equal(t, 1, n)
+	n, _ = RuneLines(lns, []byte("APPLE"), textpos.IgnoreCase)
+	assert.Equal(t, 3, n)
+
+	// only this file has the mixed case, while all of them have the lower case
+	res, err := Paths([]string{"./"}, "PaCkAgE sEaRcH", textpos.UseCase, false, []fileinfo.Known{fileinfo.Go})
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(res))
+	res, err = Paths([]string{"./"}, "PaCkAgE sEaRcH", textpos.IgnoreCase, false, []fileinfo.Known{fileinfo.Go})
+	assert.NoError(t, err)
+	assert.Equal(t, 4, len(res))
 }

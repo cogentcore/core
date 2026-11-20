@@ -36,9 +36,9 @@ func TestParseEditsAfterSetText(t *testing.T) {
 			for i := range 400 {
 				ln := ls.NumLines() - 2
 				if i%2 == 0 {
-					ls.ReplaceText(textpos.Pos{Line: ln}, textpos.Pos{Line: ln + 1}, textpos.Pos{Line: ln}, "", false)
+					ls.ReplaceText(textpos.Pos{Line: ln}, textpos.Pos{Line: ln + 1}, textpos.Pos{Line: ln}, "", ReplaceNoMatchCase)
 				} else {
-					ls.ReplaceText(textpos.Pos{Line: ln}, textpos.Pos{Line: ln}, textpos.Pos{Line: ln}, tc.ins, false)
+					ls.ReplaceText(textpos.Pos{Line: ln}, textpos.Pos{Line: ln}, textpos.Pos{Line: ln}, tc.ins, ReplaceNoMatchCase)
 				}
 			}
 			assert.Equal(t, n, ls.NumLines())

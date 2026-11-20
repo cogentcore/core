@@ -45,14 +45,14 @@ func NewMatch(rn []rune, st, ed, ln int) Match {
 	return Match{Region: reg, Text: txt, TextMatch: Range{Start: len(sctx), End: len(sctx) + len(fstr)}}
 }
 
-// CaseInsensitive specifies whether a search ignores case: [IgnoreCase] or
-// [UseCase].
-type CaseInsensitive bool
+// CaseSensitive specifies whether a search is case-sensitive: [UseCase] or
+// [IgnoreCase].
+type CaseSensitive bool
 
 const (
-	// IgnoreCase is passed to search functions to indicate case should be ignored
-	IgnoreCase CaseInsensitive = true
+	// UseCase is passed to search functions for a case-sensitive search.
+	UseCase CaseSensitive = true
 
-	// UseCase is passed to search functions to indicate case is relevant
-	UseCase CaseInsensitive = false
+	// IgnoreCase is passed to search functions for a search that ignores case.
+	IgnoreCase CaseSensitive = false
 )

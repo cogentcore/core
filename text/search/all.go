@@ -19,10 +19,10 @@ import (
 // All returns list of all files under given root path, in all subdirs,
 // of given language(s) that contain the given string, sorted in
 // descending order by number of occurrences.
-//   - ignoreCase transforms everything into lowercase.
+//   - useCase is whether the search is case-sensitive ([textpos.UseCase]).
 //   - regExp uses the go regexp syntax for the find string.
 //   - exclude is a list of filenames to exclude.
-func All(root string, find string, ignoreCase textpos.CaseInsensitive, regExp bool, langs []fileinfo.Known, exclude ...string) ([]Results, error) {
+func All(root string, find string, useCase textpos.CaseSensitive, regExp bool, langs []fileinfo.Known, exclude ...string) ([]Results, error) {
 	fsz := len(find)
 	if fsz == 0 {
 		return nil, nil
@@ -72,7 +72,7 @@ func All(root string, find string, ignoreCase textpos.CaseInsensitive, regExp bo
 		if regExp {
 			cnt, matches = FileRegexp(fpath, re)
 		} else {
-			cnt, matches = File(fpath, fb, ignoreCase)
+			cnt, matches = File(fpath, fb, useCase)
 		}
 		if cnt > 0 {
 			fpabs, err := filepath.Abs(fpath)
