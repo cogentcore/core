@@ -15,6 +15,7 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -126,6 +127,20 @@ func TestMountContent(t *testing.T) {
 				assert.Equal(t, tp.url, ct.current.Page.URL)
 				assert.Equal(t, tp.base, ct.Context.PageURL)
 				assert.Equal(t, tp.images, countImages(ct), "the icon of the app, resolved relative to the page")
+				// Without categories, the pages are listed as "Pages",
+				// with the current one selected.
+				cats := ct.categoriesTree
+				require.NotNil(t, cats)
+				assert.Equal(t, "<b>Pages</b>", cats.Text)
+				assert.Nil(t, ct.categoryTrees)
+				assert.Len(t, cats.Children, len(ct.pages))
+				var sel []string
+				for _, k := range cats.Children {
+					if pt := k.(*core.Tree); pt.StateIs(states.Selected) {
+						sel = append(sel, ct.categoryPages[pt].URL)
+					}
+				}
+				assert.Equal(t, []string{tp.url}, sel)
 			})
 		})
 	}

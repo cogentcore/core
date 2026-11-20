@@ -170,6 +170,19 @@
       return null;
     }
     const root = { key: "cats", html: "<b>Categories</b>", href: pageHref(""), children: [] };
+    const cats = site.Categories;
+    if (cats.length === 1 && cats[0].Name === "Other" && !cats[0].HasPage) {
+      // Without categories, the pages are listed, as the content app does.
+      root.html = "<b>Pages</b>";
+      for (const pg of cats[0].Pages || []) {
+        const pn = { key: "page:" + pg.URL, html: escapeHTML(pg.Name), href: pageHref(pg.URL), children: [] };
+        if (pg.URL === page.URL) {
+          root.selected = pn.key;
+        }
+        root.children.push(pn);
+      }
+      return root;
+    }
     for (const cat of site.Categories) {
       const cn = {
         key: "cat:" + cat.Name,

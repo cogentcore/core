@@ -718,7 +718,13 @@ func (ct *Content) makeCategories() bool {
 		return false
 	}
 
+	// Without categories, all of the pages are in "Other", and they are
+	// listed as the pages of the content, with no category trees.
+	flat := ct.noCategories()
 	cats := core.NewTree(ct.leftFrame).SetText("<b>Categories</b>")
+	if flat {
+		cats.SetText("<b>Pages</b>")
+	}
 	cats.SetReadOnly(true)
 	cats.OnSelect(func(e events.Event) {
 		if cats.IsRootSelected() {
@@ -728,6 +734,18 @@ func (ct *Content) makeCategories() bool {
 	ct.categoriesTree = cats
 	ct.categoryTrees = make([]*core.Tree, len(ct.categories))
 	ct.categoryPages = map[*core.Tree]*bcontent.Page{}
+	if flat {
+		ct.categoryTrees = nil
+		for _, pg := range ct.pagesByCategory["Other"] {
+			pgTree := core.NewTree(cats).SetText(pg.Name)
+			ct.categoryPages[pgTree] = pg
+			pgTree.OnSelect(func(e events.Event) {
+				ct.OpenEvent(pg.URL, e)
+			})
+		}
+		ct.updateCategories(false)
+		return true
+	}
 	for i, cat := range ct.categories {
 		catTree := core.NewTree(cats).SetText(cat).SetClosed(true)
 		ct.categoryTrees[i] = catTree
@@ -753,6 +771,13 @@ func (ct *Content) makeCategories() bool {
 	return true
 }
 
+// noCategories returns whether the pages have no categories, so that
+// they are all in the "Other" category, in which case the categories tree
+// lists the pages, as "Pages", without category trees.
+func (ct *Content) noCategories() bool {
+	return len(ct.categories) == 1 && ct.categories[0] == "Other"
+}
+
 // updateCategories selects the nodes of the categories tree for the current page
 // and opens the categories that contain it, closing the others, as a new tree has them.
 // If restyle is true, the nodes whose selection changes are styled again.
@@ -774,6 +799,12 @@ func (ct *Content) updateCategories(restyle bool) {
 
 	// The root is selected by a click on it until the home page opens.
 	setSelected(ct.categoriesTree, false)
+	if ct.categoryTrees == nil { // the pages, without categories
+		for _, k := range ct.categoriesTree.Children {
+			pgTree := k.(*core.Tree)
+			setSelected(pgTree, ct.categoryPages[pgTree] == ct.current.Page)
+		}
+	}
 	for i, catTree := range ct.categoryTrees {
 		setSelected(catTree, ct.current.Page.Name == ct.categories[i])
 		hasPage := false

@@ -332,7 +332,14 @@ func staticNavHTML(site *bcontent.Site, prp *bcontent.PreRenderPage, base string
 		}
 		b.WriteString(`</ul></li></ul>`)
 	}
-	if len(site.Categories) > 0 {
+	if cats := site.Categories; len(cats) == 1 && cats[0].Name == "Other" && !cats[0].HasPage {
+		// Without categories, the pages are listed, as the content app does.
+		fmt.Fprintf(&b, `<ul><li><a href="%s"><b>Pages</b></a><ul>`, pageHref(base, ""))
+		for _, pg := range cats[0].Pages {
+			fmt.Fprintf(&b, `<li><a href="%s">%s</a></li>`, pageHref(base, pg.URL), html.EscapeString(pg.Name))
+		}
+		b.WriteString(`</ul></li></ul>`)
+	} else if len(site.Categories) > 0 {
 		fmt.Fprintf(&b, `<ul><li><a href="%s"><b>Categories</b></a><ul>`, pageHref(base, ""))
 		for _, cat := range site.Categories {
 			b.WriteString("<li>")
