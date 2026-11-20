@@ -115,7 +115,7 @@ func main() {
 		xyz.InitArrow(g, math32.Vec3(-1.5, -.5, .5), math32.Vec3(2, 1, 1), .05, colors.Cyan, xyz.StartArrow, xyz.EndArrow, 4, .5, 8)
 	})
 
-	cylinder := xyz.NewCylinder(sc, "cylinder", 1.5, .5, 32, 1, true, true)
+	cylinder := xyz.NewCylinder(sc, "cylinder", 1.5, .5, 32, 1, xyz.WithTop, xyz.WithBottom)
 	tree.AddChild(sc, func(n *xyz.Solid) {
 		n.SetMesh(cylinder).SetPos(-2.25, 0, 0)
 	})

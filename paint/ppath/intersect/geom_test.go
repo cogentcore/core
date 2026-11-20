@@ -18,20 +18,20 @@ import (
 
 func TestEllipse(t *testing.T) {
 	tolEqualVec2(t, ellipseDeriv2(2.0, 1.0, math32.Pi/2.0, 0.0), math32.Vec2(0.0, -2.0))
-	assert.InDelta(t, EllipseCurvatureRadius(2.0, 1.0, true, 0.0), 0.5, 1.0e-5)
-	assert.InDelta(t, EllipseCurvatureRadius(2.0, 1.0, false, 0.0), -0.5, 1.0e-5)
-	assert.InDelta(t, EllipseCurvatureRadius(2.0, 1.0, true, math32.Pi/2.0), 4.0, 1.0e-5)
-	assert.True(t, math32.IsNaN(EllipseCurvatureRadius(2.0, 0.0, true, 0.0)))
+	assert.InDelta(t, EllipseCurvatureRadius(2.0, 1.0, ppath.Clockwise, 0.0), 0.5, 1.0e-5)
+	assert.InDelta(t, EllipseCurvatureRadius(2.0, 1.0, ppath.CounterClockwise, 0.0), -0.5, 1.0e-5)
+	assert.InDelta(t, EllipseCurvatureRadius(2.0, 1.0, ppath.Clockwise, math32.Pi/2.0), 4.0, 1.0e-5)
+	assert.True(t, math32.IsNaN(EllipseCurvatureRadius(2.0, 0.0, ppath.Clockwise, 0.0)))
 
 	// https://www.wolframalpha.com/input/?i=arclength+x%28t%29%3D2*cos+t%2C+y%28t%29%3Dsin+t+for+t%3D0+to+0.5pi
 	assert.InDelta(t, ellipseLength(2.0, 1.0, 0.0, math32.Pi/2.0), 2.4221102220, 1.0e-5)
 }
 
 func TestXMonotoneEllipse(t *testing.T) {
-	assert.InDeltaSlice(t, xmonotoneEllipticArc(math32.Vec2(0.0, 0.0), 100.0, 50.0, 0.0, false, false, math32.Vec2(0.0, 100.0)), ppath.MustParseSVGPath("M0 0A100 50 0 0 0 -100 50A100 50 0 0 0 0 100"), 1.0e-4)
+	assert.InDeltaSlice(t, xmonotoneEllipticArc(math32.Vec2(0.0, 0.0), 100.0, 50.0, 0.0, ppath.SmallArc, ppath.CounterClockwise, math32.Vec2(0.0, 100.0)), ppath.MustParseSVGPath("M0 0A100 50 0 0 0 -100 50A100 50 0 0 0 0 100"), 1.0e-4)
 
 	// defer setEpsilon(1e-3)()
-	assert.InDeltaSlice(t, xmonotoneEllipticArc(math32.Vec2(0.0, 0.0), 50.0, 25.0, math32.Pi/4.0, false, false, math32.Vec2(100.0/math32.Sqrt(2.0), 100.0/math32.Sqrt(2.0))), ppath.MustParseSVGPath("M0 0A50 25 45 0 0 -4.1731 11.6383A50 25 45 0 0 70.71067811865474 70.71067811865474"), 1.0e-4)
+	assert.InDeltaSlice(t, xmonotoneEllipticArc(math32.Vec2(0.0, 0.0), 50.0, 25.0, math32.Pi/4.0, ppath.SmallArc, ppath.CounterClockwise, math32.Vec2(100.0/math32.Sqrt(2.0), 100.0/math32.Sqrt(2.0))), ppath.MustParseSVGPath("M0 0A50 25 45 0 0 -4.1731 11.6383A50 25 45 0 0 70.71067811865474 70.71067811865474"), 1.0e-4)
 }
 
 func TestFlattenEllipse(t *testing.T) {
@@ -39,7 +39,7 @@ func TestFlattenEllipse(t *testing.T) {
 	tolerance := float32(1.0)
 
 	// circular
-	assert.InDeltaSlice(t, FlattenEllipticArc(math32.Vec2(0.0, 0.0), 100.0, 100.0, 0.0, false, false, math32.Vec2(200.0, 0.0), tolerance), ppath.MustParseSVGPath("M0 0L3.855789619238635 30.62763190857508L20.85117757566036 62.58773789575414L48.032233398236286 86.49342322102808L81.90102498412543 99.26826345535623L118.09897501587452 99.26826345535625L151.96776660176369 86.4934232210281L179.1488224243396 62.58773789575416L196.14421038076136 30.62763190857507L200 0"), 1.0e-4)
+	assert.InDeltaSlice(t, FlattenEllipticArc(math32.Vec2(0.0, 0.0), 100.0, 100.0, 0.0, ppath.SmallArc, ppath.CounterClockwise, math32.Vec2(200.0, 0.0), tolerance), ppath.MustParseSVGPath("M0 0L3.855789619238635 30.62763190857508L20.85117757566036 62.58773789575414L48.032233398236286 86.49342322102808L81.90102498412543 99.26826345535623L118.09897501587452 99.26826345535625L151.96776660176369 86.4934232210281L179.1488224243396 62.58773789575416L196.14421038076136 30.62763190857507L200 0"), 1.0e-4)
 }
 
 func TestEllipseSplit(t *testing.T) {

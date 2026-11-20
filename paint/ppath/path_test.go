@@ -230,10 +230,10 @@ func TestPathReplace(t *testing.T) {
 		p.LineTo(p3.X, p3.Y)
 		return p
 	}
-	arc := func(p0 math32.Vector2, rx, ry, phi float32, largeArc, sweep bool, p1 math32.Vector2) Path {
+	arc := func(p0 math32.Vector2, rx, ry, phi float32, largeArc ArcSize, sweep ArcSweep, p1 math32.Vector2) Path {
 		p := Path{}
 		p.MoveTo(p0.X, p0.Y)
-		p.ArcTo(rx, ry, phi, !largeArc, sweep, p1.X, p1.Y)
+		p.ArcTo(rx, ry, phi, ArcSize(!largeArc), ArcSweep(sweep), p1.X, p1.Y)
 		return p
 	}
 	_ = arc
@@ -244,7 +244,7 @@ func TestPathReplace(t *testing.T) {
 		line func(math32.Vector2, math32.Vector2) Path
 		quad func(math32.Vector2, math32.Vector2, math32.Vector2) Path
 		cube func(math32.Vector2, math32.Vector2, math32.Vector2, math32.Vector2) Path
-		arc  func(math32.Vector2, float32, float32, float32, bool, bool, math32.Vector2) Path
+		arc  func(math32.Vector2, float32, float32, float32, ArcSize, ArcSweep, math32.Vector2) Path
 	}{
 		{"C0 10 10 10 10 0L30 0", "L30 0", nil, quad, cube, nil},
 		{"M20 0L30 0C0 10 10 10 10 0", "M20 0L30 0L10 0", nil, quad, cube, nil},

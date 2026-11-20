@@ -739,7 +739,7 @@ func (tx *Text) TextRunes() []rune {
 // to define the meaning of the Region line, char values for the matches.
 // The bool return value indicates whether this widget handled the search,
 // thereby excluding further searching within the elements under it.
-func (tx *Text) Search(find string, useCase bool) ([]textpos.Match, bool) {
+func (tx *Text) Search(find string, useCase CaseSensitive) ([]textpos.Match, bool) {
 	return SearchRunes(tx.richText.Join(), find, useCase), true
 }
 
@@ -764,7 +764,7 @@ func (tx *Text) HighlightMatches(matches []textpos.Match) bool {
 // SelectMatch selects match at given index from among those returned
 // from the Search method. scroll = scroll widget into view.
 // reset = clear selection instead of selecting (does not scroll).
-func (tx *Text) SelectMatch(matches []textpos.Match, index int, scroll, reset bool) {
+func (tx *Text) SelectMatch(matches []textpos.Match, index int, scroll SelectionScroll, reset SelectionReset) {
 	if reset {
 		tx.selectReset()
 		return

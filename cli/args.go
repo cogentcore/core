@@ -20,15 +20,20 @@ import (
 	"cogentcore.org/core/base/strcase"
 )
 
+// FlagNotFound specifies whether [SetFromArgs] and [ParseFlags] return an error
+// for a flag that is not in the configuration struct: [ErrNotFound] or
+// [NoErrNotFound].
+type FlagNotFound bool
+
 const (
 	// ErrNotFound can be passed to [SetFromArgs] and [ParseFlags]
 	// to indicate that they should return an error for a flag that
 	// is set but not found in the configuration struct.
-	ErrNotFound = true
+	ErrNotFound FlagNotFound = true
 	// ErrNotFound can be passed to [SetFromArgs] and [ParseFlags]
 	// to indicate that they should NOT return an error for a flag that
 	// is set but not found in the configuration struct.
-	NoErrNotFound = false
+	NoErrNotFound FlagNotFound = false
 )
 
 // SetFromArgs sets config values on the given config object from
@@ -41,7 +46,7 @@ const (
 // config struct, so any that fail to match trigger an error.
 // It is recommended that the [ErrNotFound] and [NoErrNotFound]
 // constants be used for the value of errNotFound for clearer code.
-func SetFromArgs[T any](cfg T, args []string, errNotFound bool, cmds ...*Cmd[T]) (string, error) {
+func SetFromArgs[T any](cfg T, args []string, errNotFound FlagNotFound, cmds ...*Cmd[T]) (string, error) {
 	bf := boolFlags(cfg)
 	// if we are not already a meta config object, we have to add
 	// all of the bool flags of the meta config object so that we
@@ -279,7 +284,7 @@ func parseArgsImpl[T any](cfg T, baseArgs []string, baseCmd string, cmds ...*Cmd
 // value of errNotFound for clearer code. Also, the flags should be
 // gotten through [getArgs] first, and the map of available flags should
 // be gotten through [parseArgs] first.
-func parseFlags(flags map[string]string, allFlags *fields, errNotFound bool) error {
+func parseFlags(flags map[string]string, allFlags *fields, errNotFound FlagNotFound) error {
 	for name, value := range flags {
 		err := parseFlag(name, value, allFlags, errNotFound)
 		if err != nil {
@@ -296,7 +301,7 @@ func parseFlags(flags map[string]string, allFlags *fields, errNotFound bool) err
 // to trigger an error; otherwise, it just does nothing and returns no error.
 // It is recommended that the [ErrNotFound] and [NoErrNotFound]
 // constants be used for the value of errNotFound for clearer code.
-func parseFlag(name string, value string, allFlags *fields, errNotFound bool) error {
+func parseFlag(name string, value string, allFlags *fields, errNotFound FlagNotFound) error {
 	f, exists := allFlags.AtTry(name)
 	if !exists {
 		if errNotFound {

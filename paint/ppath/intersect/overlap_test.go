@@ -72,7 +72,7 @@ func TestBooleanMany(t *testing.T) {
 func TestIntersectionLineEllipse(t *testing.T) {
 	origin := math32.Vec2(0, 0)
 	// half of an ellipse centered at (2,0), with radii 2 and 1
-	arc := arcSeg(2, 1, false, true, 4, 0)
+	arc := arcSeg(2, 1, ppath.SmallArc, ppath.Clockwise, 4, 0)
 	// which half it is
 	top := float32(1)
 	if zs := IntersectionSegment(nil, math32.Vec2(2, -2), seg(ppath.LineTo, 2, 2), origin, arc); len(zs) == 1 && zs[0].Y < 0 {

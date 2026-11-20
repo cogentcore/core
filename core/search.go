@@ -20,33 +20,46 @@ var (
 	LastSearch string
 
 	// LastUseCase remembers the last search useCase value.
-	LastUseCase bool
+	LastUseCase CaseSensitive
 )
+
+// CaseSensitive specifies whether a search is case-sensitive: [UseCase] or
+// [IgnoreCase]. It is [textpos.CaseSensitive], which the text search
+// functions use.
+type CaseSensitive = textpos.CaseSensitive
+
+// SelectionReset specifies whether a select function resets the selection
+// ([SelectReset]) or sets it ([SelectSet]).
+type SelectionReset bool
+
+// SelectionScroll specifies whether a select function scrolls to the selection:
+// [SelectScroll] or [SelectNoScroll].
+type SelectionScroll bool
 
 const (
 	// UseCase can be used as arg for [Search] functions,
 	// to use case-sensitive search.
-	UseCase = true
+	UseCase = textpos.UseCase
 
 	// IgnoreCase can be used as arg for [Search] functions
 	// to use case-insensitive search.
-	IgnoreCase = false
+	IgnoreCase = textpos.IgnoreCase
 
 	// SelectReset can be used as reset arg for Select functions,
 	// to reset the selection.
-	SelectReset = true
+	SelectReset SelectionReset = true
 
 	// SelectSet can be used as reset arg for Select functions,
 	// to actually set the selection.
-	SelectSet = false
+	SelectSet SelectionReset = false
 
 	// SelectScroll can be used as scroll arg for Select functions,
 	// to scroll to given location.
-	SelectScroll = true
+	SelectScroll SelectionScroll = true
 
 	// SelectNoScroll can be used as scroll arg for Select functions,
 	// to NOT scroll to given location.
-	SelectNoScroll = false
+	SelectNoScroll SelectionScroll = false
 )
 
 // SearchResult is one set of search results for text in a widget.
@@ -88,7 +101,7 @@ func (sr SearchResults) AtIndex(idx int) (*SearchResult, int) {
 
 // SearchRunes is a helper function that returns [textpos.Matches]
 // as Region Char indexes into the runes.
-func SearchRunes(rn []rune, find string, useCase bool) []textpos.Match {
+func SearchRunes(rn []rune, find string, useCase CaseSensitive) []textpos.Match {
 	var matches []textpos.Match
 	fr := []rune(find)
 	fsz := len(fr)
@@ -114,7 +127,7 @@ func SearchRunes(rn []rune, find string, useCase bool) []textpos.Match {
 // SearchWidgets performs text in widgets under given widget,
 // for the given find string, with given case sensitivity,
 // using the Search interface method.
-func SearchWidgets(w Widget, find string, useCase bool) SearchResults {
+func SearchWidgets(w Widget, find string, useCase CaseSensitive) SearchResults {
 	var res SearchResults
 	wb := w.AsWidget()
 	wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
@@ -154,17 +167,17 @@ func SearchHighlight(w Widget, results SearchResults) {
 
 // SearchSelect selects the [SearchResult] at given results index
 // from given [SearchResults], or resets the selection if reset = true.
-func SearchSelect(results SearchResults, index int, reset bool) {
+func SearchSelect(results SearchResults, index int, reset SelectionReset) {
 	res, i := results.AtIndex(index)
 	if res == nil {
 		return
 	}
-	res.Widget.SelectMatch(res.Matches, i, !reset, reset)
+	res.Widget.SelectMatch(res.Matches, i, SelectionScroll(!reset), reset)
 }
 
 // Search performs an interactive search for given text,
 // on elements within given widget.
-func Search(w Widget, find string, useCase bool) {
+func Search(w Widget, find string, useCase CaseSensitive) {
 	LastSearch = find
 	var res SearchResults
 	var n int
@@ -176,10 +189,10 @@ func Search(w Widget, find string, useCase bool) {
 	}
 
 	sel := func() {
-		SearchSelect(res, idx, false) // not reset
+		SearchSelect(res, idx, SelectSet) // not reset
 	}
 	unSel := func() {
-		SearchSelect(res, idx, true) // reset
+		SearchSelect(res, idx, SelectReset) // reset
 	}
 	search()
 	sel()

@@ -66,7 +66,7 @@ func (cp *Capsule) Defaults() {
 }
 
 func (cp *Capsule) MeshSize() (numVertex, nIndex int, hasColor bool) {
-	numVertex, nIndex = CylinderSectorN(cp.RadialSegs, cp.HeightSegs, false, false)
+	numVertex, nIndex = CylinderSectorN(cp.RadialSegs, cp.HeightSegs, NoTop, NoBottom)
 	if cp.BotRad > 0 {
 		nv, ni := SphereSectorN(cp.RadialSegs, cp.CapSegs, 90, 90)
 		numVertex += nv
@@ -84,8 +84,8 @@ func (cp *Capsule) MeshSize() (numVertex, nIndex int, hasColor bool) {
 func (cp *Capsule) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
 	voff := cp.VertexOffset
 	ioff := cp.IndexOffset
-	cp.CBBox = SetCylinderSector(vertex, normal, texcoord, index, voff, ioff, cp.Height, cp.TopRad, cp.BotRad, cp.RadialSegs, cp.HeightSegs, cp.AngStart, cp.AngLen, false, false, cp.Pos)
-	nv, ni := CylinderSectorN(cp.RadialSegs, cp.HeightSegs, false, false)
+	cp.CBBox = SetCylinderSector(vertex, normal, texcoord, index, voff, ioff, cp.Height, cp.TopRad, cp.BotRad, cp.RadialSegs, cp.HeightSegs, cp.AngStart, cp.AngLen, NoTop, NoBottom, cp.Pos)
+	nv, ni := CylinderSectorN(cp.RadialSegs, cp.HeightSegs, NoTop, NoBottom)
 	voff += nv
 	ioff += ni
 

@@ -39,7 +39,7 @@ func (r *Results) String() string {
 // RuneLines looks for a string (no regexp) within lines of runes,
 // with given case-sensitivity returning number of occurrences
 // and specific match position list.  Column positions are in runes.
-func RuneLines(src [][]rune, find []byte, ignoreCase bool) (int, []textpos.Match) {
+func RuneLines(src [][]rune, find []byte, useCase textpos.CaseSensitive) (int, []textpos.Match) {
 	fr := bytes.Runes(find)
 	fsz := len(fr)
 	if fsz == 0 {
@@ -52,7 +52,7 @@ func RuneLines(src [][]rune, find []byte, ignoreCase bool) (int, []textpos.Match
 		ci := 0
 		for ci < sz {
 			var i int
-			if ignoreCase {
+			if useCase == textpos.IgnoreCase {
 				i = runes.IndexFold(rn[ci:], fr)
 			} else {
 				i = runes.Index(rn[ci:], fr)
@@ -74,7 +74,7 @@ func RuneLines(src [][]rune, find []byte, ignoreCase bool) (int, []textpos.Match
 // as entire lexically tagged items,
 // with given case-sensitivity returning number of occurrences
 // and specific match position list.  Column positions are in runes.
-func LexItems(src [][]rune, lexs []lexer.Line, find []byte, ignoreCase bool) (int, []textpos.Match) {
+func LexItems(src [][]rune, lexs []lexer.Line, find []byte, useCase textpos.CaseSensitive) (int, []textpos.Match) {
 	fr := bytes.Runes(find)
 	fsz := len(fr)
 	if fsz == 0 {
@@ -93,7 +93,7 @@ func LexItems(src [][]rune, lexs []lexer.Line, find []byte, ignoreCase bool) (in
 			}
 			rn := rln[lx.Start:lx.End]
 			var i int
-			if ignoreCase {
+			if useCase == textpos.IgnoreCase {
 				i = runes.IndexFold(rn, fr)
 			} else {
 				i = runes.Index(rn, fr)
@@ -113,7 +113,7 @@ func LexItems(src [][]rune, lexs []lexer.Line, find []byte, ignoreCase bool) (in
 // using given case-sensitivity.
 // Returns number of occurrences and specific match position list.
 // Column positions are in runes.
-func Reader(reader io.Reader, find []byte, ignoreCase bool) (int, []textpos.Match) {
+func Reader(reader io.Reader, find []byte, useCase textpos.CaseSensitive) (int, []textpos.Match) {
 	fr := bytes.Runes(find)
 	fsz := len(fr)
 	if fsz == 0 {
@@ -129,7 +129,7 @@ func Reader(reader io.Reader, find []byte, ignoreCase bool) (int, []textpos.Matc
 		ci := 0
 		for ci < sz {
 			var i int
-			if ignoreCase {
+			if useCase == textpos.IgnoreCase {
 				i = runes.IndexFold(rn[ci:], fr)
 			} else {
 				i = runes.Index(rn[ci:], fr)
@@ -151,14 +151,14 @@ func Reader(reader io.Reader, find []byte, ignoreCase bool) (int, []textpos.Matc
 // File looks for a literal string (no regexp) within a file, in given
 // case-sensitive way, returning number of occurrences and specific match
 // position list. Column positions are in runes.
-func File(filename string, find []byte, ignoreCase bool) (int, []textpos.Match) {
+func File(filename string, find []byte, useCase textpos.CaseSensitive) (int, []textpos.Match) {
 	fp, err := os.Open(filename)
 	if err != nil {
 		log.Printf("search.File: open error: %v\n", err)
 		return 0, nil
 	}
 	defer fp.Close()
-	return Reader(fp, find, ignoreCase)
+	return Reader(fp, find, useCase)
 }
 
 // ReaderRegexp looks for a string using Go regexp expression,

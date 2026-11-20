@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/iox/imagex"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
@@ -158,7 +159,7 @@ func TestTableContextMenuSelect(t *testing.T) {
 		selected := func() []int {
 			b.AsyncLock()
 			defer b.AsyncUnlock()
-			return tb.SelectedIndexesList(false)
+			return tb.SelectedIndexesList(reflectx.Ascending)
 		}
 		rightClick(1)
 		assert.Equal(t, []int{0, 1}, selected(), "on a selected row")

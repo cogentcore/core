@@ -472,10 +472,10 @@ func (cs *Commands) RunDialog(ctx core.Widget, cmd string, run RunFunc) {
 	core.MessageSnackbar(ctx, "Reading the help of "+cmd+"...")
 	go func() {
 		root, name := splitCmd(cmd)
-		cm, err := cs.Cmd(root, false)
+		cm, err := cs.Cmd(root, NoReparse)
 		var sc *SubCmd
 		if err == nil && (name != "" || !cm.HasSubCmds() && len(cm.Macros) == 0 && len(cm.Scripts) == 0) {
-			sc, err = cs.SubCmd(cmd, false)
+			sc, err = cs.SubCmd(cmd, NoReparse)
 		}
 		cs.updateViews(nil)
 		ctx.AsWidget().AsyncLock()
@@ -559,7 +559,7 @@ func (cs *Commands) NewDialog(ctx core.Widget, sc *SubCmd, run RunFunc) *core.Bo
 				w.SetText("Reread help").SetIcon(icons.Refresh).SetTooltip(html.EscapeString("Read the help of the command again, as for a new version (from " + sc.Source + ")"))
 				w.OnClick(func(e events.Event) {
 					go func() {
-						nsc, err := cs.SubCmd(sc.Cmd, true)
+						nsc, err := cs.SubCmd(sc.Cmd, Reparse)
 						ctx.AsWidget().AsyncLock()
 						defer ctx.AsWidget().AsyncUnlock()
 						if err != nil {

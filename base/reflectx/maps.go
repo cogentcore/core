@@ -70,9 +70,20 @@ func MapDeleteAll(mv any) {
 	}
 }
 
+// SortOrder is the direction of a sort: [Ascending] or [Descending].
+type SortOrder bool
+
+const (
+	// Ascending sorts from the smallest to the largest value.
+	Ascending SortOrder = true
+
+	// Descending sorts from the largest to the smallest value.
+	Descending SortOrder = false
+)
+
 // MapSort sorts the keys of the map either by key or by value,
 // and returns those keys as a slice of [reflect.Value]s.
-func MapSort(mp any, byKey, ascending bool) []reflect.Value {
+func MapSort(mp any, byKey bool, ascending SortOrder) []reflect.Value {
 	mpv := reflect.ValueOf(mp)
 	mpvnp := Underlying(mpv)
 	keys := mpvnp.MapKeys() // note: this is a slice of reflect.Value!
@@ -85,7 +96,7 @@ func MapSort(mp any, byKey, ascending bool) []reflect.Value {
 }
 
 // MapValueSort sorts the keys of the given map by their values.
-func MapValueSort(mpvnp reflect.Value, keys []reflect.Value, ascending bool) error {
+func MapValueSort(mpvnp reflect.Value, keys []reflect.Value, ascending SortOrder) error {
 	if len(keys) == 0 {
 		return nil
 	}

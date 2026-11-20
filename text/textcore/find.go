@@ -11,6 +11,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/textpos"
 )
@@ -18,13 +19,13 @@ import (
 // findMatches finds the matches with given search string (literal, not regex)
 // and case sensitivity, updates highlights for all.  returns false if none
 // found
-func (ed *Editor) findMatches(find string, useCase, lexItems bool) ([]textpos.Match, bool) {
+func (ed *Editor) findMatches(find string, useCase bool, lexItems textpos.MatchScope) ([]textpos.Match, bool) {
 	fsz := len(find)
 	if fsz == 0 {
 		ed.Highlights = nil
 		return nil, false
 	}
-	_, matches := ed.Lines.Search([]byte(find), !useCase, lexItems)
+	_, matches := ed.Lines.Search([]byte(find), textpos.CaseSensitive(useCase), lexItems)
 	if len(matches) == 0 {
 		ed.Highlights = nil
 		return matches, false
@@ -85,7 +86,7 @@ var PrevISearchString string
 // iSearchMatches finds ISearch matches -- returns true if there are any
 func (ed *Editor) iSearchMatches() bool {
 	got := false
-	ed.ISearch.Matches, got = ed.findMatches(ed.ISearch.Find, ed.ISearch.useCase, false)
+	ed.ISearch.Matches, got = ed.findMatches(ed.ISearch.Find, ed.ISearch.useCase, textpos.AnyText)
 	return got
 }
 
@@ -249,7 +250,7 @@ type QReplace struct {
 	useCase bool
 
 	// search only as entire lexically tagged item boundaries -- key for replacing short local variables like i
-	lexItems bool
+	lexItems textpos.MatchScope
 
 	// current search matches
 	Matches []textpos.Match `json:"-" xml:"-"`
@@ -301,7 +302,7 @@ func (ed *Editor) QReplacePrompt() {
 	rc.SetStrings(prevQReplaceRepls...).SetCurrentIndex(0)
 
 	lexitems := ed.QReplace.lexItems
-	lxi := core.NewSwitch(d).SetText("Lexical Items").SetChecked(lexitems)
+	lxi := core.NewSwitch(d).SetText("Lexical Items").SetChecked(lexitems == textpos.LexItems)
 	lxi.SetTooltip("search matches entire lexically tagged items -- good for finding local variable names like 'i' and not matching everything")
 
 	d.AddBottomBar(func(bar *core.Frame) {
@@ -315,14 +316,14 @@ func (ed *Editor) QReplacePrompt() {
 				repl = s
 			}
 			lexItems := lxi.IsChecked()
-			ed.QReplaceStart(find, repl, lexItems)
+			ed.QReplaceStart(find, repl, textpos.MatchScope(lexItems))
 		})
 	})
 	d.RunDialog(ed)
 }
 
 // QReplaceStart starts query-replace using given find, replace strings
-func (ed *Editor) QReplaceStart(find, repl string, lexItems bool) {
+func (ed *Editor) QReplaceStart(find, repl string, lexItems textpos.MatchScope) {
 	ed.QReplace.On = true
 	ed.QReplace.Find = find
 	ed.QReplace.Replace = repl
@@ -345,7 +346,7 @@ func (ed *Editor) QReplaceStart(find, repl string, lexItems bool) {
 // qReplaceMatches finds QReplace matches -- returns true if there are any
 func (ed *Editor) qReplaceMatches() bool {
 	got := false
-	ed.QReplace.Matches, got = ed.findMatches(ed.QReplace.Find, ed.QReplace.useCase, ed.QReplace.lexItems)
+	ed.QReplace.Matches, got = ed.findMatches(ed.QReplace.Find, ed.QReplace.useCase, textpos.MatchScope(ed.QReplace.lexItems))
 	return got
 }
 
@@ -391,7 +392,7 @@ func (ed *Editor) qReplaceReplace(midx int) {
 	pos := reg.Start
 	// last arg is matchCase, only if not using case to match and rep is also lower case
 	matchCase := !ed.QReplace.useCase && !lexer.HasUpperCase(rep)
-	ed.Lines.ReplaceText(reg.Start, reg.End, pos, rep, matchCase)
+	ed.Lines.ReplaceText(reg.Start, reg.End, pos, rep, lines.MatchCase(matchCase))
 	ed.Highlights[midx] = textpos.Region{}
 	ed.setCursor(pos)
 	ed.savePosHistory(ed.CursorPos)

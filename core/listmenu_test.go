@@ -8,6 +8,7 @@ import (
 	"image"
 	"testing"
 
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/keymap"
 	"github.com/stretchr/testify/assert"
@@ -101,11 +102,11 @@ func TestListBindSelect(t *testing.T) {
 		assert.Equal(t, 1, sel)
 		ls.SelectIndexEvent(0, events.SelectOne)
 		ls.SelectIndexEvent(1, events.ExtendOne)
-		assert.Equal(t, []int{0, 1}, ls.SelectedIndexesList(false))
+		assert.Equal(t, []int{0, 1}, ls.SelectedIndexesList(reflectx.Ascending))
 		ls.SelectIndexEvent(1, events.ExtendOne)
-		assert.Equal(t, []int{0}, ls.SelectedIndexesList(false), "toggled off")
+		assert.Equal(t, []int{0}, ls.SelectedIndexesList(reflectx.Ascending), "toggled off")
 		ls.SelectIndexEvent(0, events.Unselect)
-		assert.Empty(t, ls.SelectedIndexesList(false))
+		assert.Empty(t, ls.SelectedIndexesList(reflectx.Ascending))
 		assert.Nil(t, ls.TextRunes())
 		assert.Equal(t, &ls.Slice, ls.WidgetValue())
 	}))

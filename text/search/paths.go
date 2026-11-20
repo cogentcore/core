@@ -54,10 +54,10 @@ func LangCheck(fi *fileinfo.FileInfo, langs []fileinfo.Known) bool {
 // of language(s) that contain the given string, sorted in descending order
 // by number of occurrences. Paths can be relative to current working directory.
 // Automatically skips generated files.
-//   - ignoreCase transforms everything into lowercase.
+//   - useCase is whether the search is case-sensitive ([textpos.UseCase]).
 //   - regExp uses the go regexp syntax for the find string.
 //   - exclude is a list of filenames to exclude: can use standard Glob patterns.
-func Paths(paths []string, find string, ignoreCase, regExp bool, langs []fileinfo.Known, exclude ...string) ([]Results, error) {
+func Paths(paths []string, find string, useCase textpos.CaseSensitive, regExp textpos.MatchSyntax, langs []fileinfo.Known, exclude ...string) ([]Results, error) {
 	fsz := len(find)
 	if fsz == 0 {
 		return nil, nil
@@ -110,7 +110,7 @@ func Paths(paths []string, find string, ignoreCase, regExp bool, langs []fileinf
 			if regExp {
 				cnt, matches = FileRegexp(fpath, re)
 			} else {
-				cnt, matches = File(fpath, fb, ignoreCase)
+				cnt, matches = File(fpath, fb, useCase)
 			}
 			if cnt > 0 {
 				fpabs, err := filepath.Abs(fpath)

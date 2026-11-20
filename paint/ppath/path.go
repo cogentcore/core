@@ -61,15 +61,40 @@ func CmdLen(cmd float32) int {
 	return cmdLens[int(cmd)]
 }
 
+// ArcSize is the large-arc flag of an elliptical arc (see [Path.ArcTo]):
+// [LargeArc] for the arc of more than 180 degrees, or [SmallArc].
+type ArcSize bool
+
+const (
+	// LargeArc is the arc of more than 180 degrees.
+	LargeArc ArcSize = true
+
+	// SmallArc is the arc of less than 180 degrees.
+	SmallArc ArcSize = false
+)
+
+// ArcSweep is the sweep flag of an elliptical arc (see [Path.ArcTo]): the
+// direction from the start to the end, [Clockwise] (the positive angle
+// direction, as the Y axis points down) or [CounterClockwise].
+type ArcSweep bool
+
+const (
+	// Clockwise sweeps in the positive angle direction.
+	Clockwise ArcSweep = true
+
+	// CounterClockwise sweeps in the negative angle direction.
+	CounterClockwise ArcSweep = false
+)
+
 // ToArcFlags converts to the largeArc and sweep boolean flags given its value in the path.
-func ToArcFlags(cmd float32) (bool, bool) {
-	large := (cmd == 1.0 || cmd == 3.0)
-	sweep := (cmd == 2.0 || cmd == 3.0)
+func ToArcFlags(cmd float32) (ArcSize, ArcSweep) {
+	large := ArcSize(cmd == 1.0 || cmd == 3.0)
+	sweep := ArcSweep(cmd == 2.0 || cmd == 3.0)
 	return large, sweep
 }
 
 // fromArcFlags converts the largeArc and sweep boolean flags to a value stored in the path.
-func fromArcFlags(large, sweep bool) float32 {
+func fromArcFlags(large ArcSize, sweep ArcSweep) float32 {
 	f := float32(0.0)
 	if large {
 		f += 1.0
@@ -358,7 +383,7 @@ func (p Path) CubeToPoints(i int) (cp1, cp2, end math32.Vector2) {
 
 // ArcToPoints returns the rx, ry, phi, large, sweep values for ArcTo command,
 // where the command is at index i.
-func (p Path) ArcToPoints(i int) (rx, ry, phi float32, large, sweep bool, end math32.Vector2) {
+func (p Path) ArcToPoints(i int) (rx, ry, phi float32, large ArcSize, sweep ArcSweep, end math32.Vector2) {
 	rx = p[i+1]
 	ry = p[i+2]
 	phi = p[i+3]
@@ -472,7 +497,7 @@ func (p *Path) CubeTo(cpx1, cpy1, cpx2, cpy2, x, y float32) {
 // (see https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths#Arcs),
 // and (x,y) the end position of the pen. The start position of the pen was
 // given by a previous command's end point.
-func (p *Path) ArcTo(rx, ry, rot float32, large, sweep bool, x, y float32) {
+func (p *Path) ArcTo(rx, ry, rot float32, large ArcSize, sweep ArcSweep, x, y float32) {
 	start := p.Pos()
 	end := math32.Vec2(x, y)
 	if EqualPoint(start, end) {
@@ -524,7 +549,7 @@ func (p *Path) ArcTo(rx, ry, rot float32, large, sweep bool, x, y float32) {
 // (see https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths#Arcs),
 // and (x,y) the end position of the pen. The start position of the pen was
 // given by a previous command's end point.
-func (p *Path) ArcToDeg(rx, ry, rot float32, large, sweep bool, x, y float32) {
+func (p *Path) ArcToDeg(rx, ry, rot float32, large ArcSize, sweep ArcSweep, x, y float32) {
 	p.ArcTo(rx, ry, math32.DegToRad(rot), large, sweep, x, y)
 }
 
@@ -549,14 +574,14 @@ func (p *Path) Arc(rx, ry, phi, theta0, theta1 float32) {
 	center := start.Sub(p0)
 	if dtheta >= 2.0*math32.Pi {
 		startOpposite := center.Sub(p0)
-		p.ArcTo(rx, ry, phi, large, sweep, startOpposite.X, startOpposite.Y)
-		p.ArcTo(rx, ry, phi, large, sweep, start.X, start.Y)
+		p.ArcTo(rx, ry, phi, ArcSize(large), ArcSweep(sweep), startOpposite.X, startOpposite.Y)
+		p.ArcTo(rx, ry, phi, ArcSize(large), ArcSweep(sweep), start.X, start.Y)
 		if Equal(math32.Mod(dtheta, 2.0*math32.Pi), 0.0) {
 			return
 		}
 	}
 	end := center.Add(p1)
-	p.ArcTo(rx, ry, phi, large, sweep, end.X, end.Y)
+	p.ArcTo(rx, ry, phi, ArcSize(large), ArcSweep(sweep), end.X, end.Y)
 }
 
 // ArcDeg is a version of [Path.Arc] that uses degrees instead of radians,

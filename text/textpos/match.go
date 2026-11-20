@@ -45,10 +45,38 @@ func NewMatch(rn []rune, st, ed, ln int) Match {
 	return Match{Region: reg, Text: txt, TextMatch: Range{Start: len(sctx), End: len(sctx) + len(fstr)}}
 }
 
-const (
-	// IgnoreCase is passed to search functions to indicate case should be ignored
-	IgnoreCase = true
+// CaseSensitive specifies whether a search is case-sensitive: [UseCase] or
+// [IgnoreCase].
+type CaseSensitive bool
 
-	// UseCase is passed to search functions to indicate case is relevant
-	UseCase = false
+const (
+	// UseCase is passed to search functions for a case-sensitive search.
+	UseCase CaseSensitive = true
+
+	// IgnoreCase is passed to search functions for a search that ignores case.
+	IgnoreCase CaseSensitive = false
+)
+
+// MatchSyntax specifies whether a search string is a regular expression
+// ([RegExp], in the syntax of the regexp package) or literal text ([Literal]).
+type MatchSyntax bool
+
+const (
+	// RegExp searches for a regular expression.
+	RegExp MatchSyntax = true
+
+	// Literal searches for the literal text.
+	Literal MatchSyntax = false
+)
+
+// MatchScope specifies whether a search only matches entire lexically tagged
+// items ([LexItems]) or any text ([AnyText]).
+type MatchScope bool
+
+const (
+	// LexItems only matches entire lexically tagged items, e.g., whole words.
+	LexItems MatchScope = true
+
+	// AnyText matches any text.
+	AnyText MatchScope = false
 )

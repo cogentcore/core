@@ -373,7 +373,7 @@ func (tt *TreeTable) sortSiblings(sl reflect.Value, field []int) {
 		}
 		items = reflect.Append(items, item)
 	}
-	reflectx.StructSliceSort(items.Interface(), field, !tt.sortDescending)
+	reflectx.StructSliceSort(items.Interface(), field, reflectx.SortOrder(!tt.sortDescending))
 	for i := range n {
 		item := items.Index(i)
 		sl.Index(i).Set(item)
@@ -680,7 +680,7 @@ func (tt *TreeTable) DeleteAt(idx int) {
 
 // DeleteSelected deletes the selected items, with their children.
 func (tt *TreeTable) DeleteSelected() {
-	for _, idx := range tt.SelectedIndexesList(true) { // last first, so the others stay
+	for _, idx := range tt.SelectedIndexesList(reflectx.Descending) { // last first, so the others stay
 		tt.DeleteAt(idx)
 	}
 }
@@ -873,7 +873,7 @@ func (tt *TreeTable) moveSelected(idx, delta int) {
 
 // Duplicate inserts copies of the selected items after the last of them.
 func (tt *TreeTable) Duplicate() {
-	ixs := tt.SelectedIndexesList(true)
+	ixs := tt.SelectedIndexesList(reflectx.Descending)
 	if len(ixs) == 0 {
 		return
 	}
@@ -886,7 +886,7 @@ func (tt *TreeTable) Duplicate() {
 // within another selected item, with which they are copied.
 func (tt *TreeTable) selectedTopItems() []reflect.Value {
 	var items []reflect.Value
-	for _, idx := range tt.SelectedIndexesList(false) {
+	for _, idx := range tt.SelectedIndexesList(reflectx.Ascending) {
 		if tt.validIndex(idx) && !tt.hasSelectedAncestor(idx) {
 			items = append(items, tt.rows[idx].item)
 		}

@@ -186,7 +186,7 @@ func TestEditorClipboard(t *testing.T) {
 		assert.Equal(t, "abcd\ngh\nefijkl\n", ed.Lines.String())
 
 		ed.SelectRegion = textpos.Region{Start: pos(0, 1), End: pos(2, 3)}
-		ed.CopyRect(true)
+		ed.CopyRect(core.SelectReset)
 		ed.SetCursorShow(pos(0, 0))
 		ed.SelectRegion = textpos.Region{Start: pos(0, 0), End: pos(1, 1)}
 		ed.CutRect()
@@ -224,7 +224,7 @@ func TestEditorISearch(t *testing.T) {
 func TestEditorQReplace(t *testing.T) {
 	editorTest(t, "foo bar\nbar foo\nfoo\n", func(ed *Editor) {
 		ed.SetCursorShow(pos(0, 0))
-		ed.QReplaceStart("foo", "baz", false)
+		ed.QReplaceStart("foo", "baz", textpos.AnyText)
 		assert.True(t, ed.QReplace.On)
 		assert.Len(t, ed.QReplace.Matches, 3)
 		core.SendKey(ed, 'y', 0)
@@ -233,7 +233,7 @@ func TestEditorQReplace(t *testing.T) {
 		core.SendKey(ed, '!', 0)
 		assert.Equal(t, "baz bar\nbar foo\nbaz\n", ed.Lines.String())
 
-		ed.QReplaceStart("bar", "x", false)
+		ed.QReplaceStart("bar", "x", textpos.AnyText)
 		ed.QReplaceReplaceAll(0)
 		assert.Equal(t, "baz x\nx foo\nbaz\n", ed.Lines.String())
 		ed.escPressed()

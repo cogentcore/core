@@ -66,7 +66,7 @@ func (kl *KeyedList) Init() {
 
 		builtinTypes := types.BuiltinTypes()
 
-		keys := reflectx.MapSort(kl.Map, !kl.SortByValues, true)
+		keys := reflectx.MapSort(kl.Map, !kl.SortByValues, reflectx.Ascending)
 		for _, key := range keys {
 			keytxt := reflectx.ToString(key.Interface())
 			keynm := "key-" + keytxt

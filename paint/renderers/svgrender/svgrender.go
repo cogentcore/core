@@ -56,7 +56,7 @@ func (rs *Renderer) Source() []byte {
 		return nil
 	}
 	var b bytes.Buffer
-	rs.SVG.WriteXML(&b, true)
+	rs.SVG.WriteXML(&b, svg.IndentXML)
 	return b.Bytes()
 }
 

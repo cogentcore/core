@@ -10,11 +10,13 @@ import (
 var _ = register(func() {
 	add(map[string]map[string]reflect.Value{
 		"cogentcore.org/core/base/reflectx": {
+			"Ascending":          reflect.ValueOf(p_cogentcore_org_core_base_reflectx.Ascending),
 			"CloneToType":        reflect.ValueOf(p_cogentcore_org_core_base_reflectx.CloneToType),
 			"CopyFields":         reflect.ValueOf(p_cogentcore_org_core_base_reflectx.CopyFields),
 			"CopyMapRobust":      reflect.ValueOf(p_cogentcore_org_core_base_reflectx.CopyMapRobust),
 			"CopySliceRobust":    reflect.ValueOf(p_cogentcore_org_core_base_reflectx.CopySliceRobust),
 			"CopyStructDeep":     reflect.ValueOf(p_cogentcore_org_core_base_reflectx.CopyStructDeep),
+			"Descending":         reflect.ValueOf(p_cogentcore_org_core_base_reflectx.Descending),
 			"FieldByPath":        reflect.ValueOf(p_cogentcore_org_core_base_reflectx.FieldByPath),
 			"FormatDefault":      reflect.ValueOf(p_cogentcore_org_core_base_reflectx.FormatDefault),
 			"IsNil":              reflect.ValueOf(p_cogentcore_org_core_base_reflectx.IsNil),
@@ -52,6 +54,7 @@ var _ = register(func() {
 			"SliceElementValue":  reflect.ValueOf(p_cogentcore_org_core_base_reflectx.SliceElementValue),
 			"SliceNewAt":         reflect.ValueOf(p_cogentcore_org_core_base_reflectx.SliceNewAt),
 			"SliceSort":          reflect.ValueOf(p_cogentcore_org_core_base_reflectx.SliceSort),
+			"SortOrder":          reflect.ValueOf((*p_cogentcore_org_core_base_reflectx.SortOrder)(nil)),
 			"StringJSON":         reflect.ValueOf(p_cogentcore_org_core_base_reflectx.StringJSON),
 			"StructSliceSort":    reflect.ValueOf(p_cogentcore_org_core_base_reflectx.StructSliceSort),
 			"StructTags":         reflect.ValueOf(p_cogentcore_org_core_base_reflectx.StructTags),

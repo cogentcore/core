@@ -82,7 +82,7 @@ func (p Path) Transform(m math32.Matrix2) Path {
 			p[i+1] = rx
 			p[i+2] = ry
 			p[i+3] = phi
-			p[i+4] = fromArcFlags(large, sweep)
+			p[i+4] = fromArcFlags(ArcSize(large), ArcSweep(sweep))
 			p[i+5] = end.X
 			p[i+6] = end.Y
 		}
@@ -124,7 +124,7 @@ func (p Path) Replace(
 	line func(math32.Vector2, math32.Vector2) Path,
 	quad func(math32.Vector2, math32.Vector2, math32.Vector2) Path,
 	cube func(math32.Vector2, math32.Vector2, math32.Vector2, math32.Vector2) Path,
-	arc func(math32.Vector2, float32, float32, float32, bool, bool, math32.Vector2) Path,
+	arc func(math32.Vector2, float32, float32, float32, ArcSize, ArcSweep, math32.Vector2) Path,
 ) Path {
 	copied := false
 	var start, end, cp1, cp2 math32.Vector2
@@ -153,7 +153,8 @@ func (p Path) Replace(
 		case ArcTo:
 			if arc != nil {
 				var rx, ry, phi float32
-				var large, sweep bool
+				var large ArcSize
+				var sweep ArcSweep
 				rx, ry, phi, large, sweep, end = p.ArcToPoints(i)
 				q = arc(start, rx, ry, phi, large, sweep, end)
 			}
@@ -257,7 +258,7 @@ func (p Path) Reverse() Path {
 			q = append(q, CubeTo, cx2, cy2, cx1, cy1, end.X, end.Y, CubeTo)
 		case ArcTo:
 			rx, ry, phi, large, sweep, _ := p.ArcToPoints(i)
-			q = append(q, ArcTo, rx, ry, phi, fromArcFlags(large, !sweep), end.X, end.Y, ArcTo)
+			q = append(q, ArcTo, rx, ry, phi, fromArcFlags(ArcSize(large), ArcSweep(!sweep)), end.X, end.Y, ArcTo)
 		}
 		start = end
 	}

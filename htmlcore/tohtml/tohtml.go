@@ -22,6 +22,7 @@ import (
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/svg"
 	"cogentcore.org/core/tree"
 )
 
@@ -240,7 +241,7 @@ func toHTML(w core.Widget, e *xml.Encoder, b *bytes.Buffer) error {
 	case *core.SVG:
 		w.SVG.PhysicalWidth = wb.Styles.Min.X
 		w.SVG.PhysicalHeight = wb.Styles.Min.Y
-		err := w.SVG.WriteXML(b, false)
+		err := w.SVG.WriteXML(b, svg.NoIndentXML)
 		if err != nil {
 			return err
 		}

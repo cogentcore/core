@@ -27,7 +27,7 @@ import (
 // Ran reports if the command ran (rather than was not found or not executable).
 // Code reports the exit code the command returned if it ran. If err == nil, ran
 // is always true and code is always 0.
-func (cl *Client) Exec(sio *exec.StdIOState, start, output bool, cmd string, args ...string) (string, error) {
+func (cl *Client) Exec(sio *exec.StdIOState, start exec.StartMode, output exec.OutputMode, cmd string, args ...string) (string, error) {
 	return cl.ExecContext(context.Background(), sio, start, output, cmd, args...)
 }
 
@@ -38,9 +38,9 @@ func (cl *Client) Exec(sio *exec.StdIOState, start, output bool, cmd string, arg
 // with a hangup. A command that is run with its standard input from a
 // terminal gets the input of that terminal while it runs, such that
 // interactive programs such as more and editors work.
-func (cl *Client) ExecContext(ctx context.Context, sio *exec.StdIOState, start, output bool, cmd string, args ...string) (string, error) {
+func (cl *Client) ExecContext(ctx context.Context, sio *exec.StdIOState, start exec.StartMode, output exec.OutputMode, cmd string, args ...string) (string, error) {
 	var tty *os.File
-	if !start && !output {
+	if start == exec.Foreground && output == exec.NoCapture {
 		tty = terminalInput(sio.In)
 	}
 	ses, err := cl.newSession(tty)
@@ -89,7 +89,7 @@ func interruptOnDone(ctx context.Context, done chan struct{}, ses *ssh.Session) 
 	}
 }
 
-func (cl *Client) run(ses *ssh.Session, sio *exec.StdIOState, tty *os.File, start, output bool, cmd string, args ...string) (string, error) {
+func (cl *Client) run(ses *ssh.Session, sio *exec.StdIOState, tty *os.File, start exec.StartMode, output exec.OutputMode, cmd string, args ...string) (string, error) {
 	for k, v := range cl.Env {
 		ses.Setenv(k, v)
 	}
@@ -127,13 +127,13 @@ func (cl *Client) run(ses *ssh.Session, sio *exec.StdIOState, tty *os.File, star
 
 	if !cl.PrintOnly {
 		switch {
-		case start:
+		case start == exec.Background:
 			err = ses.Start(cmds)
 			go func() {
 				ses.Wait()
 				sio.PopToStart()
 			}()
-		case output:
+		case output == exec.CaptureOutput:
 			buf := &bytes.Buffer{}
 			ses.Stdout = buf
 			err = ses.Run(cmds)

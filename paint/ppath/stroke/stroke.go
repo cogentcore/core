@@ -18,7 +18,7 @@ import (
 )
 
 // ellipseNormal returns the normal to the right at angle theta of the ellipse, given rotation phi.
-func ellipseNormal(rx, ry, phi float32, sweep bool, theta, d float32) math32.Vector2 {
+func ellipseNormal(rx, ry, phi float32, sweep ppath.ArcSweep, theta, d float32) math32.Vector2 {
 	return ppath.EllipseDeriv(rx, ry, phi, sweep, theta).Rot90CW().Normal().MulScalar(d)
 }
 
@@ -108,7 +108,7 @@ type RoundCapper struct{}
 // at a pivot point and initial normal direction of n0.
 func (RoundCapper) Cap(p *ppath.Path, halfWidth float32, pivot, n0 math32.Vector2) {
 	end := pivot.Sub(n0)
-	p.ArcTo(halfWidth, halfWidth, 0, false, true, end.X, end.Y)
+	p.ArcTo(halfWidth, halfWidth, 0, ppath.SmallArc, ppath.Clockwise, end.X, end.Y)
 }
 
 func (RoundCapper) String() string {
@@ -197,9 +197,9 @@ func (RoundJoiner) Join(rhs, lhs *ppath.Path, halfWidth float32, pivot, n0, n1 m
 	cw := 0.0 <= n0.Rot90CW().Dot(n1)
 	if cw { // bend to the right, ie. CW (or 180 degree turn)
 		rhs.LineTo(rEnd.X, rEnd.Y)
-		lhs.ArcTo(halfWidth, halfWidth, 0.0, false, false, lEnd.X, lEnd.Y)
+		lhs.ArcTo(halfWidth, halfWidth, 0.0, ppath.SmallArc, ppath.CounterClockwise, lEnd.X, lEnd.Y)
 	} else { // bend to the left, ie. CCW
-		rhs.ArcTo(halfWidth, halfWidth, 0.0, false, true, rEnd.X, rEnd.Y)
+		rhs.ArcTo(halfWidth, halfWidth, 0.0, ppath.SmallArc, ppath.Clockwise, rEnd.X, rEnd.Y)
 		lhs.LineTo(lEnd.X, lEnd.Y)
 	}
 }
@@ -392,12 +392,12 @@ func (j ArcsJoiner) Join(rhs, lhs *ppath.Path, halfWidth float32, pivot, n0, n1 
 
 			sweep := 0.0 < rMid
 			RMid := math32.Abs(rMid)
-			cx, cy, a0, _ := ppath.EllipseToCenter(pivot.X, pivot.Y, RMid, RMid, 0.0, false, sweep, mid.X, mid.Y)
+			cx, cy, a0, _ := ppath.EllipseToCenter(pivot.X, pivot.Y, RMid, RMid, 0.0, ppath.SmallArc, ppath.ArcSweep(sweep), mid.X, mid.Y)
 			cMid := math32.Vec2(cx, cy)
 			dtheta := limit * halfWidth / rMid
 
 			clipMid = ppath.EllipsePos(RMid, RMid, 0.0, cMid.X, cMid.Y, a0+dtheta)
-			clipNormal = ellipseNormal(RMid, RMid, 0.0, sweep, a0+dtheta, 1.0)
+			clipNormal = ellipseNormal(RMid, RMid, 0.0, ppath.ArcSweep(sweep), a0+dtheta, 1.0)
 		}
 
 		if math32.IsNaN(r1) {
@@ -444,7 +444,7 @@ func (j ArcsJoiner) Join(rhs, lhs *ppath.Path, halfWidth float32, pivot, n0, n1 
 		if math32.IsNaN(r0) {
 			lhs.LineTo(mid.X, mid.Y)
 		} else {
-			lhs.ArcTo(R0, R0, 0.0, false, 0.0 < r0, mid.X, mid.Y)
+			lhs.ArcTo(R0, R0, 0.0, ppath.SmallArc, 0.0 < r0, mid.X, mid.Y)
 		}
 		if clip {
 			lhs.LineTo(mid2.X, mid2.Y)
@@ -452,13 +452,13 @@ func (j ArcsJoiner) Join(rhs, lhs *ppath.Path, halfWidth float32, pivot, n0, n1 
 		if math32.IsNaN(r1) {
 			lhs.LineTo(lEnd.X, lEnd.Y)
 		} else {
-			lhs.ArcTo(R1, R1, 0.0, false, 0.0 < r1, lEnd.X, lEnd.Y)
+			lhs.ArcTo(R1, R1, 0.0, ppath.SmallArc, 0.0 < r1, lEnd.X, lEnd.Y)
 		}
 	} else { // bend to the left, ie. CCW
 		if math32.IsNaN(r0) {
 			rhs.LineTo(mid.X, mid.Y)
 		} else {
-			rhs.ArcTo(R0, R0, 0.0, false, 0.0 < r0, mid.X, mid.Y)
+			rhs.ArcTo(R0, R0, 0.0, ppath.SmallArc, 0.0 < r0, mid.X, mid.Y)
 		}
 		if clip {
 			rhs.LineTo(mid2.X, mid2.Y)
@@ -466,7 +466,7 @@ func (j ArcsJoiner) Join(rhs, lhs *ppath.Path, halfWidth float32, pivot, n0, n1 
 		if math32.IsNaN(r1) {
 			rhs.LineTo(rEnd.X, rEnd.Y)
 		} else {
-			rhs.ArcTo(R1, R1, 0.0, false, 0.0 < r1, rEnd.X, rEnd.Y)
+			rhs.ArcTo(R1, R1, 0.0, ppath.SmallArc, 0.0 < r1, rEnd.X, rEnd.Y)
 		}
 		lhs.LineTo(lEnd.X, lEnd.Y)
 	}
@@ -579,7 +579,8 @@ type pathStrokeState struct {
 
 	cp1, cp2                    math32.Vector2 // Béziers
 	rx, ry, rot, theta0, theta1 float32        // arcs
-	large, sweep                bool           // arcs
+	large                       ppath.ArcSize  // arcs
+	sweep                       ppath.ArcSweep
 }
 
 // offset returns the rhs and lhs paths from offsetting a path
@@ -711,8 +712,8 @@ func offset(p ppath.Path, halfWidth float32, cr Capper, jr Joiner, strokeOpen bo
 			if rLambda <= 1.0 && lLambda <= 1.0 {
 				rLambda, lLambda = 1.0, 1.0
 			}
-			rhs.ArcTo(rLambda*(cur.rx+dr), rLambda*(cur.ry+dr), cur.rot, cur.large, cur.sweep, rEnd.X, rEnd.Y)
-			lhs.ArcTo(lLambda*(cur.rx-dr), lLambda*(cur.ry-dr), cur.rot, cur.large, cur.sweep, lEnd.X, lEnd.Y)
+			rhs.ArcTo(rLambda*(cur.rx+dr), rLambda*(cur.ry+dr), cur.rot, ppath.ArcSize(cur.large), ppath.ArcSweep(cur.sweep), rEnd.X, rEnd.Y)
+			lhs.ArcTo(lLambda*(cur.rx-dr), lLambda*(cur.ry-dr), cur.rot, ppath.ArcSize(cur.large), ppath.ArcSweep(cur.sweep), lEnd.X, lEnd.Y)
 		}
 
 		// optimize inner bend

@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/iox/imagex"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
@@ -1168,7 +1169,7 @@ func TestTreeTableMultiSelect(t *testing.T) {
 	selected := func() []int {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
-		return tt.SelectedIndexesList(false)
+		return tt.SelectedIndexesList(reflectx.Ascending)
 	}
 	RenderImage(b, func() {}, func() {
 		src := b.Scene.RenderWindow().SystemWindow.Events()
@@ -1223,7 +1224,7 @@ func TestTreeTableMoveSelected(t *testing.T) {
 		}
 		selNames := func() []string {
 			var ns []string
-			for _, i := range tt.SelectedIndexesList(false) {
+			for _, i := range tt.SelectedIndexesList(reflectx.Ascending) {
 				ns = append(ns, strings.TrimSpace(rowNames(tt)[i]))
 			}
 			return ns

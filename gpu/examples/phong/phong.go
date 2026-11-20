@@ -72,8 +72,8 @@ func main() {
 	ph.SetMesh("cube",
 		shape.NewBox(1, 1, 1).SetSegs(math32.Vec3i(50, 50, 50)))
 	ph.SetMesh("sphere", shape.NewSphere(.5, 64))
-	ph.SetMesh("cylinder", shape.NewCylinder(1, .5, 64, 64, true, true))
-	ph.SetMesh("cone", shape.NewCone(1, .5, 64, 64, true))
+	ph.SetMesh("cylinder", shape.NewCylinder(1, .5, 64, 64, shape.WithTop, shape.WithBottom))
+	ph.SetMesh("cone", shape.NewCone(1, .5, 64, 64, shape.WithBottom))
 	ph.SetMesh("capsule", shape.NewCapsule(1, .5, 64, 64))
 	ph.SetMesh("torus", shape.NewTorus(2, .2, 64))
 

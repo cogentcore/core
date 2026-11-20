@@ -206,8 +206,8 @@ func (nb *NodeBase) UpdateBBox2D(size math32.Vector2) {
 	off := math32.Vector2{}
 	nb.WorldBBox.BBox = nb.MeshBBox.BBox.MulMatrix4(&nb.Pose.WorldMatrix)
 	nb.NDCBBox = nb.MeshBBox.BBox.MVProjToNDC(&nb.Pose.MVPMatrix)
-	Wmin := nb.NDCBBox.Min.NDCToWindow(size, off, 0, 1, true) // true = flipY
-	Wmax := nb.NDCBBox.Max.NDCToWindow(size, off, 0, 1, true) // true = filpY
+	Wmin := nb.NDCBBox.Min.NDCToWindow(size, off, 0, 1, math32.FlipY)
+	Wmax := nb.NDCBBox.Max.NDCToWindow(size, off, 0, 1, math32.FlipY)
 	// BBox is always relative to scene
 	nb.BBox = image.Rectangle{Min: image.Point{int(Wmin.X), int(Wmax.Y)}, Max: image.Point{int(Wmax.X), int(Wmin.Y)}}
 	// note: BBox is inaccurate for objects extending behind camera
@@ -239,7 +239,7 @@ func (nb *NodeBase) RayPick(pos image.Point) math32.Ray {
 	sz := nb.Scene.Geom.Size
 	size := math32.Vec2(float32(sz.X), float32(sz.Y))
 	fpos := math32.Vec2(float32(pos.X), float32(pos.Y))
-	ndc := fpos.WindowToNDC(size, math32.Vector2{}, true) // flipY
+	ndc := fpos.WindowToNDC(size, math32.Vector2{}, math32.FlipY)
 	var err error
 	ndc.Z = -1 // at closest point
 	cdir := math32.Vector4FromVector3(ndc, 1).MulMatrix4(&nb.Scene.Camera.InvProjectionMatrix)

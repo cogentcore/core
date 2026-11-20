@@ -184,7 +184,7 @@ func TestDrawerUsed(t *testing.T) {
 
 	dw.Start()
 	dw.UseGoImage(img, Changed)
-	dw.ScaleUsed(image.Rectangle{}, image.Rectangle{}, 0, draw.Src, false)
+	dw.ScaleUsed(image.Rectangle{}, image.Rectangle{}, 0, draw.Src, math32.NoFlipY)
 	dw.End()
 	out := dt.image(t)
 	// at a quarter and three quarters: the sampler repeats, so the
@@ -194,7 +194,7 @@ func TestDrawerUsed(t *testing.T) {
 
 	dw.Start()
 	dw.UseGoImage(img, Unchanged)
-	dw.ScaleUsed(image.Rectangle{}, image.Rectangle{}, 0, draw.Src, true)
+	dw.ScaleUsed(image.Rectangle{}, image.Rectangle{}, 0, draw.Src, math32.FlipY)
 	dw.End()
 	out = dt.image(t)
 	assertPixel(t, out, 20, 10, blue, "flipped top")

@@ -133,8 +133,8 @@ func TestVector3More(t *testing.T) {
 
 	size, off := Vec2(200, 100), Vec2(10, 20)
 	for _, flip := range []bool{false, true} {
-		w := Vec3(0.5, -0.5, 0).NDCToWindow(size, off, 0, 1, flip)
-		n := Vec2(w.X, w.Y).WindowToNDC(size, off, flip)
+		w := Vec3(0.5, -0.5, 0).NDCToWindow(size, off, 0, 1, YFlip(flip))
+		n := Vec2(w.X, w.Y).WindowToNDC(size, off, YFlip(flip))
 		assert.InDelta(t, 0.5, n.X, 1e-5)
 		assert.InDelta(t, -0.5, n.Y, 1e-5)
 		assert.InDelta(t, 0.5, w.Z, 1e-5)

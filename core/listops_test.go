@@ -7,6 +7,7 @@ package core
 import (
 	"testing"
 
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/keymap"
@@ -20,7 +21,7 @@ func TestListKeyNavigation(t *testing.T) {
 	b := NewBody()
 	sl := []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19}
 	ls := NewList(b).SetSlice(&sl)
-	sel := func() []int { return ls.SelectedIndexesList(false) }
+	sel := func() []int { return ls.SelectedIndexesList(reflectx.Ascending) }
 	AssertRender(t, b, "list/key-navigation", Locked(b, func() {
 		ls.SelectIndexEvent(0, events.SelectOne)
 		SendKeyFunction(ls, keymap.MoveDown)
@@ -77,7 +78,7 @@ func TestListInsertDelete(t *testing.T) {
 		ls.SelectIndexEvent(4, events.SelectOne)
 		ls.DeleteAt(2)
 		assert.Equal(t, []string{"a", "b", "", "c", ""}, sl)
-		assert.Equal(t, []int{3}, ls.SelectedIndexesList(false), "the selection moves up")
+		assert.Equal(t, []int{3}, ls.SelectedIndexesList(reflectx.Ascending), "the selection moves up")
 		ls.DeleteAt(10)
 		ls.DeleteAt(-1)
 		assert.Len(t, sl, 5, "out of range deletes do nothing")

@@ -26,6 +26,7 @@ var _ = register(func() {
 			"KnownComments":          reflect.ValueOf(p_cogentcore_org_core_text_lines.KnownComments),
 			"LineCells":              reflect.ValueOf(p_cogentcore_org_core_text_lines.LineCells),
 			"Lines":                  reflect.ValueOf((*p_cogentcore_org_core_text_lines.Lines)(nil)),
+			"MatchCase":              reflect.ValueOf((*p_cogentcore_org_core_text_lines.MatchCase)(nil)),
 			"NewDiffSelected":        reflect.ValueOf(p_cogentcore_org_core_text_lines.NewDiffSelected),
 			"NewLines":               reflect.ValueOf(p_cogentcore_org_core_text_lines.NewLines),
 			"NewLinesFromBytes":      reflect.ValueOf(p_cogentcore_org_core_text_lines.NewLinesFromBytes),

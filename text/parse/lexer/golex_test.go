@@ -277,10 +277,10 @@ func TestErrors(t *testing.T) {
 	assert.Equal(t, "first", el[1].Msg)
 	assert.Contains(t, el.Error(), "(and 3 more errors)")
 	assert.Error(t, el.Err())
-	rep := el.Report(2, "", true, true)
+	rep := el.Report(2, "", lexer.ShowSrc, lexer.ShowRule)
 	assert.Contains(t, rep, "other file")
 	assert.Contains(t, rep, "more errors")
-	assert.Contains(t, el[3].Report("", true, false), "rc line", "the source from the error")
+	assert.Contains(t, el[3].Report("", lexer.ShowSrc, lexer.NoRule), "rc line", "the source from the error")
 	assert.Equal(t, "b.go:3:1: second", el[3].Error())
 	el.RemoveMultiples()
 	assert.Equal(t, 3, el.Len(), "one error per line")
@@ -301,7 +301,7 @@ func TestErrorsReportMax(t *testing.T) {
 	for ln := range 4 {
 		el.Add(textpos.Pos{Line: ln}, "a.go", "err", "", nil)
 	}
-	rep := el.Report(2, "", false, false)
+	rep := el.Report(2, "", lexer.NoSrc, lexer.NoRule)
 	assert.Equal(t, 2, strings.Count(rep, "a.go:"))
 	assert.Contains(t, rep, "and 2 more errors")
 }

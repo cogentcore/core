@@ -124,8 +124,8 @@ func TestPathAccessors(t *testing.T) {
 	tolEqualVec2(t, end, math32.Vec2(2, 0))
 	rx, ry, phi, large, sweep, aend := p.ArcToPoints(4 + CmdLen(QuadTo) + CmdLen(CubeTo))
 	assert.Equal(t, []float32{1, 1, 0}, []float32{rx, ry, phi})
-	assert.False(t, large)
-	assert.True(t, sweep)
+	assert.Equal(t, SmallArc, large)
+	assert.Equal(t, Clockwise, sweep)
 	tolEqualVec2(t, aend, math32.Vec2(7, 0))
 
 	q := p.CopyTo(nil)
@@ -150,8 +150,8 @@ func TestPathAccessors(t *testing.T) {
 	assert.True(t, MustParseSVGPath("M0 0L1 0M2 2L3 3").HasSubpaths())
 
 	for _, fl := range [][2]bool{{false, false}, {false, true}, {true, false}, {true, true}} {
-		l, s := ToArcFlags(fromArcFlags(fl[0], fl[1]))
-		assert.Equal(t, fl, [2]bool{l, s})
+		l, s := ToArcFlags(fromArcFlags(ArcSize(fl[0]), ArcSweep(fl[1])))
+		assert.Equal(t, fl, [2]bool{bool(l), bool(s)})
 	}
 }
 
@@ -180,7 +180,7 @@ func TestScanners(t *testing.T) {
 			assert.True(t, s.Path().Equals(MustParseSVGPath("M4 1C5 0 6 2 7 1")))
 		case ArcTo:
 			rx, ry, _, large, sweep := s.Arc()
-			assert.Equal(t, []any{float32(1), float32(1), false, true}, []any{rx, ry, large, sweep})
+			assert.Equal(t, []any{float32(1), float32(1), SmallArc, Clockwise}, []any{rx, ry, large, sweep})
 			assert.Equal(t, math32.Vec2(9, 1), s.End())
 			assert.Equal(t, CmdLen(ArcTo), len(s.Path())-CmdLen(MoveTo))
 		case LineTo:
@@ -207,7 +207,7 @@ func TestScanners(t *testing.T) {
 		case ArcTo:
 			rx, _, _, _, sweep := rs.Arc()
 			assert.Equal(t, float32(1), rx)
-			assert.True(t, sweep)
+			assert.Equal(t, Clockwise, sweep)
 			assert.NotEmpty(t, rs.Path())
 		case LineTo:
 			assert.True(t, rs.Path().Equals(MustParseSVGPath("M1 1L2 1")))
@@ -236,7 +236,7 @@ func TestTranslateScale(t *testing.T) {
 
 	a := New()
 	a.MoveTo(0, 0)
-	a.ArcTo(1, 1, 0, false, true, 2, 0)
+	a.ArcTo(1, 1, 0, SmallArc, Clockwise, 2, 0)
 	s := a.Clone().Scale(2, 2)
 	rx, ry, _, _, _, end := s.ArcToPoints(CmdLen(MoveTo))
 	assert.InDelta(t, 2, rx, 1e-5)
@@ -253,7 +253,7 @@ func TestTranslateScale(t *testing.T) {
 	// a flip reverses the sweep
 	f := a.Clone().Scale(1, -1)
 	_, _, _, _, sweep, _ := f.ArcToPoints(CmdLen(MoveTo))
-	assert.False(t, sweep)
+	assert.Equal(t, CounterClockwise, sweep)
 
 	// a rotation rotates the arc
 	rot := a.Clone().Transform(math32.Rotate2D(math32.Pi / 2))

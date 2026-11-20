@@ -60,8 +60,8 @@ func (gl *GoLang) Lookup(fss *parse.FileStates, str string, pos textpos.Pos) (ld
 
 	if CompleteTrace {
 		lfs.ParseState.AST.WriteTree(os.Stdout, 0)
-		lfs.LexState.Errs.Report(20, "", true, true)
-		lfs.ParseState.Errs.Report(20, "", true, true)
+		lfs.LexState.Errs.Report(20, "", lexer.ShowSrc, lexer.ShowRule)
+		lfs.ParseState.Errs.Report(20, "", lexer.ShowSrc, lexer.ShowRule)
 	}
 
 	var scopes syms.SymMap // scope(s) for position, fname
@@ -171,8 +171,8 @@ func (gl *GoLang) CompleteLine(fss *parse.FileStates, str string, pos textpos.Po
 
 	if CompleteTrace {
 		lfs.ParseState.AST.WriteTree(os.Stdout, 0)
-		lfs.LexState.Errs.Report(20, "", true, true)
-		lfs.ParseState.Errs.Report(20, "", true, true)
+		lfs.LexState.Errs.Report(20, "", lexer.ShowSrc, lexer.ShowRule)
+		lfs.ParseState.Errs.Report(20, "", lexer.ShowSrc, lexer.ShowRule)
 	}
 
 	var scopes syms.SymMap // scope(s) for position, fname

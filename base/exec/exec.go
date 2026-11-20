@@ -195,3 +195,39 @@ func ExitStatus(err error) int {
 	}
 	return 1
 }
+
+// ErrorMode specifies whether a command that fails is an error to report:
+// [ErrorsFail] or [ErrorsOK].
+type ErrorMode bool
+
+const (
+	// ErrorsOK does not report an error when the command fails.
+	ErrorsOK ErrorMode = true
+
+	// ErrorsFail reports an error when the command fails.
+	ErrorsFail ErrorMode = false
+)
+
+// StartMode specifies whether to start a command in the background without
+// waiting for it to finish ([Background]) or wait for it ([Foreground]).
+type StartMode bool
+
+const (
+	// Background starts the command without waiting for it to finish.
+	Background StartMode = true
+
+	// Foreground waits for the command to finish.
+	Foreground StartMode = false
+)
+
+// OutputMode specifies whether to capture the output of a command and
+// return it ([CaptureOutput]) or send it to the standard output ([NoCapture]).
+type OutputMode bool
+
+const (
+	// CaptureOutput captures the output and returns it.
+	CaptureOutput OutputMode = true
+
+	// NoCapture sends the output to the standard output.
+	NoCapture OutputMode = false
+)

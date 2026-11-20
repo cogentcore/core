@@ -129,10 +129,10 @@ func TestTextLinks(t *testing.T) {
 		tx.HandleEvent(events.NewMouseMove(events.NoButton, p, p, 0))
 		assert.NotNil(t, tx.PaintText())
 		assert.Equal(t, "Go to the site now", string(tx.TextRunes()))
-		matches, ok := tx.Search("O", false)
+		matches, ok := tx.Search("O", IgnoreCase)
 		assert.True(t, ok)
 		assert.Len(t, matches, 3)
-		matches, _ = tx.Search("O", true)
+		matches, _ = tx.Search("O", UseCase)
 		assert.Empty(t, matches)
 	}))
 }

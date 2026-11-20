@@ -65,6 +65,16 @@ public class GoNativeActivity extends NativeActivity {
 
 	private native void scaled(float scaleFactor, float posX, float posY);
 
+	// notifyPermission sends whether notifications are allowed to Go,
+	// after notifyRequestPermission.
+	private native void notifyPermission(boolean allowed);
+
+	// notifyClicked sends the ID of a clicked notification to Go.
+	private native void notifyClicked(String id);
+
+	// the request code of the request for the notification permission
+	private static final int NOTIFY_PERMISSION_REQUEST = 7001;
+
 	private EditText mTextEdit;
 	private boolean ignoreKey = false;
 
@@ -88,6 +98,66 @@ public class GoNativeActivity extends NativeActivity {
 	public GoNativeActivity() {
 		super();
 		goNativeActivity = this;
+	}
+
+	// context returns the context of the app, for notifications.
+	static Context context() {
+		return goNativeActivity.getApplicationContext();
+	}
+
+	// notifyShow shows the given notification now (called from Go).
+	static void notifyShow(String id, String title, String body) {
+		Notify.show(id, title, body);
+	}
+
+	// notifySync schedules the given notifications (called from Go).
+	static void notifySync(String[] ids, String[] titles, String[] bodies, long[] times) {
+		Notify.sync(ids, titles, bodies, times);
+	}
+
+	// notifyRequestPermission asks for permission to show notifications on
+	// Android 13 and later, if they are not allowed yet, sending the answer
+	// to Go with notifyPermission (called from Go).
+	static void notifyRequestPermission() {
+		goNativeActivity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				GoNativeActivity a = goNativeActivity;
+				if (Notify.allowed(a) || Build.VERSION.SDK_INT < 33) {
+					a.notifyPermission(Notify.allowed(a));
+					return;
+				}
+				a.requestPermissions(new String[] { "android.permission.POST_NOTIFICATIONS" }, NOTIFY_PERMISSION_REQUEST);
+			}
+		});
+	}
+
+	@Override
+	public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
+		super.onRequestPermissionsResult(requestCode, permissions, results);
+		if (requestCode == NOTIFY_PERMISSION_REQUEST) {
+			notifyPermission(results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED);
+		}
+	}
+
+	// deliverNotifyClick sends the ID of the clicked notification of the
+	// given intent to Go, if it is from a notification (see Notify.post).
+	private void deliverNotifyClick(Intent in) {
+		if (in == null) {
+			return;
+		}
+		String id = in.getStringExtra(Notify.EXTRA_ID);
+		if (id != null) {
+			in.removeExtra(Notify.EXTRA_ID); // only once
+			notifyClicked(id);
+		}
+	}
+
+	@Override
+	protected void onNewIntent(Intent in) {
+		super.onNewIntent(in);
+		setIntent(in);
+		deliverNotifyClick(in);
 	}
 
 	String getTmpdir() {
@@ -400,6 +470,9 @@ public class GoNativeActivity extends NativeActivity {
 		});
 
 		mScaleDetector = new ScaleGestureDetector(this, new ScaleGestureListener());
+		if (savedInstanceState == null) { // not for a recreated activity
+			deliverNotifyClick(getIntent());
+		}
 	}
 
 	private void setupEntry() {

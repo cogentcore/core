@@ -34,7 +34,7 @@ struct utsname sysInfo;
 - (void)resetText;
 @end
 
-@interface GoAppAppDelegate : UIResponder<UIApplicationDelegate>
+@interface GoAppAppDelegate : UIResponder<UIApplicationDelegate, UNUserNotificationCenterDelegate>
 @property (strong, nonatomic) UIWindow *window;
 @property (strong, nonatomic) GoAppAppController *controller;
 @end
@@ -87,7 +87,25 @@ struct utsname sysInfo;
 - (void)userNotificationCenter:(UNUserNotificationCenter *)center
        willPresentNotification:(UNNotification *)notification
          withCompletionHandler:(void (^)(UNNotificationPresentationOptions options))completionHandler {
-	completionHandler(UNNotificationPresentationOptionAlert);
+	if (@available(iOS 14.0, *)) {
+		completionHandler(UNNotificationPresentationOptionBanner | UNNotificationPresentationOptionList | UNNotificationPresentationOptionSound);
+	} else {
+		completionHandler(UNNotificationPresentationOptionAlert | UNNotificationPresentationOptionSound);
+	}
+}
+
+// a tap on a notification is sent to Go with its ID (see notify.go),
+// including one that starts the app, as the delegate is set at launch
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center
+didReceiveNotificationResponse:(UNNotificationResponse *)response
+         withCompletionHandler:(void (^)(void))completionHandler {
+	if ([response.actionIdentifier isEqualToString:UNNotificationDefaultActionIdentifier]) {
+		NSString* nid = response.notification.request.content.userInfo[@"id"];
+		if (nid != nil) {
+			iosNotifyClicked((char*)[nid UTF8String]);
+		}
+	}
+	completionHandler();
 }
 @end
 

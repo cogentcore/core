@@ -79,7 +79,7 @@ func (s *Scanner) CP2() math32.Vector2 {
 }
 
 // Arc returns the arguments for arcs (rx,ry,rot,large,sweep).
-func (s *Scanner) Arc() (float32, float32, float32, bool, bool) {
+func (s *Scanner) Arc() (float32, float32, float32, ArcSize, ArcSweep) {
 	if s.p[s.i] != ArcTo {
 		panic("must be arc")
 	}
@@ -161,7 +161,7 @@ func (s *ReverseScanner) CP2() math32.Vector2 {
 }
 
 // Arc returns the arguments for arcs (rx,ry,rot,large,sweep).
-func (s *ReverseScanner) Arc() (float32, float32, float32, bool, bool) {
+func (s *ReverseScanner) Arc() (float32, float32, float32, ArcSize, ArcSweep) {
 	if s.p[s.i] != ArcTo {
 		panic("must be arc")
 	}

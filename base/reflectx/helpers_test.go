@@ -127,10 +127,10 @@ func TestMapAddDeleteSort(t *testing.T) {
 		}
 		return s
 	}
-	assert.Equal(t, []string{"a", "b", "c"}, keys(MapSort(m, true, true)))
-	assert.Equal(t, []string{"c", "b", "a"}, keys(MapSort(&m, true, false)))
-	assert.Equal(t, []string{"b", "c", "a"}, keys(MapSort(m, false, true)))
-	assert.Equal(t, []string{"a", "c", "b"}, keys(MapSort(m, false, false)))
+	assert.Equal(t, []string{"a", "b", "c"}, keys(MapSort(m, true, Ascending)))
+	assert.Equal(t, []string{"c", "b", "a"}, keys(MapSort(&m, true, Descending)))
+	assert.Equal(t, []string{"b", "c", "a"}, keys(MapSort(m, false, Ascending)))
+	assert.Equal(t, []string{"a", "c", "b"}, keys(MapSort(m, false, Descending)))
 
 	mi := map[int]float64{3: 0.5, 1: 2.5, 2: 1.5}
 	ki := func(vs []reflect.Value) []int64 {
@@ -140,20 +140,20 @@ func TestMapAddDeleteSort(t *testing.T) {
 		}
 		return s
 	}
-	assert.Equal(t, []int64{1, 2, 3}, ki(MapSort(mi, true, true)))
-	assert.Equal(t, []int64{3, 2, 1}, ki(MapSort(mi, false, true)))
-	assert.Equal(t, []int64{1, 2, 3}, ki(MapSort(mi, false, false)))
+	assert.Equal(t, []int64{1, 2, 3}, ki(MapSort(mi, true, Ascending)))
+	assert.Equal(t, []int64{3, 2, 1}, ki(MapSort(mi, false, Ascending)))
+	assert.Equal(t, []int64{1, 2, 3}, ki(MapSort(mi, false, Descending)))
 
 	ms := map[string]string{"x": "b", "y": "a"}
-	assert.Equal(t, []string{"y", "x"}, keys(MapSort(ms, false, true)))
+	assert.Equal(t, []string{"y", "x"}, keys(MapSort(ms, false, Ascending)))
 
 	mu := map[uint]uint{2: 1, 1: 2}
-	assert.Len(t, MapSort(mu, true, true), 2)
-	assert.Len(t, MapSort(mu, false, true), 2)
+	assert.Len(t, MapSort(mu, true, Ascending), 2)
+	assert.Len(t, MapSort(mu, false, Ascending), 2)
 	mt := map[string]time.Time{"late": time.Unix(200, 0), "early": time.Unix(100, 0)}
-	assert.Equal(t, []string{"early", "late"}, keys(MapSort(mt, false, true)))
-	assert.Equal(t, []string{"late", "early"}, keys(MapSort(mt, false, false)))
-	assert.NoError(t, MapValueSort(reflect.ValueOf(m), nil, true))
+	assert.Equal(t, []string{"early", "late"}, keys(MapSort(mt, false, Ascending)))
+	assert.Equal(t, []string{"late", "early"}, keys(MapSort(mt, false, Descending)))
+	assert.NoError(t, MapValueSort(reflect.ValueOf(m), nil, Ascending))
 }
 
 func TestSetMapRobust(t *testing.T) {
@@ -186,38 +186,38 @@ func TestSliceDeleteSort(t *testing.T) {
 	assert.Equal(t, []int{1, 3}, s)
 
 	si := []int{3, 1, 2}
-	assert.NoError(t, SliceSort(si, true))
+	assert.NoError(t, SliceSort(si, Ascending))
 	assert.Equal(t, []int{1, 2, 3}, si)
-	assert.NoError(t, SliceSort(&si, false))
+	assert.NoError(t, SliceSort(&si, Descending))
 	assert.Equal(t, []int{3, 2, 1}, si)
 
 	su := []uint8{3, 1, 2}
-	assert.NoError(t, SliceSort(su, true))
+	assert.NoError(t, SliceSort(su, Ascending))
 	assert.Equal(t, []uint8{1, 2, 3}, su)
-	assert.NoError(t, SliceSort(su, false))
+	assert.NoError(t, SliceSort(su, Descending))
 	assert.Equal(t, []uint8{3, 2, 1}, su)
 
 	sf := []float32{0.5, 2, 1}
-	assert.NoError(t, SliceSort(sf, true))
+	assert.NoError(t, SliceSort(sf, Ascending))
 	assert.Equal(t, []float32{0.5, 1, 2}, sf)
-	assert.NoError(t, SliceSort(sf, false))
+	assert.NoError(t, SliceSort(sf, Descending))
 	assert.Equal(t, []float32{2, 1, 0.5}, sf)
 
 	ss := []string{"b", "c", "a"}
-	assert.NoError(t, SliceSort(ss, true))
+	assert.NoError(t, SliceSort(ss, Ascending))
 	assert.Equal(t, []string{"a", "b", "c"}, ss)
-	assert.NoError(t, SliceSort(ss, false))
+	assert.NoError(t, SliceSort(ss, Descending))
 	assert.Equal(t, []string{"c", "b", "a"}, ss)
 
 	st := []time.Time{time.Unix(3, 0), time.Unix(1, 0), time.Unix(2, 0)}
-	assert.NoError(t, SliceSort(st, true))
+	assert.NoError(t, SliceSort(st, Ascending))
 	assert.Equal(t, time.Unix(1, 0), st[0])
-	assert.NoError(t, SliceSort(st, false))
+	assert.NoError(t, SliceSort(st, Descending))
 	assert.Equal(t, time.Unix(3, 0), st[0])
 
-	assert.NoError(t, SliceSort([]int{}, true))
-	assert.NoError(t, SliceSort([]image.Point{{1, 2}}, true), "a Stringer sorts by its string")
-	assert.Error(t, SliceSort([]struct{ X int }{{1}}, true), "not a basic type")
+	assert.NoError(t, SliceSort([]int{}, Ascending))
+	assert.NoError(t, SliceSort([]image.Point{{1, 2}}, Ascending), "a Stringer sorts by its string")
+	assert.Error(t, SliceSort([]struct{ X int }{{1}}, Ascending), "not a basic type")
 }
 
 func TestValueSliceSort(t *testing.T) {
@@ -231,38 +231,38 @@ func TestValueSliceSort(t *testing.T) {
 	first := func(vs []reflect.Value) any { return vs[0].Interface() }
 
 	vi := vals(3, 1, 2)
-	assert.NoError(t, ValueSliceSort(vi, true))
+	assert.NoError(t, ValueSliceSort(vi, Ascending))
 	assert.Equal(t, 1, first(vi))
-	assert.NoError(t, ValueSliceSort(vi, false))
+	assert.NoError(t, ValueSliceSort(vi, Descending))
 	assert.Equal(t, 3, first(vi))
 
 	vu := vals(uint(3), uint(1))
-	assert.NoError(t, ValueSliceSort(vu, true))
+	assert.NoError(t, ValueSliceSort(vu, Ascending))
 	assert.Equal(t, uint(1), first(vu))
-	assert.NoError(t, ValueSliceSort(vu, false))
+	assert.NoError(t, ValueSliceSort(vu, Descending))
 	assert.Equal(t, uint(3), first(vu))
 
 	vf := vals(0.5, 2.0)
-	assert.NoError(t, ValueSliceSort(vf, false))
+	assert.NoError(t, ValueSliceSort(vf, Descending))
 	assert.Equal(t, 2.0, first(vf))
-	assert.NoError(t, ValueSliceSort(vf, true))
+	assert.NoError(t, ValueSliceSort(vf, Ascending))
 	assert.Equal(t, 0.5, first(vf))
 
 	vs := vals("b", "a")
-	assert.NoError(t, ValueSliceSort(vs, true))
+	assert.NoError(t, ValueSliceSort(vs, Ascending))
 	assert.Equal(t, "a", first(vs))
-	assert.NoError(t, ValueSliceSort(vs, false))
+	assert.NoError(t, ValueSliceSort(vs, Descending))
 	assert.Equal(t, "b", first(vs))
 
 	vt := vals(time.Unix(2, 0), time.Unix(1, 0))
-	assert.NoError(t, ValueSliceSort(vt, true))
+	assert.NoError(t, ValueSliceSort(vt, Ascending))
 	assert.Equal(t, time.Unix(1, 0), first(vt))
-	assert.NoError(t, ValueSliceSort(vt, false))
+	assert.NoError(t, ValueSliceSort(vt, Descending))
 	assert.Equal(t, time.Unix(2, 0), first(vt))
 
-	assert.NoError(t, ValueSliceSort(nil, true))
-	assert.NoError(t, ValueSliceSort(vals(image.Point{}), true), "a Stringer")
-	assert.Error(t, ValueSliceSort(vals(struct{ X int }{}), true))
+	assert.NoError(t, ValueSliceSort(nil, Ascending))
+	assert.NoError(t, ValueSliceSort(vals(image.Point{}), Ascending), "a Stringer")
+	assert.Error(t, ValueSliceSort(vals(struct{ X int }{}), Ascending))
 }
 
 // sortRow is a struct for testing StructSliceSort on each kind of field.
@@ -294,16 +294,16 @@ func TestStructSliceSortKinds(t *testing.T) {
 		{4, 3, 1}, // S
 		{5, 3, 1}, // T
 	} {
-		assert.NoError(t, StructSliceSort(rows, []int{tt.field}, true))
+		assert.NoError(t, StructSliceSort(rows, []int{tt.field}, Ascending))
 		assert.Equal(t, tt.asc, firstI(), "field %d ascending", tt.field)
-		assert.NoError(t, StructSliceSort(&rows, []int{tt.field}, false))
+		assert.NoError(t, StructSliceSort(&rows, []int{tt.field}, Descending))
 		assert.Equal(t, tt.desc, firstI(), "field %d descending", tt.field)
 	}
-	assert.NoError(t, StructSliceSort(rows, []int{0}, true))
+	assert.NoError(t, StructSliceSort(rows, []int{0}, Ascending))
 	assert.False(t, rows[0].B, "false first")
-	assert.NoError(t, StructSliceSort(rows, []int{6}, true), "a Stringer field")
-	assert.Error(t, StructSliceSort(rows, []int{7}, true), "a struct field")
-	assert.NoError(t, StructSliceSort([]sortRow{}, []int{1}, true))
+	assert.NoError(t, StructSliceSort(rows, []int{6}, Ascending), "a Stringer field")
+	assert.Error(t, StructSliceSort(rows, []int{7}, Ascending), "a struct field")
+	assert.NoError(t, StructSliceSort([]sortRow{}, []int{1}, Ascending))
 }
 
 // FieldsInner is embedded in fieldsOuter.

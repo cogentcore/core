@@ -175,6 +175,6 @@ func TestCurvature(t *testing.T) {
 	defer func() { ppath.ArcToCubeImmediate = immediate }()
 	arc := ppath.New()
 	arc.MoveTo(2, 0)
-	arc.ArcTo(2, 2, 0, false, true, -2, 0)
+	arc.ArcTo(2, 2, 0, ppath.SmallArc, ppath.Clockwise, -2, 0)
 	assert.InDelta(t, 0.5, math32.Abs(Curvature(*arc, 1, 0.5)), 1e-3, "1/r")
 }

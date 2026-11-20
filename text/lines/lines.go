@@ -26,12 +26,16 @@ import (
 	"cogentcore.org/core/text/textpos"
 )
 
+// MatchCase specifies whether [Lines.ReplaceText] matches the case of the
+// replaced text: [ReplaceMatchCase] or [ReplaceNoMatchCase].
+type MatchCase bool
+
 const (
 	// ReplaceMatchCase is used for MatchCase arg in ReplaceText method
-	ReplaceMatchCase = true
+	ReplaceMatchCase MatchCase = true
 
 	// ReplaceNoMatchCase is used for MatchCase arg in ReplaceText method
-	ReplaceNoMatchCase = false
+	ReplaceNoMatchCase MatchCase = false
 )
 
 var (
@@ -758,7 +762,7 @@ func (ls *Lines) insertTextRectImpl(tbe *textpos.Edit) *textpos.Edit {
 // case (upper / lower) of the new inserted text to that of the text being replaced.
 // returns the Edit for the inserted text.
 // An Undo record is automatically saved depending on Undo.Off setting.
-func (ls *Lines) replaceText(delSt, delEd, insPos textpos.Pos, insTxt string, matchCase bool) *textpos.Edit {
+func (ls *Lines) replaceText(delSt, delEd, insPos textpos.Pos, insTxt string, matchCase MatchCase) *textpos.Edit {
 	if matchCase {
 		red := ls.region(delSt, delEd)
 		cur := string(red.ToBytes())

@@ -54,6 +54,7 @@ var goalImports = []string{
 	"cogentcore.org/lab/physics/phyxyz",
 	"cogentcore.org/lab/plot",
 	"cogentcore.org/lab/plot/plots",
+	"cogentcore.org/lab/plot/statsplot",
 	"cogentcore.org/lab/plotcore",
 	"cogentcore.org/lab/stats/cluster",
 	"cogentcore.org/lab/stats/convolve",

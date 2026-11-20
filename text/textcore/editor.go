@@ -320,7 +320,7 @@ func (ed *Editor) keyInput(e events.Event) {
 	case keymap.Copy:
 		cancelAll()
 		e.SetHandled()
-		ed.Copy(true) // reset
+		ed.Copy(core.SelectReset)
 	case keymap.Search:
 		e.SetHandled()
 		ed.qReplaceCancel()
@@ -358,11 +358,11 @@ func (ed *Editor) keyInput(e events.Event) {
 			ed.Clear()
 		case kf == keymap.FocusNext: // tab
 			e.SetHandled()
-			ed.CursorNextLink(true)
+			ed.CursorNextLink(Wraparound)
 			ed.OpenLinkAt(ed.CursorPos)
 		case kf == keymap.FocusPrev: // tab
 			e.SetHandled()
-			ed.CursorPrevLink(true)
+			ed.CursorPrevLink(Wraparound)
 			ed.OpenLinkAt(ed.CursorPos)
 		case kf == keymap.None && ed.ISearch.On:
 			if unicode.IsPrint(e.KeyRune()) && !e.HasAnyModifier(key.Control, key.Meta) {
@@ -371,7 +371,7 @@ func (ed *Editor) keyInput(e events.Event) {
 		case e.KeyRune() == ' ' || kf == keymap.Accept || kf == keymap.Enter:
 			e.SetHandled()
 			ed.CursorPos = ed.Lines.MoveBackward(ed.CursorPos, 1)
-			ed.CursorNextLink(true) // todo: cursorcurlink
+			ed.CursorNextLink(Wraparound) // todo: cursorcurlink
 			ed.OpenLinkAt(ed.CursorPos)
 		}
 		return
@@ -777,7 +777,7 @@ func (ed *Editor) contextMenu(m *core.Scene, pos image.Point) {
 	core.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).
 		SetKey(keymap.Copy).SetState(!ed.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
-			ed.Copy(true)
+			ed.Copy(core.SelectReset)
 		})
 	if !ed.IsReadOnly() {
 		core.NewButton(m).SetText("Cut").SetIcon(icons.ContentCopy).

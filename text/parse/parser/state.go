@@ -166,7 +166,7 @@ func (ps *State) Error(pos textpos.Pos, msg string, rule *Rule) {
 	}
 	e := ps.Errs.Add(pos, ps.Src.Filename, msg, ps.Src.SrcLine(pos.Line), rule)
 	if isGUIActive() {
-		erstr := e.Report(ps.Src.BasePath, true, true)
+		erstr := e.Report(ps.Src.BasePath, lexer.ShowSrc, lexer.ShowRule)
 		fmt.Fprintln(ps.Trace.OutWrite, "ERROR: "+erstr)
 	}
 }

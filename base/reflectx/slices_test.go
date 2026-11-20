@@ -138,7 +138,7 @@ func TestStructSliceSortBool(t *testing.T) {
 		Done bool
 	}
 	items := []*item{{"a", true}, {"b", false}, {"c", true}, {"d", false}}
-	assert.NoError(t, StructSliceSort(items, []int{1}, true))
+	assert.NoError(t, StructSliceSort(items, []int{1}, Ascending))
 	names := func() string {
 		s := ""
 		for _, it := range items {
@@ -147,6 +147,6 @@ func TestStructSliceSortBool(t *testing.T) {
 		return s
 	}
 	assert.Equal(t, "bdac", names(), "false first, in the same order")
-	assert.NoError(t, StructSliceSort(items, []int{1}, false))
+	assert.NoError(t, StructSliceSort(items, []int{1}, Descending))
 	assert.Equal(t, "acbd", names(), "true first, in the same order")
 }
