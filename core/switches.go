@@ -307,3 +307,35 @@ func (sw *Switches) bitFlagFromSelected(bitflag enums.BitFlagSetter) {
 		bitflag.SetFlag(true, values[i].(enums.BitFlag))
 	}
 }
+
+// SizeUp reserves the width of the check icons of the chips that are not
+// checked, when the chips are on one line (not wrapped, as in a list or
+// table), so that the switches are as wide as they are with all of them
+// checked: a chip is wider when it is checked, with its check icon, and the
+// width of a one-line row of switches does not change, as for the columns of
+// a table, which do not anticipate it.
+func (sw *Switches) SizeUp() {
+	sw.Frame.SizeUp()
+	if sw.Type != SwitchChip || sw.Styles.Wrap || sw.Styles.Direction != styles.Row {
+		return
+	}
+	extra := float32(0)
+	sw.ForWidgetChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
+		ch, ok := cw.(*Switch)
+		if !ok || ch.IsChecked() {
+			return tree.Continue
+		}
+		if ic, ok := ch.FindPath("stack/icon-on").(*Icon); ok {
+			extra += ic.Geom.Size.Actual.Total.X
+		}
+		return tree.Continue
+	})
+	if extra == 0 {
+		return
+	}
+	sz := &sw.Geom.Size
+	sz.Actual.Content.X += extra
+	sz.SetTotalFromContent(&sz.Actual)
+	sz.minWidth += extra
+	sz.prefWidth += extra
+}

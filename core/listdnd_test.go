@@ -68,7 +68,8 @@ func TestListDragDrop(t *testing.T) {
 		require.True(t, ok)
 		assert.Equal(t, 2, idx)
 
-		ls.saveDraggedIndexes(idx)
+		ls.draggedIndexes = []int{0} // as set by dragStart
+		ls.shiftDraggedIndexes(idx)
 		assert.Equal(t, []int{0}, ls.draggedIndexes, "before the drop, so not moved")
 		m := NewScene()
 		ls.makePasteMenu(m, image.Point{}, md, idx, de.DropMod, func() { ls.dropFinalize(de) })

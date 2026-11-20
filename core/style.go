@@ -230,7 +230,8 @@ func setFromTag(tags reflect.StructTag, tag string, set func(v float32)) {
 
 // styleFromTags adds a [WidgetBase.Styler] to the given widget
 // to set its style properties based on the given [reflect.StructTag].
-// Width, height, and grow properties are supported.
+// Width, height, and grow properties are supported, and also new-window,
+// and drag-moves for the lists of slices (see [ListBase.DragMoves]).
 func styleFromTags(w Widget, tags reflect.StructTag) {
 	w.AsWidget().Styler(func(s *styles.Style) {
 		setFromTag(tags, "width", s.Min.X.Ch)
@@ -244,6 +245,14 @@ func styleFromTags(w Widget, tags reflect.StructTag) {
 	})
 	if tags.Get("new-window") == "+" {
 		w.AsWidget().setFlag(true, widgetValueNewWindow)
+	}
+	if tags.Get("drag-moves") == "+" {
+		switch x := w.(type) {
+		case *ListButton:
+			x.DragMoves = true
+		case Lister:
+			x.AsListBase().DragMoves = true
+		}
 	}
 }
 
