@@ -41,23 +41,27 @@ type Lines struct {
 	Closed bool
 }
 
+// LinesClosed specifies whether [NewLines] connects the first and last points:
+// [CloseLines] or [OpenLines].
+type LinesClosed bool
+
 const (
 	// CloseLines is used for the closed arg in NewLines:
 	// connect first and last
-	CloseLines = true
+	CloseLines LinesClosed = true
 
 	// OpenLines is used for the closed arg in NewLines:
 	// don't connect first and last
-	OpenLines = false
+	OpenLines LinesClosed = false
 )
 
 // NewLines adds Lines mesh to given scene, with given start, end, and width
-func NewLines(sc *Scene, name string, points []math32.Vector3, width math32.Vector2, closed bool) *Lines {
+func NewLines(sc *Scene, name string, points []math32.Vector3, width math32.Vector2, closed LinesClosed) *Lines {
 	ln := &Lines{}
 	ln.Name = name
 	ln.Points = points
 	ln.Width = width
-	ln.Closed = closed
+	ln.Closed = bool(closed)
 	sc.SetMesh(ln)
 	return ln
 }
@@ -108,18 +112,26 @@ func SetLineStartEnd(pose *Pose, st, ed math32.Vector3) {
 	pose.Quat.SetFromUnitVectors(math32.Vec3(1, 0, 0), dn)
 }
 
+// ArrowStart specifies whether [InitArrow] adds an arrow at the start:
+// [StartArrow] or [NoStartArrow].
+type ArrowStart bool
+
+// ArrowEnd specifies whether [InitArrow] adds an arrow at the end: [EndArrow]
+// or [NoEndArrow].
+type ArrowEnd bool
+
 const (
 	// StartArrow specifies to add a starting arrow
-	StartArrow = true
+	StartArrow ArrowStart = true
 
 	// NoStartArrow specifies not to add a starting arrow
-	NoStartArrow = false
+	NoStartArrow ArrowStart = false
 
 	// EndArrow specifies to add a ending arrow
-	EndArrow = true
+	EndArrow ArrowEnd = true
 
 	// EndArrow specifies not to add a ending arrow
-	NoEndArrow = false
+	NoEndArrow ArrowEnd = false
 )
 
 // InitLine is an Init function (e.g., for [tree] Maker functions)
@@ -144,7 +156,7 @@ func InitLine(ln *Solid, st, ed math32.Vector3, width float32, clr color.RGBA) {
 // factor for width to achieve "fat" vs. "thin" arrows.
 // arrowSegs determines how many faces there are on the arrowhead
 // 4 = a 4-sided pyramid, etc.
-func InitArrow(g *Group, st, ed math32.Vector3, width float32, clr color.RGBA, startArrow, endArrow bool, arrowSize, arrowWidth float32, arrowSegs int) {
+func InitArrow(g *Group, st, ed math32.Vector3, width float32, clr color.RGBA, startArrow ArrowStart, endArrow ArrowEnd, arrowSize, arrowWidth float32, arrowSegs int) {
 	cm := UnitConeMesh(g.Scene, arrowSegs)
 	g.isLinear = true
 	d := ed.Sub(st)
@@ -158,12 +170,12 @@ func InitArrow(g *Group, st, ed math32.Vector3, width float32, clr color.RGBA, s
 			InitLine(ln, st, ed, width, clr)
 			ln.Pose.SetIdentity()
 			switch {
-			case startArrow && endArrow:
+			case startArrow == StartArrow && endArrow == EndArrow:
 				ln.Pose.Scale.X -= 2 * asz
-			case startArrow:
+			case startArrow == StartArrow:
 				ln.Pose.Scale.X -= asz
 				ln.Pose.Pos.X += hasz
-			case endArrow:
+			case endArrow == EndArrow:
 				ln.Pose.Scale.X -= asz
 				ln.Pose.Pos.X -= hasz
 			}
@@ -217,12 +229,16 @@ func NewLineBoxMeshes(sc *Scene, meshNm string, bbox math32.Box3, width float32)
 	return
 }
 
+// Activity specifies whether nodes are flagged as inactive (not selectable):
+// [Inactive] or [Active].
+type Activity bool
+
 const (
 	// Inactive is used for args indicating if node should be inactive
-	Inactive = true
+	Inactive Activity = true
 
 	// Active is used for args indicating if node should be inactive or not
-	Active = false
+	Active Activity = false
 )
 
 // InitLineBox returns an Init function (e.g., for [tree] Maker functions)
@@ -234,7 +250,7 @@ const (
 // initialized, e.g., using sc.InitMesh()
 // inactive indicates whether the box and solids should be flagged as inactive
 // (not selectable).
-func InitLineBox(g *Group, meshNm string, bbox math32.Box3, width float32, clr color.RGBA, inactive bool) {
+func InitLineBox(g *Group, meshNm string, bbox math32.Box3, width float32, clr color.RGBA, inactive Activity) {
 	sz := bbox.Size()
 	hSz := sz.MulScalar(0.5)
 	front, side := NewLineBoxMeshes(g.Scene, meshNm, bbox, width)

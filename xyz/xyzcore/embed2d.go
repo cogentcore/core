@@ -29,14 +29,18 @@ type Embed2D struct {
 	DPISize image.Point
 }
 
+// Embed2DSize specifies whether [NewEmbed2D] resizes the plane to fit its
+// content ([FitContent]) or keeps a fixed size ([FixedSize]).
+type Embed2DSize bool
+
 const (
 	// FitContent is used as arg for NewEmbed2D to specify that plane should be resized
 	// to fit content.
-	FitContent = true
+	FitContent Embed2DSize = true
 
 	// FixesSize is used as arg for NewEmbed2D to specify that plane should remain a
 	// specified fixed size (using )
-	FixedSize = false
+	FixedSize Embed2DSize = false
 )
 
 // NewEmbed2D adds a new embedded 2D viewport of given name and nominal size
@@ -44,7 +48,7 @@ const (
 // to that using window's current Logical DPI scaling).  If fitContent is true and
 // first and only element in Viewport is a core.Layout, then it will be resized
 // to fit content size (though no smaller than given size).
-func NewEmbed2D(sc *Scene, parent tree.Node, name string, width, height int, fitContent bool) *Embed2D {
+func NewEmbed2D(sc *Scene, parent tree.Node, name string, width, height int, fitContent Embed2DSize) *Embed2D {
 	em := parent.NewChild(TypeEmbed2D, name).(*Embed2D)
 	em.Defaults(sc)
 	em.StdSize = image.Point{width, height}

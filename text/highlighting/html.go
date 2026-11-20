@@ -12,16 +12,26 @@ import (
 
 // maxLineLen prevents overflow in allocating line length
 const (
-	maxLineLen   = 64 * 1024
-	maxNumTags   = 1024
-	EscapeHTML   = true
-	NoEscapeHTML = false
+	maxLineLen = 64 * 1024
+	maxNumTags = 1024
+)
+
+// HTMLEscape specifies whether [MarkupLineHTML] escapes the HTML special
+// characters of the text: [EscapeHTML] or [NoEscapeHTML].
+type HTMLEscape bool
+
+const (
+	// EscapeHTML escapes the HTML special characters of the text.
+	EscapeHTML HTMLEscape = true
+
+	// NoEscapeHTML does not escape the HTML special characters of the text.
+	NoEscapeHTML HTMLEscape = false
 )
 
 // MarkupLineHTML returns the line with html class tags added for each tag
 // takes both the hi tags and extra tags.  Only fully nested tags are supported,
 // with any dangling ends truncated.
-func MarkupLineHTML(txt []rune, hitags, tags lexer.Line, escapeHTML bool) []byte {
+func MarkupLineHTML(txt []rune, hitags, tags lexer.Line, escapeHTML HTMLEscape) []byte {
 	if len(txt) > maxLineLen { // avoid overflow
 		return nil
 	}

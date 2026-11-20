@@ -2092,7 +2092,7 @@ func (lb *ListBase) TextRunes() []rune {
 // to define the meaning of the Region line, char values for the matches.
 // The bool return value indicates whether this widget handled the search,
 // thereby excluding further searching within the elements under it.
-func (lb *ListBase) Search(find string, useCase bool) ([]textpos.Match, bool) {
+func (lb *ListBase) Search(find string, useCase CaseSensitive) ([]textpos.Match, bool) {
 	var results []textpos.Match
 	for rw := range lb.SliceSize {
 		val := lb.sliceElementValue(rw)
@@ -2143,13 +2143,13 @@ func (lb *ListBase) HighlightMatches(matches []textpos.Match) bool {
 // SelectMatch selects match at given index from among those returned
 // from the Search method. scroll = scroll widget into view.
 // reset = clear selection instead of selecting.
-func (lb *ListBase) SelectMatch(matches []textpos.Match, index int, scroll, reset bool) {
+func (lb *ListBase) SelectMatch(matches []textpos.Match, index int, scroll SelectionScroll, reset SelectionReset) {
 	nWidgPerRow, idxOff := lb.RowWidgetNs()
 	match := matches[index]
 	lg := lb.ListGrid
 	rw := match.Region.Start.Line
 	if rw < lb.StartIndex || rw >= lb.StartIndex+lb.VisibleRows {
-		if reset || !scroll {
+		if reset == SelectReset || scroll == SelectNoScroll {
 			return
 		}
 		lb.ScrollToIndex(rw)

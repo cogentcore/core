@@ -11,6 +11,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/text/lines"
 	"cogentcore.org/core/text/parse/lexer"
 	"cogentcore.org/core/text/textpos"
 )
@@ -24,7 +25,7 @@ func (ed *Editor) findMatches(find string, useCase, lexItems bool) ([]textpos.Ma
 		ed.Highlights = nil
 		return nil, false
 	}
-	_, matches := ed.Lines.Search([]byte(find), !useCase, lexItems)
+	_, matches := ed.Lines.Search([]byte(find), textpos.CaseInsensitive(!useCase), lexItems)
 	if len(matches) == 0 {
 		ed.Highlights = nil
 		return matches, false
@@ -391,7 +392,7 @@ func (ed *Editor) qReplaceReplace(midx int) {
 	pos := reg.Start
 	// last arg is matchCase, only if not using case to match and rep is also lower case
 	matchCase := !ed.QReplace.useCase && !lexer.HasUpperCase(rep)
-	ed.Lines.ReplaceText(reg.Start, reg.End, pos, rep, matchCase)
+	ed.Lines.ReplaceText(reg.Start, reg.End, pos, rep, lines.MatchCase(matchCase))
 	ed.Highlights[midx] = textpos.Region{}
 	ed.setCursor(pos)
 	ed.savePosHistory(ed.CursorPos)

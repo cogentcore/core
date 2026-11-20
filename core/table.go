@@ -871,7 +871,7 @@ func (tb *Table) TextRunes() []rune {
 // to define the meaning of the Region line, char values for the matches.
 // The bool return value indicates whether this widget handled the search,
 // thereby excluding further searching within the elements under it.
-func (tb *Table) Search(find string, useCase bool) ([]textpos.Match, bool) {
+func (tb *Table) Search(find string, useCase CaseSensitive) ([]textpos.Match, bool) {
 	var results []textpos.Match
 	for rw := range tb.SliceSize {
 		val := tb.sliceElementValue(rw)
@@ -934,14 +934,14 @@ func (tb *Table) HighlightMatches(matches []textpos.Match) bool {
 // SelectMatch selects match at given index from among those returned
 // from the Search method. scroll = scroll widget into view.
 // reset = clear selection instead of selecting.
-func (tb *Table) SelectMatch(matches []textpos.Match, index int, scroll, reset bool) {
+func (tb *Table) SelectMatch(matches []textpos.Match, index int, scroll SelectionScroll, reset SelectionReset) {
 	nWidgPerRow, idxOff := tb.RowWidgetNs()
 	match := matches[index]
 	lg := tb.ListGrid
 	ln := match.Region.Start.Line
 	rw := ln / tb.numVisibleFields
 	if rw < tb.StartIndex || rw >= tb.StartIndex+tb.VisibleRows {
-		if reset || !scroll {
+		if reset == SelectReset || scroll == SelectNoScroll {
 			return
 		}
 		tb.ScrollToIndex(rw)

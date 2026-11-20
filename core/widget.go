@@ -148,7 +148,7 @@ type Widget interface {
 	// to define the meaning of the Region line, char values for the matches.
 	// The bool return value indicates whether this widget handled the search,
 	// thereby excluding further searching within the elements under it.
-	Search(find string, useCase bool) ([]textpos.Match, bool)
+	Search(find string, useCase CaseSensitive) ([]textpos.Match, bool)
 
 	// HighlightMatches does highlighting of the given matches within this widget,
 	// where the matches are as returned from the Search method.
@@ -161,7 +161,7 @@ type Widget interface {
 	// SelectMatch selects match at given index from among those returned
 	// from the Search method. scroll = scroll widget into view.
 	// reset = clear selection instead of selecting (does not scroll).
-	SelectMatch(matches []textpos.Match, index int, scroll, reset bool)
+	SelectMatch(matches []textpos.Match, index int, scroll SelectionScroll, reset SelectionReset)
 }
 
 // WidgetBase implements the [Widget] interface and provides the core functionality
@@ -731,7 +731,7 @@ func (wb *WidgetBase) TextRunes() []rune {
 // to define the meaning of the Region line, char values for the matches.
 // The bool return value indicates whether this widget handled the search,
 // thereby excluding further searching within the elements under it.
-func (wb *WidgetBase) Search(find string, useCase bool) ([]textpos.Match, bool) {
+func (wb *WidgetBase) Search(find string, useCase CaseSensitive) ([]textpos.Match, bool) {
 	return nil, false
 }
 
@@ -748,6 +748,6 @@ func (wb *WidgetBase) HighlightMatches(matches []textpos.Match) bool {
 // SelectMatch selects match at given index from among those returned
 // from the Search method. scroll = scroll widget into view.
 // reset = clear selection instead of selecting (does not scroll).
-func (wb *WidgetBase) SelectMatch(matches []textpos.Match, index int, scroll, reset bool) {
+func (wb *WidgetBase) SelectMatch(matches []textpos.Match, index int, scroll SelectionScroll, reset SelectionReset) {
 
 }

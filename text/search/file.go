@@ -39,7 +39,7 @@ func (r *Results) String() string {
 // RuneLines looks for a string (no regexp) within lines of runes,
 // with given case-sensitivity returning number of occurrences
 // and specific match position list.  Column positions are in runes.
-func RuneLines(src [][]rune, find []byte, ignoreCase bool) (int, []textpos.Match) {
+func RuneLines(src [][]rune, find []byte, ignoreCase textpos.CaseInsensitive) (int, []textpos.Match) {
 	fr := bytes.Runes(find)
 	fsz := len(fr)
 	if fsz == 0 {
@@ -74,7 +74,7 @@ func RuneLines(src [][]rune, find []byte, ignoreCase bool) (int, []textpos.Match
 // as entire lexically tagged items,
 // with given case-sensitivity returning number of occurrences
 // and specific match position list.  Column positions are in runes.
-func LexItems(src [][]rune, lexs []lexer.Line, find []byte, ignoreCase bool) (int, []textpos.Match) {
+func LexItems(src [][]rune, lexs []lexer.Line, find []byte, ignoreCase textpos.CaseInsensitive) (int, []textpos.Match) {
 	fr := bytes.Runes(find)
 	fsz := len(fr)
 	if fsz == 0 {
@@ -113,7 +113,7 @@ func LexItems(src [][]rune, lexs []lexer.Line, find []byte, ignoreCase bool) (in
 // using given case-sensitivity.
 // Returns number of occurrences and specific match position list.
 // Column positions are in runes.
-func Reader(reader io.Reader, find []byte, ignoreCase bool) (int, []textpos.Match) {
+func Reader(reader io.Reader, find []byte, ignoreCase textpos.CaseInsensitive) (int, []textpos.Match) {
 	fr := bytes.Runes(find)
 	fsz := len(fr)
 	if fsz == 0 {
@@ -151,7 +151,7 @@ func Reader(reader io.Reader, find []byte, ignoreCase bool) (int, []textpos.Matc
 // File looks for a literal string (no regexp) within a file, in given
 // case-sensitive way, returning number of occurrences and specific match
 // position list. Column positions are in runes.
-func File(filename string, find []byte, ignoreCase bool) (int, []textpos.Match) {
+func File(filename string, find []byte, ignoreCase textpos.CaseInsensitive) (int, []textpos.Match) {
 	fp, err := os.Open(filename)
 	if err != nil {
 		log.Printf("search.File: open error: %v\n", err)

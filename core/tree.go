@@ -1715,7 +1715,7 @@ func (tr *Tree) TextRunes() []rune {
 // to define the meaning of the Region line, char values for the matches.
 // The bool return value indicates whether this widget handled the search,
 // thereby excluding further searching within the elements under it.
-func (tr *Tree) Search(find string, useCase bool) ([]textpos.Match, bool) {
+func (tr *Tree) Search(find string, useCase CaseSensitive) ([]textpos.Match, bool) {
 	var results []textpos.Match
 	nn := tr.Root
 	idx := 0
@@ -1797,7 +1797,7 @@ func (tr *Tree) HighlightMatches(matches []textpos.Match) bool {
 // SelectMatch selects match at given index from among those returned
 // from the Search method. scroll = scroll widget into view.
 // reset = clear selection instead of selecting.
-func (tr *Tree) SelectMatch(matches []textpos.Match, index int, scroll, reset bool) {
+func (tr *Tree) SelectMatch(matches []textpos.Match, index int, scroll SelectionScroll, reset SelectionReset) {
 	match := matches[index]
 	mIdx := match.Region.Start.Line
 	idx := 0

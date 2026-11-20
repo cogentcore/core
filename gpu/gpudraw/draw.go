@@ -19,8 +19,8 @@ const (
 	Unchanged = true
 
 	// Changed should be used for the unchanged argument to drawer calls,
-	// when the image has changed since last time or its status is unknown
-	Changed
+	// when the image has changed since last time or its status is unknown.
+	Changed = false
 )
 
 // Copy copies the given Go source image to the render target, with the

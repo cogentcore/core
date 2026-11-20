@@ -592,7 +592,7 @@ func (ls *Lines) InsertTextRect(tbe *textpos.Edit) *textpos.Edit {
 // returns the Edit for the inserted text.
 // An Undo record is automatically saved depending on Undo.Off setting.
 // Calls sendInput to send an Input event to views, so they update.
-func (ls *Lines) ReplaceText(delSt, delEd, insPos textpos.Pos, insTxt string, matchCase bool) *textpos.Edit {
+func (ls *Lines) ReplaceText(delSt, delEd, insPos textpos.Pos, insTxt string, matchCase MatchCase) *textpos.Edit {
 	ls.Lock()
 	ls.fileModCheck()
 	tbe := ls.replaceText(delSt, delEd, insPos, insTxt, matchCase)
@@ -618,7 +618,7 @@ type Replacement struct {
 // computed for the same text, e.g., from a language server, are given
 // in reverse position order. Returns the number of replacements that
 // changed the text.
-func (ls *Lines) ReplaceTexts(reps []Replacement, matchCase bool) int {
+func (ls *Lines) ReplaceTexts(reps []Replacement, matchCase MatchCase) int {
 	ls.Lock()
 	ls.fileModCheck()
 	autoSave := ls.batchUpdateStart()
@@ -1279,7 +1279,7 @@ func (ls *Lines) DiffsUnified(ob *Lines, context int) []byte {
 // Search looks for a string (no regexp) within buffer,
 // with given case-sensitivity, returning number of occurrences
 // and specific match position list. Column positions are in runes.
-func (ls *Lines) Search(find []byte, ignoreCase, lexItems bool) (int, []textpos.Match) {
+func (ls *Lines) Search(find []byte, ignoreCase textpos.CaseInsensitive, lexItems bool) (int, []textpos.Match) {
 	ls.Lock()
 	defer ls.Unlock()
 	if lexItems {

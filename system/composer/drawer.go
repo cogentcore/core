@@ -17,8 +17,8 @@ const (
 	Unchanged = true
 
 	// Changed should be used for the unchanged argument to drawer calls,
-	// when the image has changed since last time or its status is unknown
-	Changed
+	// when the image has changed since last time or its status is unknown.
+	Changed = false
 )
 
 // Drawer is an interface for image/draw style image compositing
