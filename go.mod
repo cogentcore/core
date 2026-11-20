@@ -16,7 +16,7 @@ require (
 	github.com/charmbracelet/x/xpty v0.1.4
 	github.com/chewxy/math32 v1.11.2
 	github.com/clipperhouse/displaywidth v0.11.0
-	github.com/cogentcore/mvm v0.0.0-20261026193832-5ebd19c3fa21
+	github.com/cogentcore/mvm v0.0.0-20261120030535-e3f31e8a9ab5
 	github.com/cogentcore/star-tex v0.7.2-0.20260625151004-a16970c7d698
 	github.com/cogentcore/typesetting v0.0.0-20261022123550-2cd93a91580e
 	github.com/coreos/go-oidc/v3 v3.17.0

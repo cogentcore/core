@@ -47,8 +47,8 @@ github.com/clipperhouse/displaywidth v0.11.0 h1:lBc6kY44VFw+TDx4I8opi/EtL9m20WSE
 github.com/clipperhouse/displaywidth v0.11.0/go.mod h1:bkrFNkf81G8HyVqmKGxsPufD3JhNl3dSqnGhOoSD/o0=
 github.com/clipperhouse/uax29/v2 v2.7.0 h1:+gs4oBZ2gPfVrKPthwbMzWZDaAFPGYK72F0NJv2v7Vk=
 github.com/clipperhouse/uax29/v2 v2.7.0/go.mod h1:EFJ2TJMRUaplDxHKj1qAEhCtQPW2tJSwu5BF98AuoVM=
-github.com/cogentcore/mvm v0.0.0-20261026193832-5ebd19c3fa21 h1:wqFj9c1Qc7f38QKuouoGnWOx2W3T5uNWJCec52TCpv4=
-github.com/cogentcore/mvm v0.0.0-20261026193832-5ebd19c3fa21/go.mod h1:K/Zh/ATxZT2WBuvu5pkyP1s11+9MwFu4whU6fXET0ew=
+github.com/cogentcore/mvm v0.0.0-20261120030535-e3f31e8a9ab5 h1:+8inEpwi0WhT+V2sGqRxN8tSCTU5iJgUiOQ8ZW2T/BY=
+github.com/cogentcore/mvm v0.0.0-20261120030535-e3f31e8a9ab5/go.mod h1:K/Zh/ATxZT2WBuvu5pkyP1s11+9MwFu4whU6fXET0ew=
 github.com/cogentcore/star-tex v0.7.2-0.20260625151004-a16970c7d698 h1:GsehCn/Dw8hhYAonDQO48EJz63sAAF4wxEhHmHt/xKA=
 github.com/cogentcore/star-tex v0.7.2-0.20260625151004-a16970c7d698/go.mod h1:pdlQowLCSMiGfeOM6M7yz09OmR2fzlmFYcvR/u6QaRQ=
 github.com/cogentcore/typesetting v0.0.0-20261022123550-2cd93a91580e h1:seoKVtXIRWYZrY3vlwaos/PifRWJsKi48xroc9cGXis=
