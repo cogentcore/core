@@ -363,6 +363,26 @@ func (c *Config) OnConfig(cmd string) error {
 	return nil
 }
 
+// linkerX returns the -X linker flag (with a space after it) that sets the
+// given string variable to the given value. The go command splits the
+// -ldflags into flags with quotes, but a quoted flag can not have its quote
+// character in it, as there are no escapes, so the flag is quoted with single
+// quotes, or with double quotes if the value has single quotes in it (as
+// "O'Reilly" does). If the value has both, its single quotes are replaced with
+// the given replacement, such as the typographic apostrophe for text and the
+// &#39; character reference for SVG.
+func linkerX(name, value, replace string) string {
+	q := "'"
+	if strings.Contains(value, "'") {
+		if strings.Contains(value, `"`) {
+			value = strings.ReplaceAll(value, "'", replace)
+		} else {
+			q = `"`
+		}
+	}
+	return "-X " + q + name + "=" + value + q + " "
+}
+
 // LinkerFlags returns the ld linker flags that specify the app and core version,
 // the app about information, the app icon, and the optional [Build.Ldflags].
 func LinkerFlags(c *Config) string {
@@ -378,11 +398,11 @@ func LinkerFlags(c *Config) string {
 	}
 
 	if c.ID != "" {
-		res += "-X 'cogentcore.org/core/system.AppID=" + strings.ReplaceAll(c.ID, "'", `\'`) + "' "
+		res += linkerX("cogentcore.org/core/system.AppID", c.ID, "")
 	}
 
 	if c.About != "" {
-		res += "-X 'cogentcore.org/core/core.AppAbout=" + strings.ReplaceAll(c.About, "'", `\'`) + "' "
+		res += linkerX("cogentcore.org/core/core.AppAbout", c.About, "’")
 	}
 
 	b, err := os.ReadFile("icon.svg")
@@ -391,7 +411,7 @@ func LinkerFlags(c *Config) string {
 			errors.Log(err)
 		}
 	} else {
-		res += "-X 'cogentcore.org/core/core.AppIcon=" + strings.ReplaceAll(string(b), "'", `\'`) + "' "
+		res += linkerX("cogentcore.org/core/core.AppIcon", string(b), "&#39;")
 	}
 
 	// TODO: maybe replace this linker flag version injection logic with
