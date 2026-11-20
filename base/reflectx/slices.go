@@ -59,7 +59,7 @@ func SliceDeleteAt(sl any, idx int) {
 // SliceSort sorts a slice of basic values (see [StructSliceSort] for sorting a
 // slice-of-struct using a specific field), using float, int, string, and [time.Time]
 // conversions.
-func SliceSort(sl any, ascending bool) error {
+func SliceSort(sl any, ascending SortOrder) error {
 	sv := reflect.ValueOf(sl)
 	svnp := NonPointerValue(sv)
 	if svnp.Len() == 0 {
@@ -151,7 +151,7 @@ func SliceSort(sl any, ascending bool) error {
 // and [time.Time] conversions. The sort is stable, so that the order of the
 // structs with equal values stays the same, as for sorting again.
 // It will panic if the field indexes are invalid.
-func StructSliceSort(structSlice any, fieldIndex []int, ascending bool) error {
+func StructSliceSort(structSlice any, fieldIndex []int, ascending SortOrder) error {
 	sv := reflect.ValueOf(structSlice)
 	svnp := NonPointerValue(sv)
 	if svnp.Len() == 0 {
@@ -265,7 +265,7 @@ func StructSliceSort(structSlice any, fieldIndex []int, ascending bool) error {
 }
 
 // ValueSliceSort sorts a slice of [reflect.Value]s using basic types where possible.
-func ValueSliceSort(sl []reflect.Value, ascending bool) error {
+func ValueSliceSort(sl []reflect.Value, ascending SortOrder) error {
 	if len(sl) == 0 {
 		return nil
 	}

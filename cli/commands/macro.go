@@ -250,7 +250,7 @@ func (cs *Commands) macroSubCmd(ctx core.Widget, root string, mc *Macro, fun fun
 	}
 	core.MessageSnackbar(ctx, "Reading the help of "+cmd+"...")
 	go func() {
-		sc, err := cs.SubCmd(cmd, false)
+		sc, err := cs.SubCmd(cmd, NoReparse)
 		ctx.AsWidget().AsyncLock()
 		defer ctx.AsWidget().AsyncUnlock()
 		if err != nil {

@@ -318,13 +318,13 @@ func TestCommands(t *testing.T) {
 	assert.Equal(t, version, cs2.Version)
 	assert.Equal(t, "Git", cs2.Entries[0].Label())
 	assert.Equal(t, "git", cs2.Entries[0].Command)
-	got, err := cs2.SubCmd("git  commit", false) // cached, not parsed
+	got, err := cs2.SubCmd("git  commit", NoReparse) // cached, not parsed
 	require.NoError(t, err)
 	assert.Len(t, got.Flags, 7)
-	ls, err := cs2.SubCmd("ls", false)
+	ls, err := cs2.SubCmd("ls", NoReparse)
 	require.NoError(t, err)
 	assert.Equal(t, MainName, ls.Name)
-	_, err = cs2.SubCmd("git", false)
+	_, err = cs2.SubCmd("git", NoReparse)
 	assert.Error(t, err, "git has subcommands")
 
 	// the changes of each are read by the other, and merged
@@ -363,7 +363,7 @@ func TestSubCmdMenu(t *testing.T) {
 	prev := parseSub
 	parseSub = func(cmd string) (*SubCmd, error) { return &SubCmd{Cmd: cmd, Source: cmd + " -h"}, nil }
 	t.Cleanup(func() { parseSub = prev })
-	sc, err := cs.SubCmd("git bisect", false)
+	sc, err := cs.SubCmd("git bisect", NoReparse)
 	require.NoError(t, err)
 	assert.Equal(t, "Main", sc.Group)
 
@@ -497,7 +497,7 @@ func TestBunLike(t *testing.T) {
 		cm.SubCmds = append(cm.SubCmds, sub)
 	}
 	cs.Parsed["bun"] = cm
-	sc, err := cs.SubCmd("bun run", false)
+	sc, err := cs.SubCmd("bun run", NoReparse)
 	require.NoError(t, err)
 	assert.Empty(t, sc.Cmds, "those of bun")
 
@@ -536,13 +536,13 @@ func TestSharedFlags(t *testing.T) {
 		}
 		return fs
 	}
-	run, err := cs.SubCmd("go run", false)
+	run, err := cs.SubCmd("go run", NoReparse)
 	require.NoError(t, err)
 	assert.Equal(t, []string{"-exec: run the program with xprog", "-n: print the commands", "-o: write the output there", "-race: enable data race detection"}, flags(run))
-	doc, err := cs.SubCmd("go doc", false)
+	doc, err := cs.SubCmd("go doc", NoReparse)
 	require.NoError(t, err)
 	assert.Len(t, doc.Flags, 2, "no build flags")
-	build, err := cs.SubCmd("go build", false)
+	build, err := cs.SubCmd("go build", NoReparse)
 	require.NoError(t, err)
 	assert.Len(t, build.Flags, 3)
 }
@@ -592,10 +592,10 @@ func TestHelpGuards(t *testing.T) {
 	}
 	t.Cleanup(func() { parseSub = prev })
 	cs.Parsed["x"] = &Cmd{Cmd: "x", SubCmds: []*SubCmd{{Name: "stash", Cmd: "x stash"}, {Name: "other", Cmd: "x other"}}}
-	sc, err := cs.SubCmd("x stash", false)
+	sc, err := cs.SubCmd("x stash", NoReparse)
 	require.NoError(t, err)
 	assert.Len(t, sc.Cmds, 2, "nested subcommands")
-	sc, err = cs.SubCmd("x stash mdworker", false)
+	sc, err = cs.SubCmd("x stash mdworker", NoReparse)
 	require.NoError(t, err)
 	assert.Empty(t, sc.Cmds, "no deeper")
 }

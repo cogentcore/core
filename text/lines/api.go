@@ -1279,7 +1279,7 @@ func (ls *Lines) DiffsUnified(ob *Lines, context int) []byte {
 // Search looks for a string (no regexp) within buffer,
 // with given case-sensitivity, returning number of occurrences
 // and specific match position list. Column positions are in runes.
-func (ls *Lines) Search(find []byte, useCase textpos.CaseSensitive, lexItems bool) (int, []textpos.Match) {
+func (ls *Lines) Search(find []byte, useCase textpos.CaseSensitive, lexItems textpos.MatchScope) (int, []textpos.Match) {
 	ls.Lock()
 	defer ls.Unlock()
 	if lexItems {

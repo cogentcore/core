@@ -244,10 +244,10 @@ func TestLinesJoinParaLines(t *testing.T) {
 // TestLinesSearch tests searching and matching braces.
 func TestLinesSearch(t *testing.T) {
 	lns, _ := newTestLines(t, "Foo foo\n(fOo [x])\nend")
-	n, ms := lns.Search([]byte("foo"), textpos.IgnoreCase, false)
+	n, ms := lns.Search([]byte("foo"), textpos.IgnoreCase, textpos.AnyText)
 	assert.Equal(t, 3, n)
 	assert.Len(t, ms, 3)
-	n, _ = lns.Search([]byte("foo"), textpos.UseCase, false)
+	n, _ = lns.Search([]byte("foo"), textpos.UseCase, textpos.AnyText)
 	assert.Equal(t, 1, n)
 	n, _ = lns.SearchRegexp(regexp.MustCompile(`[fF]oo`))
 	assert.Equal(t, 2, n)

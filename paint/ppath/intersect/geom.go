@@ -337,9 +337,10 @@ func Length(p ppath.Path) float32 {
 			d += cubicBezierLength(start, cp1, cp2, end)
 		case ppath.ArcTo:
 			var rx, ry, phi float32
-			var large, sweep bool
+			var large ppath.ArcSize
+			var sweep ppath.ArcSweep
 			rx, ry, phi, large, sweep, end = p.ArcToPoints(i)
-			_, _, theta1, theta2 := ppath.EllipseToCenter(start.X, start.Y, rx, ry, phi, large, sweep, end.X, end.Y)
+			_, _, theta1, theta2 := ppath.EllipseToCenter(start.X, start.Y, rx, ry, phi, ppath.ArcSize(large), ppath.ArcSweep(sweep), end.X, end.Y)
 			d += ellipseLength(rx, ry, theta1, theta2)
 		}
 		i += ppath.CmdLen(cmd)
@@ -485,15 +486,16 @@ func SplitAt(p ppath.Path, ts ...float32) []ppath.Path {
 				}
 			case ppath.ArcTo:
 				var rx, ry, phi float32
-				var large, sweep bool
+				var large ppath.ArcSize
+				var sweep ppath.ArcSweep
 				rx, ry, phi, large, sweep, end = p.ArcToPoints(i)
-				cx, cy, theta1, theta2 := ppath.EllipseToCenter(start.X, start.Y, rx, ry, phi, large, sweep, end.X, end.Y)
+				cx, cy, theta1, theta2 := ppath.EllipseToCenter(start.X, start.Y, rx, ry, phi, ppath.ArcSize(large), ppath.ArcSweep(sweep), end.X, end.Y)
 
 				if j == len(ts) {
-					q.ArcTo(rx, ry, phi, large, sweep, end.X, end.Y)
+					q.ArcTo(rx, ry, phi, ppath.ArcSize(large), ppath.ArcSweep(sweep), end.X, end.Y)
 				} else {
 					speed := func(theta float32) float32 {
-						return ppath.EllipseDeriv(rx, ry, 0.0, true, theta).Length()
+						return ppath.EllipseDeriv(rx, ry, 0.0, ppath.Clockwise, theta).Length()
 					}
 					invL, dT := invSpeedPolynomialChebyshevApprox(10, gaussLegendre7, speed, theta1, theta2)
 
@@ -506,15 +508,15 @@ func SplitAt(p ppath.Path, ts ...float32) []ppath.Path {
 							panic("theta not in elliptic arc range for splitting")
 						}
 
-						q.ArcTo(rx, ry, phi, large1, sweep, mid.X, mid.Y)
+						q.ArcTo(rx, ry, phi, ppath.ArcSize(large1), ppath.ArcSweep(sweep), mid.X, mid.Y)
 						push()
 						q.MoveTo(mid.X, mid.Y)
 						startTheta = theta
-						nextLarge = large2
+						nextLarge = ppath.ArcSize(large2)
 						j++
 					}
 					if !ppath.Equal(startTheta, theta2) {
-						q.ArcTo(rx, ry, phi*180.0/math32.Pi, nextLarge, sweep, end.X, end.Y)
+						q.ArcTo(rx, ry, phi*180.0/math32.Pi, ppath.ArcSize(nextLarge), ppath.ArcSweep(sweep), end.X, end.Y)
 					}
 					T += dT
 				}
@@ -540,8 +542,8 @@ func XMonotone(p ppath.Path) ppath.Path {
 	cube := func(p0, p1, p2, p3 math32.Vector2) ppath.Path {
 		return xmonotoneCubicBezier(p0, p1, p2, p3)
 	}
-	arc := func(start math32.Vector2, rx, ry, phi float32, large, sweep bool, end math32.Vector2) ppath.Path {
-		return xmonotoneEllipticArc(start, rx, ry, phi, large, sweep, end)
+	arc := func(start math32.Vector2, rx, ry, phi float32, large ppath.ArcSize, sweep ppath.ArcSweep, end math32.Vector2) ppath.Path {
+		return xmonotoneEllipticArc(start, rx, ry, phi, ppath.ArcSize(large), ppath.ArcSweep(sweep), end)
 	}
 	return p.Replace(nil, quad, cube, arc)
 }
@@ -630,9 +632,10 @@ func Bounds(p ppath.Path) math32.Box2 {
 			}
 		case ppath.ArcTo:
 			var rx, ry, phi float32
-			var large, sweep bool
+			var large ppath.ArcSize
+			var sweep ppath.ArcSweep
 			rx, ry, phi, large, sweep, end = p.ArcToPoints(i)
-			cx, cy, theta0, theta1 := ppath.EllipseToCenter(start.X, start.Y, rx, ry, phi, large, sweep, end.X, end.Y)
+			cx, cy, theta0, theta1 := ppath.EllipseToCenter(start.X, start.Y, rx, ry, phi, ppath.ArcSize(large), ppath.ArcSweep(sweep), end.X, end.Y)
 
 			// find the four extremes (top, bottom, left, right) and apply those who are between theta1 and theta2
 			// x(theta) = cx + rx*cos(theta)*cos(phi) - ry*sin(theta)*sin(phi)

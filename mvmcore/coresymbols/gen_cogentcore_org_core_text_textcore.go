@@ -25,11 +25,13 @@ var _ = register(func() {
 			"EditorEmbedder":           reflect.ValueOf((*p_cogentcore_org_core_text_textcore.EditorEmbedder)(nil)),
 			"FileModPrompt":            reflect.ValueOf(p_cogentcore_org_core_text_textcore.FileModPrompt),
 			"ISearch":                  reflect.ValueOf((*p_cogentcore_org_core_text_textcore.ISearch)(nil)),
+			"LinkWrap":                 reflect.ValueOf((*p_cogentcore_org_core_text_textcore.LinkWrap)(nil)),
 			"NewBase":                  reflect.ValueOf(p_cogentcore_org_core_text_textcore.NewBase),
 			"NewDiffEditor":            reflect.ValueOf(p_cogentcore_org_core_text_textcore.NewDiffEditor),
 			"NewDiffTextEditor":        reflect.ValueOf(p_cogentcore_org_core_text_textcore.NewDiffTextEditor),
 			"NewEditor":                reflect.ValueOf(p_cogentcore_org_core_text_textcore.NewEditor),
 			"NewTwinEditors":           reflect.ValueOf(p_cogentcore_org_core_text_textcore.NewTwinEditors),
+			"NoWraparound":             reflect.ValueOf(p_cogentcore_org_core_text_textcore.NoWraparound),
 			"OutputBuffer":             reflect.ValueOf((*p_cogentcore_org_core_text_textcore.OutputBuffer)(nil)),
 			"OutputBufferMarkupFunc":   reflect.ValueOf((*p_cogentcore_org_core_text_textcore.OutputBufferMarkupFunc)(nil)),
 			"PrevISearchString":        reflect.ValueOf(&p_cogentcore_org_core_text_textcore.PrevISearchString),
@@ -38,6 +40,7 @@ var _ = register(func() {
 			"SaveAs":                   reflect.ValueOf(p_cogentcore_org_core_text_textcore.SaveAs),
 			"TextDialog":               reflect.ValueOf(p_cogentcore_org_core_text_textcore.TextDialog),
 			"TwinEditors":              reflect.ValueOf((*p_cogentcore_org_core_text_textcore.TwinEditors)(nil)),
+			"Wraparound":               reflect.ValueOf(p_cogentcore_org_core_text_textcore.Wraparound),
 		},
 	})
 })

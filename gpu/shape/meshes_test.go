@@ -56,8 +56,8 @@ func TestMeshes(t *testing.T) {
 		{"box", NewBox(2, 4, 6), math32.Vec3(-1, -2, -3), math32.Vec3(1, 2, 3)},
 		{"plane", NewPlane(math32.Y, 4, 2), math32.Vec3(-2, 0, -1), math32.Vec3(2, 0, 1)},
 		{"sphere", NewSphere(1.5, 16), math32.Vec3(-1.5, -1.5, -1.5), math32.Vec3(1.5, 1.5, 1.5)},
-		{"cylinder", NewCylinder(2, 1, 16, 2, true, true), math32.Vec3(-1, -1, -1), math32.Vec3(1, 1, 1)},
-		{"cone", NewCone(2, 1, 16, 2, true), math32.Vec3(-1, -1, -1), math32.Vec3(1, 1, 1)},
+		{"cylinder", NewCylinder(2, 1, 16, 2, WithTop, WithBottom), math32.Vec3(-1, -1, -1), math32.Vec3(1, 1, 1)},
+		{"cone", NewCone(2, 1, 16, 2, WithBottom), math32.Vec3(-1, -1, -1), math32.Vec3(1, 1, 1)},
 		{"capsule", NewCapsule(2, 0.5, 16, 2), math32.Vec3(-0.5, -1.5, -0.5), math32.Vec3(0.5, 1.5, 0.5)},
 		{"torus", NewTorus(2, 0.5, 16), math32.Vec3(-2.5, -2.5, -0.5), math32.Vec3(2.5, 2.5, 0.5)}, // in the XY plane
 	}
@@ -70,7 +70,7 @@ func TestMeshes(t *testing.T) {
 
 // TestCone tests that the top of a cone is a point.
 func TestCone(t *testing.T) {
-	md := checkMesh(t, "cone", NewCone(2, 1, 8, 1, false))
+	md := checkMesh(t, "cone", NewCone(2, 1, 8, 1, NoBottom))
 	for i := range md.NumVertex {
 		var v math32.Vector3
 		v.FromSlice(md.Vertex, i*3)

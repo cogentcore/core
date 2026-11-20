@@ -73,7 +73,7 @@ func TestEditorMouseClicks(t *testing.T) {
 		ed.SelectReset()
 		ed.SetCursorShow(pos(0, 0))
 		ed.SelectRegion = textpos.Region{Start: pos(0, 0), End: pos(0, 3)}
-		ed.Copy(true)
+		ed.Copy(core.SelectReset)
 		sendMouse(ed, events.Click, events.Middle, pos(1, 0))
 		assert.Equal(t, "oneone two three", string(ed.Lines.Line(0)), "a middle click pastes at the cursor")
 	})
@@ -203,7 +203,7 @@ func TestEditorPasteHistory(t *testing.T) {
 		long := strings.Repeat("x", editorClipHistoryChooserLength+5)
 		addBaseClipboardHistory([]byte(long))
 		ed.SelectRegion = textpos.Region{Start: pos(0, 4), End: pos(0, 7)}
-		ed.Copy(false)
+		ed.Copy(core.SelectSet)
 		cl := editorClipHistoryChooserList()
 		require.Len(t, cl, 2)
 		assert.Equal(t, "two", cl[0], "the latest first")

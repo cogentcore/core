@@ -22,7 +22,7 @@ func seg(cmd float32, vals ...float32) ppath.Path {
 
 // arcSeg returns an arc segment from the origin to the given end point,
 // as an arc rather than the cubic Béziers of [ppath.ArcToCubeImmediate].
-func arcSeg(rx, ry float32, large, sweep bool, x, y float32) ppath.Path {
+func arcSeg(rx, ry float32, large ppath.ArcSize, sweep ppath.ArcSweep, x, y float32) ppath.Path {
 	defer withArcs()()
 	p := ppath.New()
 	p.MoveTo(0, 0)
@@ -71,7 +71,7 @@ func TestIntersectionSegment(t *testing.T) {
 	assert.Len(t, IntersectionSegment(nil, origin, cube, vline0, vline), 1, "cube-line")
 
 	// a half circle from (0,0) to (2,0) through (1,-1) or (1,1)
-	arc := arcSeg(1, 1, false, true, 2, 0)
+	arc := arcSeg(1, 1, ppath.SmallArc, ppath.Clockwise, 2, 0)
 	zs = IntersectionSegment(nil, vline0, vline, origin, arc)
 	require.Len(t, zs, 1, "line-arc")
 	assert.InDelta(t, 1, math32.Abs(zs[0].Y), 1e-4)
@@ -82,7 +82,7 @@ func TestIntersectionSegment(t *testing.T) {
 	assert.Len(t, zs, 2, "a line crossing an arc twice")
 
 	// two half circles of radius 1, centered at (1,0) and (2,0)
-	arc2 := arcSeg(1, 1, false, true, 2, 0)
+	arc2 := arcSeg(1, 1, ppath.SmallArc, ppath.Clockwise, 2, 0)
 	arc2[5] = 3 // the end x, for the start at (1,0)
 	zs = IntersectionSegment(nil, origin, arc, math32.Vec2(1, 0), arc2)
 	require.Len(t, zs, 1, "arc-arc")
@@ -144,7 +144,7 @@ func TestRayIntersectionsCurves(t *testing.T) {
 	p.MoveTo(0, 0)
 	p.QuadTo(2, 4, 4, 0)
 	p.CubeTo(5, -3, 7, -3, 8, 0)
-	p.ArcTo(2, 2, 0, false, false, 4, 0)
+	p.ArcTo(2, 2, 0, ppath.SmallArc, ppath.CounterClockwise, 4, 0)
 	p.Close()
 	zs := RayIntersections(*p, -1, 1)
 	assert.Len(t, zs, 2, "through the quad")

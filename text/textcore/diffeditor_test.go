@@ -124,12 +124,12 @@ func TestEditorLinks(t *testing.T) {
 	ed.LinkHandler = func(tl *rich.Hyperlink) { opened = append(opened, tl.URL) }
 	core.RenderImage(b, core.Locked(b, func() {
 		ed.SetCursorShow(textpos.Pos{Line: 2})
-		assert.True(t, ed.CursorNextLink(false))
+		assert.True(t, ed.CursorNextLink(NoWraparound))
 		assert.Equal(t, 3, ed.CursorPos.Line)
-		assert.False(t, ed.CursorNextLink(false))
-		assert.True(t, ed.CursorNextLink(true), "wraps around")
+		assert.False(t, ed.CursorNextLink(NoWraparound))
+		assert.True(t, ed.CursorNextLink(Wraparound), "wraps around")
 		assert.Equal(t, 1, ed.CursorPos.Line)
-		assert.True(t, ed.CursorPrevLink(true), "wraps around")
+		assert.True(t, ed.CursorPrevLink(Wraparound), "wraps around")
 		assert.Equal(t, 3, ed.CursorPos.Line)
 
 		lk, ln := ed.OpenLinkAt(textpos.Pos{Line: 1, Char: 2})

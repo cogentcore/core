@@ -315,7 +315,7 @@ func (sv *SVG) SavePDF(fname string) error {
 // by writing and reading the XML source.
 func (sv *SVG) CloneSVG(size math32.Vector2) *SVG {
 	var b bytes.Buffer
-	errors.Log(sv.WriteXML(&b, false))
+	errors.Log(sv.WriteXML(&b, NoIndentXML))
 	nsv := NewSVG(size)
 	errors.Log(nsv.ReadXML(&b))
 	return nsv

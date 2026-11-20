@@ -377,7 +377,7 @@ func (v Vector3) MulMatrix4AsVector4(m *Matrix4, w float32) Vector3 {
 // (pixel) coordinates, using given window size parameters.
 // near, far are 0, 1 by default (glDepthRange defaults).
 // flipY if true means flip the Y axis (top = 0 for windows vs. bottom = 0 for 3D coords)
-func (v Vector3) NDCToWindow(size, off Vector2, near, far float32, flipY bool) Vector3 {
+func (v Vector3) NDCToWindow(size, off Vector2, near, far float32, flipY YFlip) Vector3 {
 	w := Vector3{}
 	half := size.MulScalar(0.5)
 	w.X = half.X*v.X + half.X
@@ -395,7 +395,7 @@ func (v Vector3) NDCToWindow(size, off Vector2, near, far float32, flipY bool) V
 // normalized display coordinates (NDC), using given window size parameters.
 // The Z depth coordinate (0-1) must be set manually or by reading from framebuffer
 // flipY if true means flip the Y axis (top = 0 for windows vs. bottom = 0 for 3D coords)
-func (v Vector2) WindowToNDC(size, off Vector2, flipY bool) Vector3 {
+func (v Vector2) WindowToNDC(size, off Vector2, flipY YFlip) Vector3 {
 	n := Vector3{}
 	half := size.MulScalar(0.5)
 	n.X = v.X - off.X
@@ -535,3 +535,16 @@ func (v *Vector3) RandomTangents() (Vector3, Vector3) {
 	}
 	return t1, t2
 }
+
+// YFlip specifies whether to flip the Y axis between coordinate systems
+// (e.g., normalized device coordinates and window coordinates):
+// [FlipY] or [NoFlipY].
+type YFlip bool
+
+const (
+	// FlipY flips the Y axis.
+	FlipY YFlip = true
+
+	// NoFlipY does not flip the Y axis.
+	NoFlipY YFlip = false
+)

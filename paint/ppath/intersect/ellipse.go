@@ -27,12 +27,12 @@ func ellipseLength(rx, ry, theta1, theta2 float32) float32 {
 		theta1, theta2 = theta2, theta1
 	}
 	speed := func(theta float32) float32 {
-		return ppath.EllipseDeriv(rx, ry, 0.0, true, theta).Length()
+		return ppath.EllipseDeriv(rx, ry, 0.0, ppath.Clockwise, theta).Length()
 	}
 	return gaussLegendre5(speed, theta1, theta2)
 }
 
-func EllipseCurvatureRadius(rx, ry float32, sweep bool, theta float32) float32 {
+func EllipseCurvatureRadius(rx, ry float32, sweep ppath.ArcSweep, theta float32) float32 {
 	// positive for ccw / sweep
 	// phi has no influence on the curvature
 	dp := ppath.EllipseDeriv(rx, ry, 0.0, sweep, theta)
@@ -60,7 +60,7 @@ func ellipseSplit(rx, ry, phi, cx, cy, theta0, theta1, theta float32) (math32.Ve
 	return mid, large0, large1, true
 }
 
-func xmonotoneEllipticArc(start math32.Vector2, rx, ry, phi float32, large, sweep bool, end math32.Vector2) ppath.Path {
+func xmonotoneEllipticArc(start math32.Vector2, rx, ry, phi float32, large ppath.ArcSize, sweep ppath.ArcSweep, end math32.Vector2) ppath.Path {
 	sign := float32(1.0)
 	if !sweep {
 		sign = -1.0
@@ -84,7 +84,7 @@ func xmonotoneEllipticArc(start math32.Vector2, rx, ry, phi float32, large, swee
 		t += sign * dt
 
 		pos := ppath.EllipsePos(rx, ry, phi, cx, cy, t)
-		p.ArcTo(rx, ry, phi, false, sweep, pos.X, pos.Y)
+		p.ArcTo(rx, ry, phi, ppath.SmallArc, sweep, pos.X, pos.Y)
 		left = !left
 	}
 	return p

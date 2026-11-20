@@ -74,13 +74,13 @@ func (p *Path) RoundedRectangle(x, y, w, h, r float32) *Path {
 	r = math32.Min(r, h/2.0)
 
 	p.MoveTo(x, y+r)
-	p.ArcTo(r, r, 0.0, false, sweep, x+r, y)
+	p.ArcTo(r, r, 0.0, SmallArc, ArcSweep(sweep), x+r, y)
 	p.LineTo(x+w-r, y)
-	p.ArcTo(r, r, 0.0, false, sweep, x+w, y+r)
+	p.ArcTo(r, r, 0.0, SmallArc, ArcSweep(sweep), x+w, y+r)
 	p.LineTo(x+w, y+h-r)
-	p.ArcTo(r, r, 0.0, false, sweep, x+w-r, y+h)
+	p.ArcTo(r, r, 0.0, SmallArc, ArcSweep(sweep), x+w-r, y+h)
 	p.LineTo(x+r, y+h)
-	p.ArcTo(r, r, 0.0, false, sweep, x, y+h-r)
+	p.ArcTo(r, r, 0.0, SmallArc, ArcSweep(sweep), x, y+h-r)
 	p.Close()
 	return p
 }
@@ -114,19 +114,19 @@ func (p *Path) RoundedRectangleSides(x, y, w, h float32, r sides.Floats) *Path {
 
 	p.MoveTo(xtl, ytli)
 	if r.Top != 0 {
-		p.ArcTo(r.Top, r.Top, 0, false, true, xtli, ytl)
+		p.ArcTo(r.Top, r.Top, 0, SmallArc, Clockwise, xtli, ytl)
 	}
 	p.LineTo(xtri, ytr)
 	if r.Right != 0 {
-		p.ArcTo(r.Right, r.Right, 0, false, true, xbr, ytri)
+		p.ArcTo(r.Right, r.Right, 0, SmallArc, Clockwise, xbr, ytri)
 	}
 	p.LineTo(xbr, ybri)
 	if r.Bottom != 0 {
-		p.ArcTo(r.Bottom, r.Bottom, 0, false, true, xbri, ybl)
+		p.ArcTo(r.Bottom, r.Bottom, 0, SmallArc, Clockwise, xbri, ybl)
 	}
 	p.LineTo(xbli, ybl)
 	if r.Left != 0 {
-		p.ArcTo(r.Left, r.Left, 0, false, true, xtl, ybli)
+		p.ArcTo(r.Left, r.Left, 0, SmallArc, Clockwise, xtl, ybli)
 	}
 	p.Close()
 	return p
@@ -169,8 +169,8 @@ func (p *Path) Ellipse(cx, cy, rx, ry float32) *Path {
 	}
 
 	p.MoveTo(cx+rx, cy+(ry*0.001))
-	p.ArcTo(rx, ry, 0.0, false, true, cx-rx, cy)
-	p.ArcTo(rx, ry, 0.0, false, true, cx+rx, cy)
+	p.ArcTo(rx, ry, 0.0, SmallArc, Clockwise, cx-rx, cy)
+	p.ArcTo(rx, ry, 0.0, SmallArc, Clockwise, cx+rx, cy)
 	p.Close()
 	return p
 }
@@ -301,7 +301,7 @@ func (p *Path) Grid(w, h float32, nx, ny int, r float32) *Path {
 	return p
 }
 
-func ArcToQuad(start math32.Vector2, rx, ry, phi float32, large, sweep bool, end math32.Vector2) Path {
+func ArcToQuad(start math32.Vector2, rx, ry, phi float32, large ArcSize, sweep ArcSweep, end math32.Vector2) Path {
 	p := Path{}
 	p.MoveTo(start.X, start.Y)
 	for _, bezier := range ellipseToQuadraticBeziers(start, rx, ry, phi, large, sweep, end) {
@@ -310,7 +310,7 @@ func ArcToQuad(start math32.Vector2, rx, ry, phi float32, large, sweep bool, end
 	return p
 }
 
-func ArcToCube(start math32.Vector2, rx, ry, phi float32, large, sweep bool, end math32.Vector2) Path {
+func ArcToCube(start math32.Vector2, rx, ry, phi float32, large ArcSize, sweep ArcSweep, end math32.Vector2) Path {
 	p := Path{}
 	p.MoveTo(start.X, start.Y)
 	for _, bezier := range ellipseToCubicBeziers(start, rx, ry, phi, large, sweep, end) {

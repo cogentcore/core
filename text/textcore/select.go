@@ -262,7 +262,7 @@ func (ed *Base) deleteSelection() *textpos.Edit {
 
 // Copy copies any selected text to the clipboard, and returns that text,
 // optionally resetting the current selection
-func (ed *Base) Copy(reset bool) *textpos.Edit {
+func (ed *Base) Copy(reset core.SelectionReset) *textpos.Edit {
 	tbe := ed.Selection()
 	if tbe == nil {
 		return nil
@@ -337,7 +337,7 @@ func (ed *Base) CutRect() *textpos.Edit {
 
 // CopyRect copies any selected text to the clipboard, and returns that text,
 // optionally resetting the current selection
-func (ed *Base) CopyRect(reset bool) *textpos.Edit {
+func (ed *Base) CopyRect(reset core.SelectionReset) *textpos.Edit {
 	ed.validateSelection()
 	tbe := ed.Lines.RegionRect(ed.SelectRegion.Start, ed.SelectRegion.End)
 	if tbe == nil {

@@ -109,7 +109,7 @@ func TestWriteRoundTrip(t *testing.T) {
 	assert.Equal(t, float32(3), r.Radius.X)
 
 	var b bytes.Buffer
-	require.NoError(t, sv.WriteXML(&b, true))
+	require.NoError(t, sv.WriteXML(&b, IndentXML))
 	assert.Contains(t, b.String(), "\n  <", "indented")
 
 	fn := filepath.Join(t.TempDir(), "rich.svg")

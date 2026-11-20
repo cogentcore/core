@@ -11,7 +11,7 @@ import (
 	"cogentcore.org/core/math32"
 )
 
-func EllipseDeriv(rx, ry, phi float32, sweep bool, theta float32) math32.Vector2 {
+func EllipseDeriv(rx, ry, phi float32, sweep ArcSweep, theta float32) math32.Vector2 {
 	sintheta, costheta := math32.Sincos(theta)
 	sinphi, cosphi := math32.Sincos(phi)
 	dx := -rx*sintheta*cosphi - ry*costheta*sinphi
@@ -37,7 +37,7 @@ func EllipsePos(rx, ry, phi, cx, cy, theta float32) math32.Vector2 {
 // (-2*PI, 4*PI), the ellipse runs clockwise.
 // The angles are from before the ellipse has been stretched and rotated.
 // See https://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes
-func EllipseToCenter(x1, y1, rx, ry, phi float32, large, sweep bool, x2, y2 float32) (float32, float32, float32, float32) {
+func EllipseToCenter(x1, y1, rx, ry, phi float32, large ArcSize, sweep ArcSweep, x2, y2 float32) (float32, float32, float32, float32) {
 	if Equal(x1, x2) && Equal(y1, y2) {
 		return x1, y1, 0.0, 0.0
 	} else if Equal(math32.Abs(x2-x1), rx) && Equal(y1, y2) && Equal(phi, 0.0) {
@@ -76,7 +76,7 @@ func EllipseToCenter(x1, y1, rx, ry, phi float32, large, sweep bool, x2, y2 floa
 		sq = 0.0
 	}
 	coef := math32.Sqrt(sq)
-	if large == sweep {
+	if bool(large) == bool(sweep) {
 		coef = -coef
 	}
 	cxp := coef * rx * y1p / ry
@@ -121,7 +121,7 @@ func EllipseRadiiCorrection(start math32.Vector2, rx, ry, phi float32, end math3
 }
 
 // see Drawing and elliptical arc using polylines, quadratic or cubic Bézier curves (2003), L. Maisonobe, https://spaceroots.org/documents/ellipse/elliptical-arc.pdf
-func ellipseToCubicBeziers(start math32.Vector2, rx, ry, phi float32, large, sweep bool, end math32.Vector2) [][4]math32.Vector2 {
+func ellipseToCubicBeziers(start math32.Vector2, rx, ry, phi float32, large ArcSize, sweep ArcSweep, end math32.Vector2) [][4]math32.Vector2 {
 	cx, cy, theta0, theta1 := EllipseToCenter(start.X, start.Y, rx, ry, phi, large, sweep, end.X, end.Y)
 
 	dtheta := float32(math32.Pi / 2.0) // TODO: use error measure to determine dtheta?
@@ -150,7 +150,7 @@ func ellipseToCubicBeziers(start math32.Vector2, rx, ry, phi float32, large, swe
 }
 
 // see Drawing and elliptical arc using polylines, quadratic or cubic Bézier curves (2003), L. Maisonobe, https://spaceroots.org/documents/ellipse/elliptical-arc.pdf
-func ellipseToQuadraticBeziers(start math32.Vector2, rx, ry, phi float32, large, sweep bool, end math32.Vector2) [][3]math32.Vector2 {
+func ellipseToQuadraticBeziers(start math32.Vector2, rx, ry, phi float32, large ArcSize, sweep ArcSweep, end math32.Vector2) [][3]math32.Vector2 {
 	cx, cy, theta0, theta1 := EllipseToCenter(start.X, start.Y, rx, ry, phi, large, sweep, end.X, end.Y)
 
 	dtheta := float32(math32.Pi / 2.0) // TODO: use error measure to determine dtheta?

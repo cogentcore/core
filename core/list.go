@@ -843,7 +843,7 @@ func (lb *ListBase) deleteAtRow(row int) {
 // NewAtSelect updates the selected rows based on
 // inserting a new element at the given index.
 func (lb *ListBase) NewAtSelect(i int) {
-	sl := lb.SelectedIndexesList(false) // ascending
+	sl := lb.SelectedIndexesList(reflectx.Ascending)
 	lb.ResetSelectedIndexes()
 	for _, ix := range sl {
 		if ix >= i {
@@ -856,7 +856,7 @@ func (lb *ListBase) NewAtSelect(i int) {
 // DeleteAtSelect updates the selected rows based on
 // deleting the element at the given index.
 func (lb *ListBase) DeleteAtSelect(i int) {
-	sl := lb.SelectedIndexesList(true) // desscending
+	sl := lb.SelectedIndexesList(reflectx.Descending)
 	lb.ResetSelectedIndexes()
 	for _, ix := range sl {
 		switch {
@@ -1274,7 +1274,7 @@ func (lb *ListBase) ResetSelectedIndexes() {
 
 // SelectedIndexesList returns list of selected indexes,
 // sorted either ascending or descending
-func (lb *ListBase) SelectedIndexesList(descendingSort bool) []int {
+func (lb *ListBase) SelectedIndexesList(order reflectx.SortOrder) []int {
 	rws := make([]int, len(lb.SelectedIndexes))
 	i := 0
 	for r := range lb.SelectedIndexes {
@@ -1286,7 +1286,7 @@ func (lb *ListBase) SelectedIndexesList(descendingSort bool) []int {
 		rws[i] = r
 		i++
 	}
-	if descendingSort {
+	if order == reflectx.Descending {
 		sort.Slice(rws, func(i, j int) bool {
 			return rws[i] > rws[j]
 		})
@@ -1464,7 +1464,7 @@ func (lb *ListBase) CopySelectToMime() mimedata.Mimes {
 	if nitms == 0 {
 		return nil
 	}
-	ixs := lb.SelectedIndexesList(false) // ascending
+	ixs := lb.SelectedIndexesList(reflectx.Ascending)
 	md := make(mimedata.Mimes, 0, nitms)
 	for _, i := range ixs {
 		lb.mimeDataIndex(&md, i)
@@ -1494,7 +1494,7 @@ func (lb *ListBase) cutIndexes() { //types:add
 	}
 
 	lb.copyIndexes(false)
-	ixs := lb.SelectedIndexesList(true) // descending sort
+	ixs := lb.SelectedIndexesList(reflectx.Descending)
 	idx := ixs[0]
 	lb.unselectAllIndexes()
 	for _, i := range ixs {
@@ -1611,7 +1611,7 @@ func (lb *ListBase) duplicate() int { //types:add
 	if nitms == 0 {
 		return -1
 	}
-	ixs := lb.SelectedIndexesList(true) // descending sort -- last first
+	ixs := lb.SelectedIndexesList(reflectx.Descending) // last first
 	pasteAt := ixs[0]
 	lb.copyIndexes(true)
 	dt := lb.This.(Lister).MimeDataType()
@@ -1647,7 +1647,7 @@ func (lb *ListBase) dragStart(e events.Event) {
 	if !lb.selectRowIfNone(e) || !lb.mousePosInGrid(e) {
 		return
 	}
-	ixs := lb.SelectedIndexesList(false) // ascending
+	ixs := lb.SelectedIndexesList(reflectx.Ascending)
 	if len(ixs) == 0 {
 		return
 	}
@@ -1717,7 +1717,7 @@ func (lb *ListBase) saveDraggedIndexes(idx int) {
 		lb.draggedIndexes = nil
 		return
 	}
-	ixs := lb.SelectedIndexesList(false) // ascending
+	ixs := lb.SelectedIndexesList(reflectx.Ascending)
 	lb.draggedIndexes = make([]int, len(ixs))
 	for i, ix := range ixs {
 		if ix > idx {

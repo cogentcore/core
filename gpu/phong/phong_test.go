@@ -213,8 +213,8 @@ func TestPhongMeshes(t *testing.T) {
 	meshes := map[string]shape.Mesh{
 		"box":      shape.NewBox(1, 1, 1),
 		"sphere":   shape.NewSphere(0.6, 24),
-		"cylinder": shape.NewCylinder(1, 0.5, 24, 1, true, true),
-		"cone":     shape.NewCone(1, 0.5, 24, 1, true),
+		"cylinder": shape.NewCylinder(1, 0.5, 24, 1, shape.WithTop, shape.WithBottom),
+		"cone":     shape.NewCone(1, 0.5, 24, 1, shape.WithBottom),
 		"capsule":  shape.NewCapsule(1, 0.4, 24, 8),
 		"torus":    shape.NewTorus(1, 0.3, 24),
 		"lines":    shape.NewLines([]math32.Vector3{{X: -1, Y: 0, Z: 0}, {X: 1, Y: 0, Z: 0}}, math32.Vec2(0.3, 0.3), false),

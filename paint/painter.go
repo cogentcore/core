@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/pimage"
+	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/paint/render"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/sides"
@@ -93,7 +94,7 @@ func (pc *Painter) CubeTo(cp1x, cp1y, cp2x, cp2y, x, y float32) {
 // (see https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths#Arcs),
 // and (x,y) the end position of the pen. The start position of the pen was
 // given by a previous command's end point.
-func (pc *Painter) ArcTo(rx, ry, rot float32, large, sweep bool, x, y float32) {
+func (pc *Painter) ArcTo(rx, ry, rot float32, large ppath.ArcSize, sweep ppath.ArcSweep, x, y float32) {
 	pc.State.Path.ArcTo(rx, ry, rot, large, sweep, x, y)
 }
 

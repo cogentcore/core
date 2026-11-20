@@ -18,18 +18,19 @@ import (
 
 func TestEllipse(t *testing.T) {
 	tolEqualVec2(t, EllipsePos(2.0, 1.0, math32.Pi/2.0, 1.0, 0.5, 0.0), math32.Vec2(1.0, 2.5))
-	tolEqualVec2(t, EllipseDeriv(2.0, 1.0, math32.Pi/2.0, true, 0.0), math32.Vec2(-1.0, 0.0))
-	tolEqualVec2(t, EllipseDeriv(2.0, 1.0, math32.Pi/2.0, false, 0.0), math32.Vec2(1.0, 0.0))
+	tolEqualVec2(t, EllipseDeriv(2.0, 1.0, math32.Pi/2.0, Clockwise, 0.0), math32.Vec2(-1.0, 0.0))
+	tolEqualVec2(t, EllipseDeriv(2.0, 1.0, math32.Pi/2.0, CounterClockwise, 0.0), math32.Vec2(1.0, 0.0))
 
 	assert.InDelta(t, EllipseRadiiCorrection(math32.Vec2(0.0, 0.0), 0.1, 0.1, 0.0, math32.Vec2(1.0, 0.0)), 5.0, 1.0e-5)
 }
 
 func TestEllipseToCenter(t *testing.T) {
 	var tests = []struct {
-		x1, y1       float32
-		rx, ry, phi  float32
-		large, sweep bool
-		x2, y2       float32
+		x1, y1      float32
+		rx, ry, phi float32
+		large       ArcSize
+		sweep       ArcSweep
+		x2, y2      float32
 
 		cx, cy, theta0, theta1 float32
 	}{
@@ -96,12 +97,12 @@ func TestEllipseToCenter(t *testing.T) {
 }
 
 func TestArcToQuad(t *testing.T) {
-	assert.InDeltaSlice(t, ArcToQuad(math32.Vec2(0.0, 0.0), 100.0, 100.0, 0.0, false, false, math32.Vec2(200.0, 0.0)), MustParseSVGPath("Q0 100 100 100Q200 100 200 0"), 1.0e-4)
+	assert.InDeltaSlice(t, ArcToQuad(math32.Vec2(0.0, 0.0), 100.0, 100.0, 0.0, SmallArc, CounterClockwise, math32.Vec2(200.0, 0.0)), MustParseSVGPath("Q0 100 100 100Q200 100 200 0"), 1.0e-4)
 }
 
 func TestArcToCube(t *testing.T) {
 	// defer setEpsilon(1e-3)()
-	assert.InDeltaSlice(t, ArcToCube(math32.Vec2(0.0, 0.0), 100.0, 100.0, 0.0, false, false, math32.Vec2(200.0, 0.0)), MustParseSVGPath("C0 54.858 45.142 100 100 100C154.858 100 200 54.858 200 0"), 1.0e-3)
+	assert.InDeltaSlice(t, ArcToCube(math32.Vec2(0.0, 0.0), 100.0, 100.0, 0.0, SmallArc, CounterClockwise, math32.Vec2(200.0, 0.0)), MustParseSVGPath("C0 54.858 45.142 100 100 100C154.858 100 200 54.858 200 0"), 1.0e-3)
 }
 
 func TestQuadraticBezier(t *testing.T) {

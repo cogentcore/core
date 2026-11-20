@@ -58,7 +58,7 @@ func (e *Error) Error() string {
 // - basepath if non-empty shows filename relative to that path.
 // - showSrc shows the source line on a second line -- truncated to 30 chars around err
 // - showRule prints the rule name
-func (e Error) Report(basepath string, showSrc, showRule bool) string {
+func (e Error) Report(basepath string, showSrc ReportSource, showRule ReportRule) string {
 	var err error
 	fnm := ""
 	if e.Filename != "" {
@@ -70,7 +70,7 @@ func (e Error) Report(basepath string, showSrc, showRule bool) string {
 		}
 	}
 	str := fnm + ":" + e.Pos.String() + ": " + e.Msg
-	if showRule && !reflectx.IsNil(reflect.ValueOf(e.Rule)) {
+	if showRule == ShowRule && !reflectx.IsNil(reflect.ValueOf(e.Rule)) {
 		str += fmt.Sprintf(" (rule: %v)", e.Rule.AsTree().Name)
 	}
 	ssz := len(e.Src)
@@ -167,7 +167,7 @@ func (p ErrorList) Err() error {
 // - basepath if non-empty shows filename relative to that path.
 // - showSrc shows the source line on a second line -- truncated to 30 chars around err
 // - showRule prints the rule name
-func (p ErrorList) Report(maxN int, basepath string, showSrc, showRule bool) string {
+func (p ErrorList) Report(maxN int, basepath string, showSrc ReportSource, showRule ReportRule) string {
 	ne := len(p)
 	if ne == 0 {
 		return ""
@@ -216,3 +216,27 @@ func PrintError(w io.Writer, err error) {
 		fmt.Fprintf(w, "%s\n", err)
 	}
 }
+
+// ReportSource specifies whether an error report includes the source line:
+// [ShowSrc] or [NoSrc].
+type ReportSource bool
+
+const (
+	// ShowSrc includes the source line.
+	ShowSrc ReportSource = true
+
+	// NoSrc does not include the source line.
+	NoSrc ReportSource = false
+)
+
+// ReportRule specifies whether an error report includes the parsing rule:
+// [ShowRule] or [NoRule].
+type ReportRule bool
+
+const (
+	// ShowRule includes the rule.
+	ShowRule ReportRule = true
+
+	// NoRule does not include the rule.
+	NoRule ReportRule = false
+)

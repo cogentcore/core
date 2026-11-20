@@ -133,7 +133,7 @@ func (fs *FileState) LexHasErrs() bool {
 // LexErrReport returns a report of all the lexing errors -- these should only
 // occur during development of lexer so we use a detailed report format
 func (fs *FileState) LexErrReport() string {
-	return fs.LexState.Errs.Report(0, fs.Src.BasePath, true, true)
+	return fs.LexState.Errs.Report(0, fs.Src.BasePath, lexer.ShowSrc, lexer.ShowRule)
 }
 
 // PassTwoHasErrs returns true if there were errors from pass two processing
@@ -144,7 +144,7 @@ func (fs *FileState) PassTwoHasErrs() bool {
 // PassTwoErrReport returns all the pass two errors as a string -- these should
 // only occur during development so we use a detailed report format
 func (fs *FileState) PassTwoErrReport() string {
-	return fs.TwoState.Errs.Report(0, fs.Src.BasePath, true, true)
+	return fs.TwoState.Errs.Report(0, fs.Src.BasePath, lexer.ShowSrc, lexer.ShowRule)
 }
 
 // ParseAtEnd returns true if parsing state is now at end of source
@@ -165,19 +165,19 @@ func (fs *FileState) ParseHasErrs() bool {
 // ParseErrReport returns at most 10 parsing errors in end-user format, sorted
 func (fs *FileState) ParseErrReport() string {
 	fs.ParseState.Errs.Sort()
-	return fs.ParseState.Errs.Report(10, fs.Src.BasePath, true, false)
+	return fs.ParseState.Errs.Report(10, fs.Src.BasePath, lexer.ShowSrc, lexer.NoRule)
 }
 
 // ParseErrReportAll returns all parsing errors in end-user format, sorted
 func (fs *FileState) ParseErrReportAll() string {
 	fs.ParseState.Errs.Sort()
-	return fs.ParseState.Errs.Report(0, fs.Src.BasePath, true, false)
+	return fs.ParseState.Errs.Report(0, fs.Src.BasePath, lexer.ShowSrc, lexer.NoRule)
 }
 
 // ParseErrReportDetailed returns at most 10 parsing errors in detailed format, sorted
 func (fs *FileState) ParseErrReportDetailed() string {
 	fs.ParseState.Errs.Sort()
-	return fs.ParseState.Errs.Report(10, fs.Src.BasePath, true, true)
+	return fs.ParseState.Errs.Report(10, fs.Src.BasePath, lexer.ShowSrc, lexer.ShowRule)
 }
 
 // ParseRuleString returns the rule info for entire source -- if full

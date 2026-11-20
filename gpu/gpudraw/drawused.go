@@ -62,7 +62,7 @@ func (dw *Drawer) UseTexture(tx *gpu.Texture) {
 //   - op is the drawing operation: Src = copy source directly (blit),
 //     Over = alpha blend with existing.
 //   - flipY = flipY axis when drawing this image.
-func (dw *Drawer) CopyUsed(dp image.Point, sr image.Rectangle, op draw.Op, flipY bool) {
+func (dw *Drawer) CopyUsed(dp image.Point, sr image.Rectangle, op draw.Op, flipY math32.YFlip) {
 	if sr == (image.Rectangle{}) {
 		sr.Max = dw.curImageSize
 	}
@@ -85,7 +85,7 @@ func (dw *Drawer) CopyUsed(dp image.Point, sr image.Rectangle, op draw.Op, flipY
 //   - op is the drawing operation: Src = copy source directly (blit),
 //     Over = alpha blend with existing.
 //   - flipY = flipY axis when drawing this image.
-func (dw *Drawer) ScaleUsed(dr image.Rectangle, sr image.Rectangle, rotateDeg float32, op draw.Op, flipY bool) {
+func (dw *Drawer) ScaleUsed(dr, sr image.Rectangle, rotateDeg float32, op draw.Op, flipY math32.YFlip) {
 	if dr == (image.Rectangle{}) {
 		dr.Max = dw.DestSize()
 	}
@@ -101,7 +101,7 @@ func (dw *Drawer) ScaleUsed(dr image.Rectangle, sr image.Rectangle, rotateDeg fl
 //   - sr is the source region; if zero uses full src image.
 //   - op is the drawing operation: Src = copy source directly (blit),
 //     Over = alpha blend with existing.
-func (dw *Drawer) TransformUsed(xform math32.Matrix3, sr image.Rectangle, op draw.Op, flipY bool) {
+func (dw *Drawer) TransformUsed(xform math32.Matrix3, sr image.Rectangle, op draw.Op, flipY math32.YFlip) {
 	dw.Lock()
 	defer dw.Unlock()
 	if sr == (image.Rectangle{}) {

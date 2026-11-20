@@ -46,9 +46,10 @@ func (p Path) FastBounds() math32.Box2 {
 			ymax = math32.Max(ymax, math32.Max(cp1.Y, math32.Max(cp2.Y, end.Y)))
 		case ArcTo:
 			var rx, ry, phi float32
-			var large, sweep bool
+			var large ArcSize
+			var sweep ArcSweep
 			rx, ry, phi, large, sweep, end = p.ArcToPoints(i)
-			cx, cy, _, _ := EllipseToCenter(start.X, start.Y, rx, ry, phi, large, sweep, end.X, end.Y)
+			cx, cy, _, _ := EllipseToCenter(start.X, start.Y, rx, ry, phi, ArcSize(large), ArcSweep(sweep), end.X, end.Y)
 			r := math32.Max(rx, ry)
 			xmin = math32.Min(xmin, cx-r)
 			xmax = math32.Max(xmax, cx+r)

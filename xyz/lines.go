@@ -96,7 +96,7 @@ func UnitConeMesh(sc *Scene, segs int) *Cylinder {
 	if cm != nil {
 		return cm.(*Cylinder)
 	}
-	cmm := NewCone(sc, nm, 1, 1, segs, 1, true)
+	cmm := NewCone(sc, nm, 1, 1, segs, 1, WithBottom)
 	return cmm
 }
 

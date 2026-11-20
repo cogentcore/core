@@ -51,9 +51,21 @@ func (ed *Base) highlightLink(lk *rich.Hyperlink, ln int) textpos.Region {
 	return reg
 }
 
+// LinkWrap specifies whether going to the next or previous link wraps
+// around the ends of the text: [Wraparound] or [NoWraparound].
+type LinkWrap bool
+
+const (
+	// Wraparound goes from the last link to the first, and back.
+	Wraparound LinkWrap = true
+
+	// NoWraparound stops at the first and last links.
+	NoWraparound LinkWrap = false
+)
+
 // CursorNextLink moves cursor to next link. wraparound wraps around to top of
 // buffer if none found -- returns true if found
-func (ed *Base) CursorNextLink(wraparound bool) bool {
+func (ed *Base) CursorNextLink(wraparound LinkWrap) bool {
 	if ed.NumLines() == 0 {
 		return false
 	}
@@ -83,7 +95,7 @@ func (ed *Base) CursorNextLink(wraparound bool) bool {
 
 // CursorPrevLink moves cursor to next link. wraparound wraps around to bottom of
 // buffer if none found -- returns true if found
-func (ed *Base) CursorPrevLink(wraparound bool) bool {
+func (ed *Base) CursorPrevLink(wraparound LinkWrap) bool {
 	if ed.NumLines() == 0 {
 		return false
 	}

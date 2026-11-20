@@ -218,18 +218,39 @@ type Cylinder struct { //types:add -setters
 	AngLen float32 `min:"0" max:"360" step:"5"`
 }
 
+// TopCap specifies whether a cylinder has a top cap: [WithTop] or [NoTop].
+type TopCap = shape.TopCap
+
+// BottomCap specifies whether a cylinder or cone has a bottom cap:
+// [WithBottom] or [NoBottom].
+type BottomCap = shape.BottomCap
+
+const (
+	// WithTop adds the top cap.
+	WithTop = shape.WithTop
+
+	// NoTop leaves the top open.
+	NoTop = shape.NoTop
+
+	// WithBottom adds the bottom cap.
+	WithBottom = shape.WithBottom
+
+	// NoBottom leaves the bottom open.
+	NoBottom = shape.NoBottom
+)
+
 // NewCone creates a cone mesh with the specified base radius, height,
 // number of radial segments, number of height segments, and presence of a bottom cap.
 // Height is along the Y axis.
-func NewCone(sc *Scene, name string, height, radius float32, radialSegs, heightSegs int, bottom bool) *Cylinder {
-	return NewCylinderSector(sc, name, height, 0, radius, radialSegs, heightSegs, 0, 360, false, bottom)
+func NewCone(sc *Scene, name string, height, radius float32, radialSegs, heightSegs int, bottom BottomCap) *Cylinder {
+	return NewCylinderSector(sc, name, height, 0, radius, radialSegs, heightSegs, 0, 360, NoTop, bottom)
 }
 
 // NewCylinder creates a cylinder mesh with the specified radius, height,
 // number of radial segments, number of height segments,
 // and presence of a top and/or bottom cap.
 // Height is along the Y axis.
-func NewCylinder(sc *Scene, name string, height, radius float32, radialSegs, heightSegs int, top, bottom bool) *Cylinder {
+func NewCylinder(sc *Scene, name string, height, radius float32, radialSegs, heightSegs int, top TopCap, bottom BottomCap) *Cylinder {
 	return NewCylinderSector(sc, name, height, radius, radius, radialSegs, heightSegs, 0, 360, top, bottom)
 }
 
@@ -238,7 +259,7 @@ func NewCylinder(sc *Scene, name string, height, radius float32, radialSegs, hei
 // number of height segments, sector start angle in degrees,
 // sector size angle in degrees, and presence of a top and/or bottom cap.
 // Height is along the Y axis.
-func NewCylinderSector(sc *Scene, name string, height, topRad, botRad float32, radialSegs, heightSegs int, angStart, angLen float32, top, bottom bool) *Cylinder {
+func NewCylinderSector(sc *Scene, name string, height, topRad, botRad float32, radialSegs, heightSegs int, angStart, angLen float32, top TopCap, bottom BottomCap) *Cylinder {
 	cy := &Cylinder{}
 	cy.Name = name
 	cy.Height = height
@@ -248,8 +269,8 @@ func NewCylinderSector(sc *Scene, name string, height, topRad, botRad float32, r
 	cy.HeightSegs = heightSegs
 	cy.AngStart = angStart
 	cy.AngLen = angLen
-	cy.Top = top
-	cy.Bottom = bottom
+	cy.Top = bool(top)
+	cy.Bottom = bool(bottom)
 	sc.SetMesh(cy)
 	return cy
 }
@@ -267,14 +288,14 @@ func (cy *Cylinder) Defaults() {
 }
 
 func (cy *Cylinder) MeshSize() (numVertex, nIndex int, hasColor bool) {
-	cy.NumVertex, cy.NumIndex = shape.CylinderSectorN(cy.RadialSegs, cy.HeightSegs, cy.Top, cy.Bottom)
+	cy.NumVertex, cy.NumIndex = shape.CylinderSectorN(cy.RadialSegs, cy.HeightSegs, shape.TopCap(cy.Top), shape.BottomCap(cy.Bottom))
 	cy.HasColor = false
 	return cy.NumVertex, cy.NumIndex, cy.HasColor
 }
 
 func (cy *Cylinder) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
 	pos := math32.Vector3{}
-	bb := shape.SetCylinderSector(vertex, normal, texcoord, index, 0, 0, cy.Height, cy.TopRad, cy.BotRad, cy.RadialSegs, cy.HeightSegs, cy.AngStart, cy.AngLen, cy.Top, cy.Bottom, pos)
+	bb := shape.SetCylinderSector(vertex, normal, texcoord, index, 0, 0, cy.Height, cy.TopRad, cy.BotRad, cy.RadialSegs, cy.HeightSegs, cy.AngStart, cy.AngLen, shape.TopCap(cy.Top), shape.BottomCap(cy.Bottom), pos)
 	cy.BBox.SetBounds(bb.Min, bb.Max)
 }
 
@@ -342,7 +363,7 @@ func (cp *Capsule) Defaults() {
 }
 
 func (cp *Capsule) MeshSize() (numVertex, nIndex int, hasColor bool) {
-	numVertex, nIndex = shape.CylinderSectorN(cp.RadialSegs, cp.HeightSegs, false, false)
+	numVertex, nIndex = shape.CylinderSectorN(cp.RadialSegs, cp.HeightSegs, shape.NoTop, shape.NoBottom)
 	if cp.BotRad > 0 {
 		nv, ni := shape.SphereSectorN(cp.RadialSegs, cp.CapSegs, 90, 90)
 		numVertex += nv
@@ -360,8 +381,8 @@ func (cp *Capsule) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index mat
 	pos := math32.Vector3{}
 	voff := 0
 	ioff := 0
-	bb := shape.SetCylinderSector(vertex, normal, texcoord, index, voff, ioff, cp.Height, cp.TopRad, cp.BotRad, cp.RadialSegs, cp.HeightSegs, cp.AngStart, cp.AngLen, false, false, pos)
-	nv, ni := shape.CylinderSectorN(cp.RadialSegs, cp.HeightSegs, false, false)
+	bb := shape.SetCylinderSector(vertex, normal, texcoord, index, voff, ioff, cp.Height, cp.TopRad, cp.BotRad, cp.RadialSegs, cp.HeightSegs, cp.AngStart, cp.AngLen, shape.NoTop, shape.NoBottom, pos)
+	nv, ni := shape.CylinderSectorN(cp.RadialSegs, cp.HeightSegs, shape.NoTop, shape.NoBottom)
 	voff += nv
 	ioff += ni
 

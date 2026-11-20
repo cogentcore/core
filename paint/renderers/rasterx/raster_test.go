@@ -19,6 +19,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint/ppath"
 	"cogentcore.org/core/paint/renderers/rasterx/scan"
 	"golang.org/x/image/math/fixed"
 )
@@ -433,16 +434,16 @@ func doShapes(t *testing.T, f Scanner, fa Adder, fname string, img image.Image) 
 
 func TestFindElipsecenter(t *testing.T) {
 	ra, rb := float32(10), float32(5)
-	cx, cy := FindEllipseCenter(&ra, &rb, 0.0, 0.0, 0.0, 20.0, 0.0, true, true)
+	cx, cy := FindEllipseCenter(&ra, &rb, 0.0, 0.0, 0.0, 20.0, 0.0, ppath.Clockwise, ppath.SmallArc)
 	if cx != 10 || cy != 0 || ra != 10 || rb != 5 {
 		t.Error("Find elipse center failed ", cx, cy, ra, rb)
 	}
-	cx, cy = FindEllipseCenter(&ra, &rb, 0.0, 0.0, 0.0, 35.0, 5.0, false, true)
+	cx, cy = FindEllipseCenter(&ra, &rb, 0.0, 0.0, 0.0, 35.0, 5.0, ppath.CounterClockwise, ppath.SmallArc)
 	if ra == 10 || rb == 5 {
 		t.Error("Find elipse center failed with resize of radiuses ", cx, cy, ra, rb)
 	}
 	ra, rb = 5.0, 5.0
-	cx, cy = FindEllipseCenter(&ra, &rb, 0.0, 0.0, 0.0, 35.0, 5.0, true, true)
+	cx, cy = FindEllipseCenter(&ra, &rb, 0.0, 0.0, 0.0, 35.0, 5.0, ppath.Clockwise, ppath.SmallArc)
 	if ra == 10 || rb == 5 {
 		t.Error("Find elipse center failed with resize of radiuses ", cx, cy, ra, rb)
 	}

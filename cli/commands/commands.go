@@ -341,11 +341,23 @@ func (cs *Commands) cachedSub(cmd string) *SubCmd {
 	return nil
 }
 
+// ReparseMode specifies whether to parse the commands again, from their
+// files: [Reparse] or [NoReparse].
+type ReparseMode bool
+
+const (
+	// Reparse parses the commands again.
+	Reparse ReparseMode = true
+
+	// NoReparse uses the commands as they were parsed.
+	NoReparse ReparseMode = false
+)
+
 // Cmd returns the parsed command for the given command, such as "git",
 // parsing its help and saving it if it has not been parsed yet, or if
 // reparse is true, keeping the subcommands that have been parsed.
-func (cs *Commands) Cmd(cmd string, reparse bool) (*Cmd, error) {
-	if cm := cs.cached(cmd); cm != nil && cm.IsParsed() && !reparse {
+func (cs *Commands) Cmd(cmd string, reparse ReparseMode) (*Cmd, error) {
+	if cm := cs.cached(cmd); cm != nil && cm.IsParsed() && reparse == NoReparse {
 		return cm, nil
 	}
 	cm, err := ParseCmd(cmd)
@@ -372,13 +384,13 @@ func (cs *Commands) Cmd(cmd string, reparse bool) (*Cmd, error) {
 // parsed yet, or if reparse is true. Its documentation defaults to that
 // given by its command (or parent subcommand). A subcommand that is not
 // one of those of the command, such as "git stash list", is added to them.
-func (cs *Commands) SubCmd(cmd string, reparse bool) (*SubCmd, error) {
+func (cs *Commands) SubCmd(cmd string, reparse ReparseMode) (*SubCmd, error) {
 	cmd = strings.Join(strings.Fields(cmd), " ")
 	if sc := cs.cachedSub(cmd); sc != nil && !reparse {
 		return sc, nil
 	}
 	root, name := splitCmd(cmd)
-	cm, err := cs.Cmd(root, false)
+	cm, err := cs.Cmd(root, NoReparse)
 	if err != nil {
 		return nil, err
 	}
@@ -389,7 +401,7 @@ func (cs *Commands) SubCmd(cmd string, reparse bool) (*SubCmd, error) {
 		name = MainName
 	}
 	if name == MainName && reparse {
-		if _, err := cs.Cmd(root, true); err != nil {
+		if _, err := cs.Cmd(root, Reparse); err != nil {
 			return nil, err
 		}
 		return cs.cachedSub(cmd), nil
@@ -462,7 +474,7 @@ func (cs *Commands) addSharedFlags(root string, sc *SubCmd) {
 	if !ok || sc.Name == sf.from || !sf.usage.MatchString(sc.Usage) {
 		return
 	}
-	from, err := cs.SubCmd(root+" "+sf.from, false)
+	from, err := cs.SubCmd(root+" "+sf.from, NoReparse)
 	if errors.Log(err) != nil {
 		return
 	}
@@ -505,7 +517,7 @@ func (cs *Commands) ParseAll() {
 		if sc := cs.cachedSub(full); sc != nil {
 			return sc
 		}
-		sc, err := cs.SubCmd(full, false)
+		sc, err := cs.SubCmd(full, NoReparse)
 		errors.Log(err)
 		return sc
 	}
@@ -513,7 +525,7 @@ func (cs *Commands) ParseAll() {
 	var nested []string
 	for _, cmd := range cmds {
 		root, name := splitCmd(cmd)
-		cm, err := cs.Cmd(root, false)
+		cm, err := cs.Cmd(root, NoReparse)
 		if errors.Log(err) != nil {
 			continue
 		}

@@ -947,7 +947,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 // XMLString returns the svg to a XML-encoded file, using WriteXML
 func (sv *SVG) XMLString() string {
 	var b bytes.Buffer
-	sv.WriteXML(&b, false)
+	sv.WriteXML(&b, NoIndentXML)
 	return b.String()
 }
 
@@ -961,7 +961,7 @@ func (sv *SVG) SaveXML(fname string) error {
 	}
 	defer fp.Close()
 	bw := bufio.NewWriter(fp)
-	err = sv.WriteXML(bw, true)
+	err = sv.WriteXML(bw, IndentXML)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -973,9 +973,21 @@ func (sv *SVG) SaveXML(fname string) error {
 	return err
 }
 
+// XMLIndent specifies whether the written XML is indented: [IndentXML] or
+// [NoIndentXML].
+type XMLIndent bool
+
+const (
+	// IndentXML indents the XML.
+	IndentXML XMLIndent = true
+
+	// NoIndentXML does not indent the XML.
+	NoIndentXML XMLIndent = false
+)
+
 // WriteXML writes XML-formatted SVG output to io.Writer, and uses
 // XMLEncoder
-func (sv *SVG) WriteXML(wr io.Writer, indent bool) error {
+func (sv *SVG) WriteXML(wr io.Writer, indent XMLIndent) error {
 	enc := NewXMLEncoder(wr)
 	if indent {
 		enc.Indent("", "  ")

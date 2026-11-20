@@ -243,7 +243,7 @@ func TestStandardMacros(t *testing.T) {
 			continue
 		}
 		for _, mc := range mcs {
-			sc, err := cs.SubCmd(mc.Cmd(root), false)
+			sc, err := cs.SubCmd(mc.Cmd(root), NoReparse)
 			if !assert.NoError(t, err, mc.Label(root)) {
 				continue
 			}
@@ -257,7 +257,7 @@ func TestStandardMacros(t *testing.T) {
 			}
 		}
 	}
-	gc, err := cs.SubCmd("git commit", false)
+	gc, err := cs.SubCmd("git commit", NoReparse)
 	if err == nil {
 		mc := StandardMacros()["git"][4]
 		assert.Equal(t, "Git commit", mc.Label("git"))

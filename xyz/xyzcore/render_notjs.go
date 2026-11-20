@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/gpudraw"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/composer"
 )
@@ -44,7 +45,7 @@ func (xr *xyzSource) Draw(c composer.Composer) {
 	}
 	xr.sw.XYZ.Lock()
 	gdrw.UseTexture(xr.texture)
-	gdrw.CopyUsed(xr.destBBox.Min, xr.srcBBox, draw.Src, false)
+	gdrw.CopyUsed(xr.destBBox.Min, xr.srcBBox, draw.Src, math32.NoFlipY)
 	xr.sw.XYZ.Unlock()
 }
 

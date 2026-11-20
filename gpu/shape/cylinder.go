@@ -42,11 +42,34 @@ type Cylinder struct { //types:add -setters
 	AngLen float32 `min:"0" max:"360" step:"5"`
 }
 
+// TopCap specifies whether a cylinder has a top cap: [WithTop] or [NoTop].
+type TopCap bool
+
+const (
+	// WithTop adds the top cap.
+	WithTop TopCap = true
+
+	// NoTop leaves the top open.
+	NoTop TopCap = false
+)
+
+// BottomCap specifies whether a cylinder or cone has a bottom cap:
+// [WithBottom] or [NoBottom].
+type BottomCap bool
+
+const (
+	// WithBottom adds the bottom cap.
+	WithBottom BottomCap = true
+
+	// NoBottom leaves the bottom open.
+	NoBottom BottomCap = false
+)
+
 // NewCylinder returns a Cylinder shape with given radius, height,
 // number of radial segments, number of height segments,
 // and presence of a top and/or bottom cap.
 // Height is along the Y axis.
-func NewCylinder(height, radius float32, radialSegs, heightSegs int, top, bottom bool) *Cylinder {
+func NewCylinder(height, radius float32, radialSegs, heightSegs int, top TopCap, bottom BottomCap) *Cylinder {
 	cy := &Cylinder{}
 	cy.Defaults()
 
@@ -55,15 +78,15 @@ func NewCylinder(height, radius float32, radialSegs, heightSegs int, top, bottom
 	cy.BotRad = radius
 	cy.RadialSegs = radialSegs
 	cy.HeightSegs = heightSegs
-	cy.Top = top
-	cy.Bottom = bottom
+	cy.Top = bool(top)
+	cy.Bottom = bool(bottom)
 	return cy
 }
 
 // NewCone returns a cone shape with the specified base radius, height,
 // number of radial segments, number of height segments, and presence of a bottom cap.
 // Height is along the Y axis.
-func NewCone(height, radius float32, radialSegs, heightSegs int, bottom bool) *Cylinder {
+func NewCone(height, radius float32, radialSegs, heightSegs int, bottom BottomCap) *Cylinder {
 	cy := &Cylinder{}
 	cy.Defaults()
 
@@ -73,7 +96,7 @@ func NewCone(height, radius float32, radialSegs, heightSegs int, bottom bool) *C
 	cy.RadialSegs = radialSegs
 	cy.HeightSegs = heightSegs
 	cy.Top = false
-	cy.Bottom = bottom
+	cy.Bottom = bool(bottom)
 	return cy
 }
 
@@ -90,20 +113,20 @@ func (cy *Cylinder) Defaults() {
 }
 
 func (cy *Cylinder) MeshSize() (numVertex, nIndex int, hasColor bool) {
-	numVertex, nIndex = CylinderSectorN(cy.RadialSegs, cy.HeightSegs, cy.Top, cy.Bottom)
+	numVertex, nIndex = CylinderSectorN(cy.RadialSegs, cy.HeightSegs, TopCap(cy.Top), BottomCap(cy.Bottom))
 	return
 }
 
 // Set sets points in given allocated arrays.
 func (cy *Cylinder) Set(vertex, normal, texcoord, clrs math32.ArrayF32, index math32.ArrayU32) {
-	cy.CBBox = SetCylinderSector(vertex, normal, texcoord, index, cy.VertexOffset, cy.IndexOffset, cy.Height, cy.TopRad, cy.BotRad, cy.RadialSegs, cy.HeightSegs, cy.AngStart, cy.AngLen, cy.Top, cy.Bottom, cy.Pos)
+	cy.CBBox = SetCylinderSector(vertex, normal, texcoord, index, cy.VertexOffset, cy.IndexOffset, cy.Height, cy.TopRad, cy.BotRad, cy.RadialSegs, cy.HeightSegs, cy.AngStart, cy.AngLen, TopCap(cy.Top), BottomCap(cy.Bottom), cy.Pos)
 }
 
 ////////////////////////////////////////////////////////////////
 
 // CylinderSectorN returns the N's for the cylinder (truncated cone) sector
 // vertex and index data with given parameters
-func CylinderSectorN(radialSegs, heightSegs int, top, bottom bool) (numVertex, nIndex int) {
+func CylinderSectorN(radialSegs, heightSegs int, top TopCap, bottom BottomCap) (numVertex, nIndex int) {
 	numVertex = (heightSegs + 1) * (radialSegs + 1)
 	nIndex = radialSegs * heightSegs * 6
 	if top {
@@ -123,8 +146,8 @@ func CylinderSectorN(radialSegs, heightSegs int, top, bottom bool) (numVertex, n
 // number of radial segments, number of height segments, and presence of a bottom cap.
 // Height is along the Y axis.
 // pos is an arbitrary offset (for composing shapes).
-func SetCone(vertex, normal, texcoord math32.ArrayF32, index math32.ArrayU32, vtxOff, idxOff int, height, radius float32, radialSegs, heightSegs int, bottom bool, pos math32.Vector3) math32.Box3 {
-	return SetCylinderSector(vertex, normal, texcoord, index, vtxOff, idxOff, height, 0, radius, radialSegs, heightSegs, 0, 360, false, bottom, pos)
+func SetCone(vertex, normal, texcoord math32.ArrayF32, index math32.ArrayU32, vtxOff, idxOff int, height, radius float32, radialSegs, heightSegs int, bottom BottomCap, pos math32.Vector3) math32.Box3 {
+	return SetCylinderSector(vertex, normal, texcoord, index, vtxOff, idxOff, height, 0, radius, radialSegs, heightSegs, 0, 360, NoTop, bottom, pos)
 }
 
 // SetCylinderSector creates a generalized cylinder (truncated cone) sector
@@ -135,7 +158,7 @@ func SetCone(vertex, normal, texcoord math32.ArrayF32, index math32.ArrayU32, vt
 // sector size angle in degrees, and presence of a top and/or bottom cap.
 // Height is along the Y axis.
 // pos is an arbitrary offset (for composing shapes).
-func SetCylinderSector(vertex, normal, texcoord math32.ArrayF32, index math32.ArrayU32, vtxOff, idxOff int, height, topRad, botRad float32, radialSegs, heightSegs int, angStart, angLen float32, top, bottom bool, pos math32.Vector3) math32.Box3 {
+func SetCylinderSector(vertex, normal, texcoord math32.ArrayF32, index math32.ArrayU32, vtxOff, idxOff int, height, topRad, botRad float32, radialSegs, heightSegs int, angStart, angLen float32, top TopCap, bottom BottomCap, pos math32.Vector3) math32.Box3 {
 	hHt := height / 2
 	vtxs := [][]int{}
 	uvsOrig := [][]math32.Vector2{}

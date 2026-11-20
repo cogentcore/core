@@ -21,13 +21,13 @@ func Flatten(p ppath.Path, tolerance float32) ppath.Path {
 	cube := func(p0, p1, p2, p3 math32.Vector2) ppath.Path {
 		return FlattenCubicBezier(p0, p1, p2, p3, 0.0, tolerance)
 	}
-	arc := func(start math32.Vector2, rx, ry, phi float32, large, sweep bool, end math32.Vector2) ppath.Path {
+	arc := func(start math32.Vector2, rx, ry, phi float32, large ppath.ArcSize, sweep ppath.ArcSweep, end math32.Vector2) ppath.Path {
 		return FlattenEllipticArc(start, rx, ry, phi, large, sweep, end, tolerance)
 	}
 	return p.Replace(nil, quad, cube, arc)
 }
 
-func FlattenEllipticArc(start math32.Vector2, rx, ry, phi float32, large, sweep bool, end math32.Vector2, tolerance float32) ppath.Path {
+func FlattenEllipticArc(start math32.Vector2, rx, ry, phi float32, large ppath.ArcSize, sweep ppath.ArcSweep, end math32.Vector2, tolerance float32) ppath.Path {
 	if ppath.Equal(rx, ry) {
 		// circle
 		r := rx

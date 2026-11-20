@@ -29,7 +29,7 @@ type Matrix struct {
 // coordinates (translation, scaling), txsz is the size of the texture to draw,
 // sr is the source region (set to tex.Format.Bounds() for all)
 // flipY inverts the Y axis of the source image.
-func Config(destSz image.Point, xform math32.Matrix3, txsz image.Point, sr image.Rectangle, flipY bool) *Matrix {
+func Config(destSz image.Point, xform math32.Matrix3, txsz image.Point, sr image.Rectangle, flipY math32.YFlip) *Matrix {
 	var tmat Matrix
 
 	sr = sr.Intersect(image.Rectangle{Max: txsz})

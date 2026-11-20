@@ -10,6 +10,7 @@ package rasterx
 
 import (
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint/ppath"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -178,7 +179,7 @@ func EllipsePointAt(a, b, sinTheta, cosTheta, eta, cx, cy float32) (px, py float
 // to reduce the problem to finding the center of a circle that includes the origin
 // and an arbitrary point. The center of the circle is then transformed
 // back to the original coordinates and returned.
-func FindEllipseCenter(ra, rb *float32, rotX, startX, startY, endX, endY float32, sweep, smallArc bool) (cx, cy float32) {
+func FindEllipseCenter(ra, rb *float32, rotX, startX, startY, endX, endY float32, sweep ppath.ArcSweep, large ppath.ArcSize) (cx, cy float32) {
 	cos, sin := math32.Cos(rotX), math32.Sin(rotX)
 
 	// Move origin to start point
@@ -207,7 +208,7 @@ func FindEllipseCenter(ra, rb *float32, rotX, startX, startY, endX, endY float32
 		hr = math32.Sqrt(*rb**rb-midlenSq) / math32.Sqrt(midlenSq)
 	}
 	// Notice that if hr is zero, both answers are the same.
-	if (sweep && smallArc) || (!sweep && !smallArc) {
+	if (sweep == ppath.Clockwise) == (large == ppath.SmallArc) {
 		cx = midX + midY*hr
 		cy = midY - midX*hr
 	} else {

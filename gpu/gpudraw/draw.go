@@ -44,7 +44,7 @@ func (dw *Drawer) Copy(dp image.Point, src image.Image, sr image.Rectangle, op d
 		return
 	}
 	dw.UseGoImage(src, unchanged)
-	dw.CopyUsed(dp, sr, op, false)
+	dw.CopyUsed(dp, sr, op, math32.NoFlipY)
 }
 
 // Scale copies the given Go source image to the render target,
@@ -66,7 +66,7 @@ func (dw *Drawer) Copy(dp image.Point, src image.Image, sr image.Rectangle, op d
 //     from the last time it was used -- saves re-uploading to gpu.
 func (dw *Drawer) Scale(dr image.Rectangle, src image.Image, sr image.Rectangle, rotateDeg float32, op draw.Op, unchanged bool) {
 	dw.UseGoImage(src, unchanged)
-	dw.ScaleUsed(dr, sr, rotateDeg, op, false)
+	dw.ScaleUsed(dr, sr, rotateDeg, op, math32.NoFlipY)
 }
 
 // Transform copies the given Go source image to the render target,
@@ -81,5 +81,5 @@ func (dw *Drawer) Scale(dr image.Rectangle, src image.Image, sr image.Rectangle,
 //     from the last time it was used -- saves re-uploading to gpu.
 func (dw *Drawer) Transform(xform math32.Matrix3, src image.Image, sr image.Rectangle, op draw.Op, unchanged bool) {
 	dw.UseGoImage(src, unchanged)
-	dw.TransformUsed(xform, sr, op, false)
+	dw.TransformUsed(xform, sr, op, math32.NoFlipY)
 }

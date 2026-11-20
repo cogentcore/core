@@ -629,7 +629,7 @@ func (tb *Table) SortSlice() {
 	if tb.SortFunc != nil && tb.SortFunc(field.Name, tb.sortDescending) {
 		return
 	}
-	reflectx.StructSliceSort(tb.Slice, field.Index, !tb.sortDescending)
+	reflectx.StructSliceSort(tb.Slice, field.Index, reflectx.SortOrder(!tb.sortDescending))
 }
 
 // SortColumn sorts the slice for the given field index.

@@ -299,10 +299,22 @@ func (cl *Client) sshClient() (*ssh.Client, error) {
 	return cl.Client, nil
 }
 
+// SessionMode specifies whether an ssh session is interactive, with a
+// terminal: [Interactive] or [NonInteractive].
+type SessionMode bool
+
+const (
+	// Interactive requests a terminal for the session.
+	Interactive SessionMode = true
+
+	// NonInteractive runs the session without a terminal.
+	NonInteractive SessionMode = false
+)
+
 // NewSession creates a new session, sets its input / outputs based on
 // config.  Only works if Client already connected, and connects again
 // if the connection was lost (see [Client.CheckConnection]).
-func (cl *Client) NewSession(interact bool) (*ssh.Session, error) {
+func (cl *Client) NewSession(interact SessionMode) (*ssh.Session, error) {
 	if interact {
 		return cl.newSession(nil)
 	}
@@ -324,7 +336,7 @@ func (cl *Client) NewSession(interact bool) (*ssh.Session, error) {
 // input is not nil, the terminal on the host has its size and echoes the
 // input, which it gets from it while the command runs (see [forwardInput]).
 func (cl *Client) newSession(tty *os.File) (*ssh.Session, error) {
-	ses, err := cl.NewSession(false)
+	ses, err := cl.NewSession(NonInteractive)
 	if err != nil {
 		return nil, err
 	}
@@ -367,7 +379,7 @@ func (cl *Client) WaitSession(name string, ses *ssh.Session) error {
 // GetHomeDir runs "pwd" on the host to get the users home dir,
 // called right after connecting.
 func (cl *Client) GetHomeDir() error {
-	ses, err := cl.NewSession(false)
+	ses, err := cl.NewSession(NonInteractive)
 	if err != nil {
 		return err
 	}

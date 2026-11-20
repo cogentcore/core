@@ -36,7 +36,7 @@ var envName = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*$`)
 // that the shell is interactive, such as PATH (see [Config.LoginEnv]),
 // which are then set for each command, as [Client.exports].
 func (cl *Client) getLoginEnv() {
-	ses, err := cl.NewSession(false)
+	ses, err := cl.NewSession(NonInteractive)
 	if err != nil {
 		return
 	}

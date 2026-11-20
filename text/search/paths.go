@@ -57,7 +57,7 @@ func LangCheck(fi *fileinfo.FileInfo, langs []fileinfo.Known) bool {
 //   - useCase is whether the search is case-sensitive ([textpos.UseCase]).
 //   - regExp uses the go regexp syntax for the find string.
 //   - exclude is a list of filenames to exclude: can use standard Glob patterns.
-func Paths(paths []string, find string, useCase textpos.CaseSensitive, regExp bool, langs []fileinfo.Known, exclude ...string) ([]Results, error) {
+func Paths(paths []string, find string, useCase textpos.CaseSensitive, regExp textpos.MatchSyntax, langs []fileinfo.Known, exclude ...string) ([]Results, error) {
 	fsz := len(find)
 	if fsz == 0 {
 		return nil, nil

@@ -16,52 +16,52 @@ import (
 
 func TestSearchPaths(t *testing.T) {
 	core.SystemSettings.BigFileSize = 10000000
-	res, err := Paths([]string{"./"}, "package search", textpos.UseCase, false, []fileinfo.Known{fileinfo.Go})
+	res, err := Paths([]string{"./"}, "package search", textpos.UseCase, textpos.Literal, []fileinfo.Known{fileinfo.Go})
 	assert.NoError(t, err)
 	// for _, r := range res {
 	// 	fmt.Println(r.String())
 	// }
 	assert.Equal(t, 4, len(res))
 
-	res, err = Paths([]string{"./"}, "package search", textpos.UseCase, false, []fileinfo.Known{fileinfo.C})
+	res, err = Paths([]string{"./"}, "package search", textpos.UseCase, textpos.Literal, []fileinfo.Known{fileinfo.C})
 	assert.NoError(t, err)
 	assert.Equal(t, 0, len(res))
 
-	res, err = Paths([]string{"./"}, "package .*", textpos.UseCase, true, nil)
+	res, err = Paths([]string{"./"}, "package .*", textpos.UseCase, textpos.RegExp, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, 4, len(res))
 
-	res, err = Paths([]string{"./"}, "package search", textpos.UseCase, false, []fileinfo.Known{fileinfo.Go}, "*.go")
+	res, err = Paths([]string{"./"}, "package search", textpos.UseCase, textpos.Literal, []fileinfo.Known{fileinfo.Go}, "*.go")
 	assert.NoError(t, err)
 	assert.Equal(t, 0, len(res))
 
-	res, err = Paths([]string{"./"}, "package search", textpos.UseCase, false, []fileinfo.Known{fileinfo.Go}, "all.go")
+	res, err = Paths([]string{"./"}, "package search", textpos.UseCase, textpos.Literal, []fileinfo.Known{fileinfo.Go}, "all.go")
 	assert.NoError(t, err)
 	assert.Equal(t, 3, len(res))
 }
 
 func TestSearchAll(t *testing.T) {
 	core.SystemSettings.BigFileSize = 10000000
-	res, err := All("./", "package search", textpos.UseCase, false, []fileinfo.Known{fileinfo.Go})
+	res, err := All("./", "package search", textpos.UseCase, textpos.Literal, []fileinfo.Known{fileinfo.Go})
 	assert.NoError(t, err)
 	// for _, r := range res {
 	// 	fmt.Println(r.String())
 	// }
 	assert.Equal(t, 4, len(res))
 
-	res, err = All("./", "package search", textpos.UseCase, false, []fileinfo.Known{fileinfo.C})
+	res, err = All("./", "package search", textpos.UseCase, textpos.Literal, []fileinfo.Known{fileinfo.C})
 	assert.NoError(t, err)
 	assert.Equal(t, 0, len(res))
 
-	res, err = All("./", "package .*", textpos.UseCase, true, nil)
+	res, err = All("./", "package .*", textpos.UseCase, textpos.RegExp, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, 4, len(res))
 
-	res, err = All("./", "package search", textpos.UseCase, false, []fileinfo.Known{fileinfo.Go}, "*.go")
+	res, err = All("./", "package search", textpos.UseCase, textpos.Literal, []fileinfo.Known{fileinfo.Go}, "*.go")
 	assert.NoError(t, err)
 	assert.Equal(t, 0, len(res))
 
-	res, err = All("./", "package search", textpos.UseCase, false, []fileinfo.Known{fileinfo.Go}, "all.go")
+	res, err = All("./", "package search", textpos.UseCase, textpos.Literal, []fileinfo.Known{fileinfo.Go}, "all.go")
 	assert.NoError(t, err)
 	assert.Equal(t, 3, len(res))
 }
@@ -82,10 +82,10 @@ func TestSearchCase(t *testing.T) {
 	assert.Equal(t, 3, n)
 
 	// only this file has the mixed case, while all of them have the lower case
-	res, err := Paths([]string{"./"}, "PaCkAgE sEaRcH", textpos.UseCase, false, []fileinfo.Known{fileinfo.Go})
+	res, err := Paths([]string{"./"}, "PaCkAgE sEaRcH", textpos.UseCase, textpos.Literal, []fileinfo.Known{fileinfo.Go})
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(res))
-	res, err = Paths([]string{"./"}, "PaCkAgE sEaRcH", textpos.IgnoreCase, false, []fileinfo.Known{fileinfo.Go})
+	res, err = Paths([]string{"./"}, "PaCkAgE sEaRcH", textpos.IgnoreCase, textpos.Literal, []fileinfo.Known{fileinfo.Go})
 	assert.NoError(t, err)
 	assert.Equal(t, 4, len(res))
 }

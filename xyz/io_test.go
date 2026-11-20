@@ -171,7 +171,7 @@ func TestShapeDefaults(t *testing.T) {
 	sp := NewSphere(sc, "sphere", 3, 8)
 	sp.Defaults()
 	assert.Equal(t, float32(1), sp.Radius)
-	cy := NewCylinder(sc, "cyl", 2, 3, 8, 1, true, true)
+	cy := NewCylinder(sc, "cyl", 2, 3, 8, 1, WithTop, WithBottom)
 	cy.Defaults()
 	assert.Equal(t, float32(1), cy.Height)
 	ca := NewCapsule(sc, "cap", 2, 3, 8, 1)

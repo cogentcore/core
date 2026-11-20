@@ -305,6 +305,10 @@ func (t *Cylinder) SetAngStart(v float32) *Cylinder { t.AngStart = v; return t }
 // total angle to generate in degrees (max 360)
 func (t *Cylinder) SetAngLen(v float32) *Cylinder { t.AngLen = v; return t }
 
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.TopCap", IDName: "top-cap", Doc: "TopCap specifies whether a cylinder has a top cap: [WithTop] or [NoTop]."})
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.BottomCap", IDName: "bottom-cap", Doc: "BottomCap specifies whether a cylinder or cone has a bottom cap:\n[WithBottom] or [NoBottom]."})
+
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Capsule", IDName: "capsule", Doc: "Capsule is a generalized capsule shape: a cylinder with hemisphere end caps.\nSupports different radii on each end.\nHeight is along the Y axis -- total height is Height + TopRad + BotRad.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Height", Doc: "height of the cylinder portion"}, {Name: "TopRad", Doc: "radius of the top -- set to 0 for a cone"}, {Name: "BotRad", Doc: "radius of the bottom"}, {Name: "RadialSegs", Doc: "number of radial segments (32 is a reasonable default for full circle)"}, {Name: "HeightSegs", Doc: "number of height segments"}, {Name: "CapSegs", Doc: "number of segments in the hemisphere cap ends (16 is a reasonable default)"}, {Name: "AngStart", Doc: "starting angle in degrees, relative to -1,0,0 left side starting point"}, {Name: "AngLen", Doc: "total angle to generate in degrees (max 360)"}}})
 
 // SetHeight sets the [Capsule.Height]:

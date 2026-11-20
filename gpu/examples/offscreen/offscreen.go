@@ -169,7 +169,7 @@ func main() {
 
 		drw.Start()
 		drw.UseTexture(rt.Frames[0])
-		drw.ScaleUsed(image.Rectangle{}, image.Rectangle{}, 0, draw.Src, false)
+		drw.ScaleUsed(image.Rectangle{}, image.Rectangle{}, 0, draw.Src, math32.NoFlipY)
 		drw.End()
 
 		// fmt.Printf("present %v\n\n", time.Since(rt))
