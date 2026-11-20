@@ -260,6 +260,11 @@ func (sc *Scene) standardContextMenu(m *Scene, pos image.Point) { //types:add
 	NewButton(m).SetText("Menu search").SetIcon(icons.Search).SetKey(keymap.Menu).SetTooltip(msdesc).OnClick(func(e events.Event) {
 		sc.MenuSearchDialog("Menu search", msdesc)
 	})
+	if AppHelp != nil {
+		NewButton(m).SetText("Help").SetIcon(icons.Help).SetTooltip("The documentation of " + TheApp.Name()).OnClick(func(e events.Event) {
+			AppHelp(sc)
+		})
+	}
 	NewButton(m).SetText("About").SetIcon(icons.Info).OnClick(func(e events.Event) {
 		d := NewBody(TheApp.Name())
 		d.Styler(func(s *styles.Style) {

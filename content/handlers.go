@@ -408,6 +408,16 @@ func (ct *Content) parseURL(url string) (pgURL string, pg *bcontent.Page, headin
 	return
 }
 
+// isPageURL returns whether the given URL, with an optional #heading,
+// is the URL of a page, which has slashes in it for a page in a mount
+// of a [MountFS], as distinct from the URL of a resource file.
+func (ct *Content) isPageURL(url string) bool {
+	url = strings.ReplaceAll(url, "/#", "#")
+	pgURL, _, _ := strings.Cut(url, "#")
+	_, ok := ct.pagesByURL[pgURL]
+	return ok
+}
+
 // open opens the page with the given URL and updates the display.
 // It optionally adds the page to the history.
 func (ct *Content) open(url string, history bool) {
@@ -421,7 +431,7 @@ func (ct *Content) open(url string, history bool) {
 		return
 	}
 	sli := strings.Index(url, "/")
-	if sli > 0 && len(url) > sli+1 && url[sli+1] != '#' {
+	if sli > 0 && len(url) > sli+1 && url[sli+1] != '#' && !ct.isPageURL(url) {
 		fb, err := fs.ReadFile(ct.Source, url)
 		if err != nil {
 			core.MessageSnackbar(ct, "Resource at: "+url+" not found")

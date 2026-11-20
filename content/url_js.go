@@ -36,6 +36,9 @@ func (ct *Content) getPrintURL() string {
 // getWebURL returns the current relative web URL that should be passed to [Content.Open]
 // on startup and in [Content.handleWebPopState].
 func (ct *Content) getWebURL() string {
+	if ct.noWebURL {
+		return ""
+	}
 	if firstContent == nil {
 		firstContent = ct
 	}
@@ -68,6 +71,9 @@ func (ct *Content) saveWebURL(lc *Location) {
 // pageURL returns the full URL for the given page, with the heading
 // if non-empty.
 func (ct *Content) pageURL(pg *bcontent.Page, heading string) (current, nw *url.URL, err error) {
+	if ct.noWebURL {
+		return
+	}
 	if firstContent == nil {
 		firstContent = ct
 	}
@@ -93,6 +99,9 @@ func (ct *Content) handleWebPopState() {
 		// The page is opened outside of the event callback, which must not
 		// block (opening a page can wait on files), with the render lock, as
 		// in the handling of other events.
+		if ct.noWebURL {
+			return nil
+		}
 		go func() {
 			ct.AsyncLock()
 			defer ct.AsyncUnlock()
