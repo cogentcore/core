@@ -34,14 +34,14 @@ func TestWideWidgets(t *testing.T) {
 	})
 	ct := NewContent(b)
 	var sim *core.Frame
-	ct.Context.ElementHandlers["wide-sim"] = func(ctx *htmlcore.Context) bool {
-		sim = core.NewFrame(ctx.BlockParent)
+	ct.Context.AddElementHandler("wide-sim", func(ctx *htmlcore.Context) bool {
+		sim = core.NewFrame(ctx.BlockParent())
 		sim.Styler(func(s *styles.Style) {
 			s.Grow.Set(1, 0)
 			s.Min.Y.Dp(100)
 		})
 		return true
-	}
+	})
 	ct.SetSource(src)
 	core.AssertRender(t, b, "wide-widgets", func() {
 		ct.AsyncLock()

@@ -194,24 +194,24 @@ func (ct *Content) Init() {
 	// constrain PDF render, but code, images, and the widgets of element
 	// handlers (which do not get the styles), such as simulations, can have
 	// the whole width of the page.
-	ct.Context.Style = fmt.Sprintf("body { margin: 0; } %s { max-width: %din; }", textBlocks, maxTextWidth)
-	ct.Context.DelayedImageLoad = false // not useful for content
+	ct.Context.SetStyle(fmt.Sprintf("body { margin: 0; } %s { max-width: %din; }", textBlocks, maxTextWidth))
+	ct.Context.SetDelayedImageLoad(false) // not useful for content
 	// The source does not change until SetSource, which resets the cache.
-	ct.Context.ImageCache = htmlcore.NewImageCache(ImageCacheBytes)
-	ct.Context.OpenURL = func(url string, e events.Event) {
+	ct.Context.SetImageCache(htmlcore.NewImageCache(ImageCacheBytes))
+	ct.Context.SetOpenURL(func(url string, e events.Event) {
 		ct.OpenEvent(url, e)
-	}
-	ct.Context.GetURL = func(url string) (*http.Response, error) {
+	})
+	ct.Context.SetGetURL(func(url string) (*http.Response, error) {
 		return htmlcore.GetURLFromFS(ct.Source, url)
-	}
+	})
 	ct.Context.AddWikilinkHandler(ct.citeWikilink)
 	ct.Context.AddWikilinkHandler(ct.mainWikilink)
-	ct.Context.ElementHandlers["embed-page"] = func(ctx *htmlcore.Context) bool {
+	ct.Context.AddElementHandler("embed-page", func(ctx *htmlcore.Context) bool {
 		errors.Log(ct.embedPage(ctx))
 		return true
-	}
-	ct.Context.ElementHandlers["pre"] = ct.htmlPreHandler
-	ct.Context.AttributeHandlers["id"] = ct.htmlIDAttributeHandler
+	})
+	ct.Context.AddElementHandler("pre", ct.htmlPreHandler)
+	ct.Context.AddAttributeHandler("id", ct.htmlIDAttributeHandler)
 	ct.Context.AddWidgetHandler(ct.widgetHandler)
 
 	ct.Maker(func(p *tree.Plan) {
@@ -406,8 +406,8 @@ var Files fs.FS
 func (ct *Content) SetSource(source fs.FS) *Content {
 	ct.Source = source
 	Files = source
-	if ct.Context.ImageCache != nil {
-		ct.Context.ImageCache.Reset()
+	if ic := ct.Context.ImageCache(); ic != nil {
+		ic.Reset()
 	}
 	ct.pages = []*bcontent.Page{}
 	ct.pagesByName = map[string]*bcontent.Page{}
@@ -572,14 +572,14 @@ func (ct *Content) loadPage(w *core.Frame) error {
 	ct.loads++
 	staged := stagePages && core.TheApp.Platform() == system.Web && ct.current.Heading == "" && !ct.inPDFRender
 	if staged {
-		ct.Context.StageSize = ct.stageSize()
+		ct.Context.SetStageSize(ct.stageSize())
 		ct.leftScroll = ct.leftFrame.Geom.Scroll.Y
 	}
 	// The relative URLs of the resources of a page in a mount of a MountFS
 	// are relative to the page.
-	ct.Context.PageURL = ct.pageBase(ct.current.Page)
+	ct.Context.SetPageURL(ct.pageBase(ct.current.Page))
 	err = htmlcore.ReadMD(ct.Context, w, b)
-	ct.Context.StageSize = 0
+	ct.Context.SetStageSize(0)
 	if err != nil {
 		return err
 	}
@@ -881,7 +881,7 @@ func (ct *Content) updateScene() {
 // html element. A title attribute may also be specified to override the
 // heading text.
 func (ct *Content) embedPage(ctx *htmlcore.Context) error {
-	src := htmlcore.GetAttr(ctx.Node, "src")
+	src := htmlcore.GetAttr(ctx.Node(), "src")
 	if src == "" {
 		return fmt.Errorf("missing src attribute in <embed-page>")
 	}
@@ -889,7 +889,7 @@ func (ct *Content) embedPage(ctx *htmlcore.Context) error {
 	if pg == nil {
 		return fmt.Errorf("page %q not found in <embed-page>", src)
 	}
-	title := htmlcore.GetAttr(ctx.Node, "title")
+	title := htmlcore.GetAttr(ctx.Node(), "title")
 	if title == "" {
 		title = pg.Name
 	}
@@ -900,10 +900,10 @@ func (ct *Content) embedPage(ctx *htmlcore.Context) error {
 	lead, _, _ := bytes.Cut(b, []byte("\n#"))
 	heading := fmt.Sprintf("## %s\n\n*Main page: [[%s]]*\n\n", title, pg.Name)
 	res := append([]byte(heading), lead...)
-	base := ctx.PageURL
-	ctx.PageURL = ct.pageBase(pg)
-	defer func() { ctx.PageURL = base }()
-	return htmlcore.ReadMD(ctx, ctx.BlockParent, res)
+	base := ctx.PageURL()
+	ctx.SetPageURL(ct.pageBase(pg))
+	defer ctx.SetPageURL(base)
+	return htmlcore.ReadMD(ctx, ctx.BlockParent(), res)
 }
 
 // setStageTitle sets the title of the stage based on the current page URL,

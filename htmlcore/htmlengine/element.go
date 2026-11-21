@@ -1,0 +1,486 @@
+// Copyright (c) 2026, Cogent Core. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package htmlengine
+
+import (
+	"slices"
+	"strconv"
+	"strings"
+
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/htmlcore/css"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
+	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/tree"
+	"golang.org/x/net/html"
+)
+
+// The widgets of an element are made by the builder of its kind, in
+// handleElement: the document and metadata elements, blocks of text,
+// list items (list.go), form controls (forms.go), replaced elements
+// (images and svg, image.go), tables (table.go), inline elements of text
+// (inline.go), and boxes for the other elements by their display. The
+// children of an element are then read into the widget that its builder
+// sets as [Context.NewParent], and the formatting contexts that arrange
+// the widgets of the children (grid, multi-column, details) do so after
+// they are read (see [Context.arrange]).
+
+// documentTags are the elements of the document and its metadata, which
+// are handled whatever their display (as head, which is not displayed).
+var documentTags = map[string]bool{"style": true, "link": true, "script": true, "title": true,
+	"meta": true, "head": true, "html": true}
+
+// boxTags are the elements that have a box even with a display of
+// contents (as replaced elements and form controls).
+var boxTags = map[string]bool{"html": true, "head": true, "body": true, "img": true, "input": true,
+	"button": true, "select": true, "textarea": true, "svg": true, "video": true, "audio": true, "iframe": true,
+	"canvas": true, "br": true}
+
+// textBlockTags are the elements that are blocks of text, with
+// a frame for their text and any other content.
+var textBlockTags = map[string]bool{"pre": true, "p": true, "h1": true, "h2": true, "h3": true,
+	"h4": true, "h5": true, "h6": true, "hr": true, "dt": true, "dd": true, "figcaption": true,
+	"caption": true, "summary": true, "legend": true}
+
+// clippedRows returns whether the given rows of a table (a row group or
+// row) are positioned out of the table and clipped to nothing, as visually
+// hidden headers for screen readers (as the thead.sr-only of the diffs of
+// GitHub), which are then not in it, as in browsers, rather than a row of
+// its grid (of which only the clip would hide the text).
+func (c *Context) clippedRows(n *html.Node) bool {
+	pos := c.declaration(n, "position")
+	if pos != "absolute" && pos != "fixed" {
+		return false
+	}
+	return css.ZeroAreaClip("clip", strings.TrimSpace(c.declaration(n, "clip"))) ||
+		css.ZeroAreaClip("clip-path", strings.TrimSpace(c.declaration(n, "clip-path")))
+}
+
+// handleElement makes the widgets of the current node with the handler in
+// [Context.ElementHandlers] for its tag, if any, or else with the builder
+// of its kind.
+func handleElement(ctx *Context) {
+	tag := ctx.Node.Data
+	if h, ok := ctx.ElementHandlers[tag]; ok && h(ctx) {
+		return
+	}
+	if ctx.iconNodes[ctx.Node] {
+		return // the icon of a text field (see [Context.inputIcons])
+	}
+	display := ctx.displayOf(ctx.Node)
+	if display == "none" && !documentTags[tag] {
+		return // not rendered, and neither are its children
+	}
+	if (tag == "thead" || tag == "tbody" || tag == "tfoot" || tag == "tr") && ctx.clippedRows(ctx.Node) {
+		return // (see clippedRows)
+	}
+	if display == "contents" && !boxTags[tag] {
+		// it has no box, and its children are in its parent
+		ctx.NewParent = ctx.BlockParent
+		ctx.inlineParent = nil
+		return
+	}
+
+	var newWidget core.Widget
+	switch tag {
+	case "html", "head":
+		ctx.NewParent = ctx.BlockParent
+	case "script", "link", "style":
+		// nothing is rendered, and the style sheets are added first
+	case "title":
+		// it is not rendered, but it is the title of the page (the first one)
+		if ctx.Title == "" {
+			ctx.Title = strings.Join(strings.Fields(ExtractText(ctx)), " ")
+		}
+	case "meta":
+		if strings.EqualFold(GetAttr(ctx.Node, "http-equiv"), "refresh") && ctx.RefreshURL == "" {
+			// content is "delay" or "delay;url=URL"
+			_, u, _ := strings.Cut(GetAttr(ctx.Node, "content"), ";")
+			u = strings.TrimSpace(u)
+			if len(u) > 4 && strings.EqualFold(u[:4], "url=") {
+				ctx.RefreshURL = strings.Trim(strings.TrimSpace(u[4:]), `'"`)
+			}
+		}
+	case "li":
+		// as a list item when its display is list-item (the default),
+		// also when it is blockified (as in a flex container)
+		if d := ctx.declaration(ctx.Node, "display"); d == "" || d == "list-item" {
+			handleListItem(ctx)
+		} else { // as a box of its display (as inline-flex), without a marker
+			newWidget = handleBox(ctx, tag, display)
+		}
+	case "select":
+		handleSelect(ctx)
+	case "button":
+		handleButton(ctx)
+	case "input":
+		if typ := strings.ToLower(GetAttr(ctx.Node, "type")); typ == "submit" || typ == "button" || typ == "reset" {
+			handleInputButton(ctx, typ)
+		} else {
+			newWidget = handleInput(ctx)
+		}
+	case "textarea":
+		// a text field, which wraps its text on lines (an editor is only
+		// for monospaced text)
+		tf := New[core.TextField](ctx).SetText(ExtractText(ctx)).SetType(core.TextFieldOutlined)
+		cssFieldBorder(tf)
+		fieldWidth(ctx.Node, tf)
+		tf.SetPlaceholder(GetAttr(ctx.Node, "placeholder"))
+		newWidget = tf
+	case "svg":
+		handleSVG(ctx)
+	case "img":
+		newWidget = handleImage(ctx, tag)
+	case "iframe":
+		newWidget = handleIframe(ctx)
+	case "video":
+		newWidget = handleVideo(ctx)
+	case "audio": // (with controls, as it is not displayed without them)
+		newWidget = handleAudio(ctx)
+	case "table":
+		newWidget = handleTable(ctx)
+	case "th", "td":
+		newWidget = handleCell(ctx, tag)
+	case "thead", "tbody", "tfoot", "tr":
+		ctx.NewParent = ctx.tableFor(ctx.Node)
+	case "colgroup", "col":
+		// the columns of a table, which have no boxes of their own (and
+		// the white space in a colgroup is not a cell of the table)
+	default:
+		switch {
+		case textBlockTags[tag]:
+			handleTextBlock(ctx, tag)
+		case slices.Contains(textTags, tag): // not in a run of inline content
+			handleInlineElement(ctx, tag, display)
+		default:
+			newWidget = handleBox(ctx, tag, display)
+		}
+	}
+	if newWidget != nil {
+		ctx.handleWidget(ctx.Node, newWidget)
+	}
+}
+
+// handleTextBlock handles an element that is a block of text (as p).
+func handleTextBlock(ctx *Context, tag string) {
+	w := New[core.Frame](ctx)
+	ctx.NewParent = w
+	ctx.handleWidget(ctx.Node, w)
+	if p := ctx.Node.Parent; tag == "caption" && p != nil && p.Data == "table" {
+		// the caption is above the cells, across all of the columns
+		span := ctx.tableColumns(p)
+		w.FinalStyler(func(s *styles.Style) { s.ColSpan = span })
+	}
+	if p := ctx.Node.Parent; p != nil && p.Data != "table" && ctx.displayOf(ctx.Node) == "table-caption" {
+		// The caption of an element displayed as a table wraps in the
+		// width of the table without widening it, which for a figure is
+		// that of its image when it has a width (as for a thumbnail).
+		if iw := tableImageWidth(p); iw > 0 {
+			w.FinalStyler(func(s *styles.Style) { s.Max.X = units.Dp(iw); s.BoxSizing = styles.BoxBorderBox })
+		}
+	}
+}
+
+// handleInlineElement handles an inline element of text (as a or span)
+// that is not in a run of inline content, with the given display.
+func handleInlineElement(ctx *Context, tag, display string) {
+	switch display {
+	case "none":
+		return
+	case "", "inline":
+		if !ctx.isTextElement(ctx.Node) {
+			// an inline element with widgets in it, which are in the run
+			// of inline content that it is in
+			ctx.NewParent = ctx.Parent()
+			return
+		}
+		ctx.handleWidget(ctx.Node, handleTextTag(ctx))
+		return
+	}
+	w := New[core.Frame](ctx)
+	ctx.NewParent = w
+	ctx.handleWidget(ctx.Node, w)
+	if href := GetAttr(ctx.Node, "href"); tag == "a" && href != "" {
+		ctx.linkFrame(w, href)
+	}
+}
+
+// handleBox handles the other elements by their display: a block (or
+// inline block) has a frame for its children, and the children of an
+// inline element are in the run of inline content that it is in.
+// It returns the new widget, if any.
+func handleBox(ctx *Context, tag, display string) core.Widget {
+	switch {
+	case display == "contents" && tag != "body":
+		// it has no box, and its children are in its parent
+		ctx.NewParent = ctx.BlockParent
+		ctx.inlineParent = nil
+	case display == "block" && ctx.flattensBlock(ctx.Node):
+		// its children are in its parent, as it has no box of its own
+		ctx.NewParent = ctx.BlockParent
+		ctx.inlineParent = nil
+	case isBlockDisplay(display) || tag == "body" || strings.HasPrefix(display, "inline-"):
+		if container, inline := ctx.isContainer(ctx.Node); container {
+			w := New[containerFrame](ctx)
+			w.inline, w.ctx = inline, ctx
+			if ks, ok := ctx.keptContainers[ctx.Node]; ok {
+				w.size, w.prev = ks.size, ks.prev
+			}
+			if ctx.containers == nil {
+				ctx.containers = map[*html.Node]*containerFrame{}
+			}
+			ctx.containers[ctx.Node] = w
+			ctx.containersChanged()
+			ctx.NewParent = w
+			return w
+		}
+		w := New[core.Frame](ctx)
+		ctx.NewParent = w
+		return w
+	default:
+		ctx.NewParent = ctx.Parent()
+	}
+	return nil
+}
+
+// arrange arranges the widgets of the children of the given element in
+// the given frame of it, after they are read, for the formatting contexts
+// that place them other than in order: grid areas, multiple columns, and
+// the content of details.
+func (c *Context) arrange(n *html.Node, fr *core.Frame) {
+	switch c.displayOf(n) {
+	case "flex", "inline-flex", "grid", "inline-grid":
+		c.arrangeOrder(fr)
+	}
+	switch c.displayOf(n) {
+	case "flex", "inline-flex":
+		if strings.HasSuffix(c.flexDirection(n), "-reverse") {
+			// the items from the end (as the image of the lead story of
+			// theguardian.com, on the right of its text by row-reverse)
+			slices.Reverse(fr.Children)
+		}
+	}
+	switch c.displayOf(n) {
+	case "grid", "inline-grid":
+		c.arrangeGrid(n, fr)
+	case "block", "list-item", "flow-root", "inline-block":
+		c.arrangeColumns(n, fr)
+	}
+	if n.Data == "details" {
+		c.arrangeDetails(n, fr)
+	}
+}
+
+// arrangeOrder puts the children of the given flex or grid container in
+// the order of their order property (stably: those of the same order are
+// in the order of the document), as in CSS (as the images of the stories
+// of npr.org, before their titles by an order of -1).
+func (c *Context) arrangeOrder(fr *core.Frame) {
+	orders := map[tree.Node]int{}
+	for _, k := range fr.Children {
+		kw, ok := k.(core.Widget)
+		if !ok {
+			continue
+		}
+		if kn := NodeOf(kw); kn != nil {
+			if o, err := strconv.Atoi(strings.TrimSpace(c.declaration(kn, "order"))); err == nil && o != 0 {
+				orders[k] = o
+			}
+		}
+	}
+	if len(orders) == 0 {
+		return
+	}
+	slices.SortStableFunc(fr.Children, func(a, b tree.Node) int { return orders[a] - orders[b] })
+}
+
+// flexDirection returns the flex-direction of the given element, of the
+// longhand or the flex-flow shorthand that is last in the cascade.
+func (c *Context) flexDirection(n *html.Node) string {
+	prop, v := c.lastDeclaration(n, "flex-direction", "flex-flow")
+	v = strings.ToLower(strings.TrimSpace(v))
+	if prop == "flex-flow" {
+		for f := range strings.FieldsSeq(v) {
+			if strings.HasPrefix(f, "row") || strings.HasPrefix(f, "column") {
+				return f
+			}
+		}
+		return ""
+	}
+	return v
+}
+
+// linkFrame makes the given frame of an a element open the given URL.
+func (c *Context) linkFrame(w *core.Frame, href string) {
+	if c.linkFrames == nil {
+		c.linkFrames = map[*html.Node]string{}
+	}
+	link := c.Node
+	c.linkFrames[link] = href
+	w.SetProperty("href", href)
+	w.SetTooltip(href)
+	w.Styler(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.Clickable)
+		s.Cursor = cursors.Pointer
+	})
+	w.OnClick(func(e events.Event) {
+		e.SetHandled()
+		c.openLink(link, href, e)
+	})
+}
+
+// handleInLink makes the given widget of the given node, if it is in a
+// link that is a frame (see linkFrame), open the link when clicked on, as
+// the frame does: the widgets in it that can be pressed, as its text,
+// otherwise get the clicks instead of the frame.
+func (c *Context) handleInLink(node *html.Node, w core.Widget) {
+	c.handleInButton(node, w)
+	if len(c.linkFrames) == 0 {
+		return
+	}
+	for n := node; n != nil; n = n.Parent {
+		href, ok := c.linkFrames[n]
+		if !ok {
+			continue
+		}
+		if n == node {
+			if frameOf(w) != nil {
+				return // the link frame itself
+			}
+		}
+		wb := w.AsWidget()
+		wb.Styler(func(s *styles.Style) { s.Cursor = cursors.Pointer })
+		link := n
+		wb.OnClick(func(e events.Event) {
+			if e.IsHandled() {
+				return
+			}
+			e.SetHandled()
+			c.openLink(link, href, e)
+		})
+		return
+	}
+}
+
+// flattensBlock returns whether the given block element, in the flow of
+// blocks of its parent, has no styles of its own (only its display), so
+// that its children can be read into its parent. Then the floats in it
+// are beside the blocks after it, as in CSS, where they are not limited
+// to the block that they are in (as they are in core). Such blocks are
+// common wrappers, as the section elements of Wikipedia.
+func (c *Context) flattensBlock(n *html.Node) bool {
+	switch n.Data {
+	case "body", "html", "form", "a", "button", "label", "details", "dialog", "fieldset":
+		return false // they have widgets with a function
+	}
+	p := n.Parent
+	if p == nil || p.Type != html.ElementNode || p.Data == "html" {
+		return false
+	}
+	switch c.displayOf(p) {
+	case "block", "list-item", "flow-root", "table-cell":
+	default:
+		return false // a flex, grid, or table item
+	}
+	if !c.unstyledBlock(n) {
+		return false
+	}
+	// Only the blocks among siblings that have floats in them are
+	// flattened, so that the floats are beside all of their content.
+	if c.floatSiblings == nil {
+		c.floatSiblings = map[*html.Node]bool{}
+	}
+	if c.flattened[n] { // flattened already
+		return true
+	}
+	has, ok := c.floatSiblings[p]
+	if !ok && c.flattened[p] {
+		has, ok = true, true // in a flattened block, as beside its floats
+	}
+	if !ok {
+		for k := p.FirstChild; k != nil && !has; k = k.NextSibling {
+			if k.Type == html.ElementNode && c.unstyledBlock(k) {
+				has = c.hasFloatChild(k)
+			}
+		}
+		c.floatSiblings[p] = has
+	}
+	if has {
+		if c.flattened == nil {
+			c.flattened = map[*html.Node]bool{}
+		}
+		c.flattened[n] = true
+	}
+	return has
+}
+
+// unstyledBlock returns whether the given element has no declarations
+// other than its display (and custom properties).
+func (c *Context) unstyledBlock(n *html.Node) bool {
+	for _, d := range c.declarations(n) {
+		switch d.Property {
+		case "display", "unicode-bidi", "will-change", "orphans", "widows", "user-select", "-webkit-user-select":
+		default:
+			if !strings.HasPrefix(d.Property, "--") && !noBoxProperty(d.Property) {
+				return false
+			}
+		}
+	}
+	return c.displayOf(n) == "block"
+}
+
+// noBoxProperty returns whether the given property does not change the box
+// of an element or what is drawn for it (as the animations and transitions
+// of the rule for reduced motion of Wikipedia, for all elements, so that
+// its sections were not flattened, and the next one was below the floats
+// of one).
+func noBoxProperty(prop string) bool {
+	for _, p := range []string{"animation", "transition", "scroll-", "page-break-", "break-"} {
+		if strings.HasPrefix(prop, p) {
+			return true
+		}
+	}
+	return false
+}
+
+// hasFloatChild returns whether the given element has a child that floats.
+func (c *Context) hasFloatChild(n *html.Node) bool {
+	for k := n.FirstChild; k != nil; k = k.NextSibling {
+		if k.Type != html.ElementNode {
+			continue
+		}
+		if f := c.declaration(k, "float"); f != "" && f != "none" && c.displayOf(k) != "none" {
+			return true
+		}
+	}
+	return false
+}
+
+// handleInButton makes the text of the given widget, if it is in a button
+// element (at the given node or in it), not selectable, as in browsers, so
+// that the button gets the presses and clicks on it (as the toggles of the
+// contents of Wikipedia, whose text is in elements in the button).
+func (c *Context) handleInButton(node *html.Node, w core.Widget) {
+	if _, isText := w.(*core.Text); !isText {
+		return
+	}
+	for n := node; n != nil; n = n.Parent {
+		if n.Type == html.ElementNode && n.Data == "button" {
+			buttonText(w)
+			return
+		}
+	}
+}
+
+// buttonText makes the given text of a button not selectable, so that the
+// button gets the presses and clicks on it.
+func buttonText(w core.Widget) {
+	w.AsWidget().Styler(func(s *styles.Style) {
+		s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable, abilities.TripleClickable, abilities.LongPressable, abilities.Slideable)
+	})
+}

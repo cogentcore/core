@@ -1,0 +1,473 @@
+// Copyright (c) 2026, Cogent Core. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package htmlengine
+
+import (
+	"fmt"
+	"strings"
+	"testing"
+
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/tree"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"golang.org/x/net/html"
+)
+
+// elementByID returns the element of the given id in the given document.
+func elementByID(doc *html.Node, id string) *html.Node {
+	var found *html.Node
+	var walk func(n *html.Node)
+	walk = func(n *html.Node) {
+		if found != nil {
+			return
+		}
+		if n.Type == html.ElementNode && GetAttr(n, "id") == id {
+			found = n
+			return
+		}
+		for k := n.FirstChild; k != nil; k = k.NextSibling {
+			walk(k)
+		}
+	}
+	walk(doc)
+	return found
+}
+
+// setAttr sets the given attribute of the given element.
+func setAttr(n *html.Node, key, val string) {
+	for i, a := range n.Attr {
+		if a.Key == key {
+			n.Attr[i].Val = val
+			return
+		}
+	}
+	n.Attr = append(n.Attr, html.Attribute{Key: key, Val: val})
+}
+
+// widgetStates returns the boxes and the styles that are rendered of the
+// widgets of the elements with ids in the given body, by id.
+func widgetStates(bd *core.Body) map[string]string {
+	m := map[string]string{}
+	bd.WalkDown(func(k tree.Node) bool {
+		if wb := core.AsWidget(k); wb != nil {
+			if id, ok := wb.Property("id").(string); ok {
+				s := &wb.Styles
+				m[id] = fmt.Sprintf("pos %v size %v color %v bg %v opacity %v", wb.Geom.Pos.Total, wb.Geom.Size.Actual.Total,
+					colors.AsHex(colors.ToUniform(s.Color)), colors.AsHex(colors.ToUniform(s.Background)), s.Opacity) + fmt.Sprintf(" translate %v rotate %v", s.Translate, s.Rotate)
+				if im, ok := k.(*core.Image); ok {
+					if im.Image != nil {
+						m[id] += fmt.Sprintf(" image %v", im.Image.Bounds())
+					} else {
+						m[id] += " no image"
+					}
+				}
+			}
+		}
+		return tree.Continue
+	})
+	return m
+}
+
+// testRestyle reads the given HTML, changes its document with change after
+// it is shown, restyles the elements that change returns, and tests that
+// that is done (if restyled) or not, and that the widgets are then as
+// those of the document read again.
+func testRestyle(t *testing.T, src string, restyled bool, change func(doc *html.Node) []*html.Node) {
+	t.Helper()
+	ctx := NewContext()
+	doc, err := ParseHTML(ctx, strings.NewReader(src))
+	require.NoError(t, err)
+	bd := core.NewBody()
+	require.NoError(t, ReadDocument(ctx, bd, doc))
+	var ok bool
+	var before, got, want map[string]string
+	core.RenderImage(bd, func() {
+		bd.AsyncLock()
+		before = widgetStates(bd)
+		ok = ctx.Restyle(change(doc))
+		bd.AsyncUnlock()
+	}, func() {
+		bd.AsyncLock()
+		got = widgetStates(bd)
+		bd.AsyncUnlock()
+	})
+	require.Equal(t, restyled, ok, "restyled")
+	if !ok {
+		return
+	}
+	fresh := core.NewBody()
+	require.NoError(t, ReadDocument(NewContext(), fresh, doc))
+	core.RenderImage(fresh, func() {}, core.Locked(fresh, func() { want = widgetStates(fresh) }))
+	assert.Equal(t, want, got)
+	assert.NotEqual(t, before, got, "the change shows")
+}
+
+// TestRestyle tests that changes of the styles of elements (by their
+// style and class attributes and their states) are made by styling their
+// widgets again (see [Context.Restyle]), as reading the page again would
+// make them, and that the changes that need it are not.
+func TestRestyle(t *testing.T) {
+	const page = `<html><head><style>
+.box { width: 100px; height: 20px; background: blue }
+.open .item { color: red; width: 60px }
+.open ~ .after { background: green; margin-left: 30px }
+.wide { width: 200px }
+.moved { transform: translateX(40px) }
+.gone { display: none }
+.wrap:has(.on) .target { width: 150px }
+.wrap2:has(.on2) { width: 170px }
+.hidden-modal { display: none }
+.icon.playing::before { content: "||" }
+.imagewrap.has-dims { height: 0; overflow: hidden; padding-bottom: 50%; position: relative }
+.imagewrap .pic { position: absolute; width: 100%; height: 100%; background: red }
+.marked::before { content: "x" }
+.v { width: var(--w, 10px); height: 10px; background: red }
+.wv { --w: 90px }
+</style></head><body><div style="width: 400px">
+<div id="a" class="box">a</div>
+<div id="menu" class="menu"><div id="item" class="item box">item</div></div>
+<div id="after" class="after box">after</div>
+<div class="wrap"><div id="target" class="target box">t</div><div id="trigger">x</div></div>
+<div id="wrap2" class="wrap2 box"><div><div id="trigger2">deep</div></div></div>
+<section class="hidden-modal"><div><div id="icon" class="icon">i</div></div></section>
+<div style="width: 200px"><div id="imagewrap" class="imagewrap"><div id="pic" class="pic">pic</div></div></div>
+<div id="vars"><div id="v" class="v"></div></div>
+<p id="p">text <span id="span">span</span> more</p>
+</div></body></html>`
+	t.Run("style width", func(t *testing.T) {
+		testRestyle(t, page, true, func(doc *html.Node) []*html.Node {
+			a := elementByID(doc, "a")
+			setAttr(a, "style", "width: 250px; background: orange")
+			return []*html.Node{a}
+		})
+	})
+	t.Run("class of descendants and siblings", func(t *testing.T) {
+		testRestyle(t, page, true, func(doc *html.Node) []*html.Node {
+			m := elementByID(doc, "menu")
+			setAttr(m, "class", "menu open")
+			return []*html.Node{m}
+		})
+	})
+	t.Run("transform", func(t *testing.T) {
+		testRestyle(t, page, true, func(doc *html.Node) []*html.Node {
+			a := elementByID(doc, "a")
+			setAttr(a, "class", "box moved")
+			return []*html.Node{a}
+		})
+	})
+	// :has() in the subject compound, of an ancestor (only the ancestors
+	// and their previous siblings are matched again, see relationalChanges)
+	for _, c := range []struct{ id, class string }{{"trigger2", "on2"}} {
+		t.Run("subject has "+c.class, func(t *testing.T) {
+			testRestyle(t, page, true, func(doc *html.Node) []*html.Node {
+				tr := elementByID(doc, c.id)
+				setAttr(tr, "class", c.class)
+				return []*html.Node{tr}
+			})
+		})
+	}
+	// static to relative (as the images of npr.org as they load), with an
+	// absolute child that fills it
+	t.Run("position relative", func(t *testing.T) {
+		testRestyle(t, page, true, func(doc *html.Node) []*html.Node {
+			w := elementByID(doc, "imagewrap")
+			setAttr(w, "class", "imagewrap has-dims")
+			return []*html.Node{w}
+		})
+	})
+	// a change of the ::before of an element in a hidden one (as the icons
+	// of the players in the hidden dialog of npr.org), not rendered
+	t.Run("pseudo in hidden", func(t *testing.T) {
+		ctx := NewContext()
+		doc, err := ParseHTML(ctx, strings.NewReader(page))
+		require.NoError(t, err)
+		bd := core.NewBody()
+		require.NoError(t, ReadDocument(ctx, bd, doc))
+		icon := elementByID(doc, "icon")
+		var ok bool
+		core.RenderImage(bd, func() {
+			bd.AsyncLock()
+			defer bd.AsyncUnlock()
+			setAttr(icon, "class", "icon playing")
+			ok = ctx.Restyle([]*html.Node{icon})
+		})
+		assert.True(t, ok, "restyled, with nothing to change")
+	})
+	t.Run("has", func(t *testing.T) {
+		testRestyle(t, page, true, func(doc *html.Node) []*html.Node {
+			tr := elementByID(doc, "trigger")
+			setAttr(tr, "class", "on")
+			return []*html.Node{tr}
+		})
+	})
+	t.Run("custom property", func(t *testing.T) {
+		testRestyle(t, page, true, func(doc *html.Node) []*html.Node {
+			v := elementByID(doc, "vars")
+			setAttr(v, "style", "--w: 70px")
+			return []*html.Node{v}
+		})
+	})
+	t.Run("custom property of a class", func(t *testing.T) {
+		// (of a style sheet, not of the style attribute, as the lookups of
+		// custom properties are memoized, see Context.varMemo)
+		testRestyle(t, page, true, func(doc *html.Node) []*html.Node {
+			v := elementByID(doc, "vars")
+			setAttr(v, "class", "wv")
+			return []*html.Node{v}
+		})
+	})
+	t.Run("display", func(t *testing.T) {
+		testRestyle(t, page, false, func(doc *html.Node) []*html.Node {
+			a := elementByID(doc, "a")
+			setAttr(a, "class", "box gone")
+			return []*html.Node{a}
+		})
+	})
+	t.Run("pseudo-element", func(t *testing.T) {
+		testRestyle(t, page, false, func(doc *html.Node) []*html.Node {
+			a := elementByID(doc, "a")
+			setAttr(a, "class", "box marked")
+			return []*html.Node{a}
+		})
+	})
+	t.Run("inline", func(t *testing.T) {
+		testRestyle(t, page, false, func(doc *html.Node) []*html.Node {
+			sp := elementByID(doc, "span")
+			setAttr(sp, "style", "color: green")
+			return []*html.Node{sp}
+		})
+	})
+}
+
+// TestSubjectStart tests the start of the subject compound of selectors,
+// after their last combinator outside of parentheses, brackets and quotes.
+func TestSubjectStart(t *testing.T) {
+	for sel, want := range map[string]string{
+		".a:has(.b)":             ".a:has(.b)",
+		".a:has(.b) .c":          ".c",
+		"div > .a:has(> .b ~ c)": ".a:has(> .b ~ c)",
+		`a[title="x y"]:has(b)`:  `a[title="x y"]:has(b)`,
+		".x + .y:not(:has(.z))":  ".y:not(:has(.z))",
+	} {
+		assert.Equal(t, want, sel[subjectStart(sel):], sel)
+	}
+}
+
+// TestHasCompound tests the compound of the :has() selectors of selectors
+// whose :has() is not in their subject, without them.
+func TestHasCompound(t *testing.T) {
+	for sel, want := range map[string]struct {
+		compound string
+		siblings bool
+	}{
+		".a:has(.b) .c":                 {".a", false},
+		"body:has(.modal.open) > .page": {"body", false},
+		".x .a:has(> .b ~ .c) + .d":     {".a", true},
+		":has(.b) .c":                   {"*", false},
+		".a:has(.b) .c:has(.d)":         {"", false}, // in two compounds
+		".a:not(:has(.b)) .c":           {".a", false},
+		".a.b:where(:not(:has(.c))) .x": {".a.b", false},
+	} {
+		cs, sib := hasCompound(sel)
+		if want.compound == "" {
+			assert.Nil(t, cs, sel)
+			continue
+		}
+		if assert.NotNil(t, cs, sel) {
+			assert.Equal(t, want.siblings, sib, sel)
+		}
+	}
+}
+
+// TestRestyleUnusedCustomProps tests that a change of custom properties of
+// the html element, which has no widget of its own, that no declaration
+// uses is restyled (it changes nothing), as the --vwo-el-* properties that
+// the A/B testing scripts of volkskrant.nl set, for which the page was
+// read whole, while one that is used can not be.
+func TestRestyleUnusedCustomProps(t *testing.T) {
+	const page = `<html><head><style>.v { width: var(--w, 10px); height: 10px }</style></head>` +
+		`<body><div class="v">v</div></body></html>`
+	for _, tc := range []struct {
+		style    string
+		restyled bool
+	}{{"--vwo-el-opacity: 0", true}, {"--w: 50px", false}} {
+		ctx := NewContext()
+		doc, err := ParseHTML(ctx, strings.NewReader(page))
+		require.NoError(t, err)
+		bd := core.NewBody()
+		require.NoError(t, ReadDocument(ctx, bd, doc))
+		root := documentElement(doc)
+		root.Attr = append(root.Attr, html.Attribute{Key: "style", Val: tc.style})
+		var ok bool
+		core.RenderImage(bd, func() {
+			bd.AsyncLock()
+			ok = ctx.Restyle([]*html.Node{root})
+			bd.AsyncUnlock()
+		})
+		assert.Equal(t, tc.restyled, ok, tc.style)
+	}
+}
+
+// TestRestyleSourceDisplay tests that a change of the display of a source
+// element of a picture, which is never rendered, restyles the page (it
+// changes nothing), as the slideshows of npr.org change it many times a
+// second, each of which read the page again.
+func TestRestyleSourceDisplay(t *testing.T) {
+	const page = `<html><body><picture><source id="s" srcset="a.png" style="display: none"><img src="a.png"></picture></body></html>`
+	ctx := NewContext()
+	doc, err := ParseHTML(ctx, strings.NewReader(page))
+	require.NoError(t, err)
+	bd := core.NewBody()
+	require.NoError(t, ReadDocument(ctx, bd, doc))
+	s := elementByID(doc, "s")
+	setAttr(s, "style", "display: block")
+	var ok bool
+	core.RenderImage(bd, func() {
+		bd.AsyncLock()
+		ok = ctx.Restyle([]*html.Node{s})
+		bd.AsyncUnlock()
+	})
+	assert.True(t, ok, ctx.Fallback())
+}
+
+// TestRestyleCustomPropsUnchanged tests that a change of an attribute of
+// an element with custom properties in its style that does not change them
+// (as the lang and class of the html element of nytimes.com) restyles only
+// the elements that the change may select differently, and that a change of
+// its custom properties restyles those in it.
+func TestRestyleCustomPropsUnchanged(t *testing.T) {
+	const page = `<html lang="en" style="--w: 50px"><head><style>.v { width: var(--w, 10px); height: 10px }
+.dark .v { background: red }</style></head><body><div id="v" class="v">v</div></body></html>`
+	t.Run("invalidation", func(t *testing.T) {
+		ctx := NewContext()
+		doc, err := ParseHTML(ctx, strings.NewReader(page))
+		require.NoError(t, err)
+		require.NoError(t, ReadDocument(ctx, core.NewBody(), doc))
+		root := documentElement(doc)
+		for i, a := range root.Attr {
+			if a.Key == "lang" {
+				root.Attr[i].Val = "en-US"
+			}
+		}
+		_, _, ok := ctx.invalidation(root)
+		assert.True(t, ok, "only the elements selected by lang")
+		for i, a := range root.Attr {
+			if a.Key == "style" {
+				root.Attr[i].Val = "--w: 60px"
+			}
+		}
+		_, _, ok = ctx.invalidation(root)
+		assert.False(t, ok, "custom properties changed")
+	})
+	t.Run("class", func(t *testing.T) {
+		testRestyle(t, page, true, func(doc *html.Node) []*html.Node {
+			root := documentElement(doc)
+			root.Attr = append(root.Attr, html.Attribute{Key: "class", Val: "dark"})
+			return []*html.Node{root}
+		})
+	})
+}
+
+// TestRestyleStatesOfOthers tests that a change of the states of an
+// element (or its attributes set to the values that they had) restyles
+// only the elements that the rules of states may select differently, not
+// all of those in it for a rule of the state of another element with
+// custom properties (as on nytimes.com).
+func TestRestyleStatesOfOthers(t *testing.T) {
+	const page = `<html lang="en"><head><style>.btn:hover { --c: red }
+.v { color: var(--c, black); height: 10px }</style></head><body><div id="v" class="v">v</div><button class="btn">b</button></body></html>`
+	ctx := NewContext()
+	doc, err := ParseHTML(ctx, strings.NewReader(page))
+	require.NoError(t, err)
+	require.NoError(t, ReadDocument(ctx, core.NewBody(), doc))
+	_, _, ok := ctx.invalidation(documentElement(doc))
+	assert.True(t, ok, "the html element is not a .btn")
+	btn := documentElement(doc).LastChild.LastChild // (body > button)
+	require.Equal(t, "button", btn.Data)
+	_, _, ok = ctx.invalidation(btn)
+	assert.False(t, ok, "the elements in a .btn inherit its --c")
+}
+
+// TestCompoundMaySelect tests whether the compound selectors before the
+// subjects of selectors that have changed states or attributes may select
+// elements.
+func TestCompoundMaySelect(t *testing.T) {
+	doc, err := html.Parse(strings.NewReader(`<html><body><div id="m" class="menu open"></div></body></html>`))
+	require.NoError(t, err)
+	m := elementByID(doc, "m")
+	root := documentElement(doc)
+	for _, tc := range []struct {
+		prefix, token string
+		n             *html.Node
+		may           bool
+	}{
+		{".menu:hover ", ":hover", m, true},
+		{".menu:hover ", ":hover", root, false},
+		{"div.open:focus-within > ", ":focus-within", m, true},
+		{"nav:hover > ", ":hover", m, false},
+		{":hover > ", ":hover", root, true},
+		{".x .menu:hover + ", ":hover", m, true},
+		{".x:hover .menu ", ":hover", m, false},
+		{"[class~=package]:hover .x>", ":hover", root, false},
+		{"[class~=menu]:hover .x>", ":hover", m, true},
+		{"[id=m]:hover ", ":hover", m, true},
+		{"[id=other]:hover ", ":hover", m, false},
+		{"[class~=menu i]:hover ", ":hover", root, true},
+		{"[lang=en] ", "lang", root, true},
+		{"div[lang=en] ", "lang", root, false},
+	} {
+		has := func(comp string) bool { return hasToken(comp, tc.token) }
+		if !strings.HasPrefix(tc.token, ":") {
+			has = func(comp string) bool { return hasAttrSelector(comp, tc.token) }
+		}
+		if tc.may {
+			assert.True(t, compoundMaySelect(tc.prefix, tc.n, has), tc.prefix)
+		} else {
+			assert.True(t, noKeyMatch(func() bool { return compoundMaySelect(tc.prefix, tc.n, has) }), tc.prefix)
+		}
+	}
+	_, sib, _ := splitLastCompound("[class~=a]:hover .b>*")
+	assert.False(t, sib, "~= is not a combinator")
+	_, sib, _ = splitLastCompound(".a ~ .b")
+	assert.True(t, sib)
+}
+
+// TestInvalidationLang tests that a change of the lang of the html element
+// (as nytimes.com sets it) does not select the elements in it again for the
+// rules of the classes of others (as [class~=x]:hover .y), and that a change
+// of its classes does.
+func TestInvalidationLang(t *testing.T) {
+	const page = `<html lang="en" class="a"><head><style>[class~=x]:hover .y { color: red }
+div:lang(fr) .y { color: blue }</style></head><body><div id="y" class="y">y</div></body></html>`
+	ctx := NewContext()
+	doc, err := ParseHTML(ctx, strings.NewReader(page))
+	require.NoError(t, err)
+	require.NoError(t, ReadDocument(ctx, core.NewBody(), doc))
+	root, y := documentElement(doc), elementByID(doc, "y")
+	setAttr := func(key, val string) {
+		for i, a := range root.Attr {
+			if a.Key == key {
+				root.Attr[i].Val = val
+			}
+		}
+	}
+	setAttr("lang", "en-US")
+	assert.True(t, noKeyMatch(func() bool {
+		selects, _, ok := ctx.invalidation(root)
+		return !ok || selects(y)
+	}), "lang")
+	setAttr("lang", "en")
+	setAttr("class", "a  a ")
+	assert.True(t, noKeyMatch(func() bool {
+		selects, _, ok := ctx.invalidation(root)
+		return !ok || selects(y)
+	}), "the same classes")
+	setAttr("class", "a x")
+	selects, _, ok := ctx.invalidation(root)
+	require.True(t, ok)
+	assert.True(t, selects(y), "class x")
+}

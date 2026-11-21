@@ -74,11 +74,11 @@ func (ct *Content) htmlIDAttributeHandler(ctx *htmlcore.Context, w io.Writer, no
 }
 
 func (ct *Content) htmlPreHandler(ctx *htmlcore.Context) bool {
-	hasCode := ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "code"
+	hasCode := ctx.Node().FirstChild != nil && ctx.Node().FirstChild.Data == "code"
 	if !hasCode {
 		return false
 	}
-	codeEl := ctx.Node.FirstChild
+	codeEl := ctx.Node().FirstChild
 	collapsed := htmlcore.GetAttr(codeEl, "collapsed")
 	lang := htmlcore.GetLanguage(htmlcore.GetAttr(codeEl, "class"))
 	id := htmlcore.GetAttr(codeEl, "id")
@@ -108,7 +108,7 @@ func (ct *Content) htmlPreHandler(ctx *htmlcore.Context) bool {
 	} else {
 		ed = textcore.NewEditor(fr)
 	}
-	ctx.Node = codeEl
+	ctx.SetNode(codeEl)
 	if lang != "" {
 		ed.Lines.SetFileExt(lang)
 	}

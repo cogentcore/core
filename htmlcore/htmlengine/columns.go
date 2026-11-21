@@ -1,0 +1,221 @@
+// Copyright (c) 2026, Cogent Core. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package htmlengine
+
+import (
+	"strconv"
+	"strings"
+
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/htmlcore/css"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/tree"
+	"golang.org/x/net/html"
+)
+
+// The CSS multi-column layout of an element (columns, column-count, and
+// column-width) is approximated by moving its children into frames for
+// the columns, side by side, filled in order and balanced by the length
+// of their text (see [Context.arrangeColumns]). The number of columns is
+// from column-count, or from column-width and an estimate of the width
+// that the element has (from the viewport and the widths and spaces of
+// the elements that it is in), as it is set when the page is read.
+
+// columnCount returns the number of columns of the given element, or 0
+// if it does not have a multi-column layout.
+func (c *Context) columnCount(n *html.Node) int {
+	has := false
+	for _, d := range c.declarations(n) {
+		if d.Property == "columns" || d.Property == "column-count" || d.Property == "column-width" {
+			has = true
+			break
+		}
+	}
+	if !has {
+		return 0
+	}
+	env := c.readEnv()
+	count := 0
+	width := float32(0)
+	set := func(v string) {
+		if v == "auto" {
+			return
+		}
+		if i, err := strconv.Atoi(v); err == nil {
+			count = i
+		} else if px, ok := env.LengthPx(v); ok {
+			width = px
+		}
+	}
+	for _, d := range c.declarations(n) {
+		v := strings.ToLower(strings.TrimSpace(d.Value))
+		switch d.Property {
+		case "columns":
+			count, width = 0, 0
+			for f := range strings.FieldsSeq(v) {
+				set(f)
+			}
+		case "column-count":
+			count = 0
+			set(v)
+		case "column-width":
+			width = 0
+			set(v)
+		}
+	}
+	if width <= 0 {
+		if count > 1 {
+			return count
+		}
+		return 0
+	}
+	gap := float32(16) // the normal column gap is 1em
+	if g, ok := env.LengthPx(c.declaration(n, "column-gap")); ok {
+		gap = g
+	}
+	fit := int((c.availableWidth(env, n) + gap) / (width + gap))
+	if count > 0 {
+		fit = min(fit, count)
+	}
+	if fit < 2 {
+		fit = 0
+	}
+	if !c.checkingMedia { // it depends on the width of the viewport
+		if c.columnUses == nil {
+			c.columnUses = map[*html.Node]int{}
+		}
+		c.columnUses[n] = fit
+	}
+	return fit
+}
+
+// availableWidth returns an estimate of the width of the content of the
+// given element, in px: that of the viewport, within the widths and max
+// widths of it and the elements that it is in, less their spaces.
+func (c *Context) availableWidth(env *css.LengthEnv, n *html.Node) float32 {
+	w := c.mediaWidth()
+	var chain []*html.Node
+	for p := n; p != nil && p.Type == html.ElementNode; p = p.Parent {
+		chain = append(chain, p)
+	}
+	for ri := len(chain) - 1; ri >= 0; ri-- { // from the top down
+		p := chain[ri]
+
+		// the spaces are outside of the width (of the content box)
+		for _, base := range []string{"padding", "margin"} {
+			l, r := c.horizontalSides(env, p, base)
+			w -= max(l, 0) + max(r, 0)
+		}
+		for _, prop := range []string{"width", "max-width"} {
+			if px, ok := env.LengthPx(c.declaration(p, prop)); ok && px > 0 {
+				w = min(w, px)
+			}
+		}
+	}
+	return max(w, 0)
+}
+
+// arrangeColumns moves the children of the given widget for the given
+// element into frames for its columns, as above.
+func (c *Context) arrangeColumns(n *html.Node, fr *core.Frame) {
+	count := c.columnCount(n)
+	if count < 2 {
+		return
+	}
+	// The content of an element with only one child (as a list in a div
+	// with columns, as for the references of Wikipedia) is that of the
+	// child, which is split into the columns, as in CSS.
+	for fr.NumChildren() == 1 {
+		k := frameOf(fr.Child(0))
+		ok := k != nil
+		if !ok || k.NumChildren() < 2 {
+			break
+		}
+		fr = k
+	}
+	kids := append([]tree.Node(nil), fr.Children...)
+	if len(kids) < 2 {
+		return
+	}
+	count = min(count, len(kids))
+	gap := units.Em(1)
+	if g, ok := c.readEnv().Length(c.declaration(n, "column-gap"), units.UnitPw); ok {
+		gap = g
+	}
+	fr.FinalStyler(func(s *styles.Style) {
+		s.Display = styles.Flex
+		s.Direction = styles.Row
+		s.Wrap = false
+		s.Align.Items = styles.Start
+		s.Gap.X = gap
+	})
+	// the weight of a child is the length of its text (as its height)
+	weights := make([]int, len(kids))
+	total := 0
+	for i, k := range kids {
+		w := 40
+		for d := range k.AsTree().All() {
+			if tx, ok := d.(*core.Text); ok {
+				w += len(tx.Text)
+			}
+		}
+		weights[i] = w
+		total += w
+	}
+	var cols []*core.Frame
+	for range count {
+		col := core.NewFrame(fr)
+		col.SetName("column")
+		tree.SetUniqueName(col)
+		c.Node = nil
+		c.browserStyler(nil, col, nil)
+		c.blocks[col].display = "block"
+		col.FinalStyler(func(s *styles.Style) {
+			s.Direction = styles.Column
+			s.Grow.X, s.Shrink.X = 1, 1
+			s.Min.X = units.Value{}
+			s.Max.X = units.Pw(100 / float32(count))
+		})
+		cols = append(cols, col)
+	}
+	// each column is filled up to its share of the total weight
+	ci, sum := 0, 0
+	for i, k := range kids {
+		if ci < count-1 && sum > 0 && sum+weights[i]/2 > total*(ci+1)/count {
+			ci++
+		}
+		tree.MoveToParent(k, cols[ci])
+		sum += weights[i]
+	}
+}
+
+// horizontalSides returns the left and right lengths in px of the given
+// sides property (padding or margin) of the given element, from its
+// declarations in the order of the cascade (with the shorthand).
+func (c *Context) horizontalSides(env *css.LengthEnv, n *html.Node, base string) (left, right float32) {
+	px := func(v string) float32 {
+		l, _ := env.LengthPx(v)
+		return l
+	}
+	for _, d := range c.declarations(n) {
+		switch d.Property {
+		case base:
+			if vals := css.ExpandSides(css.SplitColors(d.Value)); len(vals) == 4 {
+				right, left = px(vals[1]), px(vals[3])
+			}
+		case base + "-left", base + "-inline-start":
+			left = px(d.Value)
+		case base + "-right", base + "-inline-end":
+			right = px(d.Value)
+		case base + "-inline":
+			fs := css.SplitColors(d.Value)
+			if len(fs) > 0 {
+				left, right = px(fs[0]), px(fs[len(fs)-1])
+			}
+		}
+	}
+	return
+}

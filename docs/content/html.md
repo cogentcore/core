@@ -37,18 +37,22 @@ ctx.AddWidgetHandler(func(w core.Widget) {
 htmlcore.ReadHTMLString(ctx, b, `<button>Click me!</button>`)
 ```
 
-You can also read a parsed document with [[doc:htmlcore.ReadDocument]], from [[doc:htmlcore.ParseHTML]], and find the element of a widget with [[doc:htmlcore.NodeOf]]. To read whole web pages, set [[doc:htmlcore.Context.PageURL]] (for relative URLs), [[doc:htmlcore.Context.GetURL]] (for style sheets, images and fonts), and [[doc:htmlcore.Context.OpenURL]] (for links), and use a new context for each page, with [[doc:htmlcore.Context.NewPage]]:
+You can also read a parsed document with [[doc:htmlcore.ReadDocument]], from [[doc:htmlcore.ParseHTML]], and find the element of a widget with [[doc:htmlcore.NodeOf]]. For the pages of an app, set the URL of the page with [[doc:htmlcore.Context.SetPageURL]] (for relative URLs), and how to get resources and open links with [[doc:htmlcore.Context.SetGetURL]] and [[doc:htmlcore.Context.SetOpenURL]]. Custom elements can be made into widgets with [[doc:htmlcore.Context.AddElementHandler]].
+
+## Web pages
+
+The [[doc:htmlcore]] package is a small API over the engine that reads HTML, the [[doc:htmlcore/htmlengine]] package, which apps that show whole web pages, as a browser does, use directly. Its [[doc:htmlcore/htmlengine.Context]] has all of the settings of reading pages (as media sizes, scripting and zoom), and a new context is used for each page, with [[doc:htmlcore/htmlengine.Context.NewPage]]:
 
 ```go
 ctx := base.NewPage()
 ctx.PageURL = "https://example.com/"
 resp, err := ctx.GetURL(ctx.PageURL)
 ...
-doc, err := htmlcore.ParseHTML(ctx, resp.Body)
-err = htmlcore.ReadDocument(ctx, page, doc)
+doc, err := htmlengine.ParseHTML(ctx, resp.Body)
+err = htmlengine.ReadDocument(ctx, page, doc)
 ```
 
-When a document changes after it is read, as by the scripts of a page, [[doc:htmlcore.Context.Restyle]] updates the widgets for changes of the styles of elements (their `class` and `style`, and states such as `:hover`), and [[doc:htmlcore.Context.Reread]] reads only the elements that have changed again, keeping the widgets of the others. Both return false when the page needs to be read again whole. The web browser of [Cogent Web](https://github.com/cogentcore/cogent/tree/main/web) runs the scripts of pages with these.
+When a document changes after it is read, as by the scripts of a page, [[doc:htmlcore/htmlengine.Context.Restyle]] updates the widgets for changes of the styles of elements (their `class` and `style`, and states such as `:hover`), and [[doc:htmlcore/htmlengine.Context.Reread]] reads only the elements that have changed again, keeping the widgets of the others. Both return false when the page needs to be read again whole. The web browser of [Cogent Web](https://github.com/cogentcore/cogent/tree/main/web) runs the scripts of pages with these.
 
 ## Markdown
 
@@ -63,16 +67,16 @@ Markdown is converted to HTML ([[doc:htmlcore.MDToHTML]]), which is then read as
 
 ## Implementation
 
-This is a broad overview of how [[doc:htmlcore]] works; see the documentation of each part for more.
+This is a broad overview of how [[doc:htmlcore/htmlengine]] works; see the documentation of each part for more. The parts of CSS that do not depend on widgets (parsing style sheets, selectors, and the values of properties) are in [[doc:htmlcore/css]].
 
-* **Parsing:** HTML is parsed into a document of nodes by [golang.org/x/net/html](https://pkg.go.dev/golang.org/x/net/html), as browsers parse it ([[doc:htmlcore.ParseHTML]]).
+* **Parsing:** HTML is parsed into a document of nodes by [golang.org/x/net/html](https://pkg.go.dev/golang.org/x/net/html), as browsers parse it ([[doc:htmlcore/htmlengine.ParseHTML]]).
 
-* **Cascade:** the style sheets of the document (`<style>`, `<link>`, `@import`, with `@media`, `@supports`, `@container` and `@layer`) and the default styles of browsers are matched against its elements with [cascadia](https://pkg.go.dev/github.com/andybalholm/cascadia) selectors, giving each element its declarations in the order of the cascade (by origin, `!important`, specificity and order), with `var()` resolved. [[doc:htmlcore.Context.ComputedValue]] returns the value of a property of an element.
+* **Cascade:** the style sheets of the document (`<style>`, `<link>`, `@import`, with `@media`, `@supports`, `@container` and `@layer`) and the default styles of browsers are matched against its elements with [cascadia](https://pkg.go.dev/github.com/andybalholm/cascadia) selectors, giving each element its declarations in the order of the cascade (by origin, `!important`, specificity and order), with `var()` resolved. [[doc:htmlcore/htmlengine.Context.ComputedValue]] returns the value of a property of an element.
 
-* **Reading:** [[doc:htmlcore.ReadDocument]] walks the document, making the widgets of its elements in the widget given to it: block elements are [[frame]]s, runs of inline content (text, links, `<b>`, `<span>`) are single [[text]]s with rich text, and replaced elements and controls are their widgets ([[image]], [[svg]], [[button]], [[text field]], and so on). Element handlers ([[doc:htmlcore.Context.ElementHandlers]]) can make the widgets of elements themselves.
+* **Reading:** [[doc:htmlcore/htmlengine.ReadDocument]] walks the document, making the widgets of its elements in the widget given to it: block elements are [[frame]]s, runs of inline content (text, links, `<b>`, `<span>`) are single [[text]]s with rich text, and replaced elements and controls are their widgets ([[image]], [[svg]], [[button]], [[text field]], and so on). Element handlers ([[doc:htmlcore.Context.AddElementHandler]]) can make the widgets of elements themselves.
 
 * **Styling:** the declarations of each element are compiled into a [[style|styler]] of its widget, which sets its [[doc:styles.Style]] from them when it is styled, with CSS units, inheritance and percentages resolved then, as the sizes of their containers are known.
 
 * **Layout:** pages are laid out by the [[layout]] of Cogent Core, which has the intrinsic (min-content and preferred) widths, floats, positioning, grid placement and stacking that CSS needs. Tables and grids are arranged into grid frames as they are read, and multiple columns into column frames.
 
-* **Updates:** [[doc:htmlcore.Context.Restyle]] and [[doc:htmlcore.Context.Reread]] find the declarations of the changed elements again from the recorded style rules, and update their widgets in place, reconciling the new widgets of reread elements with the old ones by [[plan|tree.Plan]].
+* **Updates:** [[doc:htmlcore/htmlengine.Context.Restyle]] and [[doc:htmlcore/htmlengine.Context.Reread]] find the declarations of the changed elements again from the recorded style rules, and update their widgets in place, reconciling the new widgets of reread elements with the old ones by [[plan|tree.Plan]].
