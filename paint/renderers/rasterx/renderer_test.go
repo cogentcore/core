@@ -208,3 +208,30 @@ func TestRendererText(t *testing.T) {
 	img2 := renderItems(t, pc.Size, r)
 	assert.Equal(t, img.Pix, img2.Pix)
 }
+
+// TestRendererEmptyBounds tests that nothing is drawn in a context with
+// empty bounds, as for a widget scrolled out of view: the small glyphs of
+// punctuation, which are not cached, and paths, which are drawn by the
+// scanner, were drawn without clipping.
+func TestRendererEmptyBounds(t *testing.T) {
+	goscript.Skip(t, "the js fonts have only metrics, so the image renderer cannot draw text glyphs")
+	pc := newPainter(100, 60)
+	sh := shaped.NewShaper()
+	tsty := text.NewStyle()
+	tsty.ToDots(&pc.UnitContext)
+	sty := rich.NewStyle()
+	sty.Size = 2
+	pc.PushContext(nil, render.NewBoundsRect(image.Rect(0, 80, 100, 80), sides.Floats{}))
+	tx := rich.NewText(sty, []rune(`"a", 'b'; .,:`))
+	pc.DrawText(sh.WrapLines(tx, sty, tsty, pc.Size), math32.Vec2(5, 5))
+	pc.Fill.Color = colors.Uniform(colors.Black)
+	pc.Rectangle(10, 10, 50, 30)
+	pc.Draw()
+	pc.PopContext()
+	img := renderPainter(t, pc)
+	for y := range 60 {
+		for x := range 100 {
+			require.Equal(t, color.RGBA{255, 255, 255, 255}, rgba(img, x, y), "pixel %d, %d", x, y)
+		}
+	}
+}

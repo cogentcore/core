@@ -39,7 +39,11 @@ func (rs *Renderer) TextLines(ctx *render.Context, lns *shaped.Lines, pos math32
 	m := ctx.Cumulative
 	identity := m == math32.Identity2()
 	off := pos.Add(lns.Offset)
-	rs.Scanner.SetClip(ctx.Bounds.Rect.ToRect())
+	clip := ctx.Bounds.Rect.ToRect()
+	if clip.Empty() { // all clipped (the scanner does not clip with an empty clip)
+		return
+	}
+	rs.Scanner.SetClip(clip)
 	// tbb := lns.Bounds.Translate(off)
 	// rs.StrokeBounds(ctx, tbb, colors.Red)
 	clr := colors.Uniform(lns.Color)

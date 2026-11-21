@@ -102,7 +102,11 @@ func (rs *Renderer) RenderPath(pt *render.Path) {
 		p = p.ReplaceArcs()
 	}
 	pc := &pt.Context
-	rs.Scanner.SetClip(pc.Bounds.Rect.ToRect())
+	clip := pc.Bounds.Rect.ToRect()
+	if clip.Empty() { // all clipped (the scanner does not clip with an empty clip)
+		return
+	}
+	rs.Scanner.SetClip(clip)
 	PathToRasterx(&rs.Path, p, pt.Context.Cumulative, math32.Vector2{})
 	rs.Fill(pt)
 	rs.Stroke(pt)
