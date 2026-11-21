@@ -10,6 +10,7 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/text"
 	"golang.org/x/net/html"
@@ -37,6 +38,7 @@ func handleListItem(ctx *Context) {
 		mk.SetName("marker")
 		ctx.handleWidget(nil, mk)
 		mk.Styler(func(s *styles.Style) {
+			s.SetAbilities(false, abilities.Selectable) // not in a selection, as in browsers
 			s.Min.X = markerWidth
 			s.Max.X = markerWidth
 			s.Grow.X = 0

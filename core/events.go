@@ -339,16 +339,16 @@ func (em *Events) handlePosEvent(e events.Event) {
 			em.setCursorFromStyle()
 			return
 		}
-		if !tree.IsNil(em.slide) {
-			if len(sc.selectedText) > 0 && !em.slide.AsWidget().posInScBBox(pos) {
-				// allow multi-select
-			} else {
-				em.slide.AsWidget().HandleEvent(e)
-				em.slide.AsWidget().Send(events.SlideMove, e)
-				e.SetHandled()
-				em.setCursorFromStyle()
-				return
-			}
+		// A slide continues wherever the mouse moves, as a selection of
+		// text across texts (see [Text.selectTo]), unless a drag of the
+		// widget that was pressed can still start out of it (as for the
+		// index text of a row of a list), which is handled below.
+		if !tree.IsNil(em.slide) && (tree.IsNil(em.dragPress) || em.slide.AsWidget().posInScBBox(pos)) {
+			em.slide.AsWidget().HandleEvent(e)
+			em.slide.AsWidget().Send(events.SlideMove, e)
+			e.SetHandled()
+			em.setCursorFromStyle()
+			return
 		}
 	case events.MouseUp:
 		// a slide of a sprite stops wherever the mouse is released
@@ -552,28 +552,8 @@ func (em *Events) handlePosEvent(e events.Event) {
 			} else if !tree.IsNil(em.slidePress) && em.dragStartCheck(e, TimingSettings.SlideStartTime, TimingSettings.DragStartDistance) {
 				em.cancelRepeatClick()
 				em.cancelLongPress()
-				if em.slide != nil { // out of original bbox
-					var nextSlide Widget
-					for i := n - 1; i >= 0; i-- {
-						w := em.mouseInBBox[i]
-						if _, ok := w.(*Text); ok {
-							nextSlide = w
-							break
-						}
-					}
-					slb := em.slide.AsWidget()
-					if pos.Y > slb.Geom.TotalBBox.Max.Y || pos.X > slb.Geom.TotalBBox.Max.X {
-						ec := e.Clone()
-						ec.AsBase().WhereLocal = slb.Geom.TotalBBox.Max
-						slb.Send(events.SlideMove, ec)
-					}
-					if nextSlide != nil {
-						em.slide = nextSlide
-						slb = em.slide.AsWidget()
-						ec := e.Clone()
-						ec.AsBase().WhereLocal = slb.Geom.TotalBBox.Min
-						slb.Send(events.SlideStart, ec)
-					}
+				if em.slide != nil { // it continues (see above)
+					em.slide.AsWidget().Send(events.SlideMove, e)
 				} else {
 					em.slide = em.slidePress
 					em.slide.AsWidget().Send(events.SlideStart, e)
