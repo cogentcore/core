@@ -395,9 +395,17 @@ func (ct *Content) pageByName(name string) *bcontent.Page {
 	return nil
 }
 
-// SetSource sets the source filesystem for the content.
+// Files is the source filesystem of the content of the app (the
+// [Content.Source] that was set last), for the code of its pages to open
+// data files in it by their path in the content, as in
+// table.OpenFS(content.Files, "datasets/planets.csv", tensor.Comma).
+var Files fs.FS
+
+// SetSource sets the source filesystem for the content,
+// which is also the [Files] of the app.
 func (ct *Content) SetSource(source fs.FS) *Content {
 	ct.Source = source
+	Files = source
 	if ct.Context.ImageCache != nil {
 		ct.Context.ImageCache.Reset()
 	}
