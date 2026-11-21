@@ -13,6 +13,8 @@ import (
 	"testing"
 	"time"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
@@ -738,13 +740,13 @@ func TestRereadInertAttrs(t *testing.T) {
 // seed of a run), which only matches more elements, so the tests of keys
 // that do not match try other seeds.
 func noKeyMatch(f func() bool) bool {
-	old := keySeed
-	defer func() { keySeed = old }()
+	old := css.KeySeed
+	defer func() { css.KeySeed = old }()
 	for range 5 {
 		if !f() {
 			return true
 		}
-		keySeed = maphash.MakeSeed()
+		css.KeySeed = maphash.MakeSeed()
 	}
 	return false
 }

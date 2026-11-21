@@ -9,6 +9,8 @@ import (
 	"strings"
 	"testing"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
@@ -26,7 +28,7 @@ func TestPseudoContent(t *testing.T) {
 	assert.Equal(t, "(T)", contentText(n, `"(" attr(title) ")"`))
 	assert.Equal(t, "“q", contentText(n, `open-quote "q"`))
 	assert.Equal(t, "", contentText(n, `none`))
-	b, kind, ok := pseudoSelector(".x a::before")
+	b, kind, ok := css.PseudoSelector(".x a::before")
 	assert.Equal(t, [3]any{".x a", "before", true}, [3]any{b, kind, ok})
 
 	bd := core.NewBody()
@@ -108,7 +110,7 @@ func TestInlineBlockInHeading(t *testing.T) {
 // TestBoxShadow tests box-shadow (as of the menus of Wikipedia, with a
 // negative spread): its shadows, which take no space in the layout.
 func TestBoxShadow(t *testing.T) {
-	env := defaultLengthEnv()
+	env := css.DefaultLengthEnv()
 	sh, ok := boxShadow(env, "0 2px 6px -1px rgba(0,0,0,0.2)")
 	assert.True(t, ok)
 	assert.Equal(t, units.Dp(2), sh.OffsetY)

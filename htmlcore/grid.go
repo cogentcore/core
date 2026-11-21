@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
@@ -96,7 +98,7 @@ func (c *Context) gridColumnsDecl(n *html.Node) string {
 	if prop != "grid-template" {
 		return v
 	}
-	_, cols, _ := cutTopLevel(v, '/')
+	_, cols, _ := css.CutTopLevel(v, '/')
 	return cols
 }
 
@@ -107,7 +109,7 @@ func (c *Context) gridRowsDecl(n *html.Node) string {
 	if prop != "grid-template" {
 		return v
 	}
-	if r, _, ok := cutTopLevel(v, '/'); ok && !strings.ContainsAny(r, `"'`) {
+	if r, _, ok := css.CutTopLevel(v, '/'); ok && !strings.ContainsAny(r, `"'`) {
 		return r
 	}
 	return ""
@@ -182,7 +184,7 @@ func resolveGridLines(v string, names map[string][]int) string {
 		}
 		return strconv.Itoa(lines[nth-1]), true
 	}
-	start, end, slash := cutTopLevel(v, '/')
+	start, end, slash := css.CutTopLevel(v, '/')
 	rs, named := resolve(start, "-start")
 	if !slash {
 		if !named {
@@ -192,24 +194,6 @@ func resolveGridLines(v string, names map[string][]int) string {
 	}
 	re, _ := resolve(end, "-end")
 	return rs + " / " + re
-}
-
-// cutTopLevel cuts s around the first sep that is not in parentheses.
-func cutTopLevel(s string, sep byte) (before, after string, found bool) {
-	depth := 0
-	for i := 0; i < len(s); i++ {
-		switch s[i] {
-		case '(':
-			depth++
-		case ')':
-			depth--
-		case sep:
-			if depth == 0 {
-				return strings.TrimSpace(s[:i]), strings.TrimSpace(s[i+1:]), true
-			}
-		}
-	}
-	return s, "", false
 }
 
 // gridLineNames matches the line names of a track list, as [a b].
@@ -227,7 +211,7 @@ func gridTracks(v string) []string {
 func gridTracksAuto(v string, autoCount func(track string, fit bool) int) []string {
 	var tracks []string
 	v = gridLineNames.ReplaceAllString(v, " ")
-	for _, f := range splitColors(v) { // fields outside of parentheses
+	for _, f := range css.SplitColors(v) { // fields outside of parentheses
 		if after, ok := strings.CutPrefix(f, "repeat("); ok {
 			inner := strings.TrimSuffix(after, ")")
 			n, rest, _ := strings.Cut(inner, ",")
@@ -271,7 +255,7 @@ func (c *Context) autoRepeatCount(n *html.Node, track string, fit bool) int {
 		if f, err := strconv.ParseFloat(p, 32); err == nil {
 			size = width * float32(f) / 100
 		}
-	} else if px, ok := env.lengthPx(mn); ok {
+	} else if px, ok := env.LengthPx(mn); ok {
 		size = px
 	}
 	count := 1
@@ -299,16 +283,16 @@ func flexibleTrack(t string) bool {
 }
 
 // gridColumnGap returns the column gap of the given grid container in px.
-func (c *Context) gridColumnGap(n *html.Node, env *lengthEnv) float32 {
+func (c *Context) gridColumnGap(n *html.Node, env *css.LengthEnv) float32 {
 	g := strings.TrimSpace(c.declaration(n, "column-gap"))
 	if g == "" {
-		if _, col, ok := cutTopLevel(strings.TrimSpace(c.declaration(n, "gap")), ' '); ok {
+		if _, col, ok := css.CutTopLevel(strings.TrimSpace(c.declaration(n, "gap")), ' '); ok {
 			g = col
 		} else {
 			g = strings.TrimSpace(c.declaration(n, "gap"))
 		}
 	}
-	px, _ := env.lengthPx(g)
+	px, _ := env.LengthPx(g)
 	return px
 }
 
@@ -318,13 +302,13 @@ func (c *Context) gridColumnGap(n *html.Node, env *lengthEnv) float32 {
 // content does not size the tracks, as in CSS (as the sections of
 // theguardian.com, whose content spans 12 tracks of 60px, which were as
 // wide as their content, wider than the page).
-func (c *Context) spanStyle(env *lengthEnv, kn *html.Node, s *styles.Style, tracks []string, gap float32) {
+func (c *Context) spanStyle(env *css.LengthEnv, kn *html.Node, s *styles.Style, tracks []string, gap float32) {
 	if kn == nil || strings.TrimSpace(c.declaration(kn, "width")) != "" {
 		return
 	}
 	width := gap * float32(len(tracks)-1)
 	for _, t := range tracks {
-		px, ok := env.lengthPx(t)
+		px, ok := env.LengthPx(t)
 		if !ok || strings.HasSuffix(t, "%") {
 			return
 		}
@@ -375,7 +359,7 @@ func containFlexible(s *styles.Style, tracks []string, noMin bool) {
 // factor (and minmax(0, length) grows up to the length), and the other
 // tracks are as wide as their content when other tracks are flexible
 // (and auto tracks share the rest of the width when none are).
-func gridTrackStyle(env *lengthEnv, s *styles.Style, track string, flexible bool) {
+func gridTrackStyle(env *css.LengthEnv, s *styles.Style, track string, flexible bool) {
 	if after, ok := strings.CutPrefix(track, "minmax("); ok {
 		inner := strings.TrimSuffix(after, ")")
 		mn, mx, _ := strings.Cut(inner, ",")
@@ -392,7 +376,7 @@ func gridTrackStyle(env *lengthEnv, s *styles.Style, track string, flexible bool
 				s.Contain = styles.ContainInlineSize
 			}
 			if mn != "0" && mn != "0px" && mn != "auto" {
-				if l, ok := env.length(mn, units.UnitPw); ok {
+				if l, ok := env.Length(mn, units.UnitPw); ok {
 					// the track is at least the length (as the first column
 					// of minmax(64px, 1fr) of the results of google.com,
 					// empty, which was narrower, so that the header was to
@@ -402,7 +386,7 @@ func gridTrackStyle(env *lengthEnv, s *styles.Style, track string, flexible bool
 				}
 			}
 			track = mx
-		} else if l, ok := env.length(mx, units.UnitPw); ok {
+		} else if l, ok := env.Length(mx, units.UnitPw); ok {
 			s.Grow.X, s.Shrink.X = 1, 1
 			s.Max.X = l
 			s.BoxSizing = styles.BoxBorderBox
@@ -415,7 +399,7 @@ func gridTrackStyle(env *lengthEnv, s *styles.Style, track string, flexible bool
 		}
 		return
 	}
-	if l, ok := env.length(track, units.UnitPw); ok {
+	if l, ok := env.Length(track, units.UnitPw); ok {
 		s.BoxSizing = styles.BoxBorderBox
 		// a length or a percentage of the grid is the width of the track,
 		// which its content does not narrow (as the 21.5% navigation of
@@ -451,7 +435,7 @@ func (c *Context) stackGrid(w core.Widget) bool {
 		if kn == nil {
 			return false
 		}
-		row, col, _ := cutTopLevel(c.declaration(kn, "grid-area"), '/')
+		row, col, _ := css.CutTopLevel(c.declaration(kn, "grid-area"), '/')
 		row, col = strings.TrimSpace(row), strings.TrimSpace(col)
 		if row == "" {
 			// (lines with an end, as 1 / span 2, are not one cell)
@@ -492,7 +476,7 @@ func (c *Context) stackGrid(w core.Widget) bool {
 // gridFiller returns a new empty widget of the given grid, for a cell in
 // a column of the given track that no child is in, which the caller moves
 // into its place in the children.
-func (c *Context) gridFiller(w core.Widget, env *lengthEnv, track string, flexible bool) *core.Frame {
+func (c *Context) gridFiller(w core.Widget, env *css.LengthEnv, track string, flexible bool) *core.Frame {
 	filler := core.NewFrame(w)
 	filler.SetName("grid-filler")
 	tree.SetUniqueName(filler) // (names of children must be unique, as for the inspector)
@@ -524,7 +508,7 @@ func (c *Context) gridLines(n *html.Node, axis string, names map[string][]int) s
 		v := strings.TrimSpace(d.Value)
 		switch d.Property {
 		case short:
-			st, en, _ := cutTopLevel(v, '/')
+			st, en, _ := css.CutTopLevel(v, '/')
 			start, end = strings.TrimSpace(st), strings.TrimSpace(en)
 		case short + "-start":
 			start = v
@@ -567,7 +551,7 @@ func (c *Context) gridPlacement(n *html.Node, ncols, nrows int, names gridNames)
 		}
 	}
 	start := func(v string) (int, bool) {
-		s, _, _ := cutTopLevel(v, '/')
+		s, _, _ := css.CutTopLevel(v, '/')
 		k, err := strconv.Atoi(strings.TrimSpace(s))
 		return k, err == nil && k > 0
 	}
@@ -630,7 +614,7 @@ func placeAutoRows[T any](items []T, area func(*T) *gridArea) {
 // or after it), or from a start line to an end line (with -1 the last line
 // of the given number of tracks, if known), or 1.
 func gridSpan(v string, ntracks int) int {
-	start, end, slash := cutTopLevel(strings.ToLower(v), '/')
+	start, end, slash := css.CutTopLevel(strings.ToLower(v), '/')
 	start, end = strings.TrimSpace(start), strings.TrimSpace(end)
 	for _, p := range []string{start, end} {
 		if n, ok := strings.CutPrefix(p, "span"); ok {
@@ -766,7 +750,7 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 	for _, k := range w.AsTree().Children {
 		if kw, ok := k.(core.Widget); ok {
 			kn, _ := kw.AsWidget().Property("node").(*html.Node)
-			name, _, _ := cutTopLevel(c.declaration(kn, "grid-area"), '/')
+			name, _, _ := css.CutTopLevel(c.declaration(kn, "grid-area"), '/')
 			if a, ok := c.gridPlacement(kn, ncols, len(rowTracks), names); (ok && a.row >= 0) || (name != "" && areas[name] != (gridArea{})) {
 				explicitRow = true
 				break
@@ -782,7 +766,7 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 		kn, _ := kw.AsWidget().Property("node").(*html.Node)
 		name := ""
 		if kn != nil {
-			name, _, _ = cutTopLevel(c.declaration(kn, "grid-area"), '/')
+			name, _, _ = css.CutTopLevel(c.declaration(kn, "grid-area"), '/')
 		}
 		if a, ok := areas[name]; ok && name != "" {
 			items = append(items, placed{kw, a})
@@ -856,7 +840,7 @@ func (c *Context) arrangeGrid(n *html.Node, w core.Widget) {
 				cols := c.gridLines(kn, "column", names.cols)
 				cs = gridSpan(cols, ncols)
 				rs = gridSpan(c.gridLines(kn, "row", names.rows), 0)
-				st, _, _ := cutTopLevel(cols, '/')
+				st, _, _ := css.CutTopLevel(cols, '/')
 				if start, err := strconv.Atoi(strings.TrimSpace(st)); err == nil && start > 0 && start <= ncols {
 					if start-1 < col { // in the next row
 						fill(ncols - col)

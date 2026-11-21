@@ -8,6 +8,8 @@ import (
 	"image"
 	"strings"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/core"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
@@ -90,7 +92,7 @@ func (c *Context) imageChange(n *html.Node, srcRules *int) (*imageSwap, bool) {
 		return nil, false
 	}
 	w, ok := ws[0].(*core.Image)
-	if !ok || parseFilter(c.declaration(img, "filter")) != nil {
+	if !ok || css.ParseFilter(c.declaration(img, "filter")) != nil {
 		return nil, false
 	}
 	src, density := c.imageSource(img)

@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
@@ -141,7 +143,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 	}
 	switch prop {
 	case "margin-inline", "margin-block", "padding-inline", "padding-block":
-		fs := splitColors(val)
+		fs := css.SplitColors(val)
 		if len(fs) == 0 {
 			return nil
 		}
@@ -155,7 +157,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		}
 		return append(c.compileCSS(base+"-top", start), c.compileCSS(base+"-bottom", end)...)
 	case "display":
-		d := legacyDisplay(lval)
+		d := css.LegacyDisplay(lval)
 		return op(func(st *cssState, s, ps *styles.Style) { st.display = d })
 	case "-webkit-line-clamp", "line-clamp":
 		n, err := strconv.Atoi(lval)
@@ -170,7 +172,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		e := lval == "ellipsis"
 		return op(func(st *cssState, s, ps *styles.Style) { s.Text.Ellipsis = e })
 	case "margin":
-		vals := expandSides(splitColors(lval))
+		vals := expandSides(css.SplitColors(lval))
 		return op(func(st *cssState, s, ps *styles.Style) {
 			for i, v := range vals {
 				setMargin(st, i, v)
@@ -180,10 +182,10 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		i := sideIndex(prop)
 		return op(func(st *cssState, s, ps *styles.Style) { setMargin(st, i, lval) })
 	case "padding":
-		vals := expandSides(splitColors(lval))
+		vals := expandSides(css.SplitColors(lval))
 		return op(func(st *cssState, s, ps *styles.Style) {
 			for i, v := range vals {
-				if l, ok := st.env.length(v, units.UnitPw); ok {
+				if l, ok := st.env.Length(v, units.UnitPw); ok {
 					setValueSide(&s.Padding, i, l)
 				}
 			}
@@ -191,7 +193,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 	case "padding-top", "padding-right", "padding-bottom", "padding-left":
 		i := sideIndex(prop)
 		return op(func(st *cssState, s, ps *styles.Style) {
-			if l, ok := st.env.length(lval, units.UnitPw); ok {
+			if l, ok := st.env.Length(lval, units.UnitPw); ok {
 				setValueSide(&s.Padding, i, l)
 			}
 		})
@@ -200,14 +202,14 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 	case "border-top", "border-right", "border-bottom", "border-left":
 		return op(compileBorder(sideIndex(prop), val))
 	case "border-width":
-		vals := expandSides(splitColors(lval))
+		vals := expandSides(css.SplitColors(lval))
 		return op(func(st *cssState, s, ps *styles.Style) {
 			for i, v := range vals {
-				setValueSide(&s.Border.Width, i, st.env.borderWidth(v))
+				setValueSide(&s.Border.Width, i, st.env.BorderWidth(v))
 			}
 		})
 	case "border-style":
-		vals := expandSides(splitColors(lval))
+		vals := expandSides(css.SplitColors(lval))
 		return op(func(st *cssState, s, ps *styles.Style) {
 			for i, v := range vals {
 				setBorderStyle(s, i, v)
@@ -215,7 +217,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		})
 	case "border-color":
 		var cfs []func() image.Image
-		for _, v := range expandSides(splitColors(val)) {
+		for _, v := range expandSides(css.SplitColors(val)) {
 			cfs = append(cfs, colorFunc(v))
 		}
 		return op(func(st *cssState, s, ps *styles.Style) {
@@ -225,7 +227,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		})
 	case "border-top-width", "border-right-width", "border-bottom-width", "border-left-width":
 		i := sideIndex(prop)
-		return op(func(st *cssState, s, ps *styles.Style) { setValueSide(&s.Border.Width, i, st.env.borderWidth(lval)) })
+		return op(func(st *cssState, s, ps *styles.Style) { setValueSide(&s.Border.Width, i, st.env.BorderWidth(lval)) })
 	case "border-top-style", "border-right-style", "border-bottom-style", "border-left-style":
 		i := sideIndex(prop)
 		return op(func(st *cssState, s, ps *styles.Style) { setBorderStyle(s, i, lval) })
@@ -237,7 +239,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		i := map[string]int{"border-top-left-radius": 0, "border-top-right-radius": 1,
 			"border-bottom-right-radius": 2, "border-bottom-left-radius": 3}[prop]
 		return op(func(st *cssState, s, ps *styles.Style) {
-			if l, ok := st.env.length(v, units.UnitEw); ok {
+			if l, ok := st.env.Length(v, units.UnitEw); ok {
 				setValueSide(&s.Border.Radius, i, l)
 			}
 		})
@@ -245,7 +247,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		vals := expandSides(strings.Fields(strings.Split(lval, "/")[0]))
 		return op(func(st *cssState, s, ps *styles.Style) {
 			for i, v := range vals {
-				if l, ok := st.env.length(v, units.UnitEw); ok {
+				if l, ok := st.env.Length(v, units.UnitEw); ok {
 					setValueSide(&s.Border.Radius, i, l)
 				}
 			}
@@ -260,7 +262,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		if prop == "background" {
 			imageOp = op(compileBackgroundImage(prop, val))
 		}
-		bg := backgroundColor(val)
+		bg := css.BackgroundColor(val)
 		if bg == "" && prop == "background" && !strings.Contains(lval, "url(") && !strings.Contains(lval, "gradient(") {
 			// The shorthand without a color (as "0 0" or "none", as
 			// github.com resets its buttons with) sets the color to
@@ -285,7 +287,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			}
 		})...)
 	case "color":
-		if parseColor(val) == nil {
+		if css.ParseColor(val) == nil {
 			return nil
 		}
 		cf := colorFunc(val)
@@ -303,7 +305,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			if prop == "height" { // the height of its content (as for a modal dialog)
 				st.heightFit = strings.Contains(lval, "fit-content") || lval == "max-content" || lval == "min-content"
 			}
-			st.setSize(prop, st.env.lengthPtr(lval, pct))
+			st.setSize(prop, st.env.LengthPtr(lval, pct))
 		})
 	case "position":
 		pos := styles.PositionStatic
@@ -322,14 +324,14 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		i := sideIndex("-" + prop)
 		return op(func(st *cssState, s, ps *styles.Style) { setInset(st.env, s, i, lval) })
 	case "inset":
-		vals := expandSides(splitColors(lval))
+		vals := expandSides(css.SplitColors(lval))
 		return op(func(st *cssState, s, ps *styles.Style) {
 			for i, v := range vals {
 				setInset(st.env, s, i, v)
 			}
 		})
 	case "inset-inline", "inset-block":
-		fs := splitColors(lval)
+		fs := css.SplitColors(lval)
 		if len(fs) == 0 {
 			return nil
 		}
@@ -379,8 +381,8 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		rot := cssRotate(prop, lval)
 		zero := prop == "transform" && cssZeroScale(lval)
 		return op(func(st *cssState, s, ps *styles.Style) {
-			s.Translate.X, _ = st.env.length(x, units.UnitEw)
-			s.Translate.Y, _ = st.env.length(y, units.UnitEh)
+			s.Translate.X, _ = st.env.Length(x, units.UnitEw)
+			s.Translate.Y, _ = st.env.Length(y, units.UnitEh)
 			if prop == "transform" {
 				s.Rotate = rot
 			}
@@ -420,7 +422,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 				if v == "none" {
 					return nil
 				}
-				return st.env.lengthPtr(v, units.UnitPw)
+				return st.env.LengthPtr(v, units.UnitPw)
 			}
 			if prop != "contain-intrinsic-height" {
 				st.intrinsicWidth = length(vals[0])
@@ -506,7 +508,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		return op(func(st *cssState, s, ps *styles.Style) { s.Text.WhiteSpace = ws })
 	case "text-indent":
 		return op(func(st *cssState, s, ps *styles.Style) {
-			if l, ok := st.env.length(lval, units.UnitPw); ok {
+			if l, ok := st.env.Length(lval, units.UnitPw); ok {
 				s.Text.Indent = l
 				// the text is moved out of view (as the labels of icons,
 				// which have it), as an indent is not otherwise supported
@@ -570,42 +572,42 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 	case "flex-basis":
 		return op(func(st *cssState, s, ps *styles.Style) { st.flexBasis = lval })
 	case "gap", "grid-gap":
-		fs := splitColors(lval)
+		fs := css.SplitColors(lval)
 		return op(func(st *cssState, s, ps *styles.Style) {
 			if len(fs) > 0 {
-				if l, ok := st.env.length(fs[0], units.UnitPh); ok {
+				if l, ok := st.env.Length(fs[0], units.UnitPh); ok {
 					s.Gap.Y = l
 					s.Gap.X = l
 				}
 			}
 			if len(fs) > 1 {
-				if l, ok := st.env.length(fs[1], units.UnitPw); ok {
+				if l, ok := st.env.Length(fs[1], units.UnitPw); ok {
 					s.Gap.X = l
 				}
 			}
 		})
 	case "row-gap":
 		return op(func(st *cssState, s, ps *styles.Style) {
-			if l, ok := st.env.length(lval, units.UnitPh); ok {
+			if l, ok := st.env.Length(lval, units.UnitPh); ok {
 				s.Gap.Y = l
 			}
 		})
 	case "column-gap":
 		return op(func(st *cssState, s, ps *styles.Style) {
-			if l, ok := st.env.length(lval, units.UnitPw); ok {
+			if l, ok := st.env.Length(lval, units.UnitPw); ok {
 				s.Gap.X = l
 			}
 		})
 	case "border-spacing":
-		fs := splitColors(lval)
+		fs := css.SplitColors(lval)
 		return op(func(st *cssState, s, ps *styles.Style) {
 			if len(fs) > 0 {
-				if l, ok := st.env.length(fs[0], units.UnitPw); ok {
+				if l, ok := st.env.Length(fs[0], units.UnitPw); ok {
 					s.Gap.Set(l)
 				}
 			}
 			if len(fs) > 1 {
-				if l, ok := st.env.length(fs[1], units.UnitPh); ok {
+				if l, ok := st.env.Length(fs[1], units.UnitPh); ok {
 					s.Gap.Y = l
 				}
 			}
@@ -676,7 +678,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		if lval == "none" {
 			return op(func(st *cssState, s, ps *styles.Style) { s.BoxShadow = nil })
 		}
-		items := splitTopLevel(val, ',')
+		items := css.SplitTopLevel(val, ',')
 		return op(func(st *cssState, s, ps *styles.Style) {
 			s.BoxShadow = nil
 			for _, item := range items {
@@ -759,13 +761,13 @@ func zeroAreaClip(prop, v string) bool {
 	if len(f) != 4 { // top, right, bottom, left, of the top left corner
 		return false
 	}
-	env := defaultLengthEnv()
+	env := css.DefaultLengthEnv()
 	var px [4]float32
 	for i, x := range f {
 		if x == "auto" {
 			return false
 		}
-		l, ok := env.lengthPx(x)
+		l, ok := env.LengthPx(x)
 		if !ok {
 			return false
 		}
@@ -779,11 +781,11 @@ func zeroAreaClip(prop, v string) bool {
 // styles; other colors (as gradients) are parsed for each style, so that
 // each has its own.
 func colorFunc(v string) func() image.Image {
-	cl := parseColor(v)
+	cl := css.ParseColor(v)
 	if _, ok := cl.(*image.Uniform); ok || cl == nil {
 		return func() image.Image { return cl }
 	}
-	return func() image.Image { return parseColor(v) }
+	return func() image.Image { return css.ParseColor(v) }
 }
 
 // setSize sets the given size property (as max-width) to the given length.
@@ -808,7 +810,7 @@ func (st *cssState) setSize(prop string, v *units.Value) {
 func compileBorder(side int, val string) styleOp {
 	style, width := "none", ""
 	var color func() image.Image // the color of the text if none
-	for _, f := range splitColors(val) {
+	for _, f := range css.SplitColors(val) {
 		lf := strings.ToLower(f)
 		switch {
 		case borderStyleNames[lf]:
@@ -816,7 +818,7 @@ func compileBorder(side int, val string) styleOp {
 		case lf == "thin" || lf == "medium" || lf == "thick" || (len(lf) > 0 && (lf[0] >= '0' && lf[0] <= '9' || lf[0] == '.')):
 			width = lf
 		default:
-			if parseColor(f) != nil {
+			if css.ParseColor(f) != nil {
 				color = colorFunc(f)
 			}
 		}
@@ -824,7 +826,7 @@ func compileBorder(side int, val string) styleOp {
 	return func(st *cssState, s, ps *styles.Style) {
 		w := units.Dp(3) // medium
 		if width != "" {
-			w = st.env.borderWidth(width)
+			w = st.env.BorderWidth(width)
 		}
 		cl := image.Image(colors.Uniform(colors.ToUniform(s.Color)))
 		if color != nil {
@@ -987,12 +989,12 @@ func setSidePtr[T any](top, right, bottom, left *T, i int, v T) {
 
 // setInset sets the given side (top, right, bottom, left) of the inset
 // of a positioned element; auto is not set.
-func setInset(env *lengthEnv, s *styles.Style, i int, v string) {
+func setInset(env *css.LengthEnv, s *styles.Style, i int, v string) {
 	pct := units.UnitPw
 	if i == 0 || i == 2 {
 		pct = units.UnitPh
 	}
-	l, ok := env.length(v, pct)
+	l, ok := env.Length(v, pct)
 	setSide(&s.InsetSet, i, ok)
 	if ok {
 		setValueSide(&s.Inset, i, l)
@@ -1006,7 +1008,7 @@ func setMargin(st *cssState, i int, v string) {
 		return
 	}
 	st.marginAuto[i] = false
-	if l, ok := st.env.length(v, units.UnitPw); ok {
+	if l, ok := st.env.Length(v, units.UnitPw); ok {
 		st.margin[i] = &l
 	}
 }
@@ -1025,37 +1027,6 @@ func setBorderStyle(s *styles.Style, i int, v string) {
 	if bs.SetString(v) == nil {
 		setSide(&s.Border.Style, i, bs)
 	}
-}
-
-// splitColors splits the given value into fields at spaces
-// that are not inside of parentheses, as in rgb(...) and calc(...).
-func splitColors(v string) []string {
-	var fs []string
-	depth := 0
-	start := -1
-	for i, r := range v {
-		switch r {
-		case '(':
-			depth++
-		case ')':
-			depth--
-		case ' ', '\t', '\n':
-			if depth == 0 {
-				if start >= 0 {
-					fs = append(fs, v[start:i])
-				}
-				start = -1
-				continue
-			}
-		}
-		if start < 0 {
-			start = i
-		}
-	}
-	if start >= 0 {
-		fs = append(fs, v[start:])
-	}
-	return fs
 }
 
 // alignValue returns the alignment for the given CSS value.
@@ -1087,7 +1058,7 @@ func gridColumns(v string) int {
 			return i
 		}
 	}
-	return len(splitColors(v))
+	return len(css.SplitColors(v))
 }
 
 // cssTranslate returns the translation of the given value of the transform
@@ -1242,15 +1213,15 @@ func cssAngle(v string) float32 {
 // boxShadow returns the shadow of the given item of a box-shadow value:
 // [inset] offset-x offset-y [blur [spread]] [color], and whether it is
 // one (an inset shadow is not supported, and is not rendered).
-func boxShadow(env *lengthEnv, item string) (styles.Shadow, bool) {
+func boxShadow(env *css.LengthEnv, item string) (styles.Shadow, bool) {
 	var sh styles.Shadow
 	var lens []units.Value
 	clr := ""
-	for _, f := range splitColors(item) {
+	for _, f := range css.SplitColors(item) {
 		if strings.EqualFold(f, "inset") {
 			return sh, false
 		}
-		if l, ok := env.length(f, units.UnitDp); ok && len(lens) < 4 && (f == "0" || strings.ContainsAny(f, "0123456789")) && parseColor(f) == nil {
+		if l, ok := env.Length(f, units.UnitDp); ok && len(lens) < 4 && (f == "0" || strings.ContainsAny(f, "0123456789")) && css.ParseColor(f) == nil {
 			lens = append(lens, l)
 			continue
 		}
@@ -1267,7 +1238,7 @@ func boxShadow(env *lengthEnv, item string) (styles.Shadow, bool) {
 		sh.Spread = lens[3]
 	}
 	sh.Color = colors.Uniform(colors.Black)
-	if c := parseColor(clr); c != nil {
+	if c := css.ParseColor(clr); c != nil {
 		sh.Color = c
 	}
 	return sh, true

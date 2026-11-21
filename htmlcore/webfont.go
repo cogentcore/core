@@ -12,10 +12,12 @@ import (
 	"strings"
 	"sync"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/text/fonts"
 	"cogentcore.org/core/text/rich"
-	"github.com/aymerick/douceur/css"
+	douceur "github.com/aymerick/douceur/css"
 )
 
 // FontDecoder is, if set, a function that decodes the data of web fonts in formats that the
@@ -38,7 +40,7 @@ var webFontURLs struct {
 // @font-face rule, if [Context.WebFonts]: the first of its sources that
 // can be loaded, unless its unicode-range does not include Latin letters
 // (as for the subsets of fonts for other scripts, which are not used).
-func (c *Context) addFontFace(decls []*css.Declaration) {
+func (c *Context) addFontFace(decls []*douceur.Declaration) {
 	var family, src, urange string
 	for _, d := range decls {
 		switch strings.ToLower(strings.TrimSpace(d.Property)) {
@@ -53,7 +55,7 @@ func (c *Context) addFontFace(decls []*css.Declaration) {
 	if family == "" || src == "" || (urange != "" && !unicodeRangeHas(urange, 'A')) {
 		return
 	}
-	for _, s := range splitTopLevel(src, ',') {
+	for _, s := range css.SplitTopLevel(src, ',') {
 		u, format := fontSource(s)
 		if u == "" {
 			continue // local() fonts, which are not used
@@ -188,20 +190,6 @@ func webFontFamily(v string) string {
 		}
 	}
 	return ""
-}
-
-// splitTopLevel splits the given string at the given separator where it is
-// not in parentheses or quotes (as a list of sources with url()s).
-func splitTopLevel(s string, sep byte) []string {
-	var parts []string
-	for {
-		before, after, found := cutTopLevel(s, sep)
-		parts = append(parts, before)
-		if !found {
-			return parts
-		}
-		s = after
-	}
 }
 
 // setFontFamily sets the font family of the given style to that of the

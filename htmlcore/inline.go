@@ -13,6 +13,8 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -447,12 +449,12 @@ func (c *Context) nodeMarkup(n *xhtml.Node, pre bool) (start, end string) {
 	var props []string
 	vals := map[string]string{}
 	for _, d := range c.declarations(n) {
-		if !inlineProperties[d.Property] || d.origin == originUserAgent || d.invalid {
+		if !inlineProperties[d.Property] || d.origin == css.OriginUserAgent || d.invalid {
 			continue
 		}
 		prop, val := d.Property, d.Value
 		if prop == "background" {
-			prop, val = "background-color", backgroundColor(val)
+			prop, val = "background-color", css.BackgroundColor(val)
 			if val == "" {
 				continue
 			}
@@ -491,7 +493,7 @@ func (c *Context) nodeMarkup(n *xhtml.Node, pre bool) (start, end string) {
 				val = fontFamily(val).String()
 			}
 		case "color", "background-color":
-			if cl, ok := cssColorFunction(val); ok { // as colors.FromString does not parse CSS alpha
+			if cl, ok := css.ColorFunction(val); ok { // as colors.FromString does not parse CSS alpha
 				val = colors.AsHex(cl)
 			} else if strings.Contains(val, "(") {
 				continue // a function that is not supported (as color-mix())
@@ -532,7 +534,7 @@ func (c *Context) fontSizePx(n *xhtml.Node) float32 {
 	if v == "" || v == "inherit" {
 		return c.fontSizePx(n.Parent)
 	}
-	if px, ok := cssFontSizes[v]; ok {
+	if px, ok := css.FontSizes[v]; ok {
 		return px
 	}
 	parent := c.fontSizePx(n.Parent)

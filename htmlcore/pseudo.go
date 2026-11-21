@@ -8,9 +8,11 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/tree"
-	"github.com/aymerick/douceur/css"
+	douceur "github.com/aymerick/douceur/css"
 	"golang.org/x/net/html"
 )
 
@@ -21,38 +23,19 @@ type pseudoKey struct {
 	kind string // "before" or "after"
 }
 
-// pseudoSelector returns the selector of the elements of the given
-// selector of a ::before or ::after pseudo-element (also :before and
-// :after), and which of them it is, or false if it is not one.
-func pseudoSelector(sel string) (base, kind string, ok bool) {
-	lsel := strings.ToLower(sel)
-	for _, k := range []string{"before", "after"} {
-		for _, p := range []string{"::" + k, ":" + k} {
-			if strings.HasSuffix(lsel, p) {
-				base = strings.TrimSpace(sel[:len(sel)-len(p)])
-				if base == "" || strings.HasSuffix(base, " ") || strings.HasSuffix(base, ">") {
-					base += "*"
-				}
-				return base, k, true
-			}
-		}
-	}
-	return "", "", false
-}
-
 // addPseudoRule adds the given declarations of a rule for the given
 // pseudo-element of the elements under root that the given selector
 // selects.
-func (c *Context) addPseudoRule(root *html.Node, sel, kind string, decls []*css.Declaration, origin cssOrigin) {
-	cs := compileSelector(sel)
+func (c *Context) addPseudoRule(root *html.Node, sel, kind string, decls []*douceur.Declaration, origin css.Origin) {
+	cs := css.CompileSelector(sel)
 	if cs == nil {
 		return
 	}
-	spec := cs.specificity + 1 // the pseudo-element
+	spec := cs.Specificity + 1 // the pseudo-element
 	if c.pseudoStyles == nil {
 		c.pseudoStyles = map[pseudoKey][]*cssDecl{}
 	}
-	c.pseudoRules = append(c.pseudoRules, &pseudoRule{root: root, sel: compileSelector(sel), text: sel, kind: kind, decls: decls, origin: origin, spec: spec})
+	c.pseudoRules = append(c.pseudoRules, &pseudoRule{root: root, sel: css.CompileSelector(sel), text: sel, kind: kind, decls: decls, origin: origin, spec: spec})
 	if strings.Contains(sel, ":has(") {
 		c.relational = true
 	}
@@ -62,7 +45,7 @@ func (c *Context) addPseudoRule(root *html.Node, sel, kind string, decls []*css.
 	for _, n := range c.selectNodes(root, sel) {
 		key := pseudoKey{n, kind}
 		for _, d := range decls {
-			p := propertyName(d.Property)
+			p := css.PropertyName(d.Property)
 			c.cssOrder++
 			c.noteVars(d.Value)
 			c.pseudoStyles[key] = append(c.pseudoStyles[key], &cssDecl{Property: p, Value: c.absoluteURLs(strings.TrimSpace(d.Value)),
@@ -242,15 +225,15 @@ func (c *Context) pseudoMarkup(n *html.Node, kind string) string {
 			}
 		}
 	}
-	left := emLength(sides["margin-left"].v) + emLength(sides["padding-left"].v)
-	right := emLength(sides["margin-right"].v) + emLength(sides["padding-right"].v)
+	left := css.EmLength(sides["margin-left"].v) + css.EmLength(sides["padding-left"].v)
+	right := css.EmLength(sides["margin-right"].v) + css.EmLength(sides["padding-right"].v)
 	m := html.EscapeString(t)
 	// the word joiners keep the spaces from being trimmed (at the start
 	// or end of a text)
-	if sp := emSpaces(left); sp != "" {
+	if sp := css.EmSpaces(left); sp != "" {
 		m = "\u2060" + sp + m
 	}
-	if sp := emSpaces(right); sp != "" {
+	if sp := css.EmSpaces(right); sp != "" {
 		m += sp + "\u2060"
 	}
 	if d := win["color"]; d != nil {
@@ -260,41 +243,6 @@ func (c *Context) pseudoMarkup(n *html.Node, kind string) string {
 		}
 	}
 	return m
-}
-
-// emLength returns the given CSS length in em, with px for 16px to the
-// em (and rem as em), or 0 if it is not one of these.
-func emLength(v string) float64 {
-	v = strings.TrimSpace(strings.ToLower(v))
-	for _, u := range []struct {
-		suffix string
-		scale  float64
-	}{{"rem", 1}, {"em", 1}, {"px", 1.0 / 16}} {
-		if num, ok := strings.CutSuffix(v, u.suffix); ok {
-			f, err := strconv.ParseFloat(num, 64)
-			if err != nil {
-				return 0
-			}
-			return f * u.scale
-		}
-	}
-	return 0
-}
-
-// emSpaces returns a string of space characters (which are not collapsed
-// or trimmed) about as wide as the given number of em.
-func emSpaces(em float64) string {
-	var sb strings.Builder
-	for _, sp := range []struct {
-		r rune
-		w float64
-	}{{'\u2003', 1}, {'\u2002', 0.5}, {'\u2004', 1.0 / 3}, {'\u2005', 0.25}, {'\u2006', 1.0 / 6}, {'\u200A', 0.1}} {
-		for em >= sp.w-0.04 && sb.Len() < 64 {
-			sb.WriteRune(sp.r)
-			em -= sp.w
-		}
-	}
-	return sb.String()
 }
 
 // pseudoContent returns the text of the given pseudo-element ("before" or

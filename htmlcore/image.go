@@ -15,6 +15,8 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/styles"
 	svgpkg "cogentcore.org/core/svg"
 
@@ -118,7 +120,7 @@ func (c *Context) svgStyle(n *html.Node, root bool) map[string]string {
 	}
 	var style map[string]string
 	for _, d := range c.declarations(n) { // in the order of the cascade: the last one wins
-		if d.origin == originUserAgent || !svgProperties[d.Property] || (root && svgRootSkip[d.Property]) {
+		if d.origin == css.OriginUserAgent || !svgProperties[d.Property] || (root && svgRootSkip[d.Property]) {
 			continue
 		}
 		if style == nil {
@@ -155,7 +157,7 @@ func (c *Context) svgStyle(n *html.Node, root bool) map[string]string {
 // if it cannot be one (as for percentages, which are of the box of the
 // element, or calc): the SVG reader logged errors for the units of CSS (as
 // translate(-.5em, 0), whose e it read as an exponent, on bicycling.com).
-func svgTransform(env *lengthEnv, v string) (string, bool) {
+func svgTransform(env *css.LengthEnv, v string) (string, bool) {
 	v = strings.TrimSpace(v)
 	if strings.EqualFold(v, "none") {
 		return v, true
@@ -185,7 +187,7 @@ func svgTransform(env *lengthEnv, v string) (string, bool) {
 				}
 				f = float32(n)
 			case "translate", "translatex", "translatey":
-				px, ok := env.lengthPx(a)
+				px, ok := env.LengthPx(a)
 				if !ok {
 					if n, err := strconv.ParseFloat(a, 32); err == nil && n == 0 {
 						px, ok = 0, true
@@ -305,7 +307,7 @@ func handleImage(ctx *Context, _ string) core.Widget {
 	// applied to the pixels of the image, and to those of an svg rendered
 	// at twice its size (shown as an image of its size).
 	var filteredSize math32.Vector2
-	if filter := parseFilter(ctx.declaration(n, "filter")); filter != nil && !ctx.DelayedImageLoad {
+	if filter := css.ParseFilter(ctx.declaration(n, "filter")); filter != nil && !ctx.DelayedImageLoad {
 		if isSVG {
 			data := svgData
 			if data == nil && resp != nil {
@@ -318,11 +320,11 @@ func handleImage(ctx *Context, _ string) core.Widget {
 			}
 			sv := svgpkg.NewSVG(math32.Vec2(math32.Ceil(2*w), math32.Ceil(2*h)))
 			if sv.ReadXML(bytes.NewReader(data)) == nil {
-				im, isSVG = filter.apply(sv.RenderImage()), false
+				im, isSVG = filter.Apply(sv.RenderImage()), false
 				filteredSize = math32.Vec2(w, h)
 			}
 		} else if im != nil {
-			im = filter.apply(im)
+			im = filter.Apply(im)
 		}
 	}
 
@@ -481,7 +483,7 @@ var svgAttr = regexp.MustCompile(`(?is)\s(width|height|viewBox)\s*=\s*["']([^"']
 // from the width and height of its root element, or the size of its view
 // box for those that are not set, as for the size of an img of it.
 func svgSize(data []byte) (w, h float32, ok bool) {
-	env := defaultLengthEnv() // only absolute lengths are used
+	env := css.DefaultLengthEnv() // only absolute lengths are used
 	tag := svgRootTag.Find(data)
 	if tag == nil {
 		return 0, 0, false
@@ -491,11 +493,11 @@ func svgSize(data []byte) (w, h float32, ok bool) {
 		v := string(m[2])
 		switch strings.ToLower(string(m[1])) {
 		case "width":
-			if l, lok := env.length(v, units.UnitPw); lok && l.Unit == units.UnitDp {
+			if l, lok := env.Length(v, units.UnitPw); lok && l.Unit == units.UnitDp {
 				w = l.Value
 			}
 		case "height":
-			if l, lok := env.length(v, units.UnitPh); lok && l.Unit == units.UnitDp {
+			if l, lok := env.Length(v, units.UnitPh); lok && l.Unit == units.UnitDp {
 				h = l.Value
 			}
 		case "viewbox":

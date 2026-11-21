@@ -6,12 +6,13 @@ package htmlcore
 
 import (
 	"regexp"
-	"strconv"
 	"strings"
 	"sync"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/system"
-	"github.com/aymerick/douceur/css"
+	douceur "github.com/aymerick/douceur/css"
 	"github.com/aymerick/douceur/parser"
 )
 
@@ -19,7 +20,7 @@ import (
 // as with constructs that the parser does not support, each of its top-level
 // rules is parsed on its own, so that only the rules that do not parse are
 // left out.
-func parseCSS(style string) *css.Stylesheet {
+func parseCSS(style string) *douceur.Stylesheet {
 	// The style sheets of a page are parsed again each time that it is read
 	// (as for each change that its scripts make), so they are cached (as
 	// they are not changed after they are parsed).
@@ -33,7 +34,7 @@ func parseCSS(style string) *css.Stylesheet {
 	if len(style) >= minCachedCSS {
 		parsedCSSMu.Lock()
 		if parsedCSSSize+len(style) > maxParsedCSS {
-			parsedCSS, parsedCSSSize = map[string]*css.Stylesheet{}, 0
+			parsedCSS, parsedCSSSize = map[string]*douceur.Stylesheet{}, 0
 		}
 		parsedCSS[style] = ss
 		parsedCSSSize += len(style)
@@ -48,7 +49,7 @@ func parseCSS(style string) *css.Stylesheet {
 // style attributes, are parsed quickly).
 var (
 	parsedCSSMu   sync.Mutex
-	parsedCSS     = map[string]*css.Stylesheet{}
+	parsedCSS     = map[string]*douceur.Stylesheet{}
 	parsedCSSSize int
 )
 
@@ -58,7 +59,7 @@ const (
 )
 
 // parseCSSText parses the given style sheet (see [parseCSS]).
-func parseCSSText(style string) *css.Stylesheet {
+func parseCSSText(style string) *douceur.Stylesheet {
 	style = removeStrayCSS(style)
 	// (the condition of an @container rule is kept, after containerMark)
 	style = containerRule.ReplaceAllString(style, "@supports "+containerMark+"$1{")
@@ -66,7 +67,7 @@ func parseCSSText(style string) *css.Stylesheet {
 	if ss, err := parser.Parse(style); err == nil {
 		return ss
 	}
-	ss := css.NewStylesheet()
+	ss := douceur.NewStylesheet()
 	for _, block := range topLevelBlocks(style) {
 		bs, err := parser.Parse(block)
 		if err != nil {
@@ -393,7 +394,7 @@ func (c *Context) mediaFeatureMatches(f string) bool {
 	name, value, _ := strings.Cut(f, ":")
 	name, value = strings.TrimSpace(name), strings.TrimSpace(value)
 	length := func() (float32, bool) {
-		return calcPx(value)
+		return css.CalcPx(value)
 	}
 	width := c.mediaWidth()
 	height := width * 3 / 4
@@ -442,109 +443,6 @@ func (c *Context) mediaFeatureMatches(f string) bool {
 	return true
 }
 
-// calcPx returns the value in px of the given length, which can be a
-// calc() expression of lengths in px, em, and rem (of 16px), and numbers,
-// with +, -, *, / and parentheses, as in media queries.
-func calcPx(v string) (float32, bool) {
-	v = strings.TrimSpace(strings.ToLower(v))
-	if inner, ok := strings.CutPrefix(v, "calc("); ok {
-		v = "(" + inner
-	}
-	p := &calcParser{s: v}
-	f, ok := p.sum()
-	p.space()
-	return float32(f), ok && p.i == len(p.s)
-}
-
-// calcParser parses calc expressions.
-type calcParser struct {
-	s string
-	i int
-}
-
-func (p *calcParser) space() {
-	for p.i < len(p.s) && p.s[p.i] == ' ' {
-		p.i++
-	}
-}
-
-func (p *calcParser) sum() (float64, bool) {
-	f, ok := p.product()
-	for ok {
-		p.space()
-		if p.i >= len(p.s) || (p.s[p.i] != '+' && p.s[p.i] != '-') {
-			break
-		}
-		op := p.s[p.i]
-		p.i++
-		g, gok := p.product()
-		if !gok {
-			return 0, false
-		}
-		if op == '+' {
-			f += g
-		} else {
-			f -= g
-		}
-	}
-	return f, ok
-}
-
-func (p *calcParser) product() (float64, bool) {
-	f, ok := p.factor()
-	for ok {
-		p.space()
-		if p.i >= len(p.s) || (p.s[p.i] != '*' && p.s[p.i] != '/') {
-			break
-		}
-		op := p.s[p.i]
-		p.i++
-		g, gok := p.factor()
-		if !gok || (op == '/' && g == 0) {
-			return 0, false
-		}
-		if op == '*' {
-			f *= g
-		} else {
-			f /= g
-		}
-	}
-	return f, ok
-}
-
-func (p *calcParser) factor() (float64, bool) {
-	p.space()
-	if p.i < len(p.s) && p.s[p.i] == '(' {
-		p.i++
-		f, ok := p.sum()
-		p.space()
-		if !ok || p.i >= len(p.s) || p.s[p.i] != ')' {
-			return 0, false
-		}
-		p.i++
-		return f, true
-	}
-	start := p.i
-	for p.i < len(p.s) && (p.s[p.i] >= '0' && p.s[p.i] <= '9' || p.s[p.i] == '.' || (p.i == start && p.s[p.i] == '-')) {
-		p.i++
-	}
-	n, err := strconv.ParseFloat(p.s[start:p.i], 64)
-	if err != nil {
-		return 0, false
-	}
-	switch {
-	case strings.HasPrefix(p.s[p.i:], "px"):
-		p.i += 2
-	case strings.HasPrefix(p.s[p.i:], "rem"):
-		p.i += 3
-		n *= 16
-	case strings.HasPrefix(p.s[p.i:], "em"):
-		p.i += 2
-		n *= 16
-	}
-	return n, true
-}
-
 // mediaRangeOp matches the comparison operators of the range syntax
 // of media features, as in (width >= 50rem) or (30rem < width <= 60rem).
 var mediaRangeOp = regexp.MustCompile(`<=|>=|<|>|=`)
@@ -567,7 +465,7 @@ func mediaRangeMatches(f string, width, height float32) bool {
 		case "aspect-ratio":
 			return width / height, true, true
 		}
-		v, ok := calcPx(strings.TrimSpace(s))
+		v, ok := css.CalcPx(strings.TrimSpace(s))
 		return v, ok, false
 	}
 	feature := false
@@ -684,7 +582,7 @@ func (p *supportsParser) term() bool {
 	if open > start {
 		return true // a function, as selector(:has(a))
 	}
-	if prop, value, ok := cutTopLevel(inner, ':'); ok && !strings.ContainsAny(prop, "( ") {
+	if prop, value, ok := css.CutTopLevel(inner, ':'); ok && !strings.ContainsAny(prop, "( ") {
 		return supportedDeclaration(strings.ToLower(prop), strings.ToLower(value))
 	}
 	sub := supportsParser{s: inner}

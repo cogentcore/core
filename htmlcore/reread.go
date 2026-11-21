@@ -10,9 +10,11 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/tree"
-	"github.com/aymerick/douceur/css"
+	douceur "github.com/aymerick/douceur/css"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
@@ -122,7 +124,7 @@ func (c *Context) addedStyle(n *html.Node) bool {
 	if c.curScope != nil {
 		root = c.curScope
 	}
-	c.addRules(root, parseCSS(added), originAuthor)
+	c.addRules(root, parseCSS(added), css.OriginAuthor)
 	c.recordOnly = false
 	c.cssBase = base
 	return true
@@ -1241,7 +1243,7 @@ func (c *Context) shallowKept(keep map[*html.Node]core.Widget) map[*html.Node]bo
 	}
 	places, siblingPlaces := c.deepPlaces()
 	_, inSiblings := c.siblingCombinators()
-	var sibSubjects []keyMask
+	var sibSubjects []css.KeyMask
 	if inSiblings {
 		sibSubjects = c.siblingSubjects()
 	}
@@ -1300,22 +1302,22 @@ func (c *Context) addedRuleTargets(root *html.Node) (shallow, deep []*html.Node,
 		return nil, nil, false
 	}
 	type added struct {
-		cs   *compiledSelector
+		cs   *css.CompiledSelector
 		vars bool
 	}
 	byKey := map[string][]added{} // by "#id", ".class", or "tag"
 	var keyless []added           // matched against all of the elements
-	addRule := func(cs *compiledSelector, text string, decls []*css.Declaration) bool {
+	addRule := func(cs *css.CompiledSelector, text string, decls []*douceur.Declaration) bool {
 		if cs == nil || strings.Contains(text, ":has(") {
 			return false
 		}
-		if cs.keyKind == 0 {
+		if cs.KeyKind == 0 {
 			keyless = append(keyless, added{cs, hasCustomProps(decls)})
 			return true
 		}
-		key := cs.key
-		if cs.keyKind != 't' {
-			key = string(cs.keyKind) + key
+		key := cs.Key
+		if cs.KeyKind != 't' {
+			key = string(cs.KeyKind) + key
 		}
 		byKey[key] = append(byKey[key], added{cs, hasCustomProps(decls)})
 		return true

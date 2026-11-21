@@ -185,7 +185,7 @@ func (c *Context) imageSlotWidth(sizes string) float32 {
 		if length == "auto" {
 			break
 		}
-		if px, ok := env.lengthPx(length); ok && px > 0 {
+		if px, ok := env.LengthPx(length); ok && px > 0 {
 			return px
 		}
 	}

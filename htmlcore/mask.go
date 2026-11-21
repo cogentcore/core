@@ -13,6 +13,8 @@ import (
 	"strings"
 	"sync"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
@@ -580,7 +582,7 @@ func compileImageLayer(prop, val string, layer func(st *cssState) **cssMask) sty
 				"border-box", "padding-box", "content-box", "fill-box", "stroke-box", "view-box", "no-clip",
 				"fixed", "scroll", "local", "none", "transparent":
 			default:
-				if parseColor(f) != nil && !isPositionWord(f) {
+				if css.ParseColor(f) != nil && !isPositionWord(f) {
 					continue // the color of the background shorthand
 				}
 				keep = append(keep, f)
@@ -601,46 +603,18 @@ func compileImageLayer(prop, val string, layer func(st *cssState) **cssMask) sty
 // resolveMaskSize returns the given mask-size with its lengths (as em and
 // calc()) resolved to px with the given length environment, as maskSize
 // reads px, percentages, auto, contain, and cover.
-func resolveMaskSize(env *lengthEnv, v string) string {
-	parts := splitTopLevelSpaces(v)
+func resolveMaskSize(env *css.LengthEnv, v string) string {
+	parts := css.SplitTopLevelSpaces(v)
 	for i, p := range parts {
 		switch {
 		case p == "auto" || p == "contain" || p == "cover" || strings.HasSuffix(p, "%"):
 			continue
 		}
-		if l, ok := env.length(p, units.UnitPw); ok && l.Unit == units.UnitDp { // (% are of the box)
+		if l, ok := env.Length(p, units.UnitPw); ok && l.Unit == units.UnitDp { // (% are of the box)
 			parts[i] = strconv.FormatFloat(float64(l.Value), 'f', -1, 32) + "px"
 		}
 	}
 	return strings.Join(parts, " ")
-}
-
-// splitTopLevelSpaces splits the given value at the spaces that are not in
-// parentheses (as "calc(1rem + 4px) auto").
-func splitTopLevelSpaces(v string) []string {
-	var parts []string
-	depth, start := 0, -1
-	for i, r := range v {
-		switch {
-		case r == '(':
-			depth++
-		case r == ')':
-			depth--
-		case r == ' ' && depth == 0:
-			if start >= 0 {
-				parts = append(parts, v[start:i])
-				start = -1
-			}
-			continue
-		}
-		if start < 0 {
-			start = i
-		}
-	}
-	if start >= 0 {
-		parts = append(parts, v[start:])
-	}
-	return parts
 }
 
 // isPositionWord returns whether the given word is one of a position (a

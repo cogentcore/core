@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
@@ -45,7 +47,7 @@ func (c *Context) columnCount(n *html.Node) int {
 		}
 		if i, err := strconv.Atoi(v); err == nil {
 			count = i
-		} else if px, ok := env.lengthPx(v); ok {
+		} else if px, ok := env.LengthPx(v); ok {
 			width = px
 		}
 	}
@@ -72,7 +74,7 @@ func (c *Context) columnCount(n *html.Node) int {
 		return 0
 	}
 	gap := float32(16) // the normal column gap is 1em
-	if g, ok := env.lengthPx(c.declaration(n, "column-gap")); ok {
+	if g, ok := env.LengthPx(c.declaration(n, "column-gap")); ok {
 		gap = g
 	}
 	fit := int((c.availableWidth(env, n) + gap) / (width + gap))
@@ -94,7 +96,7 @@ func (c *Context) columnCount(n *html.Node) int {
 // availableWidth returns an estimate of the width of the content of the
 // given element, in px: that of the viewport, within the widths and max
 // widths of it and the elements that it is in, less their spaces.
-func (c *Context) availableWidth(env *lengthEnv, n *html.Node) float32 {
+func (c *Context) availableWidth(env *css.LengthEnv, n *html.Node) float32 {
 	w := c.mediaWidth()
 	var chain []*html.Node
 	for p := n; p != nil && p.Type == html.ElementNode; p = p.Parent {
@@ -109,7 +111,7 @@ func (c *Context) availableWidth(env *lengthEnv, n *html.Node) float32 {
 			w -= max(l, 0) + max(r, 0)
 		}
 		for _, prop := range []string{"width", "max-width"} {
-			if px, ok := env.lengthPx(c.declaration(p, prop)); ok && px > 0 {
+			if px, ok := env.LengthPx(c.declaration(p, prop)); ok && px > 0 {
 				w = min(w, px)
 			}
 		}
@@ -141,7 +143,7 @@ func (c *Context) arrangeColumns(n *html.Node, fr *core.Frame) {
 	}
 	count = min(count, len(kids))
 	gap := units.Em(1)
-	if g, ok := c.readEnv().length(c.declaration(n, "column-gap"), units.UnitPw); ok {
+	if g, ok := c.readEnv().Length(c.declaration(n, "column-gap"), units.UnitPw); ok {
 		gap = g
 	}
 	fr.FinalStyler(func(s *styles.Style) {
@@ -194,15 +196,15 @@ func (c *Context) arrangeColumns(n *html.Node, fr *core.Frame) {
 // horizontalSides returns the left and right lengths in px of the given
 // sides property (padding or margin) of the given element, from its
 // declarations in the order of the cascade (with the shorthand).
-func (c *Context) horizontalSides(env *lengthEnv, n *html.Node, base string) (left, right float32) {
+func (c *Context) horizontalSides(env *css.LengthEnv, n *html.Node, base string) (left, right float32) {
 	px := func(v string) float32 {
-		l, _ := env.lengthPx(v)
+		l, _ := env.LengthPx(v)
 		return l
 	}
 	for _, d := range c.declarations(n) {
 		switch d.Property {
 		case base:
-			if vals := expandSides(splitColors(d.Value)); len(vals) == 4 {
+			if vals := expandSides(css.SplitColors(d.Value)); len(vals) == 4 {
 				right, left = px(vals[1]), px(vals[3])
 			}
 		case base + "-left", base + "-inline-start":
@@ -210,7 +212,7 @@ func (c *Context) horizontalSides(env *lengthEnv, n *html.Node, base string) (le
 		case base + "-right", base + "-inline-end":
 			right = px(d.Value)
 		case base + "-inline":
-			fs := splitColors(d.Value)
+			fs := css.SplitColors(d.Value)
 			if len(fs) > 0 {
 				left, right = px(fs[0]), px(fs[len(fs)-1])
 			}

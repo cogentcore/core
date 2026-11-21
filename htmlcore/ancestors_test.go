@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -17,21 +19,21 @@ import (
 // combinators of descendants and children, not of siblings, nor in
 // parentheses.
 func TestAncestorKeys(t *testing.T) {
-	keys := func(ks ...string) keyMask {
-		var m keyMask
+	keys := func(ks ...string) css.KeyMask {
+		var m css.KeyMask
 		for _, k := range ks {
-			m = m.or(keyBit(k))
+			m = m.Or(css.KeyBit(k))
 		}
 		return m
 	}
-	assert.Equal(t, keys(".menu"), ancestorKeys(".menu .item"))
-	assert.Equal(t, keys("div", "ul"), ancestorKeys("div > ul li.x"))
-	assert.Equal(t, keys(".b"), ancestorKeys(".a + .b .c"))
-	assert.Equal(t, keys(".a", "#main"), ancestorKeys(".a:hover #main>.b"))
-	assert.Equal(t, keyMask{}, ancestorKeys(":not(.x) .y"))
-	assert.Equal(t, keyMask{}, ancestorKeys(".a ~ .b"))
-	assert.Equal(t, keyMask{}, ancestorKeys(".item"))
-	assert.Equal(t, keyMask{}, ancestorKeys(`.a\:b .c`), "escapes")
+	assert.Equal(t, keys(".menu"), css.AncestorKeys(".menu .item"))
+	assert.Equal(t, keys("div", "ul"), css.AncestorKeys("div > ul li.x"))
+	assert.Equal(t, keys(".b"), css.AncestorKeys(".a + .b .c"))
+	assert.Equal(t, keys(".a", "#main"), css.AncestorKeys(".a:hover #main>.b"))
+	assert.Equal(t, css.KeyMask{}, css.AncestorKeys(":not(.x) .y"))
+	assert.Equal(t, css.KeyMask{}, css.AncestorKeys(".a ~ .b"))
+	assert.Equal(t, css.KeyMask{}, css.AncestorKeys(".item"))
+	assert.Equal(t, css.KeyMask{}, css.AncestorKeys(`.a\:b .c`), "escapes")
 }
 
 // TestAncestorFilter tests that the selectors that the ancestor filter
@@ -44,8 +46,8 @@ func TestAncestorFilter(t *testing.T) {
 	for _, n := range []string{"i", "p"} {
 		el := elementByID(doc, n)
 		for _, sel := range []string{".menu .item", ".open li", "#m > ul > li", "body p", ".other .item", "ul p", "div.menu li#i", "section li"} {
-			cs := compileSelector(sel)
-			assert.Equal(t, cs.sel.Match(el), ctx.selMatch(cs, el), "%s for #%s", sel, n)
+			cs := css.CompileSelector(sel)
+			assert.Equal(t, cs.Sel.Match(el), ctx.selMatch(cs, el), "%s for #%s", sel, n)
 		}
 	}
 }

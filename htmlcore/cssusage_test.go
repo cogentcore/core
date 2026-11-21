@@ -14,6 +14,8 @@ import (
 	"strings"
 	"testing"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"golang.org/x/net/html"
 )
 
@@ -87,7 +89,7 @@ func TestCSSUsage(t *testing.T) {
 			ctx.PageURL = strings.TrimSpace(string(b))
 		}
 		ctx.Node = doc
-		ctx.addStyleOrigin(browserStyles, originUserAgent)
+		ctx.addStyleOrigin(browserStyles, css.OriginUserAgent)
 		ctx.addStyleSheets(doc)
 		var walk func(n *html.Node, hidden bool)
 		walk = func(n *html.Node, hidden bool) {
@@ -98,7 +100,7 @@ func TestCSSUsage(t *testing.T) {
 				if !hidden {
 					seen := map[string]bool{}
 					for _, d := range ctx.declarations(n) {
-						if d.origin == originUserAgent || strings.HasPrefix(d.Property, "--") || seen[d.Property] {
+						if d.origin == css.OriginUserAgent || strings.HasPrefix(d.Property, "--") || seen[d.Property] {
 							continue
 						}
 						seen[d.Property] = true

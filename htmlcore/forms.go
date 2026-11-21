@@ -14,6 +14,8 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
@@ -526,7 +528,7 @@ func (c *Context) inputIcons(n *html.Node, tf *core.TextField) {
 		c.iconNodes[s] = true
 		inset := strings.TrimSpace(c.declaration(s, side))
 		env := c.readEnv()
-		pad, hasPad := env.length(inset, units.UnitPw)
+		pad, hasPad := env.Length(inset, units.UnitPw)
 		if side == "left" {
 			tf.SetLeadingIcon(icon)
 		} else {
@@ -611,7 +613,7 @@ func (c *Context) setCheckedAttrs(root *html.Node) func() {
 	var walk func(n *html.Node)
 	walk = func(n *html.Node) {
 		if c.Hovered != nil && n.Type == html.ElementNode && c.Hovered(n) {
-			n.Attr = append(n.Attr, html.Attribute{Key: hoverAttr}) // for :hover
+			n.Attr = append(n.Attr, html.Attribute{Key: css.HoverAttr}) // for :hover
 			hovered = append(hovered, n)
 		}
 		if c.Checked != nil && n.Type == html.ElementNode && n.Data == "input" {
@@ -632,7 +634,7 @@ func (c *Context) setCheckedAttrs(root *html.Node) func() {
 			toggleAttr(n, "checked")
 		}
 		for _, n := range hovered {
-			toggleAttr(n, hoverAttr)
+			toggleAttr(n, css.HoverAttr)
 		}
 	}
 }

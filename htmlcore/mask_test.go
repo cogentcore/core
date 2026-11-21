@@ -9,6 +9,8 @@ import (
 	"image/color"
 	"testing"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/units"
@@ -29,7 +31,7 @@ func TestMaskImage(t *testing.T) {
 	assert.Equal(t, [2]float32{0.5, 0.5}, [2]float32{x, y})
 	assert.Equal(t, math32.Vec2(20, 10), maskSize("20px auto", math32.Vec2(40, 40), math32.Vec2(100, 50), 1))
 	assert.Equal(t, math32.Vec2(40, 20), maskSize("contain", math32.Vec2(40, 40), math32.Vec2(100, 50), 1))
-	assert.Equal(t, "20px auto", resolveMaskSize(defaultLengthEnv(), "calc(max(calc(1rem + 4px),10px)) auto"))
+	assert.Equal(t, "20px auto", resolveMaskSize(css.DefaultLengthEnv(), "calc(max(calc(1rem + 4px),10px)) auto"))
 
 	// a circle in a 10x10 view box
 	circle := `data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" width="10" height="10"%3E%3Ccircle cx="5" cy="5" r="5"/%3E%3C/svg%3E`

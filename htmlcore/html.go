@@ -11,6 +11,8 @@ import (
 	"io"
 	"strings"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/core"
 	"golang.org/x/net/html"
 )
@@ -124,9 +126,9 @@ func readOneNode(ctx *Context, parent core.Widget, n *html.Node) {
 		ctx.reuseFrom = nil // (not kept, with all of its widgets)
 		reuse := prev != nil && prev.snaps != nil && prev.snapRoot == n && prev.matchedRules == len(prev.rules)
 		ctx.deferMatch = reuse
-		ctx.addStyleOrigin(browserStyles, originUserAgent)
+		ctx.addStyleOrigin(browserStyles, css.OriginUserAgent)
 		if ctx.Style != "" { // before the style sheets of the page, which override it
-			ctx.addStyleOrigin(ctx.Style, originAuthor)
+			ctx.addStyleOrigin(ctx.Style, css.OriginAuthor)
 		}
 		restore := ctx.setCheckedAttrs(n)
 		keptMasks := ctx.keepAncestorMasks() // (as the rules are matched)

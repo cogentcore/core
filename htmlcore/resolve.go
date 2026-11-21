@@ -5,9 +5,11 @@
 package htmlcore
 
 import (
-	"cogentcore.org/core/colors"
 	"strconv"
 	"strings"
+
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/htmlcore/css"
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
@@ -228,7 +230,7 @@ func (r *resolver) replacedSize() {
 				if i == 1 {
 					prop = "height"
 				}
-				if px, ok := st.env.lengthPx(c.declaration(cb, prop)); ok && px > 0 {
+				if px, ok := st.env.LengthPx(c.declaration(cb, prop)); ok && px > 0 {
 					scale = min(scale, px*mx.Value/100/size.Dim(math32.Dims(i)))
 				}
 			}
@@ -239,7 +241,7 @@ func (r *resolver) replacedSize() {
 			// keeping its aspect, as its width and height are auto
 			for i, prop := range []string{"max-width", "max-height"} {
 				d := math32.Dims(i)
-				if px, ok := st.env.lengthPx(c.declaration(node, prop)); ok && px > 0 && px < size.Dim(d) {
+				if px, ok := st.env.LengthPx(c.declaration(node, prop)); ok && px > 0 && px < size.Dim(d) {
 					size = size.MulScalar(px / size.Dim(d))
 				}
 			}
@@ -483,7 +485,7 @@ func (r *resolver) lineHeight() {
 			// the small text of Tailwind, which was taken to be in px: the
 			// text was 1.4px high, cut off by its boxes)
 			s.Text.LineHeight = f
-		} else if v, ok := st.env.length(lh, units.UnitEm); ok {
+		} else if v, ok := st.env.Length(lh, units.UnitEm); ok {
 			if v.Unit == units.UnitEm {
 				s.Text.LineHeight = v.Value / 100 // from %
 				if !strings.HasSuffix(lh, "%") {
@@ -503,7 +505,7 @@ func unitlessCalc(v string) (float32, bool) {
 	if !ok || strings.ContainsAny(inner, "abcdefghijklmnopqrstuvwxyz%") {
 		return 0, false
 	}
-	return calcPx(v)
+	return css.CalcPx(v)
 }
 
 // itemGrowth sets how the widget grows and shrinks in the formatting context
@@ -630,12 +632,12 @@ func (r *resolver) flexBasis() {
 			// 200px, which were 200px wide with the basis as a width)
 			// (its basis is where it starts from in a row that wraps)
 			st.width = nil
-			if l, ok := st.env.length(st.flexBasis, units.UnitPw); ok {
+			if l, ok := st.env.Length(st.flexBasis, units.UnitPw); ok {
 				r.s.FlexBasis = l
 			}
 			return
 		}
-		if l, ok := st.env.length(st.flexBasis, units.UnitPw); ok {
+		if l, ok := st.env.Length(st.flexBasis, units.UnitPw); ok {
 			st.width = &l
 		}
 		return
@@ -670,7 +672,7 @@ func (r *resolver) flexBasis() {
 	// (percentages of the width of a row in core are of it less its gaps;
 	// a custom length, not a percentage width, which a row that wraps
 	// would need room for in a line)
-	l := customLength("calc", []linear{{pct: float64(100 * st.flexGrow / sum)}}, units.UnitPw)
+	l := css.CustomLength("calc", []css.Linear{{Pct: float64(100 * st.flexGrow / sum)}}, units.UnitPw)
 	st.width = &l
 }
 
@@ -1129,7 +1131,7 @@ func (r *resolver) sizes() {
 		// which was as wide as its container)
 		s.Max.X = *st.maxWidth
 		if st.width.Unit == units.UnitDp {
-			s.Max.X = customLength("min", []linear{{px: float64(st.width.Value)}, {pct: float64(st.maxWidth.Value)}}, units.UnitPw)
+			s.Max.X = css.CustomLength("min", []css.Linear{{Px: float64(st.width.Value)}, {Pct: float64(st.maxWidth.Value)}}, units.UnitPw)
 		}
 	case st.width != nil && st.width.Unit != units.UnitPw && st.maxWidth.Unit == units.UnitPw:
 		// a fixed width with a percentage max-width (as max-width: 100%) is
@@ -1168,7 +1170,7 @@ func (r *resolver) containingBlockHeight() (float32, bool) {
 	if n == nil {
 		return 0, false
 	}
-	return r.st.env.lengthPx(strings.TrimSpace(r.c.declaration(n, "height")))
+	return r.st.env.LengthPx(strings.TrimSpace(r.c.declaration(n, "height")))
 }
 
 // textAlign aligns text and inline rows within their block for text-align.

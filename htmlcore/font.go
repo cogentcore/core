@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
@@ -20,14 +22,8 @@ import (
 // for the default Noto Sans font.
 const lineHeightNormal = 1.362
 
-// cssFontSizes are the absolute font size keywords, in px.
-var cssFontSizes = map[string]float32{
-	"xx-small": 9, "x-small": 10, "small": 13, "medium": 16, "large": 18,
-	"x-large": 24, "xx-large": 32, "xxx-large": 48,
-}
-
 // setFontSize sets the font size, relative to the inherited one.
-func setFontSize(env *lengthEnv, s, ps *styles.Style, v string) {
+func setFontSize(env *css.LengthEnv, s, ps *styles.Style, v string) {
 	inherited := s.Font.Size
 	if ps != nil {
 		inherited = ps.Font.Size
@@ -36,7 +32,7 @@ func setFontSize(env *lengthEnv, s, ps *styles.Style, v string) {
 	scale := func(f float32) {
 		s.Font.Size = units.Value{Value: inherited.Value * f, Unit: inherited.Unit}
 	}
-	if px, ok := cssFontSizes[v]; ok {
+	if px, ok := css.FontSizes[v]; ok {
 		s.Font.Size = units.Dp(px)
 		return
 	}
@@ -56,7 +52,7 @@ func setFontSize(env *lengthEnv, s, ps *styles.Style, v string) {
 	}
 	if before, ok := strings.CutSuffix(v, "rem"); ok {
 		if f, err := strconv.ParseFloat(before, 32); err == nil {
-			s.Font.Size = units.Dp(float32(env.rem) * float32(f))
+			s.Font.Size = units.Dp(float32(env.Rem) * float32(f))
 		}
 		return
 	}
@@ -66,7 +62,7 @@ func setFontSize(env *lengthEnv, s, ps *styles.Style, v string) {
 		}
 		return
 	}
-	if l, ok := env.length(v, units.UnitDp); ok {
+	if l, ok := env.Length(v, units.UnitDp); ok {
 		s.Font.Size = l
 	}
 }
@@ -131,7 +127,7 @@ func setFont(st *cssState, s, ps *styles.Style, v string) string {
 		case lf == "bold" || lf == "bolder" || lf == "lighter" || (len(lf) == 3 && lf[1] == '0' && lf[2] == '0'):
 			weight = lf
 		case lf == "normal" || lf == "small-caps":
-		case len(lf) > 0 && (lf[0] >= '0' && lf[0] <= '9' || lf[0] == '.') || cssFontSizes[lf] > 0:
+		case len(lf) > 0 && (lf[0] >= '0' && lf[0] <= '9' || lf[0] == '.') || css.FontSizes[lf] > 0:
 			s.Font.Slant = slant
 			s.Font.Weight = rich.Normal
 			if weight != "" {

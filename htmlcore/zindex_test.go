@@ -12,6 +12,8 @@ import (
 	"image/png"
 	"testing"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
@@ -120,7 +122,7 @@ func TestImageBorderRadius(t *testing.T) {
 // window, as high as its content, over the page; a closed dialog is not
 // shown.
 func TestModalDialog(t *testing.T) {
-	src := `<div style="height: 600px">page</div><dialog id="modal" open ` + ModalAttr + ` style="width: 300px"><p>Jump to</p></dialog>` +
+	src := `<div style="height: 600px">page</div><dialog id="modal" open ` + css.ModalAttr + ` style="width: 300px"><p>Jump to</p></dialog>` +
 		`<dialog id="closed"><p>closed</p></dialog>`
 	widgetsByID(t, src, func(ws map[string]*core.WidgetBase, dp float32) {
 		m := ws["modal"]

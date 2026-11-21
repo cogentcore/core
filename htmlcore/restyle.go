@@ -9,8 +9,10 @@ import (
 	"slices"
 	"strings"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/core"
-	"github.com/aymerick/douceur/css"
+	douceur "github.com/aymerick/douceur/css"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
@@ -25,11 +27,11 @@ type styleRule struct {
 	// in a shadow tree, and scopeKind is the elements that it selects there
 	// (see [Context.inScope]).
 	scope     *html.Node
-	scopeKind scopeKind
-	sel       *compiledSelector
+	scopeKind css.ScopeKind
+	sel       *css.CompiledSelector
 	text      string // of its selector
-	decls     []*css.Declaration
-	origin    cssOrigin
+	decls     []*douceur.Declaration
+	origin    css.Origin
 	spec      int
 
 	// container is the condition of the @container rule that it is in.
@@ -53,7 +55,7 @@ type styleRule struct {
 	// follows it: the rule only selects other elements in the elements
 	// that match it whose descendants (or later siblings) change, and their
 	// later siblings if hasSiblings (see [Context.relationalChanges]).
-	hasCompound *compiledSelector
+	hasCompound *css.CompiledSelector
 	hasSiblings bool
 }
 
@@ -61,11 +63,11 @@ type styleRule struct {
 // has been added to a context (see [styleRule]).
 type pseudoRule struct {
 	root   *html.Node
-	sel    *compiledSelector
+	sel    *css.CompiledSelector
 	text   string // of its selector
 	kind   string
-	decls  []*css.Declaration
-	origin cssOrigin
+	decls  []*douceur.Declaration
+	origin css.Origin
 	spec   int
 }
 
@@ -88,7 +90,7 @@ type ruleIndex struct {
 // recordRule records the given style rule (of one selector), which is
 // being added, as the rule of the declarations that it adds (see
 // [Context.Restyle]).
-func (c *Context) recordRule(root *html.Node, sel string, cs *compiledSelector, decls []*css.Declaration, origin cssOrigin, spec int) {
+func (c *Context) recordRule(root *html.Node, sel string, cs *css.CompiledSelector, decls []*douceur.Declaration, origin css.Origin, spec int) {
 	has := strings.Contains(sel, ":has(")
 	subject := has && strings.Index(sel, ":has(") >= subjectStart(sel)
 	r := &styleRule{root: root, scope: c.curScope, scopeKind: c.curScopeKind, sel: cs, text: sel, decls: decls, origin: origin, spec: spec, container: c.curContainer, cssBase: c.cssBase, relational: has, subjectHas: subject}
@@ -110,13 +112,13 @@ func (c *Context) index() *ruleIndex {
 	}
 	for ; ix.n < len(c.rules); ix.n++ {
 		i, r := ix.n, c.rules[ix.n]
-		switch r.sel.keyKind {
+		switch r.sel.KeyKind {
 		case '#':
-			ix.byID[r.sel.key] = append(ix.byID[r.sel.key], i)
+			ix.byID[r.sel.Key] = append(ix.byID[r.sel.Key], i)
 		case '.':
-			ix.byClass[r.sel.key] = append(ix.byClass[r.sel.key], i)
+			ix.byClass[r.sel.Key] = append(ix.byClass[r.sel.Key], i)
 		case 't':
-			ix.byTag[r.sel.key] = append(ix.byTag[r.sel.key], i)
+			ix.byTag[r.sel.Key] = append(ix.byTag[r.sel.Key], i)
 		default:
 			ix.other = append(ix.other, i)
 		}
@@ -168,8 +170,8 @@ func (c *Context) matchDecls(n *html.Node) []*cssDecl {
 		}
 		c.cssBase = r.cssBase // for its URLs
 		for _, d := range r.decls {
-			prop, value := propertyName(d.Property), strings.TrimSpace(d.Value)
-			if !validDeclaration(prop, value) {
+			prop, value := css.PropertyName(d.Property), strings.TrimSpace(d.Value)
+			if !css.ValidDeclaration(prop, value) {
 				continue
 			}
 			c.cssOrder++
@@ -192,7 +194,7 @@ func (c *Context) matchPseudo(n *html.Node, kind string) []*cssDecl {
 		for _, d := range r.decls {
 			c.cssOrder++
 			c.noteVars(d.Value)
-			ds = append(ds, &cssDecl{Property: propertyName(d.Property), Value: c.absoluteURLs(strings.TrimSpace(d.Value)),
+			ds = append(ds, &cssDecl{Property: css.PropertyName(d.Property), Value: c.absoluteURLs(strings.TrimSpace(d.Value)),
 				Important: d.Important, origin: r.origin, specificity: r.spec, order: c.cssOrder})
 		}
 	}
@@ -282,7 +284,7 @@ type declUpdate struct {
 	freeChanged map[*html.Node]bool
 
 	// transitions are the transitions of the properties that changed.
-	transitions []Transition
+	transitions []css.Transition
 }
 
 // apply styles the widgets of the update again, and lays them out again
@@ -562,7 +564,7 @@ func (c *Context) updateDecls(changed, whole []*html.Node, free func(n *html.Nod
 			continue
 		}
 		if oldDisplay[n] != "none" && c.displayOf(n) != "none" {
-			u.transitions = append(u.transitions, transitionsOf(n, nw, props)...)
+			u.transitions = append(u.transitions, css.TransitionsOf(n, nw, props)...)
 		}
 		if isFree(n) {
 			u.freeChanged[n] = true
@@ -672,21 +674,6 @@ func samePseudo(a, b []*cssDecl) bool {
 	return true
 }
 
-// keyIn returns whether the given element has the key of the selector
-// (see [compiledSelector.key]), which every element that it selects has,
-// or it has none.
-func (cs *compiledSelector) keyIn(n *html.Node) bool {
-	switch cs.keyKind {
-	case '#':
-		return GetAttr(n, "id") == cs.key
-	case '.':
-		return slices.Contains(strings.Fields(GetAttr(n, "class")), cs.key)
-	case 't':
-		return strings.EqualFold(n.Data, cs.key)
-	}
-	return true
-}
-
 // relationalChanges adds the elements that the rules of :has() selectors
 // select now, or did, to the elements whose declarations may change,
 // with add, returning false if there are too many of them. A change of an
@@ -719,7 +706,7 @@ func (c *Context) relationalChanges(root *html.Node, changed []*html.Node, add f
 			r := c.rules[i]
 			// (the key of its selector first, which most elements do not
 			// have, then its scope, after a match, as it walks up)
-			if had(i) != (r.sel.keyIn(n) && c.selMatch(r.sel, n) && contains(r.root, n) && c.inScope(n, r.scope, r.scopeKind)) {
+			if had(i) != (r.sel.KeyIn(n) && c.selMatch(r.sel, n) && contains(r.root, n) && c.inScope(n, r.scope, r.scopeKind)) {
 				return add(n)
 			}
 		}
@@ -758,7 +745,7 @@ func (c *Context) relationalChanges(root *html.Node, changed []*html.Node, add f
 			return true
 		}
 		for _, i := range ix.hasAbove {
-			if c.rules[i].hasCompound.sel.Match(h) {
+			if c.rules[i].hasCompound.Sel.Match(h) {
 				if _, ok := regions[h]; !ok {
 					regionOrder = append(regionOrder, h)
 				}
@@ -791,13 +778,13 @@ func (c *Context) relationalChanges(root *html.Node, changed []*html.Node, add f
 			for _, i := range rules {
 				r := c.rules[i]
 				siblings = siblings || r.hasSiblings
-				switch r.sel.keyKind {
+				switch r.sel.KeyKind {
 				case '#':
-					sub.byID[r.sel.key] = append(sub.byID[r.sel.key], i)
+					sub.byID[r.sel.Key] = append(sub.byID[r.sel.Key], i)
 				case '.':
-					sub.byClass[r.sel.key] = append(sub.byClass[r.sel.key], i)
+					sub.byClass[r.sel.Key] = append(sub.byClass[r.sel.Key], i)
 				case 't':
-					sub.byTag[r.sel.key] = append(sub.byTag[r.sel.key], i)
+					sub.byTag[r.sel.Key] = append(sub.byTag[r.sel.Key], i)
 				default:
 					sub.other = append(sub.other, i)
 				}
@@ -858,7 +845,7 @@ func (c *Context) relationalChanges(root *html.Node, changed []*html.Node, add f
 // whose :has() selectors are all in one compound that is not its last,
 // that compound without them, compiled, and whether a sibling combinator
 // follows it, or nil if they are not (or it does not compile).
-func hasCompound(sel string) (*compiledSelector, bool) {
+func hasCompound(sel string) (*css.CompiledSelector, bool) {
 	at := strings.Index(sel, ":has(")
 	combs := combinators(sel)
 	start, end, siblings := 0, len(sel), false
@@ -914,7 +901,7 @@ func hasCompound(sel string) (*compiledSelector, bool) {
 	if compound == "" {
 		compound = "*"
 	}
-	cs := compileSelector(compound)
+	cs := css.CompileSelector(compound)
 	if cs == nil {
 		return nil, false
 	}
@@ -1205,7 +1192,7 @@ func (c *Context) noteVars(value string) {
 		}
 		value = strings.TrimLeft(value[i+4:], " \t\n")
 		j := 0
-		for j < len(value) && isNameChar(value[j]) {
+		for j < len(value) && css.IsNameChar(value[j]) {
 			j++
 		}
 		if j > 0 {
@@ -1279,7 +1266,7 @@ func (c *Context) invalidation(n *html.Node) (selects func(k *html.Node) bool, s
 			}
 		}
 		for _, a := range attrTokens {
-			if a == hoverAttr {
+			if a == css.HoverAttr {
 				// (the attribute of :hover, while the states are set)
 				tokens = append(tokens, ":hover")
 			}
@@ -1294,9 +1281,9 @@ func (c *Context) invalidation(n *html.Node) (selects func(k *html.Node) bool, s
 		keysChanged = keysChanged || !sameStates(tokens) && (t[0] == '.' || t[0] == '#')
 	}
 	sameKeys := !keysChanged
-	var keys []*compiledSelector
+	var keys []*css.CompiledSelector
 	all := false
-	check := func(text string, cs *compiledSelector, decls []*css.Declaration) bool {
+	check := func(text string, cs *css.CompiledSelector, decls []*douceur.Declaration) bool {
 		prefix, sib, last := splitLastCompound(text)
 		if keysChanged && (strings.Contains(prefix, "[class") || strings.Contains(prefix, "[id")) {
 			// (selected by its class or id other than by the names of
@@ -1304,7 +1291,7 @@ func (c *Context) invalidation(n *html.Node) (selects func(k *html.Node) bool, s
 			if sib {
 				siblings = true
 			}
-			if cs == nil || cs.keyKind == 0 {
+			if cs == nil || cs.KeyKind == 0 {
 				all = true
 			} else {
 				keys = append(keys, cs)
@@ -1323,7 +1310,7 @@ func (c *Context) invalidation(n *html.Node) (selects func(k *html.Node) bool, s
 				if sib {
 					siblings = true
 				}
-				if cs == nil || cs.keyKind == 0 {
+				if cs == nil || cs.KeyKind == 0 {
 					all = true
 				} else {
 					keys = append(keys, cs)
@@ -1338,7 +1325,7 @@ func (c *Context) invalidation(n *html.Node) (selects func(k *html.Node) bool, s
 		// values that they had)
 		mayChange := func() bool {
 			if sameStates(tokens) {
-				return cs == nil || cs.keyIn(n)
+				return cs == nil || cs.KeyIn(n)
 			}
 			return len(attrTokens) > 0 || cs == nil || c.matchChanged(n, old, cs)
 		}
@@ -1354,7 +1341,7 @@ func (c *Context) invalidation(n *html.Node) (selects func(k *html.Node) bool, s
 			if sib {
 				siblings = true
 			}
-			if cs == nil || cs.keyKind == 0 {
+			if cs == nil || cs.KeyKind == 0 {
 				all = true
 			} else {
 				keys = append(keys, cs)
@@ -1377,7 +1364,7 @@ func (c *Context) invalidation(n *html.Node) (selects func(k *html.Node) bool, s
 			return true
 		}
 		for _, cs := range keys {
-			if cs.keyIn(k) {
+			if cs.KeyIn(k) {
 				return true
 			}
 		}
@@ -1396,10 +1383,10 @@ func compoundMaySelect(prefix string, n *html.Node, has func(comp string) bool) 
 	if strings.ContainsAny(prefix, "\\|") {
 		return true
 	}
-	own := ownKeys(n)
+	own := css.OwnKeys(n)
 	from := 0
 	check := func(comp string) bool {
-		return has(comp) && own.has(compoundKeys(comp))
+		return has(comp) && own.Has(css.CompoundKeys(comp))
 	}
 	for _, cb := range combinators(prefix) {
 		if check(prefix[from:cb.start]) {
@@ -1448,7 +1435,7 @@ func hasToken(text, token string) bool {
 			return false
 		}
 		end := i + j + len(token)
-		if end >= len(text) || !isNameChar(text[end]) {
+		if end >= len(text) || !css.IsNameChar(text[end]) {
 			return true
 		}
 		i = end
@@ -1464,7 +1451,7 @@ func hasAttrSelector(text, name string) bool {
 			return false
 		}
 		rest := strings.TrimLeft(text[i+j+1:], " ")
-		if strings.HasPrefix(rest, name) && (len(rest) == len(name) || !isNameChar(rest[len(name)])) {
+		if strings.HasPrefix(rest, name) && (len(rest) == len(name) || !css.IsNameChar(rest[len(name)])) {
 			return true
 		}
 		i += j + 1
@@ -1473,7 +1460,7 @@ func hasAttrSelector(text, name string) bool {
 
 // hasCustomProps returns whether the given declarations have custom
 // properties (--name).
-func hasCustomProps(decls []*css.Declaration) bool {
+func hasCustomProps(decls []*douceur.Declaration) bool {
 	for _, d := range decls {
 		if strings.HasPrefix(strings.TrimSpace(d.Property), "--") {
 			return true
@@ -1514,8 +1501,8 @@ func sameStates(tokens []string) bool {
 // matchChanged returns whether the given selector matches the given
 // element differently with its class and id now and with those of the
 // given state of it (as before they changed).
-func (c *Context) matchChanged(n *html.Node, old nodeSnap, cs *compiledSelector) bool {
-	now := cs.sel.Match(n)
+func (c *Context) matchChanged(n *html.Node, old nodeSnap, cs *css.CompiledSelector) bool {
+	now := cs.Sel.Match(n)
 	saved := n.Attr
 	attrs := make([]html.Attribute, 0, len(saved)+2)
 	for _, a := range saved {
@@ -1531,7 +1518,7 @@ func (c *Context) matchChanged(n *html.Node, old nodeSnap, cs *compiledSelector)
 		attrs = append(attrs, html.Attribute{Key: "id", Val: old.id})
 	}
 	n.Attr = attrs
-	before := cs.sel.Match(n)
+	before := cs.Sel.Match(n)
 	n.Attr = saved
 	return now != before
 }

@@ -17,6 +17,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"github.com/andybalholm/cascadia"
 
 	"cogentcore.org/core/core"
@@ -208,7 +210,7 @@ type Context struct {
 	// properties of elements that a restyle (as for a change of a class by
 	// a script) starts, for the app to dispatch their transitionend events
 	// when they end (as Google sign-in waits for, to show its next step).
-	OnTransition func(ts []Transition)
+	OnTransition func(ts []css.Transition)
 
 	// WidgetHandlers is a list of handler functions for each Widget,
 	// called in sequential order for each widget that is created,
@@ -280,7 +282,7 @@ type Context struct {
 type pageState struct {
 	// selIndex is the index of the nodes of the document for selecting
 	// the nodes of style rules (see [Context.selectNodes]).
-	selIndex *selectorIndex
+	selIndex *css.SelectorIndex
 
 	// styles are the CSS declarations for each node, which are
 	// sorted in the order of the cascade by [Context.declarations].
@@ -341,7 +343,7 @@ type pageState struct {
 	// curScope is the host of the shadow root of the style sheet whose
 	// rules are being added, if it is in a shadow tree (see shadowScope).
 	curScope     *html.Node
-	curScopeKind scopeKind
+	curScopeKind css.ScopeKind
 
 	containers     map[*html.Node]*containerFrame
 	keptContainers map[*html.Node]containerSizes
@@ -411,7 +413,7 @@ type pageState struct {
 
 	// ancestorMasks are the masks of the keys of the ancestors of the
 	// elements, while they are kept (see [Context.keepAncestorMasks]).
-	ancestorMasks map[*html.Node]keyMask
+	ancestorMasks map[*html.Node]css.KeyMask
 
 	// addedShallow and addedDeep are the elements that the rules added to
 	// the style sheets select (see [Context.addedRuleTargets]), whose
@@ -615,7 +617,7 @@ func (c *Context) InlineParent() core.Widget {
 }
 
 // addStyleOrigin adds the given CSS style string with the given origin.
-func (c *Context) addStyleOrigin(style string, origin cssOrigin) {
+func (c *Context) addStyleOrigin(style string, origin css.Origin) {
 	root := rootNode(c.Node)
 	if c.curScope != nil { // (of a style sheet of a shadow tree, see shadow.go)
 		root = c.curScope

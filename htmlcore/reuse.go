@@ -11,6 +11,8 @@ import (
 	"slices"
 	"strings"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"golang.org/x/net/html"
 )
 
@@ -233,7 +235,7 @@ func (k placeKinds) differ(o, s nodeSnap) bool {
 // place of that element changes.
 type deepPlace struct {
 	kinds placeKinds
-	keys  keyMask // of the compound selector (see compoundKeys)
+	keys  css.KeyMask // of the compound selector (see compoundKeys)
 }
 
 // deepPlaces returns the compound selectors of the style rules of the
@@ -272,9 +274,9 @@ func (c *Context) deepPlaces() (places []deepPlace, siblings placeKinds) {
 				siblings = siblings.or(k)
 				continue
 			}
-			var keys keyMask // (none: it may select any element)
+			var keys css.KeyMask // (none: it may select any element)
 			if !strings.ContainsAny(comp, "\\|") {
-				keys = compoundKeys(comp)
+				keys = css.CompoundKeys(comp)
 			}
 			dp := deepPlace{k, keys}
 			if !seen[dp] {
@@ -307,16 +309,16 @@ func placeChangedDeep(n *html.Node, o, s nodeSnap, places []deepPlace, siblings 
 	if siblings.differ(o, s) {
 		return true
 	}
-	var own keyMask
+	var own css.KeyMask
 	gotOwn := false
 	for _, p := range places {
 		if !p.kinds.differ(o, s) {
 			continue
 		}
 		if !gotOwn {
-			own, gotOwn = ownKeys(n), true
+			own, gotOwn = css.OwnKeys(n), true
 		}
-		if own.has(p.keys) {
+		if own.Has(p.keys) {
 			return true
 		}
 	}
@@ -349,9 +351,9 @@ func (c *Context) placeUses() (uses placeKinds) {
 // the start of the body of nytimes.com, by its ad scripts, matched the 6800
 // elements of its #app again, which no such selector selects, as a rule
 // had a combinator of siblings followed by one of descendants.)
-func (c *Context) siblingSubjects() []keyMask {
-	var masks []keyMask
-	seen := map[keyMask]bool{}
+func (c *Context) siblingSubjects() []css.KeyMask {
+	var masks []css.KeyMask
+	seen := map[css.KeyMask]bool{}
 	for _, r := range c.rules {
 		t := r.text
 		if !strings.ContainsAny(t, "+~") {
@@ -365,9 +367,9 @@ func (c *Context) siblingSubjects() []keyMask {
 			if i == 0 || !combs[i-1].sibling || cb.sibling {
 				continue
 			}
-			var keys keyMask // (none: it may select any element)
+			var keys css.KeyMask // (none: it may select any element)
 			if !strings.ContainsAny(comp, "\\|") {
-				keys = compoundKeys(comp)
+				keys = css.CompoundKeys(comp)
 			}
 			if !seen[keys] {
 				seen[keys] = true
@@ -381,12 +383,12 @@ func (c *Context) siblingSubjects() []keyMask {
 // siblingSelects returns whether a compound selector of the given keys
 // (see [Context.siblingSubjects]) may select the given element (or any,
 // if there are none, for the selectors that it could not tell).
-func siblingSelects(n *html.Node, masks []keyMask) bool {
+func siblingSelects(n *html.Node, masks []css.KeyMask) bool {
 	if len(masks) == 0 {
 		return true
 	}
-	own := ownKeys(n)
-	return slices.ContainsFunc(masks, own.has)
+	own := css.OwnKeys(n)
+	return slices.ContainsFunc(masks, own.Has)
 }
 
 // siblingCombinators returns whether a style rule of the context may
@@ -627,8 +629,8 @@ func (c *Context) ruleDecls(_ *html.Node, ids []int) []*cssDecl {
 		r := c.rules[i]
 		c.cssBase = r.cssBase // for its URLs
 		for _, d := range r.decls {
-			prop, value := propertyName(d.Property), strings.TrimSpace(d.Value)
-			if !validDeclaration(prop, value) {
+			prop, value := css.PropertyName(d.Property), strings.TrimSpace(d.Value)
+			if !css.ValidDeclaration(prop, value) {
 				continue
 			}
 			c.cssOrder++

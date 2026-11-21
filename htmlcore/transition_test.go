@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/core"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -33,8 +35,8 @@ func TestTransitions(t *testing.T) {
 	require.NoError(t, err)
 	bd := core.NewBody()
 	require.NoError(t, ReadDocument(ctx, bd, doc))
-	var got []Transition
-	ctx.OnTransition = func(ts []Transition) { got = append(got, ts...) }
+	var got []css.Transition
+	ctx.OnTransition = func(ts []css.Transition) { got = append(got, ts...) }
 	core.RenderImage(bd, func() {
 		bd.AsyncLock()
 		defer bd.AsyncUnlock()
@@ -44,7 +46,7 @@ func TestTransitions(t *testing.T) {
 		setAttr(c, "class", "none wide")
 		ctx.Restyle([]*html.Node{a, b, c})
 	})
-	byProp := map[string]Transition{}
+	byProp := map[string]css.Transition{}
 	for _, tr := range got {
 		byProp[GetAttr(tr.Node, "id")+" "+tr.Property] = tr
 	}

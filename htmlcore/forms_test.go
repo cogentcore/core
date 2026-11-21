@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
@@ -342,7 +344,7 @@ func TestHoverSelector(t *testing.T) {
 		require.NotNil(t, other)
 		assert.True(t, ctx.HoverAffects(item), "the hover of the item affects its submenu")
 		assert.False(t, ctx.HoverAffects(other), "the hover of the other item affects nothing")
-		assert.False(t, HasAttr(item, hoverAttr), "the attribute is removed")
+		assert.False(t, HasAttr(item, css.HoverAttr), "the attribute is removed")
 	}
 }
 

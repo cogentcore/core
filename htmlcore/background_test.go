@@ -9,6 +9,8 @@ import (
 	"image/color"
 	"testing"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/tree"
@@ -61,8 +63,8 @@ func TestComputedValue(t *testing.T) {
 		}
 		return tree.Continue
 	})
-	h1 := selectNodes(doc, "h1")[0]
-	p := selectNodes(doc, "p")[0]
+	h1 := css.SelectNodes(doc, "h1")[0]
+	p := css.SelectNodes(doc, "p")[0]
 	assert.Equal(t, "center", ctx.ComputedValue(h1, "text-align"), "inherited")
 	assert.Equal(t, "green", ctx.ComputedValue(h1, "color"), "inherit, with var()")
 	assert.Equal(t, "10px", ctx.ComputedValue(h1, "width"), "width: inherit")

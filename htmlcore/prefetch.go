@@ -7,7 +7,9 @@ package htmlcore
 import (
 	"strings"
 
-	"github.com/aymerick/douceur/css"
+	"cogentcore.org/core/htmlcore/css"
+
+	douceur "github.com/aymerick/douceur/css"
 	"golang.org/x/net/html"
 )
 
@@ -100,15 +102,15 @@ func (c *Context) PrefetchURLs(doc *html.Node) []string {
 // conditions are not checked.
 func StyleSheetURLs(sheet, base string, webFonts bool) []string {
 	var urls []string
-	var walk func(rules []*css.Rule)
-	walk = func(rules []*css.Rule) {
+	var walk func(rules []*douceur.Rule)
+	walk = func(rules []*douceur.Rule) {
 		for _, rule := range rules {
-			if rule.Kind != css.AtRule {
+			if rule.Kind != douceur.AtRule {
 				continue
 			}
 			switch strings.ToLower(rule.Name) {
 			case "@import":
-				if u, _ := importURL(rule.Prelude); u != "" {
+				if u, _ := css.ImportURL(rule.Prelude); u != "" {
 					if pu, err := parseRelativeURL(u, base); err == nil {
 						urls = append(urls, pu.String())
 					}
@@ -131,7 +133,7 @@ func StyleSheetURLs(sheet, base string, webFonts bool) []string {
 // fontFaceURL returns the URL of the web font that [Context.addFontFace]
 // would get for the given declarations of an @font-face rule in a style
 // sheet at the given URL, or "" if it would get none, or has gotten it.
-func fontFaceURL(decls []*css.Declaration, base string) string {
+func fontFaceURL(decls []*douceur.Declaration, base string) string {
 	var family, src, urange string
 	for _, d := range decls {
 		switch strings.ToLower(strings.TrimSpace(d.Property)) {
@@ -146,7 +148,7 @@ func fontFaceURL(decls []*css.Declaration, base string) string {
 	if family == "" || src == "" || (urange != "" && !unicodeRangeHas(urange, 'A')) {
 		return ""
 	}
-	for _, s := range splitTopLevel(src, ',') {
+	for _, s := range css.SplitTopLevel(src, ',') {
 		u, format := fontSource(s)
 		if u == "" {
 			continue

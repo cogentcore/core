@@ -19,6 +19,8 @@ import (
 	"testing"
 	"time"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"image/color"
 
 	"cogentcore.org/core/colors"
@@ -30,7 +32,7 @@ import (
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/tree"
 	"github.com/andybalholm/cascadia"
-	"github.com/aymerick/douceur/css"
+	douceur "github.com/aymerick/douceur/css"
 	"github.com/aymerick/douceur/parser"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -73,7 +75,7 @@ func TestSelectNodes(t *testing.T) {
 			if s, err := cascadia.Parse(sel); err == nil {
 				want = cascadia.QueryAll(doc, s)
 			}
-			assert.ElementsMatch(t, want, selectNodes(doc, sel), sel)
+			assert.ElementsMatch(t, want, css.SelectNodes(doc, sel), sel)
 		}
 	}
 	count := map[string]int{
@@ -82,9 +84,9 @@ func TestSelectNodes(t *testing.T) {
 		"p::before": 0, "body:has(.a)": 1, ":is(h1, ul) :is(li)": 2,
 	}
 	for sel, n := range count {
-		assert.Len(t, selectNodes(doc, sel), n, sel)
+		assert.Len(t, css.SelectNodes(doc, sel), n, sel)
 	}
-	assert.Equal(t, "html", selectNodes(doc, ":root")[0].Data)
+	assert.Equal(t, "html", css.SelectNodes(doc, ":root")[0].Data)
 }
 
 func TestSpecificity(t *testing.T) {
@@ -93,7 +95,7 @@ func TestSpecificity(t *testing.T) {
 		"div > p.direct": 102, "h2 + p": 2, "a:hover": 101, "p::before": 2, "[type=text]": 100,
 	}
 	for sel, want := range tests {
-		assert.Equal(t, want, specificity(sel), sel)
+		assert.Equal(t, want, css.Specificity(sel), sel)
 	}
 }
 
@@ -146,7 +148,7 @@ func TestCSSColorFunction(t *testing.T) {
 		"light-dark(rgb(1 2 3), red)": {1, 2, 3, 255},
 	}
 	for v, want := range tests {
-		got, ok := cssColorFunction(v)
+		got, ok := css.ColorFunction(v)
 		assert.True(t, ok, v)
 		assert.Equal(t, want, got, v)
 	}
@@ -160,30 +162,30 @@ func TestImportURL(t *testing.T) {
 		`'x.css'`:                  {"x.css", ""},
 		`url("y.css") layer(base)`: {"y.css", ""},
 	} {
-		u, m := importURL(prelude)
+		u, m := css.ImportURL(prelude)
 		assert.Equal(t, want, [2]string{u, m}, prelude)
 	}
 }
 
 func TestSplitSelectors(t *testing.T) {
 	assert.Equal(t, []string{"a", ".b > :is(p, table)", `[x="1,2"]`, "c:not(.d,.e)"},
-		splitSelectors(`a, .b > :is(p, table) ,[x="1,2"],c:not(.d,.e)`))
+		css.SplitSelectors(`a, .b > :is(p, table) ,[x="1,2"],c:not(.d,.e)`))
 }
 
 func TestCalcPx(t *testing.T) {
 	for v, want := range map[string]float32{
 		"640px": 640, "40em": 640, "calc(640px - 1px)": 639, "calc((100px + 20px) * 2)": 240, "calc(1rem / 2)": 8,
 	} {
-		got, ok := calcPx(v)
+		got, ok := css.CalcPx(v)
 		assert.True(t, ok, v)
 		assert.Equal(t, want, got, v)
 	}
-	_, ok := calcPx("calc(100% - 1px)")
+	_, ok := css.CalcPx("calc(100% - 1px)")
 	assert.False(t, ok)
 }
 
 func TestMathLength(t *testing.T) {
-	env := defaultLengthEnv() // an em of 16px, vw of 8px, and vh of 6px
+	env := css.DefaultLengthEnv() // an em of 16px, vw of 8px, and vh of 6px
 	for v, want := range map[string]units.Value{
 		"calc(10px + 2em)":         units.Dp(42),
 		"calc(100vh - 100px)":      units.Dp(500),
@@ -193,7 +195,7 @@ func TestMathLength(t *testing.T) {
 		"calc((100px - 20px) / 2)": units.Dp(40),
 		"calc(2 * (10px + 5px))":   units.Dp(30),
 	} {
-		got, ok := env.length(v, units.UnitPw)
+		got, ok := env.Length(v, units.UnitPw)
 		assert.True(t, ok, v)
 		assert.InDelta(t, want.Value, got.Value, 0.01, v)
 		assert.Equal(t, want.Unit, got.Unit, v)
@@ -215,7 +217,7 @@ func TestMathLength(t *testing.T) {
 		// with vw of 8px: clamp(20px, (800 - 768) / 4 = 8px, 128px) = 20px
 		"calc(100% - 2 * clamp(1.25rem, calc((100vw - 768px) / 4), 8rem))": 1000 - 40*dp,
 	} {
-		got, ok := env.length(v, units.UnitPw)
+		got, ok := env.Length(v, units.UnitPw)
 		if assert.True(t, ok, v) && assert.NotNil(t, got.Custom, v) {
 			assert.InDelta(t, want, got.Custom(uc), 0.01, v)
 		}
@@ -223,12 +225,12 @@ func TestMathLength(t *testing.T) {
 }
 
 func TestMediaHeightVh(t *testing.T) {
-	env := defaultLengthEnv()
-	env.vh, env.fixedVh = 6, true // a 600 px viewport
-	l, ok := env.length("50vh", units.UnitPh)
+	env := css.DefaultLengthEnv()
+	env.Vh, env.FixedVh = 6, true // a 600 px viewport
+	l, ok := env.Length("50vh", units.UnitPh)
 	assert.True(t, ok)
 	assert.Equal(t, units.Dp(300), l)
-	l, ok = env.length("calc(100vh - 100px)", units.UnitPh)
+	l, ok = env.Length("calc(100vh - 100px)", units.UnitPh)
 	assert.True(t, ok)
 	assert.Equal(t, units.Dp(500), l)
 }
@@ -467,11 +469,11 @@ func TestRootFontSize(t *testing.T) {
 	ctx.addStyleSheets(doc)
 	assert.InDelta(t, 10, ctx.rootFontSize(), 0.01)
 	env := ctx.readEnv()
-	assert.Equal(t, 10.0, env.rem)
-	l, ok := env.length("2rem", units.UnitPw)
+	assert.Equal(t, 10.0, env.Rem)
+	l, ok := env.Length("2rem", units.UnitPw)
 	assert.True(t, ok)
 	assert.Equal(t, units.Dp(20), l)
-	l, ok = env.length("calc(1rem + 4px)", units.UnitPw)
+	l, ok = env.Length("calc(1rem + 4px)", units.UnitPw)
 	assert.True(t, ok)
 	assert.Equal(t, units.Dp(14), l)
 }
@@ -516,7 +518,7 @@ func TestICO(t *testing.T) {
 // TestFontShorthandResets tests that the font shorthand resets the
 // properties that it does not set, as the bold of a heading.
 func TestFontShorthandResets(t *testing.T) {
-	st := &cssState{env: defaultLengthEnv()}
+	st := &cssState{env: css.DefaultLengthEnv()}
 	s := styles.NewStyle()
 	s.Font.Weight = rich.Bold
 	s.Font.Slant = rich.Italic
@@ -803,7 +805,7 @@ func TestUnset(t *testing.T) {
 func TestStrayCSS(t *testing.T) {
 	style := `a{color:red} ; {x:y} b;c{color:blue} /* {;} */ @import "s;{.css";
 		@media screen{ ;d{color:green;} {e:f} } {flex-direction:column;}`
-	done := make(chan *css.Stylesheet)
+	done := make(chan *douceur.Stylesheet)
 	go func() { done <- parseCSS(style) }()
 	select {
 	case ss := <-done:
@@ -975,11 +977,11 @@ func TestSelectorIndex(t *testing.T) {
 		"div p:not([id])", ".b > p", ".item.first", ".a\\:b", "html|p"}
 	c := NewContext()
 	for _, sel := range sels {
-		assert.ElementsMatch(t, selectNodes(doc, sel), c.selectNodes(doc, sel), sel)
+		assert.ElementsMatch(t, css.SelectNodes(doc, sel), c.selectNodes(doc, sel), sel)
 	}
-	kind, key := selectorKey("div > .x :is(.y) #z.w")
+	kind, key := css.SelectorKey("div > .x :is(.y) #z.w")
 	assert.Equal(t, "#z", string(kind)+key)
-	kind, key = selectorKey("ul li:not(.a)")
+	kind, key = css.SelectorKey("ul li:not(.a)")
 	assert.Equal(t, "tli", string(kind)+key)
 }
 

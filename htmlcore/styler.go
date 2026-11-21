@@ -10,6 +10,8 @@ import (
 	"image"
 	"strings"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/text/shaped"
 
 	"cogentcore.org/core/core"
@@ -93,7 +95,7 @@ type blockState struct {
 // resolved after all of them have been read.
 type cssState struct {
 	// env is the length environment of the style pass.
-	env *lengthEnv
+	env *css.LengthEnv
 
 	display    string
 	hideText   bool // a large negative text-indent, which moves the text out of view
@@ -163,7 +165,7 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 	var trBg image.Image // background of a table row, for its cells
 	if (tag == "td" || tag == "th") && node.Parent != nil && node.Parent.Data == "tr" {
 		if bg := c.declaration(node.Parent, "background-color"); bg != "" {
-			trBg = parseColor(bg)
+			trBg = css.ParseColor(bg)
 		}
 	}
 	// (in the state of the block, as they are compiled again when the
@@ -231,7 +233,7 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 		if tag != "" && isText { // texts for elements (as pre) fill their blocks
 			s.GrowWrap = false
 		}
-		st := &cssState{display: c.displayOf(node), env: defaultLengthEnv()}
+		st := &cssState{display: c.displayOf(node), env: css.DefaultLengthEnv()}
 		env := st.env
 		if node == nil { // anonymous text or block
 			st.display = bs.display
@@ -245,18 +247,18 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 		if ps != nil { // for calc()
 			uc := &ps.UnitContext
 			if dp := uc.Dots(units.UnitDp); dp > 0 {
-				env.em = float64(uc.FontEm / dp)
-				env.vw = float64(uc.Vpw / dp / 100)
-				env.vh = float64(uc.Vph / dp / 100)
+				env.Em = float64(uc.FontEm / dp)
+				env.Vw = float64(uc.Vpw / dp / 100)
+				env.Vh = float64(uc.Vph / dp / 100)
 			}
 		}
 		if c.MediaHeight > 0 { // (of the viewport, not of the scene)
-			env.vh, env.fixedVh = float64(c.MediaHeight)/100, true
+			env.Vh, env.FixedVh = float64(c.MediaHeight)/100, true
 		}
-		env.vhUsed = &c.viewportHeightUsed
-		env.rem = float64(c.rootFontSize())
-		env.ch = func() float64 { // of the font of the element as it is styled
-			em := env.em
+		env.VhUsed = &c.viewportHeightUsed
+		env.Rem = float64(c.rootFontSize())
+		env.Ch = func() float64 { // of the font of the element as it is styled
+			em := env.Em
 			if s.Font.Size.Unit == units.UnitDp && s.Font.Size.Value > 0 {
 				em = float64(s.Font.Size.Value)
 			}
@@ -264,14 +266,14 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 			if wb.Scene != nil {
 				sh = wb.Scene.TextShaper()
 			}
-			return chOf(sh, s, em)
+			return css.ChOf(sh, s, em)
 		}
-		env.fixedVh = c.MediaHeight > 0
-		if env.fixedVh {
-			env.vh = float64(c.MediaHeight / 100)
+		env.FixedVh = c.MediaHeight > 0
+		if env.FixedVh {
+			env.Vh = float64(c.MediaHeight / 100)
 		}
 		// the container query units, of the container of the element
-		env.cqw, env.cqh = containerUnits(w, env.vw, env.vh)
+		env.Cqw, env.Cqh = containerUnits(w, env.Vw, env.Vh)
 		if tag == "body" && c.declaration(node, "font-size") == "" {
 			// the font size of the html element (which has no widget)
 			if rf := c.rootFontSize(); rf != 16 {
