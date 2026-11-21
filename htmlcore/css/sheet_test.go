@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package htmlcore
+package css
 
 import (
 	"testing"
-
-	"cogentcore.org/core/htmlcore/css"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -17,7 +15,7 @@ import (
 // in the style sheet of github.com, whose @container rules in its @layer
 // made the parser fail on the whole style sheet).
 func TestLayerRules(t *testing.T) {
-	ss := css.Parse("@layer base, brand;" +
+	ss := Parse("@layer base, brand;" +
 		"@layer brand{.a{color:red}@container (width>=1280px){.b{color:blue}}.c{color:green}}" +
 		"@scope (.x){.d{color:red}}@starting-style{.e{opacity:0}}.f{color:red}")
 	var sels []string
@@ -32,4 +30,23 @@ func TestLayerRules(t *testing.T) {
 	}
 	assert.Equal(t, []string{"@layerbase, brand", "@supportsbrand", "  .a", "  @supports--container: (width>=1280px)", "    .b", "  .c",
 		"@supports(.x)", "  .d", "@supports", "  .e", ".f"}, sels)
+}
+
+func TestSupportsMatches(t *testing.T) {
+	for cond, want := range map[string]bool{
+		"(display: grid)":                               true,
+		"not (display:grid)":                            false,
+		"(display: grid) and (not (display: flex))":     false,
+		"not ((display: grid) or (x: y))":               false,
+		"(-moz-appearance: none)":                       false,
+		"not (-moz-appearance: none)":                   true,
+		"(-webkit-touch-callout: none)":                 false,
+		"(position: -moz-sticky) or (position: sticky)": true,
+		"selector(:has(a))":                             true,
+		"not selector(:has(a))":                         false,
+		"base":                                          true,
+		"":                                              true,
+	} {
+		assert.Equal(t, want, SupportsMatches(cond), cond)
+	}
 }

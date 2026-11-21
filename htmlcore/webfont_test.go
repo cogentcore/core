@@ -10,10 +10,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"cogentcore.org/core/htmlcore/css"
-
 	"cogentcore.org/core/base/goscript"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/htmlcore/css"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/fonts"
 	"cogentcore.org/core/text/fonts/robotomono"

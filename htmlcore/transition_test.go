@@ -9,9 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"cogentcore.org/core/htmlcore/css"
-
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/htmlcore/css"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/net/html"

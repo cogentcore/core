@@ -9,10 +9,9 @@ import (
 	"image/color"
 	"testing"
 
-	"cogentcore.org/core/htmlcore/css"
-
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/htmlcore/css"
 	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/html"

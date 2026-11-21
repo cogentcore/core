@@ -8,9 +8,8 @@ import (
 	"slices"
 	"strings"
 
-	"cogentcore.org/core/htmlcore/css"
-
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/htmlcore/css"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/units"
 	"golang.org/x/net/html"
@@ -20,7 +19,7 @@ import (
 // inline-size), for the container query units (cqw, cqh, cqi, cqb, cqmin,
 // cqmax), which are percentages of the size of the content box of the
 // nearest container that an element is in. They are resolved when the
-// element is styled, as the other lengths of CSS (in [lengthEnv]), from the
+// element is styled, as the other lengths of CSS (in [css.LengthEnv]), from the
 // size of its container in its last layout: after a layout in which the
 // size of a container changed, the elements in it are styled again and
 // laid out again (as for the screenshots of the platform features of

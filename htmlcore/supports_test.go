@@ -7,29 +7,8 @@ package htmlcore
 import (
 	"testing"
 
-	"cogentcore.org/core/htmlcore/css"
-
 	"github.com/stretchr/testify/assert"
 )
-
-func TestSupportsMatches(t *testing.T) {
-	for cond, want := range map[string]bool{
-		"(display: grid)":                               true,
-		"not (display:grid)":                            false,
-		"(display: grid) and (not (display: flex))":     false,
-		"not ((display: grid) or (x: y))":               false,
-		"(-moz-appearance: none)":                       false,
-		"not (-moz-appearance: none)":                   true,
-		"(-webkit-touch-callout: none)":                 false,
-		"(position: -moz-sticky) or (position: sticky)": true,
-		"selector(:has(a))":                             true,
-		"not selector(:has(a))":                         false,
-		"base":                                          true,
-		"":                                              true,
-	} {
-		assert.Equal(t, want, css.SupportsMatches(cond), cond)
-	}
-}
 
 func TestResolveGridLines(t *testing.T) {
 	names := gridLineNumbers("[viewport-start] minmax(0px, 1fr) [content-start left-column-start] repeat(2, 60px) [left-column-end main-column-start] repeat(12, 60px) [content-end main-column-end] minmax(0px, 1fr) [viewport-end]", nil)

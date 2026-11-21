@@ -8,9 +8,8 @@ import (
 	"image/color"
 	"testing"
 
-	"cogentcore.org/core/htmlcore/css"
-
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/htmlcore/css"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"

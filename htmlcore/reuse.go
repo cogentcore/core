@@ -11,9 +11,9 @@ import (
 	"slices"
 	"strings"
 
-	"cogentcore.org/core/htmlcore/css"
-
 	"golang.org/x/net/html"
+
+	"cogentcore.org/core/htmlcore/css"
 )
 
 // ReuseStyles makes the context, which is to read a document that the
@@ -303,7 +303,7 @@ func hasPlaceClass(sel string) bool {
 // differ in a way that may change the matches of the elements in it or
 // after it, for the given compound selectors and kinds of places of
 // siblings (see [Context.deepPlaces]): those that may select it (by its
-// keys; see [ancestorKeys]) and select by a kind of place in which its
+// keys; see [css.AncestorKeys]) and select by a kind of place in which its
 // states differ.
 func placeChangedDeep(n *html.Node, o, s nodeSnap, places []deepPlace, siblings placeKinds) bool {
 	if siblings.differ(o, s) {

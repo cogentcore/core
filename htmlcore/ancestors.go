@@ -5,9 +5,9 @@
 package htmlcore
 
 import (
-	"cogentcore.org/core/htmlcore/css"
-
 	"golang.org/x/net/html"
+
+	"cogentcore.org/core/htmlcore/css"
 )
 
 // The ancestor filter of selectors, as browsers have (a Bloom filter of
@@ -41,7 +41,7 @@ func (c *Context) ancestorMask(n *html.Node) css.KeyMask {
 
 // selMatch returns whether the given selector selects the given element,
 // without matching it if it can not for its ancestors (see
-// [ancestorKeys]).
+// [css.AncestorKeys]).
 func (c *Context) selMatch(cs *css.CompiledSelector, n *html.Node) bool {
 	if cs.Anc != (css.KeyMask{}) && !c.ancestorMask(n).Has(cs.Anc) {
 		return false

@@ -12,9 +12,8 @@ import (
 	"image/png"
 	"testing"
 
-	"cogentcore.org/core/htmlcore/css"
-
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/htmlcore/css"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"

@@ -12,34 +12,6 @@ import (
 	"cogentcore.org/core/styles/units"
 )
 
-// SplitTopLevelSpaces splits the given value at the spaces that are not in
-// parentheses (as "calc(1rem + 4px) auto").
-func SplitTopLevelSpaces(v string) []string {
-	var parts []string
-	depth, start := 0, -1
-	for i, r := range v {
-		switch {
-		case r == '(':
-			depth++
-		case r == ')':
-			depth--
-		case r == ' ' && depth == 0:
-			if start >= 0 {
-				parts = append(parts, v[start:i])
-				start = -1
-			}
-			continue
-		}
-		if start < 0 {
-			start = i
-		}
-	}
-	if start >= 0 {
-		parts = append(parts, v[start:])
-	}
-	return parts
-}
-
 // MaskSize returns the size of the mask image in the given box, for the
 // given mask-size (as "20px auto", "contain", "cover", or "50%"), and the
 // intrinsic size of the image, in pixels, with the given dots per px.

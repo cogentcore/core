@@ -9,9 +9,8 @@ import (
 	"slices"
 	"strings"
 
-	"cogentcore.org/core/htmlcore/css"
-
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/htmlcore/css"
 	douceur "github.com/aymerick/douceur/css"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
@@ -72,7 +71,7 @@ type pseudoRule struct {
 }
 
 // ruleIndex has the indexes of the style rules of a context by the key of
-// their selectors (see [selectorKey]), so that only the rules that may
+// their selectors (see [css.SelectorKey]), so that only the rules that may
 // select an element are matched against it, and those without a key.
 type ruleIndex struct {
 	byID, byClass, byTag map[string][]int
@@ -1376,7 +1375,7 @@ func (c *Context) invalidation(n *html.Node) (selects func(k *html.Node) bool, s
 // compoundMaySelect returns whether a compound selector of the given part
 // of a selector before its subject for which has returns true (one that has
 // the pseudo-class of a state or the attribute that changed) may select the
-// given element (by its keys; see [compoundKeys]), whose change those of
+// given element (by its keys; see [css.CompoundKeys]), whose change those of
 // the elements in it and after it are selected by (as .menu:hover .item,
 // or [lang=en] .x, for an element that is not a .menu, or has no lang).
 func compoundMaySelect(prefix string, n *html.Node, has func(comp string) bool) bool {

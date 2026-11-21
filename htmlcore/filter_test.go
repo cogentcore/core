@@ -8,27 +8,12 @@ import (
 	"image/color"
 	"testing"
 
-	"cogentcore.org/core/htmlcore/css"
-
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-func TestFilterColors(t *testing.T) {
-	grey := color.NRGBA{95, 99, 104, 255}
-	white := css.ParseFilter("brightness(0) saturate(1) invert(1)").Color(grey)
-	assert.Equal(t, color.NRGBA{255, 255, 255, 255}, white, "the wedges of pkg.go.dev")
-	assert.Equal(t, color.NRGBA{160, 156, 151, 255}, css.ParseFilter("invert(100%)").Color(grey))
-	half := css.ParseFilter("opacity(50%)").Color(grey)
-	assert.Equal(t, uint8(128), half.A)
-	g := css.ParseFilter("grayscale(1)").Color(color.NRGBA{255, 0, 0, 255})
-	assert.Equal(t, g.R, g.G, "gray")
-	assert.Nil(t, css.ParseFilter("none"))
-	assert.Nil(t, css.ParseFilter("blur(2px)"), "not a color function")
-}
 
 // TestFilterSVGImage tests that an img of an svg with a filter shows the
 // filtered colors (as the grey wedges of pkg.go.dev, which are white).

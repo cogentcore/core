@@ -14,13 +14,12 @@ import (
 	"strconv"
 	"strings"
 
-	"cogentcore.org/core/htmlcore/css"
-
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/htmlcore/css"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"

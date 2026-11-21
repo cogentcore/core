@@ -13,9 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"cogentcore.org/core/htmlcore/css"
-
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/htmlcore/css"
 	"cogentcore.org/core/tree"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -735,7 +734,7 @@ func TestRereadInertAttrs(t *testing.T) {
 }
 
 // noKeyMatch returns whether f returns false with one of a few seeds of the
-// hashes of the keys of elements (see [keyBit]): the masks of keys are
+// hashes of the keys of elements (see [css.KeyBit]): the masks of keys are
 // Bloom filters, in which keys that differ may collide (with the random
 // seed of a run), which only matches more elements, so the tests of keys
 // that do not match try other seeds.

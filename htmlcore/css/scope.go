@@ -10,7 +10,7 @@ import (
 )
 
 // ScopeKind is the kind of the elements that a rule of a style sheet of a
-// shadow tree selects (see [Context.inScope]).
+// shadow tree selects (see htmlcore.Context.inScope).
 type ScopeKind int8
 
 const (

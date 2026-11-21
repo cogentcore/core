@@ -23,20 +23,20 @@ import (
 // LengthEnv has the sizes that relative lengths are resolved with, in px:
 // the em (font size of the element), the rem (font size of the html
 // element), and 1% of the viewport width and height. fixedVh is whether
-// Vh is from [Context.MediaHeight], to which all vh lengths are then
+// Vh is from htmlcore.Context.MediaHeight, to which all vh lengths are then
 // relative (as dp); otherwise vh stays a unit of core, except in calc().
-// Each style pass of a widget has its own (see [Context.browserStyler]),
-// and reading a page uses that of the page (see [Context.readEnv]).
+// Each style pass of a widget has its own (see htmlcore.Context.browserStyler),
+// and reading a page uses that of the page (see htmlcore.Context.readEnv).
 type LengthEnv struct {
 	Em, Vw, Vh float64
 	FixedVh    bool
 	Rem        float64
 
 	// VhUsed, if set, is set when a length uses vh (or vmin and vmax) of
-	// the viewport (see [Context.ViewportHeightUsed]).
+	// the viewport (see htmlcore.Context.ViewportHeightUsed).
 	VhUsed *atomic.Bool
 
-	// Cqw and cqh are the container query units (1% of the width and the
+	// Cqw and Cqh are the container query units (1% of the width and the
 	// height of the container of the element; see container.go), which
 	// are those of the viewport (vw, vh) if they are not set.
 	Cqw, Cqh float64

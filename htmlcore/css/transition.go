@@ -13,7 +13,7 @@ import (
 )
 
 // Transition is a transition of a property of an element, which a change
-// of its declarations starts (see [Context.OnTransition]). It is not
+// of its declarations starts (see htmlcore.Context.OnTransition). It is not
 // rendered: the element has its new style at once, but the transitionend
 // event is dispatched when it would end, as pages wait for it.
 type Transition struct {

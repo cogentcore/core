@@ -12,11 +12,10 @@ import (
 	"strings"
 	"sync"
 
-	"cogentcore.org/core/htmlcore/css"
-
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
+	"cogentcore.org/core/htmlcore/css"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"

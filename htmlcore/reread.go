@@ -10,9 +10,8 @@ import (
 	"strconv"
 	"strings"
 
-	"cogentcore.org/core/htmlcore/css"
-
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/htmlcore/css"
 	"cogentcore.org/core/tree"
 	douceur "github.com/aymerick/douceur/css"
 	"golang.org/x/net/html"

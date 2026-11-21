@@ -13,11 +13,10 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"cogentcore.org/core/htmlcore/css"
-
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/htmlcore/css"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"

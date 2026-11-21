@@ -12,7 +12,6 @@ import (
 	"sync"
 
 	"cogentcore.org/core/htmlcore/css"
-
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/text/fonts"
 	"cogentcore.org/core/text/rich"

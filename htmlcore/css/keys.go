@@ -11,7 +11,7 @@ import (
 	"golang.org/x/net/html"
 )
 
-// KeyMask is a set of keys of elements (see [ancestorKeys]), as bits of a
+// KeyMask is a set of keys of elements (see [AncestorKeys]), as bits of a
 // Bloom filter: a set that has a key has its bit, and a set may have the
 // bit of a key that it does not have.
 type KeyMask [2]uint64

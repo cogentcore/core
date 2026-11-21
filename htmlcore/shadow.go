@@ -5,9 +5,9 @@
 package htmlcore
 
 import (
-	"cogentcore.org/core/htmlcore/css"
-
 	"golang.org/x/net/html"
+
+	"cogentcore.org/core/htmlcore/css"
 )
 
 // A page can be read as its composed tree (see [Context.ShadowScope]), in

@@ -14,9 +14,9 @@ import (
 	"strings"
 	"testing"
 
-	"cogentcore.org/core/htmlcore/css"
-
 	"golang.org/x/net/html"
+
+	"cogentcore.org/core/htmlcore/css"
 )
 
 var cssUsageFlag = flag.Bool("css-usage", false, "report the CSS properties used by the pages of -fidelity-dir")

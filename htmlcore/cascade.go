@@ -10,9 +10,8 @@ import (
 	"sort"
 	"strings"
 
-	"cogentcore.org/core/htmlcore/css"
-
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/htmlcore/css"
 	"github.com/andybalholm/cascadia"
 	douceur "github.com/aymerick/douceur/css"
 	"github.com/aymerick/douceur/parser"

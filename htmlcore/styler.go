@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"cogentcore.org/core/htmlcore/css"
-
 	"cogentcore.org/core/text/shaped"
 
 	"cogentcore.org/core/core"

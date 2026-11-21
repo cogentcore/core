@@ -17,12 +17,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"cogentcore.org/core/htmlcore/css"
-
 	"github.com/andybalholm/cascadia"
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/htmlcore/css"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"

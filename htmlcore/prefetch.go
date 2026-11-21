@@ -7,10 +7,10 @@ package htmlcore
 import (
 	"strings"
 
-	"cogentcore.org/core/htmlcore/css"
-
 	douceur "github.com/aymerick/douceur/css"
 	"golang.org/x/net/html"
+
+	"cogentcore.org/core/htmlcore/css"
 )
 
 // The URLs of the resources that a page gets as it is read, for an app to

@@ -16,7 +16,6 @@ import (
 	"strings"
 
 	"cogentcore.org/core/htmlcore/css"
-
 	"cogentcore.org/core/styles"
 	svgpkg "cogentcore.org/core/svg"
 
