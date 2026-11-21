@@ -37,7 +37,7 @@ func (ed *Base) stopCursor() {
 func (ed *Base) toggleCursor(on bool) {
 	ed.cursorOn = on
 	core.TextCursor(on, ed.AsWidget(), cursorSpriteName, ed.CursorWidth.Dots, ed.charSize.Y, ed.CursorColor, func() image.Point {
-		return ed.charStartPos(ed.CursorPos).ToPointFloor()
+		return core.TextCursorPoint(ed.charStartPos(ed.CursorPos))
 	})
 }
 
@@ -65,7 +65,7 @@ func (ed *Base) updateCursorPosition() {
 	ms.Sprites.Lock()
 	sp, ok := ms.Sprites.SpriteByNameNoLock(cursorSpriteName)
 	if ok {
-		sp.EventBBox.Min = ed.charStartPos(ed.CursorPos).ToPointFloor()
+		sp.EventBBox.Min = core.TextCursorPoint(ed.charStartPos(ed.CursorPos))
 	}
 	ms.Sprites.Unlock()
 	// The sprites are removed when the scene is rebuilt or resized,

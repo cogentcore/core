@@ -51,6 +51,9 @@ func (c *Context) arrangeDetails(n *html.Node, fr *core.Frame) {
 		!c.noListMarker(sn) {
 		marker = core.NewText(summary).SetText("▸ ")
 		c.handleWidget(nil, marker)
+		marker.Styler(func(s *styles.Style) {
+			s.SetAbilities(false, abilities.Selectable) // not in a selection, as in browsers
+		})
 		kids := summary.Children
 		summary.Children = append([]tree.Node{marker}, kids[:len(kids)-1]...) // first
 		summary.FinalStyler(func(s *styles.Style) {

@@ -77,6 +77,11 @@ type Text struct {
 	// which stays an end of the selection as the other end moves.
 	selectAnchor int
 
+	// selectTexts are the texts that a selection by sliding that started in
+	// this text can extend to, in the order of the document (see
+	// [Text.selectTo]), found when it started.
+	selectTexts []*Text
+
 	// highlights are regions that will be highlighted in the text
 	// when rendered. Indexes are into richText.Join() runes.
 	highlights []textpos.Range
@@ -321,23 +326,14 @@ func (tx *Text) Init() {
 	tx.On(events.SlideStart, func(e events.Event) {
 		e.SetHandled()
 		tx.SetState(true, states.Sliding)
-		if len(tx.Scene.selectedText) == 0 {
-			tx.SetFocusQuiet()
-		}
+		tx.SetFocusQuiet()
 		// the selection starts where the mouse was pressed, before it moved
 		// far enough to start the slide
-		tx.selectAnchor = tx.pixelToRune(e.StartPos())
-		tx.selectRange.Start = tx.selectAnchor
-		tx.selectRange.End = tx.selectAnchor
-		if !slices.Contains(tx.Scene.selectedText, tx) {
-			tx.Scene.selectedText = append(tx.Scene.selectedText, tx)
-		}
-		tx.NeedsRender()
+		tx.startSelect(tx.pixelToRune(e.StartPos()))
 	})
 	tx.On(events.SlideMove, func(e events.Event) {
 		e.SetHandled()
-		tx.selectUpdate(tx.pixelToRune(e.Pos()))
-		tx.NeedsRender()
+		tx.selectTo(e.Pos())
 	})
 	tx.On(events.SlideStop, func(e events.Event) {
 		if TheApp.SystemPlatform().IsMobile() {
@@ -452,19 +448,7 @@ func (tx *Text) copy() { //types:add
 	if !tx.hasSelection() {
 		return
 	}
-	var sel string
-	if len(tx.Scene.selectedText) > 0 {
-		for _, st := range tx.Scene.selectedText {
-			if len(sel) > 0 {
-				sel += "\n"
-			}
-			sel += string(st.richText.Join()[st.selectRange.Start:st.selectRange.End])
-		}
-	} else {
-		// note: selectRange is in runes, not string indexes.
-		sel = string(tx.richText.Join()[tx.selectRange.Start:tx.selectRange.End])
-	}
-	md := mimedata.NewText(sel)
+	md := mimedata.NewText(tx.selectedText())
 	em := tx.Events()
 	if em != nil {
 		em.Clipboard().Write(md)

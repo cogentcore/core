@@ -40,6 +40,15 @@ import (
 	"cogentcore.org/core/tree"
 )
 
+// maxTextWidth is the maximum width of the blocks of text of a page
+// ([textBlocks]), in CSS inches. Code, images, and the widgets of element
+// handlers, such as simulations, can be wider.
+const maxTextWidth = 9
+
+// textBlocks is the CSS selector of the blocks of text of a page, which
+// are at most [maxTextWidth] wide.
+const textBlocks = "p, h1, h2, h3, h4, h5, h6, ul, ol, dl, blockquote, table, hr, figcaption, details"
+
 // Content manages and displays the content of a set of pages.
 type Content struct {
 	core.Splits
@@ -179,9 +188,13 @@ func (ct *Content) Init() {
 	ct.SetSplits(0.2, 0.8)
 
 	ct.Context = htmlcore.NewContext()
-	// in the page, which has its own padding, and not too wide to read
-	// (as on a wide screen), and big enough to not constrain PDF render
-	ct.Context.Style = "body { margin: 0; max-width: 9in; }"
+	// in the page, which has its own padding; the blocks of text of the page
+	// (at any depth, as in the element of a simulation that is not closed)
+	// are not too wide to read (as on a wide screen), and big enough to not
+	// constrain PDF render, but code, images, and the widgets of element
+	// handlers (which do not get the styles), such as simulations, can have
+	// the whole width of the page.
+	ct.Context.Style = fmt.Sprintf("body { margin: 0; } %s { max-width: %din; }", textBlocks, maxTextWidth)
 	ct.Context.DelayedImageLoad = false // not useful for content
 	// The source does not change until SetSource, which resets the cache.
 	ct.Context.ImageCache = htmlcore.NewImageCache(ImageCacheBytes)
@@ -382,9 +395,17 @@ func (ct *Content) pageByName(name string) *bcontent.Page {
 	return nil
 }
 
-// SetSource sets the source filesystem for the content.
+// Files is the source filesystem of the content of the app (the
+// [Content.Source] that was set last), for the code of its pages to open
+// data files in it by their path in the content, as in
+// table.OpenFS(content.Files, "datasets/planets.csv", tensor.Comma).
+var Files fs.FS
+
+// SetSource sets the source filesystem for the content,
+// which is also the [Files] of the app.
 func (ct *Content) SetSource(source fs.FS) *Content {
 	ct.Source = source
+	Files = source
 	if ct.Context.ImageCache != nil {
 		ct.Context.ImageCache.Reset()
 	}
