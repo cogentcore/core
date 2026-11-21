@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"github.com/go-gl/glfw/v3.4/glfw"
+	"github.com/cogentcore/glfw4/v3.4/glfw"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

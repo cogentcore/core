@@ -19,7 +19,7 @@ import (
 
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/system"
-	"github.com/go-gl/glfw/v3.4/glfw"
+	"github.com/cogentcore/glfw4/v3.4/glfw"
 )
 
 // initIME sets up input methods (IME) for the window.

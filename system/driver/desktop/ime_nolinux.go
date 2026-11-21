@@ -6,7 +6,7 @@
 
 package desktop
 
-import "github.com/go-gl/glfw/v3.4/glfw"
+import "github.com/cogentcore/glfw4/v3.4/glfw"
 
 // imeInitApp sets up input methods (IME) for the app before GLFW is
 // initialized, which is only needed on Linux, returning a function

@@ -16,6 +16,7 @@ require (
 	github.com/charmbracelet/x/xpty v0.1.4
 	github.com/chewxy/math32 v1.11.2
 	github.com/clipperhouse/displaywidth v0.11.0
+	github.com/cogentcore/glfw4/v3.4/glfw v0.1.0-pre.2.0.20261121165724-248ae4b326b2
 	github.com/cogentcore/mvm v0.0.0-20261120030535-e3f31e8a9ab5
 	github.com/cogentcore/star-tex v0.7.2-0.20260625151004-a16970c7d698
 	github.com/cogentcore/typesetting v0.0.0-20261022123550-2cd93a91580e
@@ -23,7 +24,6 @@ require (
 	github.com/creack/pty v1.1.24
 	github.com/faiface/beep v1.1.0
 	github.com/go-fonts/latin-modern v0.3.3
-	github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.1.0.20260628091122-0bd588dc30cf
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/grokify/html-strip-tags-go v0.1.0
