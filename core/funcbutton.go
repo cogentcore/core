@@ -323,11 +323,29 @@ func (fb *FuncButton) callFuncShowReturns() {
 		return
 	}
 	rargs := make([]reflect.Value, len(fb.Args))
+	ftyp := fb.reflectFunc.Type()
 	for i, arg := range fb.Args {
-		rargs[i] = reflect.ValueOf(arg.Value)
+		rargs[i] = funcArgValue(arg.Value, ftyp.In(i))
 	}
 	rets := fb.reflectFunc.Call(rargs)
 	fb.showReturnsDialog(rets)
+}
+
+// funcArgValue returns the given argument value as the given type of the
+// parameter of the function. The value widgets of the arguments can set
+// a value of the underlying type of a named type (as a bool for a switch
+// of a type textpos.MatchSyntax bool), which is converted to the type (only
+// between types of the same kind, not int to string), and
+// a nil value is the zero value of the type.
+func funcArgValue(value any, typ reflect.Type) reflect.Value {
+	v := reflect.ValueOf(value)
+	if !v.IsValid() {
+		return reflect.Zero(typ)
+	}
+	if v.Kind() == typ.Kind() && !v.Type().AssignableTo(typ) && v.Type().ConvertibleTo(typ) {
+		return v.Convert(typ)
+	}
+	return v
 }
 
 // confirmDialog runs the confirm dialog.

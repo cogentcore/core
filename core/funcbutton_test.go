@@ -84,3 +84,30 @@ func TestCallFuncArgOtherWindow(t *testing.T) {
 		rc.Unlock()
 	}
 }
+
+// callFuncSyntax is a named bool type, as textpos.MatchSyntax.
+type callFuncSyntax bool
+
+// callFuncNames is a named slice type.
+type callFuncNames []string
+
+// TestCallFuncNamedTypes tests that a function with arguments of named
+// types is called with the values of the underlying types that the value
+// widgets of the arguments set (as a bool from a switch), and with nil
+// values, which was a panic in the Find of Cogent Code.
+func TestCallFuncNamedTypes(t *testing.T) {
+	var gotSyntax callFuncSyntax
+	var gotNames callFuncNames
+	gotN := -1
+	myFunc := func(s callFuncSyntax, names callFuncNames, n int) {
+		gotSyntax, gotNames, gotN = s, names, n
+	}
+	fb := NewFuncButton(NewBody()).SetFunc(myFunc)
+	fb.Args[0].Value = true          // a bool, not a callFuncSyntax
+	fb.Args[1].Value = []string{"a"} // a []string, not a callFuncNames
+	fb.Args[2].Value = nil           // the zero value
+	assert.NotPanics(t, fb.callFuncShowReturns)
+	assert.Equal(t, callFuncSyntax(true), gotSyntax)
+	assert.Equal(t, callFuncNames{"a"}, gotNames)
+	assert.Equal(t, 0, gotN)
+}
