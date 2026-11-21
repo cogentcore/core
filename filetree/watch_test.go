@@ -181,6 +181,35 @@ func TestWatchRename(t *testing.T) {
 	assert.True(t, wt.hasChange("sub/c.go", false))
 }
 
+// TestWatchRenameDirRemake tests renaming a directory, in the tree or
+// outside of it, and then making a new one with its old name, which is
+// added to the tree although the watcher can report only the files in
+// it, and the files of the renamed directory keep their new paths.
+func TestWatchRenameDirRemake(t *testing.T) {
+	for _, inTree := range []bool{true, false} {
+		wt := newWatchTest(t)
+		wt.b.AsyncLock()
+		b := wt.node("sub/b.go")
+		if inTree {
+			require.NoError(t, wt.node("sub").RenameFile("sub2"))
+		}
+		wt.b.AsyncUnlock()
+		if !inTree {
+			require.NoError(t, os.Rename(wt.path("sub"), wt.path("sub2")))
+		}
+		wt.waitFor("sub2 node", func() bool { return wt.hasNode("sub2") })
+		wt.write("sub/b.go", "package new\n")
+		wt.waitFor("new sub/b.go node", func() bool { return wt.hasNode("sub/b.go") })
+		if inTree { // the same node, with the new path
+			wt.b.AsyncLock()
+			assert.Same(t, b, wt.node("sub2/b.go"))
+			assert.Equal(t, wt.path("sub2/b.go"), string(b.Filepath))
+			assert.Equal(t, wt.path("sub/b.go"), string(wt.node("sub/b.go").Filepath))
+			wt.b.AsyncUnlock()
+		}
+	}
+}
+
 func TestWatchModify(t *testing.T) {
 	wt := newWatchTest(t)
 	text := "package a\n\nfunc A() {}\n"
