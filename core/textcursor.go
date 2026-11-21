@@ -31,6 +31,19 @@ func TextCursorOwner(w *WidgetBase, name string) tree.Node {
 	return nil
 }
 
+// TextCursorPoint returns the position of a text cursor (see [TextCursor])
+// for the given exact (fractional) position between two characters. The
+// cursor line is centered on its X position, which is the Ceil of the exact
+// one: the space between the ink of two characters is about half a pixel to
+// the right of the exact position, as their left side bearings are bigger
+// than their right ones, so that the cursor is centered in that space,
+// where it was about a pixel to the left of it, touching the character
+// before it, with Floor (see TestTextFieldCursorPosition). Y is the top of
+// the line, which is floored.
+func TextCursorPoint(pos math32.Vector2) image.Point {
+	return image.Pt(int(math32.Ceil(pos.X)), int(math32.Floor(pos.Y)))
+}
+
 // TextCursor implements a blinking text cursor using a [Sprite], which
 // is shared by the text widgets of a type in a window, and owned by the
 // one that last turned it on.

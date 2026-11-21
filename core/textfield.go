@@ -1279,7 +1279,7 @@ func (tf *TextField) stopCursor() {
 // toggleSprite turns on or off the cursor sprite.
 func (tf *TextField) toggleCursor(on bool) {
 	TextCursor(on, tf.AsWidget(), textFieldSpriteName, tf.CursorWidth.Dots, tf.lineHeight, tf.CursorColor, func() image.Point {
-		return tf.charRenderPos(tf.cursorPos).ToPointFloor()
+		return TextCursorPoint(tf.charRenderPos(tf.cursorPos))
 	})
 }
 
@@ -1296,7 +1296,7 @@ func (tf *TextField) updateCursorPosition() {
 	ms.Sprites.Lock()
 	sp, ok := ms.Sprites.SpriteByNameNoLock(textFieldSpriteName)
 	if ok {
-		sp.EventBBox.Min = tf.charRenderPos(tf.cursorPos).ToPointFloor()
+		sp.EventBBox.Min = TextCursorPoint(tf.charRenderPos(tf.cursorPos))
 	}
 	ms.Sprites.Unlock()
 	// The sprites are removed when the scene is rebuilt or resized,
