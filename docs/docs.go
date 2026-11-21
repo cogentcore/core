@@ -79,6 +79,10 @@ func main() {
 				w.SetText("GitHub").SetIcon(icons.GitHub)
 			})
 			tree.Add(p, func(w *core.Button) {
+				ctx.LinkButton(w, "https://cogentcore.org")
+				w.SetText("CogentCore.org").SetIcon(icons.CogentCore)
+			})
+			tree.Add(p, func(w *core.Button) {
 				ctx.LinkButton(w, "https://cogentcore.org/community")
 				w.SetText("Community").SetIcon(icons.Forum)
 			})
