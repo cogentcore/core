@@ -211,6 +211,11 @@ func (ed *Base) renderLine(li, ln int, rpos math32.Vector2, vsel textpos.Region,
 	// rendSpan renders the given shaped span, starting at char coff,
 	// where tabCells is the width in cells of a tab, which is 0 otherwise.
 	rendSpan := func(lns *shaped.Lines, pos math32.Vector2, coff, tabCells int) {
+		// The shaped spans are cached (the tab, and the lines with the same
+		// text), so their colors are set from the current style of the
+		// editor, which changes with the color scheme, as from light to
+		// dark mode.
+		lns.Color, lns.SelectionColor, lns.HighlightColor = tsty.Color, ed.SelectColor, ed.HighlightColor
 		lns.SelectReset()
 		lns.HighlightReset()
 		if tabCells > 0 {
