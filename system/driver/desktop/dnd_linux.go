@@ -27,7 +27,7 @@ import (
 
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/events/key"
-	"github.com/go-gl/glfw/v3.4/glfw"
+	"github.com/cogentcore/glfw4/v3.4/glfw"
 )
 
 // isX11 returns whether GLFW is using X11, which drag-and-drop

@@ -21,7 +21,7 @@ import (
 	_ "cogentcore.org/core/paint/renderers" // for the svgs of cursors, as in an app
 	"cogentcore.org/core/system"
 	_ "cogentcore.org/core/text/shaped/shapers" // (as are imported by core)
-	"github.com/go-gl/glfw/v3.4/glfw"
+	"github.com/cogentcore/glfw4/v3.4/glfw"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

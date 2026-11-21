@@ -12,7 +12,7 @@ See [Cogent docs gpu](https://cogentcore.org/core/gpu) for full documentation. T
 
 ## Platforms
 
-* On desktop (mac, windows, linux), [glfw](https://github.com/go-gl/glfw) is used for initializing the GPU.
+* On desktop (mac, windows, linux), [glfw](https://github.com/go-gl/glfw) (the Cogent Core fork [glfw4](https://github.com/cogentcore/glfw4)) is used for initializing the GPU.
 * Mobile (android, ios)...
   - When developing for Android on macOS, it is critical to set `Emulated Performance` -> `Graphics` to `Software` in the `Android Virtual Device Manager (AVD)`; otherwise, the app will crash on startup. This is because macOS does not support direct access to the underlying hardware GPU in the Android Emulator. You can see more information how to do this [in the Android developer documentation](https://developer.android.com/studio/run/emulator-acceleration). Please note that this issue will not affect end-users of your app, only you while you develop it. Also, due to the typically bad performance of the emulated device GPU on macOS, it is recommended that you use a more modern emulated device than the default Pixel 3a. Finally, you should always test your app on a real mobile device if possible to see what it is actually like.
 

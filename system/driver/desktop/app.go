@@ -19,11 +19,11 @@ import (
 
 	"cogentcore.org/core/gpu"
 	"cogentcore.org/core/gpu/gpudraw"
+	"cogentcore.org/core/gpu/wgpuglfw"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/composer"
 	"cogentcore.org/core/system/driver/base"
-	"github.com/go-gl/glfw/v3.4/glfw"
-	"github.com/oliverbestmann/webgpu/wgpuglfw"
+	"github.com/cogentcore/glfw4/v3.4/glfw"
 )
 
 // Init sets up the desktop app. The windowing system is initialized
