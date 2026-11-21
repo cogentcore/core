@@ -7,6 +7,8 @@ package htmlcore
 import (
 	"testing"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,7 +27,7 @@ func TestSupportsMatches(t *testing.T) {
 		"base":                                          true,
 		"":                                              true,
 	} {
-		assert.Equal(t, want, supportsMatches(cond), cond)
+		assert.Equal(t, want, css.SupportsMatches(cond), cond)
 	}
 }
 

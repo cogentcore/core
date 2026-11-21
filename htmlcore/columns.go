@@ -204,7 +204,7 @@ func (c *Context) horizontalSides(env *css.LengthEnv, n *html.Node, base string)
 	for _, d := range c.declarations(n) {
 		switch d.Property {
 		case base:
-			if vals := expandSides(css.SplitColors(d.Value)); len(vals) == 4 {
+			if vals := css.ExpandSides(css.SplitColors(d.Value)); len(vals) == 4 {
 				right, left = px(vals[1]), px(vals[3])
 			}
 		case base + "-left", base + "-inline-start":

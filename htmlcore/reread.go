@@ -124,7 +124,7 @@ func (c *Context) addedStyle(n *html.Node) bool {
 	if c.curScope != nil {
 		root = c.curScope
 	}
-	c.addRules(root, parseCSS(added), css.OriginAuthor)
+	c.addRules(root, css.Parse(added), css.OriginAuthor)
 	c.recordOnly = false
 	c.cssBase = base
 	return true

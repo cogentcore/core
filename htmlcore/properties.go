@@ -6,7 +6,6 @@ package htmlcore
 
 import (
 	"image"
-	"math"
 	"strconv"
 	"strings"
 
@@ -16,7 +15,6 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
-	"cogentcore.org/core/styles/sides"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/text/rich"
 	"cogentcore.org/core/text/text"
@@ -39,7 +37,7 @@ func (c *Context) compileDecls(decls []*cssDecl) []styleOp {
 	var ops []styleOp
 	for _, font := range []bool{true, false} {
 		for _, d := range decls {
-			if fontProperties[d.Property] != font {
+			if css.FontProperties[d.Property] != font {
 				continue
 			}
 			v := d.Value
@@ -52,13 +50,6 @@ func (c *Context) compileDecls(decls []*cssDecl) []styleOp {
 	return ops
 }
 
-// fontProperties are the properties of fonts, which are compiled first
-// (with line-height, which the font shorthand sets).
-var fontProperties = map[string]bool{
-	"font": true, "font-family": true, "font-size": true, "font-weight": true,
-	"font-style": true, "line-height": true,
-}
-
 // compileCSS compiles the declaration of the given CSS property with the
 // given value into the operations that apply it to a style. The parts of
 // the value that are the same for every element, as keywords, numbers and
@@ -67,7 +58,7 @@ var fontProperties = map[string]bool{
 // and calc()). It returns nil for a property that is not supported, or
 // a value that is not valid.
 func (c *Context) compileCSS(prop, val string) []styleOp {
-	if p, ok := strings.CutPrefix(prop, "-webkit-"); ok && webkitAliases[p] {
+	if p, ok := strings.CutPrefix(prop, "-webkit-"); ok && css.WebkitAliases[p] {
 		// the old prefixed property is the standard one (as the
 		// -webkit-transform with which the slider of the photos of the
 		// postings of craigslist.org moves its slides); the last of them
@@ -79,11 +70,11 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 	op := func(f styleOp) []styleOp { return []styleOp{f} }
 	if lval == "unset" { // inherit for the inherited properties, initial otherwise
 		lval = "initial"
-		if inheritedProperties[prop] {
+		if css.InheritedProperties[prop] {
 			lval = "inherit"
 		}
 	}
-	if ls, ok := keywordLonghands[prop]; ok && (lval == "inherit" || lval == "initial") {
+	if ls, ok := css.KeywordLonghands[prop]; ok && (lval == "inherit" || lval == "initial") {
 		// a shorthand is its longhands (as the font of a var() that has no
 		// value, which is unset, inherited)
 		var ops []styleOp
@@ -96,7 +87,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		// a clip to nothing hides the element (as the visually hidden
 		// skip links of go.dev, of clip: rect(0 0 0 0), unset on focus);
 		// other clips are not applied
-		zero := zeroAreaClip(prop, lval)
+		zero := css.ZeroAreaClip(prop, lval)
 		return op(func(st *cssState, s, ps *styles.Style) { st.clippedOut = zero })
 	}
 	if prop == "visibility" && (lval == "inherit" || lval == "initial") {
@@ -130,7 +121,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 	}
 	if lval == "initial" && (prop == "margin-top" || prop == "margin-right" || prop == "margin-bottom" || prop == "margin-left") {
 		// the margins of the cascade are those of the state (see setMargin)
-		i := sideIndex(prop)
+		i := css.SideIndex(prop)
 		return op(func(st *cssState, s, ps *styles.Style) { setMargin(st, i, "0") })
 	}
 	if lval == "inherit" || lval == "initial" {
@@ -138,7 +129,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			s.FromProperty(ps, prop, lval, colors.BaseContext(colors.ToUniform(s.Color)))
 		})
 	}
-	if p, ok := logicalProperties[prop]; ok {
+	if p, ok := css.LogicalProperties[prop]; ok {
 		prop = p
 	}
 	switch prop {
@@ -172,83 +163,85 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		e := lval == "ellipsis"
 		return op(func(st *cssState, s, ps *styles.Style) { s.Text.Ellipsis = e })
 	case "margin":
-		vals := expandSides(css.SplitColors(lval))
+		vals := css.ExpandSides(css.SplitColors(lval))
 		return op(func(st *cssState, s, ps *styles.Style) {
 			for i, v := range vals {
 				setMargin(st, i, v)
 			}
 		})
 	case "margin-top", "margin-right", "margin-bottom", "margin-left":
-		i := sideIndex(prop)
+		i := css.SideIndex(prop)
 		return op(func(st *cssState, s, ps *styles.Style) { setMargin(st, i, lval) })
 	case "padding":
-		vals := expandSides(css.SplitColors(lval))
+		vals := css.ExpandSides(css.SplitColors(lval))
 		return op(func(st *cssState, s, ps *styles.Style) {
 			for i, v := range vals {
 				if l, ok := st.env.Length(v, units.UnitPw); ok {
-					setValueSide(&s.Padding, i, l)
+					css.SetValueSide(&s.Padding, i, l)
 				}
 			}
 		})
 	case "padding-top", "padding-right", "padding-bottom", "padding-left":
-		i := sideIndex(prop)
+		i := css.SideIndex(prop)
 		return op(func(st *cssState, s, ps *styles.Style) {
 			if l, ok := st.env.Length(lval, units.UnitPw); ok {
-				setValueSide(&s.Padding, i, l)
+				css.SetValueSide(&s.Padding, i, l)
 			}
 		})
 	case "border":
 		return op(compileBorder(-1, val))
 	case "border-top", "border-right", "border-bottom", "border-left":
-		return op(compileBorder(sideIndex(prop), val))
+		return op(compileBorder(css.SideIndex(prop), val))
 	case "border-width":
-		vals := expandSides(css.SplitColors(lval))
+		vals := css.ExpandSides(css.SplitColors(lval))
 		return op(func(st *cssState, s, ps *styles.Style) {
 			for i, v := range vals {
-				setValueSide(&s.Border.Width, i, st.env.BorderWidth(v))
+				css.SetValueSide(&s.Border.Width, i, st.env.BorderWidth(v))
 			}
 		})
 	case "border-style":
-		vals := expandSides(css.SplitColors(lval))
+		vals := css.ExpandSides(css.SplitColors(lval))
 		return op(func(st *cssState, s, ps *styles.Style) {
 			for i, v := range vals {
-				setBorderStyle(s, i, v)
+				css.SetBorderStyle(s, i, v)
 			}
 		})
 	case "border-color":
 		var cfs []func() image.Image
-		for _, v := range expandSides(css.SplitColors(val)) {
-			cfs = append(cfs, colorFunc(v))
+		for _, v := range css.ExpandSides(css.SplitColors(val)) {
+			cfs = append(cfs, css.ColorFunc(v))
 		}
 		return op(func(st *cssState, s, ps *styles.Style) {
 			for i, cf := range cfs {
-				setSide(&s.Border.Color, i, cf())
+				css.SetSide(&s.Border.Color, i, cf())
 			}
 		})
 	case "border-top-width", "border-right-width", "border-bottom-width", "border-left-width":
-		i := sideIndex(prop)
-		return op(func(st *cssState, s, ps *styles.Style) { setValueSide(&s.Border.Width, i, st.env.BorderWidth(lval)) })
+		i := css.SideIndex(prop)
+		return op(func(st *cssState, s, ps *styles.Style) {
+			css.SetValueSide(&s.Border.Width, i, st.env.BorderWidth(lval))
+		})
 	case "border-top-style", "border-right-style", "border-bottom-style", "border-left-style":
-		i := sideIndex(prop)
-		return op(func(st *cssState, s, ps *styles.Style) { setBorderStyle(s, i, lval) })
+		i := css.SideIndex(prop)
+		return op(func(st *cssState, s, ps *styles.Style) { css.SetBorderStyle(s, i, lval) })
 	case "border-top-color", "border-right-color", "border-bottom-color", "border-left-color":
-		i, cf := sideIndex(prop), colorFunc(val)
-		return op(func(st *cssState, s, ps *styles.Style) { setSide(&s.Border.Color, i, cf()) })
+		i, cf := css.SideIndex(prop), css.ColorFunc(val)
+		return op(func(st *cssState, s, ps *styles.Style) { css.SetSide(&s.Border.Color, i, cf()) })
 	case "border-top-left-radius", "border-top-right-radius", "border-bottom-right-radius", "border-bottom-left-radius":
 		v := strings.Fields(lval + " 0")[0]
 		i := map[string]int{"border-top-left-radius": 0, "border-top-right-radius": 1,
 			"border-bottom-right-radius": 2, "border-bottom-left-radius": 3}[prop]
 		return op(func(st *cssState, s, ps *styles.Style) {
 			if l, ok := st.env.Length(v, units.UnitEw); ok {
-				setValueSide(&s.Border.Radius, i, l)
+				css.SetValueSide(&s.Border.Radius, i, l)
 			}
 		})
 	case "border-radius":
-		vals := expandSides(strings.Fields(strings.Split(lval, "/")[0]))
+		vals := css.ExpandSides(strings.Fields(strings.Split(lval, "/")[0]))
 		return op(func(st *cssState, s, ps *styles.Style) {
 			for i, v := range vals {
 				if l, ok := st.env.Length(v, units.UnitEw); ok {
-					setValueSide(&s.Border.Radius, i, l)
+					css.SetValueSide(&s.Border.Radius, i, l)
 				}
 			}
 		})
@@ -279,7 +272,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		}
 		none := bg == "transparent" || bg == "none"
 		current := strings.EqualFold(bg, "currentcolor")
-		cf := colorFunc(bg)
+		cf := css.ColorFunc(bg)
 		return append(imageOp, op(func(st *cssState, s, ps *styles.Style) {
 			st.background, st.hasBg, st.bgCurrentColor = cf(), true, current
 			if none || current {
@@ -290,7 +283,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		if css.ParseColor(val) == nil {
 			return nil
 		}
-		cf := colorFunc(val)
+		cf := css.ColorFunc(val)
 		return op(func(st *cssState, s, ps *styles.Style) { s.Color = cf() })
 	case "width", "height", "min-width", "min-height", "max-width", "max-height":
 		pct := units.UnitPw
@@ -321,10 +314,10 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		}
 		return op(func(st *cssState, s, ps *styles.Style) { s.Position = pos })
 	case "top", "right", "bottom", "left":
-		i := sideIndex("-" + prop)
+		i := css.SideIndex("-" + prop)
 		return op(func(st *cssState, s, ps *styles.Style) { setInset(st.env, s, i, lval) })
 	case "inset":
-		vals := expandSides(css.SplitColors(lval))
+		vals := css.ExpandSides(css.SplitColors(lval))
 		return op(func(st *cssState, s, ps *styles.Style) {
 			for i, v := range vals {
 				setInset(st.env, s, i, v)
@@ -374,12 +367,12 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		}
 		return nil
 	case "transform", "translate":
-		x, y, ok := cssTranslate(prop, lval)
+		x, y, ok := css.Translate(prop, lval)
 		if !ok {
 			return nil
 		}
-		rot := cssRotate(prop, lval)
-		zero := prop == "transform" && cssZeroScale(lval)
+		rot := css.Rotate(prop, lval)
+		zero := prop == "transform" && css.ZeroScale(lval)
 		return op(func(st *cssState, s, ps *styles.Style) {
 			s.Translate.X, _ = st.env.Length(x, units.UnitEw)
 			s.Translate.Y, _ = st.env.Length(y, units.UnitEh)
@@ -432,10 +425,10 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			}
 		})
 	case "aspect-ratio":
-		r := cssAspectRatio(lval)
+		r := css.AspectRatio(lval)
 		return op(func(st *cssState, s, ps *styles.Style) { s.AspectRatio = r })
 	case "rotate":
-		rot := cssAngle(lval)
+		rot := css.Angle(lval)
 		return op(func(st *cssState, s, ps *styles.Style) { s.Rotate = rot })
 	case "z-index":
 		z, err := strconv.Atoi(lval)
@@ -454,7 +447,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 	case "font-size":
 		return op(func(st *cssState, s, ps *styles.Style) { setFontSize(st.env, s, ps, lval) })
 	case "font-weight":
-		return op(func(st *cssState, s, ps *styles.Style) { setFontWeight(s, ps, lval) })
+		return op(func(st *cssState, s, ps *styles.Style) { css.SetFontWeight(s, ps, lval) })
 	case "font-style":
 		slant := rich.SlantNormal
 		if lval == "italic" || lval == "oblique" {
@@ -462,7 +455,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		}
 		return op(func(st *cssState, s, ps *styles.Style) { s.Font.Slant = slant })
 	case "font-family":
-		family := fontFamily(val)
+		family := css.FontFamily(val)
 		return op(func(st *cssState, s, ps *styles.Style) { c.setFontFamily(s, val, family) })
 	case "font":
 		return op(func(st *cssState, s, ps *styles.Style) {
@@ -560,7 +553,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		}
 		return op(func(st *cssState, s, ps *styles.Style) { st.flexShrink, st.hasShrink = float32(f), true })
 	case "flex":
-		grow, shrink, basis, ok := parseFlex(lval)
+		grow, shrink, basis, ok := css.ParseFlex(lval)
 		if !ok {
 			return nil
 		}
@@ -613,7 +606,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			}
 		})
 	case "justify-content", "justify-items", "justify-self", "align-content":
-		a := alignValue(lval)
+		a := css.AlignValue(lval)
 		return op(func(st *cssState, s, ps *styles.Style) {
 			switch prop {
 			case "justify-content":
@@ -627,13 +620,13 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			}
 		})
 	case "align-items":
-		a := alignValue(lval)
+		a := css.AlignValue(lval)
 		return op(func(st *cssState, s, ps *styles.Style) {
 			st.alignItems = lval
 			s.Align.Items = a
 		})
 	case "align-self":
-		a := alignValue(lval)
+		a := css.AlignValue(lval)
 		return op(func(st *cssState, s, ps *styles.Style) {
 			st.alignSelf = lval
 			s.Align.Self = a
@@ -689,7 +682,7 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 			s.BoxShadowOutside = true // they take no space, as in CSS
 		})
 	case "grid-template-columns":
-		cols := gridColumns(lval)
+		cols := css.GridColumns(lval)
 		return op(func(st *cssState, s, ps *styles.Style) { s.Columns = cols })
 	case "object-fit":
 		fit, ok := map[string]styles.ObjectFits{"fill": styles.FitFill, "contain": styles.FitContain, "cover": styles.FitCover,
@@ -712,80 +705,6 @@ func (c *Context) compileCSS(prop, val string) []styleOp {
 		return op(func(st *cssState, s, ps *styles.Style) { st.visibility = lval })
 	}
 	return nil
-}
-
-// zeroAreaClip returns whether the given value of clip (a rect) or of
-// clip-path (an inset) clips the element to nothing, as in the visually
-// hidden elements of pages (rect(0 0 0 0), rect(1px, 1px, 1px, 1px),
-// inset(50%)).
-func zeroAreaClip(prop, v string) bool {
-	fn := "rect("
-	if prop == "clip-path" {
-		if strings.HasPrefix(v, "rect(") { // as clip (as rect(0 0 0 0) of the .sr-only of GitHub)
-			return zeroAreaClip("clip", v)
-		}
-		fn = "inset("
-	}
-	args, ok := strings.CutPrefix(v, fn)
-	if !ok || !strings.HasSuffix(args, ")") {
-		return false
-	}
-	f := strings.Fields(strings.ReplaceAll(strings.TrimSuffix(args, ")"), ",", " "))
-	if prop == "clip-path" { // insets of 50% or more from opposite sides
-		if len(f) == 0 || len(f) > 4 || strings.Contains(args, "round") {
-			return false
-		}
-		pct := func(x string) float64 {
-			if x == "0" || x == "0px" {
-				return 0
-			}
-			n, ok := strings.CutSuffix(x, "%")
-			if !ok {
-				return -1
-			}
-			p, err := strconv.ParseFloat(n, 64)
-			if err != nil {
-				return -1
-			}
-			return p
-		}
-		// the sides of the shorthand: top, right, bottom, left
-		var sides [4]float64
-		for i := range sides {
-			j := [4][4]int{{0, 0, 0, 0}, {0, 1, 0, 1}, {0, 1, 2, 1}, {0, 1, 2, 3}}[len(f)-1][i]
-			sides[i] = pct(f[j])
-		}
-		top, right, bottom, left := sides[0], sides[1], sides[2], sides[3]
-		return top >= 0 && bottom >= 0 && top+bottom >= 100 || right >= 0 && left >= 0 && right+left >= 100
-	}
-	if len(f) != 4 { // top, right, bottom, left, of the top left corner
-		return false
-	}
-	env := css.DefaultLengthEnv()
-	var px [4]float32
-	for i, x := range f {
-		if x == "auto" {
-			return false
-		}
-		l, ok := env.LengthPx(x)
-		if !ok {
-			return false
-		}
-		px[i] = l
-	}
-	return px[2] <= px[0] || px[1] <= px[3]
-}
-
-// colorFunc returns a function that returns the given CSS color (or nil if
-// it is not one). A uniform color is parsed once, and is shared by the
-// styles; other colors (as gradients) are parsed for each style, so that
-// each has its own.
-func colorFunc(v string) func() image.Image {
-	cl := css.ParseColor(v)
-	if _, ok := cl.(*image.Uniform); ok || cl == nil {
-		return func() image.Image { return cl }
-	}
-	return func() image.Image { return css.ParseColor(v) }
 }
 
 // setSize sets the given size property (as max-width) to the given length.
@@ -813,13 +732,13 @@ func compileBorder(side int, val string) styleOp {
 	for _, f := range css.SplitColors(val) {
 		lf := strings.ToLower(f)
 		switch {
-		case borderStyleNames[lf]:
+		case css.BorderStyleNames[lf]:
 			style = lf
 		case lf == "thin" || lf == "medium" || lf == "thick" || (len(lf) > 0 && (lf[0] >= '0' && lf[0] <= '9' || lf[0] == '.')):
 			width = lf
 		default:
 			if css.ParseColor(f) != nil {
-				color = colorFunc(f)
+				color = css.ColorFunc(f)
 			}
 		}
 	}
@@ -836,154 +755,12 @@ func compileBorder(side int, val string) styleOp {
 			if side >= 0 && i != side {
 				continue
 			}
-			setSide(&s.Border.Color, i, cl)
-			setBorderStyle(s, i, style)
+			css.SetSide(&s.Border.Color, i, cl)
+			css.SetBorderStyle(s, i, style)
 			if style != "none" && style != "hidden" {
-				setValueSide(&s.Border.Width, i, w)
+				css.SetValueSide(&s.Border.Width, i, w)
 			}
 		}
-	}
-}
-
-// parseFlex returns the grow, shrink, and basis of the given value of the
-// flex shorthand, as in CSS, where a number alone (as flex: 1) has a basis
-// of 0, not of the width of the item.
-func parseFlex(v string) (grow, shrink float32, basis string, ok bool) {
-	switch v {
-	case "none":
-		return 0, 0, "auto", true
-	case "auto":
-		return 1, 1, "auto", true
-	case "initial":
-		return 0, 1, "auto", true
-	}
-	fs := strings.Fields(v)
-	if len(fs) == 0 {
-		return 0, 0, "", false
-	}
-	shrink, basis = 1, "0"
-	nums := 0
-	for _, f := range fs {
-		x, err := strconv.ParseFloat(f, 32)
-		switch {
-		case err == nil && nums == 0:
-			grow = float32(x)
-			nums++
-		case err == nil && nums == 1:
-			shrink = float32(x)
-			nums++
-		default:
-			basis = f
-			if nums == 0 { // flex: <basis> has a grow of 1
-				grow = 1
-			}
-		}
-	}
-	return grow, shrink, basis, true
-}
-
-// webkitAliases are the properties whose -webkit- prefixed names are
-// aliases of them in browsers, which pages may set only with the prefix.
-var webkitAliases = map[string]bool{
-	"transform": true, "transform-origin": true, "box-sizing": true, "box-shadow": true,
-	"border-radius": true, "flex": true, "flex-direction": true, "flex-wrap": true, "flex-flow": true,
-	"flex-grow": true, "flex-shrink": true, "flex-basis": true, "order": true, "align-items": true,
-	"align-self": true, "justify-content": true, "user-select": true, "appearance": true,
-}
-
-// keywordLonghands are the longhands of the shorthands, which their
-// CSS-wide keywords (inherit, initial) apply to (the others are applied
-// to the style whole, see styles.Style.FromProperty).
-var keywordLonghands = map[string][]string{
-	"font":   {"font-style", "font-weight", "font-size", "line-height", "font-family"},
-	"margin": {"margin-top", "margin-right", "margin-bottom", "margin-left"},
-}
-
-// inheritedProperties are the properties that are inherited in CSS, for
-// which unset is inherit (and initial for the others).
-var inheritedProperties = map[string]bool{
-	"color": true, "font": true, "font-family": true, "font-size": true, "font-style": true,
-	"font-weight": true, "font-variant": true, "line-height": true, "letter-spacing": true,
-	"word-spacing": true, "text-align": true, "text-indent": true, "text-transform": true,
-	"text-shadow": true, "white-space": true, "visibility": true, "cursor": true, "direction": true, "pointer-events": true,
-	"list-style": true, "list-style-type": true, "list-style-position": true, "quotes": true,
-	"word-break": true, "overflow-wrap": true, "hyphens": true, "tab-size": true,
-	"border-collapse": true, "border-spacing": true, "caption-side": true, "empty-cells": true,
-}
-
-// logicalProperties are the physical properties for the logical
-// properties of CSS, for horizontal, left to right text.
-var logicalProperties = map[string]string{
-	"inline-size": "width", "block-size": "height",
-	"min-inline-size": "min-width", "max-inline-size": "max-width",
-	"min-block-size": "min-height", "max-block-size": "max-height",
-	"margin-inline-start": "margin-left", "margin-inline-end": "margin-right",
-	"margin-block-start": "margin-top", "margin-block-end": "margin-bottom",
-	"padding-inline-start": "padding-left", "padding-inline-end": "padding-right",
-	"padding-block-start": "padding-top", "padding-block-end": "padding-bottom",
-	"border-inline-start": "border-left", "border-inline-end": "border-right",
-	"border-block-start": "border-top", "border-block-end": "border-bottom",
-	"border-inline-start-width": "border-left-width", "border-inline-end-width": "border-right-width",
-	"border-block-start-width": "border-top-width", "border-block-end-width": "border-bottom-width",
-	"border-inline-start-color": "border-left-color", "border-inline-end-color": "border-right-color",
-	"border-block-start-color": "border-top-color", "border-block-end-color": "border-bottom-color",
-	"inset-inline-start": "left", "inset-inline-end": "right",
-	"inset-block-start": "top", "inset-block-end": "bottom",
-	"border-start-start-radius": "border-top-left-radius", "border-start-end-radius": "border-top-right-radius",
-	"border-end-start-radius": "border-bottom-left-radius", "border-end-end-radius": "border-bottom-right-radius",
-}
-
-// expandSides expands the 1 to 4 values of a CSS shorthand for
-// the sides of a box into the values for top, right, bottom, left.
-func expandSides(vals []string) []string {
-	switch len(vals) {
-	case 0:
-		return nil
-	case 1:
-		return []string{vals[0], vals[0], vals[0], vals[0]}
-	case 2:
-		return []string{vals[0], vals[1], vals[0], vals[1]}
-	case 3:
-		return []string{vals[0], vals[1], vals[2], vals[1]}
-	}
-	return vals[:4]
-}
-
-// sideIndex returns the index (top, right, bottom, left) of the side in
-// the name of the given property, such as "margin-left".
-func sideIndex(prop string) int {
-	switch {
-	case strings.Contains(prop, "-top"):
-		return 0
-	case strings.Contains(prop, "-right"):
-		return 1
-	case strings.Contains(prop, "-bottom"):
-		return 2
-	}
-	return 3
-}
-
-// setSide sets the given side (top, right, bottom, left) of the given sides.
-func setSide[T any](s *sides.Sides[T], i int, v T) {
-	setSidePtr(&s.Top, &s.Right, &s.Bottom, &s.Left, i, v)
-}
-
-// setValueSide sets the given side (top, right, bottom, left) of the given values.
-func setValueSide(s *sides.Values, i int, v units.Value) {
-	setSidePtr(&s.Top, &s.Right, &s.Bottom, &s.Left, i, v)
-}
-
-func setSidePtr[T any](top, right, bottom, left *T, i int, v T) {
-	s := struct{ Top, Right, Bottom, Left *T }{top, right, bottom, left}
-	switch i {
-	case 0:
-		*s.Top = v
-	case 1:
-		*s.Right = v
-	case 2:
-		*s.Bottom = v
-	case 3:
-		*s.Left = v
 	}
 }
 
@@ -995,9 +772,9 @@ func setInset(env *css.LengthEnv, s *styles.Style, i int, v string) {
 		pct = units.UnitPh
 	}
 	l, ok := env.Length(v, pct)
-	setSide(&s.InsetSet, i, ok)
+	css.SetSide(&s.InsetSet, i, ok)
 	if ok {
-		setValueSide(&s.Inset, i, l)
+		css.SetValueSide(&s.Inset, i, l)
 	}
 }
 
@@ -1011,203 +788,6 @@ func setMargin(st *cssState, i int, v string) {
 	if l, ok := st.env.Length(v, units.UnitPw); ok {
 		st.margin[i] = &l
 	}
-}
-
-var borderStyleNames = map[string]bool{"none": true, "hidden": true, "solid": true, "dotted": true, "dashed": true,
-	"double": true, "groove": true, "ridge": true, "inset": true, "outset": true}
-
-// setBorderStyle sets the style of the given side of the border.
-func setBorderStyle(s *styles.Style, i int, v string) {
-	if v == "none" || v == "hidden" {
-		setValueSide(&s.Border.Width, i, units.Dp(0))
-		setSide(&s.Border.Style, i, styles.BorderNone)
-		return
-	}
-	var bs styles.BorderStyles
-	if bs.SetString(v) == nil {
-		setSide(&s.Border.Style, i, bs)
-	}
-}
-
-// alignValue returns the alignment for the given CSS value.
-func alignValue(v string) styles.Aligns {
-	switch v {
-	case "flex-start", "start", "left", "self-start", "normal", "stretch":
-		return styles.Start
-	case "flex-end", "end", "right", "self-end":
-		return styles.End
-	case "center":
-		return styles.Center
-	case "baseline", "first baseline":
-		return styles.Baseline
-	case "space-between":
-		return styles.SpaceBetween
-	case "space-around":
-		return styles.SpaceAround
-	case "space-evenly":
-		return styles.SpaceEvenly
-	}
-	return styles.Auto
-}
-
-// gridColumns returns the number of columns of a grid-template-columns value.
-func gridColumns(v string) int {
-	if after, ok := strings.CutPrefix(v, "repeat("); ok {
-		n, _, _ := strings.Cut(after, ",")
-		if i, err := strconv.Atoi(strings.TrimSpace(n)); err == nil {
-			return i
-		}
-	}
-	return len(css.SplitColors(v))
-}
-
-// cssTranslate returns the translation of the given value of the transform
-// property (the sum of its translate functions; the other functions, as
-// rotate and scale, are not supported), or of the translate property, as
-// the lengths of x and y. It returns false if it is not valid.
-// cssAspectRatio returns the ratio of width to height of the given value
-// of the aspect-ratio property (as 16 / 9, 1.5, or auto 4/3), or 0 for
-// none (auto).
-func cssAspectRatio(v string) float32 {
-	v = strings.TrimSpace(strings.Replace(v, "auto", "", 1))
-	a, b, slash := strings.Cut(v, "/")
-	w, err := strconv.ParseFloat(strings.TrimSpace(a), 32)
-	if err != nil || w <= 0 {
-		return 0
-	}
-	h := 1.0
-	if slash {
-		if h, err = strconv.ParseFloat(strings.TrimSpace(b), 32); err != nil || h <= 0 {
-			return 0
-		}
-	}
-	return float32(w / h)
-}
-
-// cssZeroScale returns whether the given transform scales the element
-// to nothing in either dimension (as scaleX(0), for a progress bar
-// that is not started), which is then not shown.
-func cssZeroScale(v string) bool {
-	for rest := v; rest != ""; {
-		name, args, found := strings.Cut(rest, "(")
-		if !found {
-			break
-		}
-		before, after, ok := strings.Cut(args, ")")
-		if !ok {
-			break
-		}
-		as := strings.Split(before, ",")
-		zero := func(i int) bool {
-			if i >= len(as) {
-				return false
-			}
-			f, err := strconv.ParseFloat(strings.TrimSpace(as[i]), 64)
-			return err == nil && f == 0
-		}
-		switch strings.TrimSpace(name) {
-		case "scale", "scale3d":
-			if zero(0) || (len(as) > 1 && zero(1)) {
-				return true
-			}
-		case "scalex", "scaley":
-			if zero(0) {
-				return true
-			}
-		}
-		rest = strings.TrimSpace(after)
-	}
-	return false
-}
-
-func cssTranslate(prop, v string) (x, y string, ok bool) {
-	x, y = "0", "0"
-	if v == "none" || v == "" {
-		return x, y, true
-	}
-	if prop == "translate" { // x [y [z]]
-		fs := strings.Fields(v)
-		if len(fs) > 0 {
-			x = fs[0]
-		}
-		if len(fs) > 1 {
-			y = fs[1]
-		}
-		return x, y, true
-	}
-	var xs, ys []string
-	for rest := v; rest != ""; {
-		name, args, found := strings.Cut(rest, "(")
-		if !found {
-			break
-		}
-		before, after, ok := strings.Cut(args, ")")
-		if !ok {
-			return "", "", false
-		}
-		as := strings.Split(before, ",")
-		for i := range as {
-			as[i] = strings.TrimSpace(as[i])
-		}
-		switch strings.TrimSpace(name) {
-		case "translate", "translate3d":
-			xs = append(xs, as[0])
-			if len(as) > 1 {
-				ys = append(ys, as[1])
-			}
-		case "translatex":
-			xs = append(xs, as[0])
-		case "translatey":
-			ys = append(ys, as[0])
-		}
-		rest = strings.TrimSpace(after)
-	}
-	sum := func(ls []string) string {
-		switch len(ls) {
-		case 0:
-			return "0"
-		case 1:
-			return ls[0]
-		}
-		return "calc(" + strings.Join(ls, " + ") + ")"
-	}
-	return sum(xs), sum(ys), true
-}
-
-// cssRotate returns the sum of the angles of the rotate functions of the
-// given transform, in degrees.
-func cssRotate(_, v string) float32 {
-	var deg float32
-	for rest := v; rest != ""; {
-		name, args, found := strings.Cut(rest, "(")
-		if !found {
-			break
-		}
-		before, after, ok := strings.Cut(args, ")")
-		if !ok {
-			break
-		}
-		if n := strings.TrimSpace(name); n == "rotate" || n == "rotatez" {
-			deg += cssAngle(strings.TrimSpace(before))
-		}
-		rest = strings.TrimSpace(after)
-	}
-	return deg
-}
-
-// cssAngle returns the given CSS angle in degrees (deg, rad, grad, turn).
-func cssAngle(v string) float32 {
-	for _, u := range []struct {
-		suffix string
-		deg    float64
-	}{{"deg", 1}, {"grad", 0.9}, {"rad", 180 / math.Pi}, {"turn", 360}} {
-		if n, ok := strings.CutSuffix(v, u.suffix); ok {
-			f, _ := strconv.ParseFloat(strings.TrimSpace(n), 64)
-			return float32(f * u.deg)
-		}
-	}
-	f, _ := strconv.ParseFloat(v, 64)
-	return float32(f)
 }
 
 // boxShadow returns the shadow of the given item of a box-shadow value:

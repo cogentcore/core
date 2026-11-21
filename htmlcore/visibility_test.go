@@ -8,6 +8,8 @@ import (
 	"image/color"
 	"testing"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
@@ -38,13 +40,13 @@ func TestHiddenOverContent(t *testing.T) {
 // drawers of pages that are moved out of view, and the labels of
 // github.com that are centered vertically), which do not change the layout.
 func TestTranslate(t *testing.T) {
-	assert.Equal(t, [2]string{"10px", "0"}, func() [2]string { x, y, _ := cssTranslate("transform", "translatex(10px)"); return [2]string{x, y} }())
+	assert.Equal(t, [2]string{"10px", "0"}, func() [2]string { x, y, _ := css.Translate("transform", "translatex(10px)"); return [2]string{x, y} }())
 	assert.Equal(t, [2]string{"0", "-50%"}, func() [2]string {
-		x, y, _ := cssTranslate("transform", "translatey(-50%) rotate(45deg)")
+		x, y, _ := css.Translate("transform", "translatey(-50%) rotate(45deg)")
 		return [2]string{x, y}
 	}())
 	assert.Equal(t, [2]string{"1px", "2px"}, func() [2]string {
-		x, y, _ := cssTranslate("transform", "translate3d(1px, 2px, 0)")
+		x, y, _ := css.Translate("transform", "translate3d(1px, 2px, 0)")
 		return [2]string{x, y}
 	}())
 	b := core.NewBody()

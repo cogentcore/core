@@ -20,6 +20,8 @@ import (
 	"testing"
 	"time"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
@@ -812,7 +814,7 @@ func TestZeroAreaClip(t *testing.T) {
 		{"clip-path", "inset(10%)", false},
 		{"clip-path", "circle(40%)", false},
 	} {
-		assert.Equal(t, tt.zero, zeroAreaClip(tt.prop, tt.val), tt.prop+": "+tt.val)
+		assert.Equal(t, tt.zero, css.ZeroAreaClip(tt.prop, tt.val), tt.prop+": "+tt.val)
 	}
 }
 

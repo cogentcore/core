@@ -806,7 +806,7 @@ func TestStrayCSS(t *testing.T) {
 	style := `a{color:red} ; {x:y} b;c{color:blue} /* {;} */ @import "s;{.css";
 		@media screen{ ;d{color:green;} {e:f} } {flex-direction:column;}`
 	done := make(chan *douceur.Stylesheet)
-	go func() { done <- parseCSS(style) }()
+	go func() { done <- css.Parse(style) }()
 	select {
 	case ss := <-done:
 		var rules []string
@@ -820,7 +820,7 @@ func TestStrayCSS(t *testing.T) {
 	case <-time.After(5 * time.Second):
 		t.Fatal("parsing did not end")
 	}
-	assert.Equal(t, "a{b:c}@media x{d{e:f}}", removeStrayCSS("a{b:c};@media x{;d{e:f}{g:h}}"))
+	assert.Equal(t, "a{b:c}@media x{d{e:f}}", css.RemoveStray("a{b:c};@media x{;d{e:f}{g:h}}"))
 }
 
 // TestFloatColumns tests floats with a percentage width, as the columns

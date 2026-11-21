@@ -179,7 +179,7 @@ func svgTransform(env *css.LengthEnv, v string) (string, bool) {
 				if _, err := strconv.ParseFloat(strings.TrimRight(a, "degratun"), 32); err != nil {
 					return "", false
 				}
-				f = cssAngle(a)
+				f = css.Angle(a)
 			case "scale", "scalex", "scaley", "matrix":
 				n, err := strconv.ParseFloat(a, 32)
 				if err != nil {

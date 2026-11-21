@@ -337,7 +337,7 @@ type pageState struct {
 	// their elements (see [Context.containerMatches]); keptContainers has
 	// the sizes that they start with (see [Context.KeepContainerSizes]),
 	// and containerMu guards the sizes of the containers in containers.
-	curContainer     *containerCond
+	curContainer     *css.ContainerCond
 	containerQueried map[*html.Node]bool
 
 	// curScope is the host of the shadow root of the style sheet whose
@@ -622,7 +622,7 @@ func (c *Context) addStyleOrigin(style string, origin css.Origin) {
 	if c.curScope != nil { // (of a style sheet of a shadow tree, see shadow.go)
 		root = c.curScope
 	}
-	c.addRules(root, parseCSS(style), origin)
+	c.addRules(root, css.Parse(style), origin)
 }
 
 // LinkButton is a helper function that makes the given button

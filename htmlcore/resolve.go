@@ -93,8 +93,8 @@ func (c *Context) resolveCSS(wb *core.WidgetBase, node *html.Node, st *cssState,
 // auto 32px, which were of no height, over each other).
 func (r *resolver) intrinsicSize() {
 	st, s := r.st, r.s
-	pad := sideDots(&s.Padding, r.dots)
-	border := sideDots(&s.Border.Width, r.dots)
+	pad := css.SideDots(&s.Padding, r.dots)
+	border := css.SideDots(&s.Border.Width, r.dots)
 	set := func(v *units.Value, min *units.Value, extra float32) {
 		if v == nil {
 			return
@@ -278,7 +278,7 @@ func (r *resolver) replacedSize() {
 			}
 		}
 		switch {
-		case st.width == nil && st.height != nil && !percentUnit(st.height.Unit) && hasAspect:
+		case st.width == nil && st.height != nil && !css.PercentUnit(st.height.Unit) && hasAspect:
 			// as wide as its height makes it, in the same unit (as the
 			// logos of github.com, which were as wide as their container,
 			// and the quotation marks of height: 0.7em of the opinion
@@ -402,12 +402,6 @@ func (r *resolver) isIframe() bool {
 	return r.node != nil && r.node.Data == "iframe"
 }
 
-// percentUnit returns whether the given unit is a percentage of a size of
-// the parent or the element, which is not definite for a replaced element.
-func percentUnit(u units.Units) bool {
-	return u == units.UnitPw || u == units.UnitPh || u == units.UnitEw || u == units.UnitEh
-}
-
 // flow sets whether the widget is block-level, in the flow of blocks,
 // and the alignment of an inline element in its line (or of the content
 // of a table cell).
@@ -476,11 +470,11 @@ func (r *resolver) lineHeight() {
 	switch lh := st.lineHeight; lh {
 	case "":
 	case "normal":
-		s.Text.LineHeight = lineHeightNormal
+		s.Text.LineHeight = css.LineHeightNormal
 	default:
 		if f, err := strconv.ParseFloat(lh, 32); err == nil {
 			s.Text.LineHeight = float32(f)
-		} else if f, ok := unitlessCalc(lh); ok {
+		} else if f, ok := css.UnitlessCalc(lh); ok {
 			// a number of calc() (as calc(1.25 / .875), the line height of
 			// the small text of Tailwind, which was taken to be in px: the
 			// text was 1.4px high, cut off by its boxes)
@@ -496,16 +490,6 @@ func (r *resolver) lineHeight() {
 			}
 		}
 	}
-}
-
-// unitlessCalc returns the value of the given calc() expression of numbers
-// only (no lengths or percentages), and whether it is one.
-func unitlessCalc(v string) (float32, bool) {
-	inner, ok := strings.CutPrefix(strings.ToLower(strings.TrimSpace(v)), "calc(")
-	if !ok || strings.ContainsAny(inner, "abcdefghijklmnopqrstuvwxyz%") {
-		return 0, false
-	}
-	return css.CalcPx(v)
 }
 
 // itemGrowth sets how the widget grows and shrinks in the formatting context
@@ -560,7 +544,7 @@ func (r *resolver) itemGrowth() {
 			case "", "auto", "normal", "stretch":
 				s.Grow.X = 1
 			default:
-				s.Justify.Self = alignValue(justify)
+				s.Justify.Self = css.AlignValue(justify)
 			}
 		}
 		if (align == "" || align == "stretch" || align == "normal") && st.height == nil {
@@ -623,7 +607,7 @@ func (r *resolver) flexBasis() {
 	case "", "auto", "content":
 		return
 	}
-	if !zeroLength(st.flexBasis) {
+	if !css.ZeroLength(st.flexBasis) {
 		if st.hasGrow && st.flexGrow > 0 && (!st.hasShrink || st.flexShrink > 0) {
 			// an item that grows and shrinks from its basis is sized by
 			// its content and grow in core, which can break a row that
@@ -660,7 +644,7 @@ func (r *resolver) flexBasis() {
 			continue
 		}
 		grow, basis := c.flexOf(sib)
-		if !zeroLength(basis) || grow <= 0 {
+		if !css.ZeroLength(basis) || grow <= 0 {
 			return
 		}
 		sum += grow
@@ -691,7 +675,7 @@ func (r *resolver) flexBasisGrowth() {
 	if st.width == nil {
 		return
 	}
-	if !zeroLength(st.flexBasis) {
+	if !css.ZeroLength(st.flexBasis) {
 		if st.hasGrow && st.flexGrow > 0 {
 			s.Grow.X = st.flexGrow
 			return
@@ -730,14 +714,6 @@ func (r *resolver) flexBasisGrowth() {
 	s.Shrink.X = 1
 }
 
-// zeroLength returns whether the given CSS length is zero (as 0, 0px, 0%).
-func zeroLength(v string) bool {
-	v = strings.TrimSpace(v)
-	v = strings.TrimRight(v, "abcdefghijklmnopqrstuvwxyz%")
-	f, err := strconv.ParseFloat(v, 32)
-	return err == nil && f == 0
-}
-
 // flexOf returns the flex grow and basis of the given element, from its
 // flex, flex-grow and flex-basis declarations, as for its siblings.
 func (c *Context) flexOf(n *html.Node) (grow float32, basis string) {
@@ -748,7 +724,7 @@ func (c *Context) flexOf(n *html.Node) (grow float32, basis string) {
 		v := strings.ToLower(strings.TrimSpace(d.Value))
 		switch d.Property {
 		case "flex", "-webkit-flex":
-			if g, _, b, ok := parseFlex(v); ok {
+			if g, _, b, ok := css.ParseFlex(v); ok {
 				grow, basis = g, b
 			}
 		case "flex-grow", "-webkit-flex-grow":
@@ -816,7 +792,7 @@ func (c *Context) hasRigidItem(n *html.Node) bool {
 			v := strings.ToLower(strings.TrimSpace(d.Value))
 			switch d.Property {
 			case "flex":
-				if _, sh, _, ok := parseFlex(v); ok {
+				if _, sh, _, ok := css.ParseFlex(v); ok {
 					shrink = sh
 				}
 			case "flex-shrink":
@@ -885,7 +861,7 @@ func (r *resolver) sizes() {
 	// sizes: Min and Max are the size of the content box (or of the
 	// border box, for box-sizing: border-box, of which core subtracts
 	// the padding and border; see styles.BoxSizing)
-	pad := sideDots(&s.Padding, dots)
+	pad := css.SideDots(&s.Padding, dots)
 	if bs.markers { // the markers of the items take the space of the padding
 		mw := dots(&markerWidth)
 		pl := max(pad.Left-mw, 0)
@@ -893,7 +869,7 @@ func (r *resolver) sizes() {
 		pad.Left = pl
 	}
 	r.pad = pad
-	r.bw = sideDots(&s.Border.Width, dots)
+	r.bw = css.SideDots(&s.Border.Width, dots)
 	if st.borderBox {
 		s.BoxSizing = styles.BoxBorderBox
 	}
@@ -1264,11 +1240,6 @@ func (r *resolver) margins() {
 	c.collapseMargins(wb, s, ps, bs, pbs, pad, bw, &top, &bottom)
 	s.Margin.Top = units.Dot(top)
 	s.Margin.Bottom = units.Dot(bottom)
-}
-
-// sideDots returns the given sides in dots, using the given function.
-func sideDots(v *sides.Values, dots func(v *units.Value) float32) sides.Floats {
-	return sides.NewFloats(dots(&v.Top), dots(&v.Right), dots(&v.Bottom), dots(&v.Left))
 }
 
 // flexDefiniteHeight returns whether the element is a flex item whose

@@ -36,7 +36,7 @@ type cssDecl struct {
 
 	// container is the condition of the @container rule that the
 	// declaration is in, if any (see [Context.containerMatches]).
-	container *containerCond
+	container *css.ContainerCond
 
 	// rule is the index of the style rule of the declaration in the
 	// rules of the context plus one, or 0 if it is not of a rule (see
@@ -78,18 +78,18 @@ func (c *Context) addRuleList(root *html.Node, rules []*douceur.Rule, origin css
 				}
 			case "@container":
 				prev := c.curContainer
-				c.curContainer = parseContainerCond(rule.Prelude, prev)
+				c.curContainer = css.ParseContainerCond(rule.Prelude, prev)
 				c.addRuleList(root, rule.Rules, origin)
 				c.curContainer = prev
 			case "@supports", "@layer", "@scope":
-				if cond, ok := strings.CutPrefix(strings.TrimSpace(rule.Prelude), containerMark); ok {
+				if cond, ok := strings.CutPrefix(strings.TrimSpace(rule.Prelude), css.ContainerMark); ok {
 					prev := c.curContainer
-					c.curContainer = parseContainerCond(cond, prev)
+					c.curContainer = css.ParseContainerCond(cond, prev)
 					c.addRuleList(root, rule.Rules, origin)
 					c.curContainer = prev
 					continue
 				}
-				if strings.ToLower(rule.Name) == "@supports" && !supportsMatches(rule.Prelude) {
+				if strings.ToLower(rule.Name) == "@supports" && !css.SupportsMatches(rule.Prelude) {
 					continue
 				}
 				c.addRuleList(root, rule.Rules, origin)
@@ -315,12 +315,12 @@ func (c *Context) ComputedValue(n *html.Node, prop string) string {
 		case "initial", "revert", "revert-layer":
 			return ""
 		case "unset":
-			if !inheritedProperties[prop] {
+			if !css.InheritedProperties[prop] {
 				return ""
 			}
 			continue
 		case "":
-			if !inheritedProperties[prop] {
+			if !css.InheritedProperties[prop] {
 				return ""
 			}
 			continue

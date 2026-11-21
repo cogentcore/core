@@ -560,15 +560,15 @@ func (c *Context) iconElement(n *html.Node) (icon icons.Icon, side string, ok bo
 		}
 	}
 	mask := true
-	u := maskURL(c.declaration(n, "mask-image"))
+	u := css.MaskURL(c.declaration(n, "mask-image"))
 	if u == "" {
-		u = maskURL(c.declaration(n, "-webkit-mask-image"))
+		u = css.MaskURL(c.declaration(n, "-webkit-mask-image"))
 	}
 	if u == "" {
-		u = maskURL(c.declaration(n, "mask"))
+		u = css.MaskURL(c.declaration(n, "mask"))
 	}
 	if u == "" {
-		u, mask = maskURL(c.declaration(n, "background-image")), false
+		u, mask = css.MaskURL(c.declaration(n, "background-image")), false
 	}
 	if u == "" {
 		return

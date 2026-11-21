@@ -7,6 +7,8 @@ package htmlcore
 import (
 	"testing"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,7 +17,7 @@ import (
 // in the style sheet of github.com, whose @container rules in its @layer
 // made the parser fail on the whole style sheet).
 func TestLayerRules(t *testing.T) {
-	ss := parseCSS("@layer base, brand;" +
+	ss := css.Parse("@layer base, brand;" +
 		"@layer brand{.a{color:red}@container (width>=1280px){.b{color:blue}}.c{color:green}}" +
 		"@scope (.x){.d{color:red}}@starting-style{.e{opacity:0}}.f{color:red}")
 	var sels []string

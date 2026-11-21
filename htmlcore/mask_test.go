@@ -22,16 +22,16 @@ import (
 // background color through the mask (as the icons of Wikipedia), with
 // mask-size, mask-position, and mask-repeat, not a box of the color.
 func TestMaskImage(t *testing.T) {
-	assert.Equal(t, "a b.svg", maskURL(`url("a b.svg")`))
-	assert.Equal(t, "x.svg", maskURL(`url(x.svg) no-repeat center`))
-	assert.Equal(t, `data:image/svg+xml;utf8,<svg a="1">`, maskURL(`url("data:image/svg+xml;utf8,<svg a=\"1\">")`), "escaped quotes")
-	x, y := maskPosition("left top")
+	assert.Equal(t, "a b.svg", css.MaskURL(`url("a b.svg")`))
+	assert.Equal(t, "x.svg", css.MaskURL(`url(x.svg) no-repeat center`))
+	assert.Equal(t, `data:image/svg+xml;utf8,<svg a="1">`, css.MaskURL(`url("data:image/svg+xml;utf8,<svg a=\"1\">")`), "escaped quotes")
+	x, y := css.MaskPosition("left top")
 	assert.Equal(t, [2]float32{0, 0}, [2]float32{x, y})
-	x, y = maskPosition("50% 50%")
+	x, y = css.MaskPosition("50% 50%")
 	assert.Equal(t, [2]float32{0.5, 0.5}, [2]float32{x, y})
-	assert.Equal(t, math32.Vec2(20, 10), maskSize("20px auto", math32.Vec2(40, 40), math32.Vec2(100, 50), 1))
-	assert.Equal(t, math32.Vec2(40, 20), maskSize("contain", math32.Vec2(40, 40), math32.Vec2(100, 50), 1))
-	assert.Equal(t, "20px auto", resolveMaskSize(css.DefaultLengthEnv(), "calc(max(calc(1rem + 4px),10px)) auto"))
+	assert.Equal(t, math32.Vec2(20, 10), css.MaskSize("20px auto", math32.Vec2(40, 40), math32.Vec2(100, 50), 1))
+	assert.Equal(t, math32.Vec2(40, 20), css.MaskSize("contain", math32.Vec2(40, 40), math32.Vec2(100, 50), 1))
+	assert.Equal(t, "20px auto", css.ResolveMaskSize(css.DefaultLengthEnv(), "calc(max(calc(1rem + 4px),10px)) auto"))
 
 	// a circle in a 10x10 view box
 	circle := `data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" width="10" height="10"%3E%3Ccircle cx="5" cy="5" r="5"/%3E%3C/svg%3E`
@@ -99,8 +99,8 @@ func TestMinWidthBelowWidth(t *testing.T) {
 // down-pointing icons rotated by -90deg to point right), including its
 // masked background.
 func TestRotatedMask(t *testing.T) {
-	assert.Equal(t, float32(-90), cssRotate("transform", "rotate(-90deg)"))
-	assert.InDelta(t, 90, cssAngle("0.25turn"), 0.01)
+	assert.Equal(t, float32(-90), css.Rotate("transform", "rotate(-90deg)"))
+	assert.InDelta(t, 90, css.Angle("0.25turn"), 0.01)
 	// a triangle in the top half of the box, pointing down
 	tri := `data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" width="10" height="10"%3E%3Cpath d="M0 0 H10 L5 5 Z"/%3E%3C/svg%3E`
 	b := core.NewBody()

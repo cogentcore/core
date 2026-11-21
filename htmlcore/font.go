@@ -17,11 +17,6 @@ import (
 	"golang.org/x/net/html"
 )
 
-// lineHeightNormal is the line height of the "normal" value, which
-// is given by the metrics of the font in browsers; this is the value
-// for the default Noto Sans font.
-const lineHeightNormal = 1.362
-
 // setFontSize sets the font size, relative to the inherited one.
 func setFontSize(env *css.LengthEnv, s, ps *styles.Style, v string) {
 	inherited := s.Font.Size
@@ -67,51 +62,6 @@ func setFontSize(env *css.LengthEnv, s, ps *styles.Style, v string) {
 	}
 }
 
-// setFontWeight sets the font weight.
-func setFontWeight(s, ps *styles.Style, v string) {
-	w := 400
-	switch v {
-	case "normal":
-	case "bold":
-		w = 700
-	case "bolder":
-		w = 700
-		if ps != nil && ps.Font.Weight >= rich.Bold {
-			w = 900
-		}
-	case "lighter":
-		w = 300
-	default:
-		n, err := strconv.Atoi(v)
-		if err != nil {
-			return
-		}
-		w = n
-	}
-	s.Font.Weight = rich.Weights(min(max((w+50)/100-1, 0), 8))
-}
-
-// fontFamily returns the font family for the given CSS font-family list,
-// the first generic family in it, or one for a common font name.
-func fontFamily(v string) rich.Family {
-	for f := range strings.SplitSeq(v, ",") {
-		f = strings.ToLower(strings.Trim(strings.TrimSpace(f), `"'`))
-		switch f {
-		case "monospace", "courier", "courier new", "consolas", "menlo", "monaco", "roboto mono", "ui-monospace", "sfmono-regular":
-			return rich.Monospace
-		case "serif", "times", "times new roman", "georgia", "garamond", "ui-serif":
-			return rich.Serif
-		case "sans-serif", "arial", "helvetica", "helvetica neue", "verdana", "tahoma", "system-ui", "-apple-system", "segoe ui", "roboto", "noto sans", "ui-sans-serif":
-			return rich.SansSerif
-		case "cursive":
-			return rich.Cursive
-		case "fantasy":
-			return rich.Fantasy
-		}
-	}
-	return rich.SansSerif
-}
-
 // setFont sets the font shorthand: [style] [weight] size[/line-height] family,
 // returning the family list if it is valid.
 func setFont(st *cssState, s, ps *styles.Style, v string) string {
@@ -131,7 +81,7 @@ func setFont(st *cssState, s, ps *styles.Style, v string) string {
 			s.Font.Slant = slant
 			s.Font.Weight = rich.Normal
 			if weight != "" {
-				setFontWeight(s, ps, weight)
+				css.SetFontWeight(s, ps, weight)
 			}
 			size, lh, _ := strings.Cut(lf, "/")
 			setFontSize(st.env, s, ps, size)
@@ -140,7 +90,7 @@ func setFont(st *cssState, s, ps *styles.Style, v string) string {
 				st.lineHeight = lh
 			}
 			family := strings.Join(fs[i+1:], " ")
-			s.Font.Family = fontFamily(family)
+			s.Font.Family = css.FontFamily(family)
 			return family
 		}
 	}
@@ -184,12 +134,8 @@ func (c *Context) rootFontSize() float32 {
 		c.rootFont = 16 * f
 	} else if f, ok := num("px"); ok {
 		c.rootFont = f
-	} else if px, ok := fontSizeKeywords[v]; ok {
+	} else if px, ok := css.FontSizeKeywords[v]; ok {
 		c.rootFont = px
 	}
 	return c.rootFont
 }
-
-// fontSizeKeywords are the font sizes of the absolute size keywords, in px.
-var fontSizeKeywords = map[string]float32{"xx-small": 9, "x-small": 10, "small": 13, "medium": 16,
-	"large": 18, "x-large": 24, "xx-large": 32, "xxx-large": 48}

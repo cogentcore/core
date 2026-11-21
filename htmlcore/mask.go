@@ -9,7 +9,6 @@ import (
 	"image"
 	"image/color"
 	"io"
-	"strconv"
 	"strings"
 	"sync"
 
@@ -183,9 +182,9 @@ func (mf *maskFill) Update(opacity float32, box math32.Box2, objTransform math32
 	if isz.X <= 0 || isz.Y <= 0 {
 		isz = bsz
 	}
-	sz := maskSize(mf.mask.size, bsz, isz, mf.dp)
-	px, py := maskPosition(mf.mask.position)
-	ox, oy := maskOffset(mf.mask.position)
+	sz := css.MaskSize(mf.mask.size, bsz, isz, mf.dp)
+	px, py := css.MaskPosition(mf.mask.position)
+	ox, oy := css.MaskOffset(mf.mask.position)
 	pos := math32.Vec2(px*(bsz.X-sz.X)+ox*mf.dp, py*(bsz.Y-sz.Y)+oy*mf.dp)
 	mf.placed = image.Rect(0, 0, int(math32.Round(sz.X)), int(math32.Round(sz.Y))).Add(b.Min).Add(image.Pt(int(math32.Round(pos.X)), int(math32.Round(pos.Y))))
 	if mf.image {
@@ -356,139 +355,6 @@ func (c *Context) applyBackgroundImage(st *cssState, s *styles.Style) {
 	s.Background = &maskFill{color: base, src: src, mask: mk, dp: dp, image: true}
 }
 
-// maskSize returns the size of the mask image in the given box, for the
-// given mask-size (as "20px auto", "contain", "cover", or "50%"), and the
-// intrinsic size of the image, in pixels, with the given dots per px.
-func maskSize(v string, box, intrinsic math32.Vector2, dp float32) math32.Vector2 {
-	aspect := intrinsic.Y / intrinsic.X
-	switch strings.TrimSpace(v) {
-	case "contain", "cover":
-		sx, sy := box.X/intrinsic.X, box.Y/intrinsic.Y
-		s := min(sx, sy)
-		if v == "cover" {
-			s = max(sx, sy)
-		}
-		return intrinsic.MulScalar(s)
-	case "", "auto", "auto auto":
-		return intrinsic
-	}
-	fs := strings.Fields(v)
-	length := func(f string, ref float32) (float32, bool) {
-		if pct, ok := strings.CutSuffix(f, "%"); ok {
-			n, err := strconv.ParseFloat(pct, 32)
-			return float32(n) / 100 * ref, err == nil
-		}
-		if f == "auto" {
-			return 0, false
-		}
-		n, err := strconv.ParseFloat(strings.TrimSuffix(f, "px"), 32)
-		return float32(n) * dp, err == nil
-	}
-	w, wok := length(fs[0], box.X)
-	h, hok := float32(0), false
-	if len(fs) > 1 {
-		h, hok = length(fs[1], box.Y)
-	}
-	switch {
-	case wok && hok:
-		return math32.Vec2(w, h)
-	case wok:
-		return math32.Vec2(w, w*aspect)
-	case hok:
-		return math32.Vec2(h/aspect, h)
-	}
-	return intrinsic
-}
-
-// maskPosition returns the fractions of the extra space of the box on each
-// axis that are before the mask image, for the given mask-position (as
-// "50% 50%", "center", or "left top").
-func maskPosition(v string) (x, y float32) {
-	fs := strings.Fields(strings.ToLower(v))
-	if len(fs) == 0 {
-		return 0, 0
-	}
-	if len(fs) == 1 {
-		fs = append(fs, "center")
-	}
-	frac := func(f string) float32 {
-		switch f {
-		case "left", "top":
-			return 0
-		case "center":
-			return 0.5
-		case "right", "bottom":
-			return 1
-		}
-		if pct, ok := strings.CutSuffix(f, "%"); ok {
-			n, _ := strconv.ParseFloat(pct, 32)
-			return float32(n) / 100
-		}
-		return 0
-	}
-	if fs[0] == "top" || fs[0] == "bottom" || fs[1] == "left" || fs[1] == "right" {
-		fs[0], fs[1] = fs[1], fs[0] // as "top left"
-	}
-	return frac(fs[0]), frac(fs[1])
-}
-
-// maskOffset returns the offsets in px of the given mask-position (or
-// background-position) that are lengths (as the positions of the images
-// in a sprite, as "0 -261px"), which are from the left and top.
-func maskOffset(v string) (x, y float32) {
-	fs := strings.Fields(strings.ToLower(v))
-	if len(fs) == 0 {
-		return 0, 0
-	}
-	if len(fs) == 1 {
-		fs = append(fs, "center")
-	}
-	if fs[0] == "top" || fs[0] == "bottom" || fs[1] == "left" || fs[1] == "right" {
-		fs[0], fs[1] = fs[1], fs[0]
-	}
-	px := func(f string) float32 {
-		if n, ok := strings.CutSuffix(f, "px"); ok {
-			v, _ := strconv.ParseFloat(n, 32)
-			return float32(v)
-		}
-		return 0
-	}
-	return px(fs[0]), px(fs[1])
-}
-
-// maskURL returns the URL of the url() of the given value of mask-image
-// (or the mask shorthand), or "" if it has none (as none).
-func maskURL(v string) string {
-	i := strings.Index(strings.ToLower(v), "url(")
-	if i < 0 {
-		return ""
-	}
-	rest := v[i+4:]
-	before, _, ok := strings.Cut(rest, ")")
-	if t := strings.TrimSpace(rest); strings.HasPrefix(t, `"`) || strings.HasPrefix(t, `'`) {
-		// a CSS string, with backslash escapes (as the quotes of the
-		// attributes of an SVG in a data URL)
-		q := t[0]
-		var sb strings.Builder
-		for i := 1; i < len(t); i++ {
-			switch c := t[i]; {
-			case c == '\\' && i+1 < len(t):
-				i++
-				sb.WriteByte(t[i])
-			case c == q:
-				return sb.String()
-			default:
-				sb.WriteByte(c)
-			}
-		}
-		return ""
-	}
-	if !ok {
-		return ""
-	}
-	return strings.TrimSpace(before)
-}
-
 // applyMask sets the background of the given style to its color through
 // the mask of the given state, if it has one and a color.
 func (c *Context) applyMask(st *cssState, s *styles.Style) {
@@ -528,7 +394,7 @@ func compileMask(prop, val string) styleOp {
 // background-repeat, or the url() of the background shorthand), as the
 // properties of masks (see [compileMask]), or returns nil.
 func compileBackgroundImage(prop, val string) styleOp {
-	if prop == "background-image" && maskURL(val) == "" {
+	if prop == "background-image" && css.MaskURL(val) == "" {
 		return func(st *cssState, s, ps *styles.Style) { st.bgImage = nil } // (as none or a gradient)
 	}
 	return compileImageLayer(strings.Replace(prop, "background", "mask", 1), val, func(st *cssState) **cssMask { return &st.bgImage })
@@ -554,18 +420,18 @@ func compileImageLayer(prop, val string, layer func(st *cssState) **cssMask) sty
 	}
 	switch prop {
 	case "mask-image":
-		u := maskURL(val)
+		u := css.MaskURL(val)
 		return set(func(m *cssMask) { m.url = u })
 	case "mask-size":
 		return func(st *cssState, s, ps *styles.Style) {
-			get(st).size = resolveMaskSize(st.env, lval)
+			get(st).size = css.ResolveMaskSize(st.env, lval)
 		}
 	case "mask-position":
 		return set(func(m *cssMask) { m.position = lval })
 	case "mask-repeat":
 		return set(func(m *cssMask) { m.repeatValue(lval) })
 	case "mask":
-		u := maskURL(val)
+		u := css.MaskURL(val)
 		rest := lval
 		if i := strings.Index(rest, "url("); i >= 0 {
 			if j := strings.Index(rest[i:], ")"); j >= 0 {
@@ -582,14 +448,14 @@ func compileImageLayer(prop, val string, layer func(st *cssState) **cssMask) sty
 				"border-box", "padding-box", "content-box", "fill-box", "stroke-box", "view-box", "no-clip",
 				"fixed", "scroll", "local", "none", "transparent":
 			default:
-				if css.ParseColor(f) != nil && !isPositionWord(f) {
+				if css.ParseColor(f) != nil && !css.IsPositionWord(f) {
 					continue // the color of the background shorthand
 				}
 				keep = append(keep, f)
 			}
 		}
 		return func(st *cssState, s, ps *styles.Style) {
-			m := &cssMask{url: u, position: strings.Join(keep, " "), size: resolveMaskSize(st.env, strings.TrimSpace(size))}
+			m := &cssMask{url: u, position: strings.Join(keep, " "), size: css.ResolveMaskSize(st.env, strings.TrimSpace(size))}
 			if len(repeats) > 0 {
 				m.repeatValue(strings.Join(repeats, " "))
 			}
@@ -598,31 +464,4 @@ func compileImageLayer(prop, val string, layer func(st *cssState) **cssMask) sty
 		}
 	}
 	return nil
-}
-
-// resolveMaskSize returns the given mask-size with its lengths (as em and
-// calc()) resolved to px with the given length environment, as maskSize
-// reads px, percentages, auto, contain, and cover.
-func resolveMaskSize(env *css.LengthEnv, v string) string {
-	parts := css.SplitTopLevelSpaces(v)
-	for i, p := range parts {
-		switch {
-		case p == "auto" || p == "contain" || p == "cover" || strings.HasSuffix(p, "%"):
-			continue
-		}
-		if l, ok := env.Length(p, units.UnitPw); ok && l.Unit == units.UnitDp { // (% are of the box)
-			parts[i] = strconv.FormatFloat(float64(l.Value), 'f', -1, 32) + "px"
-		}
-	}
-	return strings.Join(parts, " ")
-}
-
-// isPositionWord returns whether the given word is one of a position (a
-// keyword or a length), not a color.
-func isPositionWord(f string) bool {
-	switch f {
-	case "left", "right", "top", "bottom", "center":
-		return true
-	}
-	return f != "" && (f[0] >= '0' && f[0] <= '9' || f[0] == '-' || f[0] == '.')
 }

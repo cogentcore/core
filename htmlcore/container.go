@@ -8,6 +8,8 @@ import (
 	"slices"
 	"strings"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/units"
@@ -163,29 +165,6 @@ func frameOf(w any) *core.Frame {
 	return nil
 }
 
-// containerCond is the condition of an @container rule: the name of the
-// container that it queries ("" for the nearest one), and its query (as
-// (width <= 799px)), and that of an @container rule that it is in.
-type containerCond struct {
-	name, query string
-	outer       *containerCond
-}
-
-// parseContainerCond returns the condition of an @container rule of the
-// given prelude (as "spotlight (width <= 799px)"), in the given one.
-func parseContainerCond(prelude string, outer *containerCond) *containerCond {
-	prelude = strings.TrimSpace(prelude)
-	cc := &containerCond{query: prelude, outer: outer}
-	if i := strings.IndexAny(prelude, "( "); i > 0 && !strings.HasPrefix(strings.ToLower(prelude), "not") {
-		name := strings.TrimSpace(prelude[:i])
-		if name != "" && !strings.ContainsAny(name, "()") {
-			cc.name = name
-			cc.query = strings.TrimSpace(prelude[i:])
-		}
-	}
-	return cc
-}
-
 // containerDecls returns the given declarations of the given element
 // without those of @container rules whose conditions it does not match.
 //
@@ -244,14 +223,14 @@ func (c *Context) containersChanged() {
 // [containerUnits]), or of the viewport before it is laid out, as the
 // spotlight cards of edition.cnn.com, whose aspect ratios were those of
 // the last of their @container rules, which all applied.
-func (c *Context) containerMatches(n *html.Node, cc *containerCond) bool {
-	for ; cc != nil; cc = cc.outer {
+func (c *Context) containerMatches(n *html.Node, cc *css.ContainerCond) bool {
+	for ; cc != nil; cc = cc.Outer {
 		width := c.mediaWidth()
 		for p := n.Parent; p != nil && p.Type == html.ElementNode; p = p.Parent {
 			if ok, _ := c.isContainer(p); !ok {
 				continue
 			}
-			if cc.name != "" && !c.containerNamed(p, cc.name) {
+			if cc.Name != "" && !c.containerNamed(p, cc.Name) {
 				continue
 			}
 			if cf := c.containers[p]; cf != nil && cf.size.X > 0 {
@@ -261,7 +240,7 @@ func (c *Context) containerMatches(n *html.Node, cc *containerCond) bool {
 			}
 			break
 		}
-		if !c.containerQueryMatches(cc.query, width) {
+		if !c.containerQueryMatches(cc.Query, width) {
 			return false
 		}
 	}

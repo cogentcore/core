@@ -33,8 +33,8 @@ func TestWebFonts(t *testing.T) {
 	file := filepath.Join(t.TempDir(), "web.ttf")
 	require.NoError(t, os.WriteFile(file, data, 0666))
 	assert.Equal(t, []string{"url(a.woff2) format(\"woff2\")", "local(x)"}, css.SplitTopLevel(`url(a.woff2) format("woff2"), local(x)`, ','))
-	assert.True(t, unicodeRangeHas("U+0000-00FF, U+0131", 'A'))
-	assert.False(t, unicodeRangeHas("U+0400-045F", 'A'))
+	assert.True(t, css.UnicodeRangeHas("U+0000-00FF, U+0131", 'A'))
+	assert.False(t, css.UnicodeRangeHas("U+0400-045F", 'A'))
 
 	b := core.NewBody()
 	ctx := NewContext()

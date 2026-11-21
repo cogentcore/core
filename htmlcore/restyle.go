@@ -35,7 +35,7 @@ type styleRule struct {
 	spec      int
 
 	// container is the condition of the @container rule that it is in.
-	container *containerCond
+	container *css.ContainerCond
 
 	// cssBase is the URL that the URLs of the rule are relative to.
 	cssBase string
@@ -1042,7 +1042,7 @@ func (c *Context) restylable(n *html.Node, prop string) bool {
 	if strings.HasPrefix(prop, "--") {
 		return true // its uses are changes of their own
 	}
-	if p, ok := strings.CutPrefix(prop, "-webkit-"); ok && webkitAliases[p] {
+	if p, ok := strings.CutPrefix(prop, "-webkit-"); ok && css.WebkitAliases[p] {
 		prop = p
 	}
 	if !restylableProperties[prop] {

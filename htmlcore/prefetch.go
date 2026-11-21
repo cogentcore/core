@@ -126,7 +126,7 @@ func StyleSheetURLs(sheet, base string, webFonts bool) []string {
 			}
 		}
 	}
-	walk(parseCSS(sheet).Rules)
+	walk(css.Parse(sheet).Rules)
 	return urls
 }
 
@@ -145,11 +145,11 @@ func fontFaceURL(decls []*douceur.Declaration, base string) string {
 			urange = d.Value
 		}
 	}
-	if family == "" || src == "" || (urange != "" && !unicodeRangeHas(urange, 'A')) {
+	if family == "" || src == "" || (urange != "" && !css.UnicodeRangeHas(urange, 'A')) {
 		return ""
 	}
 	for _, s := range css.SplitTopLevel(src, ',') {
-		u, format := fontSource(s)
+		u, format := css.FontSource(s)
 		if u == "" {
 			continue
 		}

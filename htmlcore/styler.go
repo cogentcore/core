@@ -419,7 +419,7 @@ func (c *Context) inlineInheritedOps(node *html.Node, wb *core.WidgetBase) []sty
 		c0 := chain[ri]
 		var inh []*cssDecl
 		for _, d := range c.declarations(c0) {
-			if inheritedProperties[d.Property] {
+			if css.InheritedProperties[d.Property] {
 				inh = append(inh, d)
 			}
 		}

@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/htmlcore/css"
+
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
@@ -56,8 +58,8 @@ func (c *Context) clippedRows(n *html.Node) bool {
 	if pos != "absolute" && pos != "fixed" {
 		return false
 	}
-	return zeroAreaClip("clip", strings.TrimSpace(c.declaration(n, "clip"))) ||
-		zeroAreaClip("clip-path", strings.TrimSpace(c.declaration(n, "clip-path")))
+	return css.ZeroAreaClip("clip", strings.TrimSpace(c.declaration(n, "clip"))) ||
+		css.ZeroAreaClip("clip-path", strings.TrimSpace(c.declaration(n, "clip-path")))
 }
 
 // handleElement makes the widgets of the current node with the handler in

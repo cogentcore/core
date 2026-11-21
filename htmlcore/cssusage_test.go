@@ -41,7 +41,7 @@ func init() {
 	padding-block list-style list-style-type cursor`) {
 		supportedProperties[p] = true
 	}
-	for p := range logicalProperties {
+	for p := range css.LogicalProperties {
 		supportedProperties[p] = true
 	}
 }
