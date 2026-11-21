@@ -22,7 +22,7 @@ import (
 )
 
 // selectPage is an htmlcore page of the fidelity tests (in
-// htmlcore/testdata/fidelity) in a window of the given size, for testing
+// htmlcore/htmlengine/testdata/fidelity) in a window of the given size, for testing
 // the selection of text across texts by sliding the mouse.
 type selectPage struct {
 	t *testing.T
@@ -30,7 +30,7 @@ type selectPage struct {
 }
 
 func newSelectPage(t *testing.T, name string, width, height float32) *selectPage {
-	src, err := os.ReadFile(filepath.Join("..", "htmlcore", "testdata", "fidelity", name+".html"))
+	src, err := os.ReadFile(filepath.Join("..", "htmlcore", "htmlengine", "testdata", "fidelity", name+".html"))
 	require.NoError(t, err)
 	b := core.NewBody()
 	b.Styler(func(s *styles.Style) {

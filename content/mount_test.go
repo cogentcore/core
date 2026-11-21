@@ -125,7 +125,7 @@ func TestMountContent(t *testing.T) {
 				ct.AsyncLock()
 				defer ct.AsyncUnlock()
 				assert.Equal(t, tp.url, ct.current.Page.URL)
-				assert.Equal(t, tp.base, ct.Context.PageURL)
+				assert.Equal(t, tp.base, ct.Context.PageURL())
 				assert.Equal(t, tp.images, countImages(ct), "the icon of the app, resolved relative to the page")
 				// Without categories, the pages are listed as "Pages",
 				// with the current one selected.

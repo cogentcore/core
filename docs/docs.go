@@ -99,9 +99,9 @@ func main() {
 	content.CodeSymbols["mySVG"] = mySVG
 	content.CodeSymbols["myFile"] = myFile
 
-	ctx.ElementHandlers["home-page"] = homePage
-	ctx.ElementHandlers["core-playground"] = func(ctx *htmlcore.Context) bool {
-		splits := core.NewSplits(ctx.BlockParent)
+	ctx.AddElementHandler("home-page", homePage)
+	ctx.AddElementHandler("core-playground", func(ctx *htmlcore.Context) bool {
+		splits := core.NewSplits(ctx.BlockParent())
 		ed := textcore.NewEditor(splits)
 		playgroundFile := filepath.Join(core.TheApp.AppDataDir(), "playground.go")
 		err := ed.Lines.Open(playgroundFile)
@@ -123,10 +123,10 @@ func main() {
 		parent := core.NewFrame(splits)
 		content.BindCode(ed, parent, "Go")
 		return true
-	}
-	ctx.ElementHandlers["style-demo"] = func(ctx *htmlcore.Context) bool {
+	})
+	ctx.AddElementHandler("style-demo", func(ctx *htmlcore.Context) bool {
 		// same as demo styles tab
-		sp := core.NewSplits(ctx.BlockParent)
+		sp := core.NewSplits(ctx.BlockParent())
 		sp.Styler(func(s *styles.Style) {
 			s.Min.Y.Em(40)
 		})
@@ -156,13 +156,13 @@ func main() {
 			})
 		}
 		return true
-	}
+	})
 
 	b.RunMainWindow()
 }
 
 func homePage(ctx *htmlcore.Context) bool {
-	home := core.NewFrame(ctx.BlockParent)
+	home := core.NewFrame(ctx.BlockParent())
 	home.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)

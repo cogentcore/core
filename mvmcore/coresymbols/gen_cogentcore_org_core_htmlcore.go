@@ -4,69 +4,35 @@ package coresymbols
 
 import (
 	p_cogentcore_org_core_htmlcore "cogentcore.org/core/htmlcore"
-	"github.com/cogentcore/mvm/genshim"
 	"reflect"
 )
 
 var _ = register(func() {
-	genshim.Register("cogentcore.org/core/htmlcore", `package htmlcore
-
-import core "cogentcore.org/core/core"
-import tree "cogentcore.org/core/tree"
-
-func New[T tree.NodeValue](ctx *Context) *T {
-	parent := ctx.Parent()
-	w := tree.New[T](parent)
-	ctx.config(any(w).(core.Widget))
-	return w
-}
-`, []string{"Context"})
 	add(map[string]map[string]reflect.Value{
 		"cogentcore.org/core/htmlcore": {
-			"AcceptLanguage":      reflect.ValueOf(&p_cogentcore_org_core_htmlcore.AcceptLanguage),
-			"AudioDefaultHeight":  reflect.ValueOf(p_cogentcore_org_core_htmlcore.AudioDefaultHeight),
-			"AudioDefaultWidth":   reflect.ValueOf(p_cogentcore_org_core_htmlcore.AudioDefaultWidth),
-			"Context":             reflect.ValueOf((*p_cogentcore_org_core_htmlcore.Context)(nil)),
-			"ExtractText":         reflect.ValueOf(p_cogentcore_org_core_htmlcore.ExtractText),
-			"ExtractTextExclude":  reflect.ValueOf(p_cogentcore_org_core_htmlcore.ExtractTextExclude),
-			"FontDecoder":         reflect.ValueOf(&p_cogentcore_org_core_htmlcore.FontDecoder),
-			"Get":                 reflect.ValueOf(p_cogentcore_org_core_htmlcore.Get),
-			"GetAttr":             reflect.ValueOf(p_cogentcore_org_core_htmlcore.GetAttr),
-			"GetLanguage":         reflect.ValueOf(p_cogentcore_org_core_htmlcore.GetLanguage),
-			"GetURLFromFS":        reflect.ValueOf(p_cogentcore_org_core_htmlcore.GetURLFromFS),
-			"GoDocWikilink":       reflect.ValueOf(p_cogentcore_org_core_htmlcore.GoDocWikilink),
-			"HasAttr":             reflect.ValueOf(p_cogentcore_org_core_htmlcore.HasAttr),
-			"IframeDefaultHeight": reflect.ValueOf(p_cogentcore_org_core_htmlcore.IframeDefaultHeight),
-			"IframeDefaultWidth":  reflect.ValueOf(p_cogentcore_org_core_htmlcore.IframeDefaultWidth),
-			"ImageCache":          reflect.ValueOf((*p_cogentcore_org_core_htmlcore.ImageCache)(nil)),
-			"MDGetAttr":           reflect.ValueOf(p_cogentcore_org_core_htmlcore.MDGetAttr),
-			"MDSetAttr":           reflect.ValueOf(p_cogentcore_org_core_htmlcore.MDSetAttr),
-			"MDToHTML":            reflect.ValueOf(p_cogentcore_org_core_htmlcore.MDToHTML),
-			"Markdown":            reflect.ValueOf((*p_cogentcore_org_core_htmlcore.Markdown)(nil)),
-			"NewContext":          reflect.ValueOf(p_cogentcore_org_core_htmlcore.NewContext),
-			"NewImageCache":       reflect.ValueOf(p_cogentcore_org_core_htmlcore.NewImageCache),
-			"NewMarkdown":         reflect.ValueOf(p_cogentcore_org_core_htmlcore.NewMarkdown),
-			"NodeOf":              reflect.ValueOf(p_cogentcore_org_core_htmlcore.NodeOf),
-			"ParseHTML":           reflect.ValueOf(p_cogentcore_org_core_htmlcore.ParseHTML),
-			"ParseRelativeURL":    reflect.ValueOf(p_cogentcore_org_core_htmlcore.ParseRelativeURL),
-			"PseudoElement":       reflect.ValueOf(p_cogentcore_org_core_htmlcore.PseudoElement),
-			"ReadDocument":        reflect.ValueOf(p_cogentcore_org_core_htmlcore.ReadDocument),
-			"ReadHTML":            reflect.ValueOf(p_cogentcore_org_core_htmlcore.ReadHTML),
-			"ReadHTMLString":      reflect.ValueOf(p_cogentcore_org_core_htmlcore.ReadHTMLString),
-			"ReadMD":              reflect.ValueOf(p_cogentcore_org_core_htmlcore.ReadMD),
-			"ReadMDString":        reflect.ValueOf(p_cogentcore_org_core_htmlcore.ReadMDString),
-			"ScreenMediaWidth":    reflect.ValueOf(p_cogentcore_org_core_htmlcore.ScreenMediaWidth),
-			"SetRequestHeaders":   reflect.ValueOf(p_cogentcore_org_core_htmlcore.SetRequestHeaders),
-			"StyleSheetURLs":      reflect.ValueOf(p_cogentcore_org_core_htmlcore.StyleSheetURLs),
-			"TagTexts":            reflect.ValueOf(p_cogentcore_org_core_htmlcore.TagTexts),
-			"TextElement":         reflect.ValueOf(p_cogentcore_org_core_htmlcore.TextElement),
-			"TextTag":             reflect.ValueOf(p_cogentcore_org_core_htmlcore.TextTag),
-			"UserAgent":           reflect.ValueOf(&p_cogentcore_org_core_htmlcore.UserAgent),
-			"VideoBox":            reflect.ValueOf((*p_cogentcore_org_core_htmlcore.VideoBox)(nil)),
-			"VideoDefaultHeight":  reflect.ValueOf(p_cogentcore_org_core_htmlcore.VideoDefaultHeight),
-			"VideoDefaultWidth":   reflect.ValueOf(p_cogentcore_org_core_htmlcore.VideoDefaultWidth),
-			"VideoSourceOf":       reflect.ValueOf(p_cogentcore_org_core_htmlcore.VideoSourceOf),
-			"WikilinkHandler":     reflect.ValueOf((*p_cogentcore_org_core_htmlcore.WikilinkHandler)(nil)),
+			"Context":         reflect.ValueOf((*p_cogentcore_org_core_htmlcore.Context)(nil)),
+			"ExtractText":     reflect.ValueOf(p_cogentcore_org_core_htmlcore.ExtractText),
+			"GetAttr":         reflect.ValueOf(p_cogentcore_org_core_htmlcore.GetAttr),
+			"GetLanguage":     reflect.ValueOf(p_cogentcore_org_core_htmlcore.GetLanguage),
+			"GetURLFromFS":    reflect.ValueOf(p_cogentcore_org_core_htmlcore.GetURLFromFS),
+			"GoDocWikilink":   reflect.ValueOf(p_cogentcore_org_core_htmlcore.GoDocWikilink),
+			"HasAttr":         reflect.ValueOf(p_cogentcore_org_core_htmlcore.HasAttr),
+			"ImageCache":      reflect.ValueOf((*p_cogentcore_org_core_htmlcore.ImageCache)(nil)),
+			"MDGetAttr":       reflect.ValueOf(p_cogentcore_org_core_htmlcore.MDGetAttr),
+			"MDSetAttr":       reflect.ValueOf(p_cogentcore_org_core_htmlcore.MDSetAttr),
+			"MDToHTML":        reflect.ValueOf(p_cogentcore_org_core_htmlcore.MDToHTML),
+			"NewContext":      reflect.ValueOf(p_cogentcore_org_core_htmlcore.NewContext),
+			"NewImageCache":   reflect.ValueOf(p_cogentcore_org_core_htmlcore.NewImageCache),
+			"NodeOf":          reflect.ValueOf(p_cogentcore_org_core_htmlcore.NodeOf),
+			"ParseHTML":       reflect.ValueOf(p_cogentcore_org_core_htmlcore.ParseHTML),
+			"ReadDocument":    reflect.ValueOf(p_cogentcore_org_core_htmlcore.ReadDocument),
+			"ReadHTML":        reflect.ValueOf(p_cogentcore_org_core_htmlcore.ReadHTML),
+			"ReadHTMLString":  reflect.ValueOf(p_cogentcore_org_core_htmlcore.ReadHTMLString),
+			"ReadMD":          reflect.ValueOf(p_cogentcore_org_core_htmlcore.ReadMD),
+			"ReadMDString":    reflect.ValueOf(p_cogentcore_org_core_htmlcore.ReadMDString),
+			"TagTexts":        reflect.ValueOf(p_cogentcore_org_core_htmlcore.TagTexts),
+			"TextTag":         reflect.ValueOf(p_cogentcore_org_core_htmlcore.TextTag),
+			"WikilinkHandler": reflect.ValueOf((*p_cogentcore_org_core_htmlcore.WikilinkHandler)(nil)),
 		},
 	})
 })
