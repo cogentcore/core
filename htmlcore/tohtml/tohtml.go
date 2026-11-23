@@ -165,7 +165,9 @@ func toHTML(w core.Widget, e *xml.Encoder, b *bytes.Buffer) error {
 		// in a flex layout.
 		cssID := idName
 		floats := hasFloats(wb)
-		if inlineOnly(wb) || floats {
+		// A table cell keeps the display of a cell: a flex layout (as of
+		// the frame of an empty cell) takes it out of its row.
+		if inlineOnly(wb) || floats || tableCells[se.Name.Local] {
 			cssID = "text"
 		}
 		css := styles.ToCSS(&wb.Styles, cssID, se.Name.Local) + growCSS(wb)
@@ -296,6 +298,10 @@ func hasFloats(wb *core.WidgetBase) bool {
 	})
 	return floats
 }
+
+// tableCells are the elements of the cells of a table, whose widgets have
+// no layout of their own in the HTML.
+var tableCells = map[string]bool{"td": true, "th": true}
 
 // inlineElements are the HTML elements that are inline by default, which
 // are boxes ("inline-block") when they are widgets of their own.
