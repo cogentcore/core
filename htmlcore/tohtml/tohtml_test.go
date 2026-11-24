@@ -40,6 +40,22 @@ func TestWidgetTable(t *testing.T) {
 	assert.True(t, strings.HasPrefix(h, "<table><tr><th "), h)
 }
 
+// An empty cell (a frame, not a text) is a cell of its row, not a flex box.
+func TestWidgetTableEmptyCell(t *testing.T) {
+	b := core.NewBody()
+	tb := core.NewFrame(b)
+	tb.SetProperty("tag", "table")
+	tb.Styler(func(s *styles.Style) {
+		s.Display = styles.Grid
+		s.Columns = 2
+	})
+	core.NewText(tb).SetText("a").SetProperty("tag", "td")
+	core.NewFrame(tb).SetProperty("tag", "td")
+	h := Generate(tb)
+	assert.Equal(t, 2, strings.Count(h, "<td "), h)
+	assert.NotContains(t, h, "display:", h)
+}
+
 func TestWidgetProperties(t *testing.T) {
 	b := core.NewBody()
 	fr := core.NewFrame(b)

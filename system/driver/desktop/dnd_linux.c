@@ -97,7 +97,9 @@ static void postCmd(int typ, Window win) {
 	while (*p != NULL) p = &(*p)->next;
 	*p = c;
 	pthread_mutex_unlock(&mu);
-	write(wakeFds[1], "x", 1);
+	// The write only wakes the event loop, so a failed one (a full pipe,
+	// which already wakes it) is not an error.
+	if (write(wakeFds[1], "x", 1) < 0) {}
 }
 
 ////////  Drag source
@@ -603,7 +605,7 @@ static void* eventLoop(void* arg) {
 		XFlush(xd);
 		if (poll(fds, 2, 250) > 0 && (fds[1].revents & POLLIN)) {
 			char b[64];
-			read(wakeFds[0], b, sizeof(b));
+			if (read(wakeFds[0], b, sizeof(b)) < 0) {} // only drains the wake bytes
 			runCmds();
 		}
 		if (src.waiting && now() > src.deadline) { // target never finished
