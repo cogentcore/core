@@ -14,9 +14,14 @@ import (
 	"fmt"
 	"io/fs"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
+	"strings"
+	"sync"
+	"time"
 
 	"cogentcore.org/core/base/iox/jsonx"
 	"cogentcore.org/core/core"
@@ -27,6 +32,7 @@ import (
 // AuthConfig is the configuration information passed to [Auth].
 type AuthConfig struct {
 	// Ctx is the context to use. It is [context.TODO] if unspecified.
+	// Canceling it stops waiting for the user to sign in in the browser.
 	Ctx context.Context
 
 	// ProviderName is the name of the provider to authenticate with (eg: "google")
@@ -47,6 +53,7 @@ type AuthConfig struct {
 	// If it is nil or it returns "", the token is not stored. Also, if it is non-nil, Auth skips the user-facing authentication
 	// step if it finds a valid token at the file (ie: remember me). It checks all [AuthConfig.Accounts] until it finds one
 	// that works for that step. If [AuthConfig.Accounts] is nil, it checks with a blank ("") email account.
+	// The token is saved again whenever its access token is refreshed (see [TokenSource]).
 	TokenFile func(email string) string
 
 	// Accounts are optional accounts to check for the remember me feature described in [AuthConfig.TokenFile].
@@ -55,12 +62,68 @@ type AuthConfig struct {
 
 	// Scopes are additional scopes to request beyond the default "openid", "profile", and "email" scopes
 	Scopes []string
+
+	// SelectAccount is whether to always have the user sign in in the
+	// browser, choosing the account there, without using a saved token,
+	// as for adding another account.
+	SelectAccount bool
+
+	// LoginHint, if set, is the email address of the account to suggest
+	// when the user signs in in the browser, as for signing in to an
+	// account again.
+	LoginHint string
+
+	// NoPrompt is whether to only use a saved token, returning
+	// [ErrNoToken] if there is none that works, instead of having the
+	// user sign in in the browser.
+	NoPrompt bool
 }
+
+// ScopesError is the error of [Auth] and [TokenSource] when the user did
+// not allow all of the access of the requested scopes, as the provider can
+// let the user uncheck some of them when signing in.
+type ScopesError struct {
+	// Missing are the requested scopes that were not allowed.
+	Missing []string
+}
+
+func (e *ScopesError) Error() string {
+	return fmt.Sprintf("not all of the access was allowed when signing in (missing %s): sign in again and allow all of it", strings.Join(e.Missing, ", "))
+}
+
+// ErrNoToken is the error of [Auth] and [TokenSource] with
+// [AuthConfig.NoPrompt] when there is no saved token that works.
+var ErrNoToken = errors.New("auth: no saved token")
+
+// callbackAddress is the address of the local server that gets the
+// result of the user signing in in the browser.
+const callbackAddress = "127.0.0.1:5556"
+
+// signInMu makes only one sign-in in the browser happen at a time,
+// as they use the same local server address.
+var signInMu sync.Mutex
 
 // Auth authenticates the user using the given configuration information and returns the
 // resulting oauth token and user info. See [AuthConfig] for more information on the
-// configuration options.
+// configuration options. Use [TokenSource] to keep the access token fresh.
 func Auth(c *AuthConfig) (*oauth2.Token, *oidc.UserInfo, error) {
+	ts, userInfo, err := TokenSource(c)
+	if err != nil {
+		return nil, nil, err
+	}
+	token, err := ts.Token()
+	if err != nil {
+		return nil, nil, err
+	}
+	return token, userInfo, nil
+}
+
+// TokenSource authenticates the user like [Auth], and returns a token
+// source whose tokens have a valid access token, refreshed as needed
+// (which requires a refresh token, which the provider returns for the
+// offline access requested here), and the user info. Each refreshed
+// token is saved to the token file (see [AuthConfig.TokenFile]).
+func TokenSource(c *AuthConfig) (oauth2.TokenSource, *oidc.UserInfo, error) {
 	if c.Ctx == nil {
 		c.Ctx = context.TODO()
 	}
@@ -73,88 +136,194 @@ func Auth(c *AuthConfig) (*oauth2.Token, *oidc.UserInfo, error) {
 		return nil, nil, err
 	}
 
-	config := oauth2.Config{
+	config := &oauth2.Config{
 		ClientID:     c.ClientID,
 		ClientSecret: c.ClientSecret,
-		RedirectURL:  "http://127.0.0.1:5556/auth/" + c.ProviderName + "/callback",
+		RedirectURL:  "http://" + callbackAddress + "/auth/" + c.ProviderName + "/callback",
 		Endpoint:     provider.Endpoint(),
 		Scopes:       append([]string{oidc.ScopeOpenID, "profile", "email"}, c.Scopes...),
 	}
 
-	var token *oauth2.Token
-
-	if c.TokenFile != nil {
-		if c.Accounts == nil {
-			c.Accounts = []string{""}
+	// remember me: the first saved token that still works
+	if c.TokenFile != nil && !c.SelectAccount {
+		accounts := c.Accounts
+		if accounts == nil {
+			accounts = []string{""}
 		}
-		for _, account := range c.Accounts {
+		for _, account := range accounts {
 			tf := c.TokenFile(account)
-			if tf != "" {
-				err := jsonx.Open(&token, tf)
-				if err != nil && !errors.Is(err, fs.ErrNotExist) {
-					return nil, nil, err
-				}
-				break
+			if tf == "" {
+				continue
 			}
+			var token *oauth2.Token
+			err := jsonx.Open(&token, tf)
+			if errors.Is(err, fs.ErrNotExist) || token == nil {
+				continue
+			}
+			if err != nil {
+				return nil, nil, err
+			}
+			if token.RefreshToken != "" {
+				// refresh now, which checks that the refresh token still
+				// works, and gets the scopes that it allows
+				token.Expiry = time.Unix(1, 0)
+			}
+			ts, userInfo, err := tokenSource(c, provider, config, token)
+			if err != nil { // such as a revoked or expired refresh token
+				slog.Info("auth: saved token does not work", "account", account, "err", err)
+				continue
+			}
+			return ts, userInfo, nil
 		}
 	}
-
-	// if we didn't get it through remember me, we have to get it manually
-	if token == nil {
-		b := make([]byte, 16)
-		rand.Read(b)
-		state := base64.RawURLEncoding.EncodeToString(b)
-
-		code := make(chan string)
-
-		sm := http.NewServeMux()
-		sm.HandleFunc("/auth/"+c.ProviderName+"/callback", func(w http.ResponseWriter, r *http.Request) {
-			if r.URL.Query().Get("state") != state {
-				http.Error(w, "state did not match", http.StatusBadRequest)
-				return
-			}
-			code <- r.URL.Query().Get("code")
-			w.Write([]byte("<h1>Signed in</h1><p>You can return to the app</p>"))
-		})
-		// TODO(kai/auth): more graceful closing / error handling
-		go http.ListenAndServe("127.0.0.1:5556", sm)
-
-		core.TheApp.OpenURL(config.AuthCodeURL(state))
-
-		cs := <-code
-
-		token, err = config.Exchange(c.Ctx, cs)
-		if err != nil {
-			return nil, nil, fmt.Errorf("failed to exchange token: %w", err)
-		}
+	if c.NoPrompt {
+		return nil, nil, ErrNoToken
 	}
 
-	tokenSource := config.TokenSource(c.Ctx, token)
-	// the access token could have changed
-	newToken, err := tokenSource.Token()
+	token, err := signIn(c, config)
 	if err != nil {
 		return nil, nil, err
 	}
+	return tokenSource(c, provider, config, token)
+}
 
-	userInfo, err := provider.UserInfo(c.Ctx, tokenSource)
+// tokenSource returns the saving token source for the given token and
+// the user info, saving the token.
+func tokenSource(c *AuthConfig, provider *oidc.Provider, config *oauth2.Config, token *oauth2.Token) (oauth2.TokenSource, *oidc.UserInfo, error) {
+	src := config.TokenSource(c.Ctx, token)
+	fresh, err := src.Token()
+	if err != nil {
+		return nil, nil, err
+	}
+	if err := checkScopes(fresh, c.Scopes); err != nil {
+		return nil, nil, err
+	}
+	userInfo, err := provider.UserInfo(c.Ctx, oauth2.StaticTokenSource(fresh))
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get user info: %w", err)
 	}
-
+	ts := &savingTokenSource{src: src}
 	if c.TokenFile != nil {
-		tf := c.TokenFile(userInfo.Email)
-		if tf != "" {
-			err := os.MkdirAll(filepath.Dir(tf), 0700)
-			if err != nil {
-				return nil, nil, err
-			}
-			// TODO(kai/auth): more secure saving of token file
-			err = jsonx.Save(token, tf)
-			if err != nil {
-				return nil, nil, err
-			}
+		ts.file = c.TokenFile(userInfo.Email)
+	}
+	if err := ts.save(fresh); err != nil {
+		return nil, nil, err
+	}
+	return ts, userInfo, nil
+}
+
+// checkScopes returns a [*ScopesError] if the given token, from the
+// provider, does not allow all of the given scopes. Tokens that do not say
+// which scopes they allow (only those just received do) are not checked.
+func checkScopes(token *oauth2.Token, scopes []string) error {
+	granted, _ := token.Extra("scope").(string)
+	if granted == "" {
+		return nil
+	}
+	have := strings.Fields(granted)
+	var missing []string
+	for _, s := range scopes {
+		if !slices.Contains(have, s) {
+			missing = append(missing, s)
 		}
 	}
+	if len(missing) > 0 {
+		return &ScopesError{Missing: missing}
+	}
+	return nil
+}
 
-	return newToken, userInfo, nil
+// signIn has the user sign in in the browser, returning the token.
+func signIn(c *AuthConfig, config *oauth2.Config) (*oauth2.Token, error) {
+	signInMu.Lock()
+	defer signInMu.Unlock()
+
+	b := make([]byte, 16)
+	rand.Read(b)
+	state := base64.RawURLEncoding.EncodeToString(b)
+
+	ln, err := net.Listen("tcp", callbackAddress)
+	if err != nil {
+		return nil, fmt.Errorf("starting the local server for signing in: %w", err)
+	}
+	code := make(chan string, 1)
+	sm := http.NewServeMux()
+	sm.HandleFunc("/auth/"+c.ProviderName+"/callback", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Get("state") != state {
+			http.Error(w, "state did not match", http.StatusBadRequest)
+			return
+		}
+		if e := r.URL.Query().Get("error"); e != "" {
+			http.Error(w, "Not signed in: "+e, http.StatusBadRequest)
+			return
+		}
+		select {
+		case code <- r.URL.Query().Get("code"):
+		default:
+		}
+		w.Write([]byte("<h1>Signed in</h1><p>You can return to the app</p>"))
+	})
+	srv := &http.Server{Handler: sm}
+	go srv.Serve(ln)
+	defer srv.Close()
+
+	// offline access for a refresh token; consent so that the provider
+	// returns one even if the user has already allowed the app
+	prompt := "consent"
+	if c.SelectAccount {
+		prompt = "select_account consent"
+	}
+	opts := []oauth2.AuthCodeOption{oauth2.AccessTypeOffline, oauth2.SetAuthURLParam("prompt", prompt)}
+	if c.LoginHint != "" {
+		opts = append(opts, oauth2.SetAuthURLParam("login_hint", c.LoginHint))
+	}
+	core.TheApp.OpenURL(config.AuthCodeURL(state, opts...))
+
+	var cs string
+	select {
+	case cs = <-code:
+	case <-c.Ctx.Done():
+		return nil, c.Ctx.Err()
+	}
+	token, err := config.Exchange(c.Ctx, cs)
+	if err != nil {
+		return nil, fmt.Errorf("failed to exchange token: %w", err)
+	}
+	return token, nil
+}
+
+// savingTokenSource is a token source that saves each new token
+// to its file, if any.
+type savingTokenSource struct {
+	src  oauth2.TokenSource
+	file string
+
+	mu     sync.Mutex
+	access string // the access token last saved
+}
+
+func (ts *savingTokenSource) Token() (*oauth2.Token, error) {
+	token, err := ts.src.Token()
+	if err != nil {
+		return nil, err
+	}
+	return token, ts.save(token)
+}
+
+// save saves the given token if its access token is new.
+func (ts *savingTokenSource) save(token *oauth2.Token) error {
+	ts.mu.Lock()
+	defer ts.mu.Unlock()
+	if ts.file == "" || token.AccessToken == ts.access {
+		return nil
+	}
+	if err := os.MkdirAll(filepath.Dir(ts.file), 0700); err != nil {
+		return err
+	}
+	// TODO(kai/auth): more secure saving of token file
+	if err := jsonx.Save(token, ts.file); err != nil {
+		return err
+	}
+	ts.access = token.AccessToken
+	return nil
 }
