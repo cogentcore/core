@@ -43,6 +43,9 @@ var mySVG embed.FS
 //go:embed file.go
 var myFile embed.FS
 
+//go:embed icon.svg
+var icon string
+
 const defaultPlaygroundCode = `package main
 
 func main() {
@@ -52,6 +55,7 @@ func main() {
 }`
 
 func main() {
+	core.AppIcon = icon
 	b := core.NewBody("Cogent Core Docs")
 	highlighting.AddLexers(lexers.Bash, lexers.TOML)
 	ct := content.NewContent(b).SetContent(econtent)

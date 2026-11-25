@@ -26,7 +26,7 @@ import (
 // If the command fails, it will return an error with the command output.
 // The given cmd and args may include references
 // to environment variables in $FOO format, in which case these will be
-// expanded before the command is run.
+// expanded before the command is run, unless [Config.NoExpand].
 //
 // Ran reports if the command ran (rather than was not found or not executable).
 // Code reports the exit code the command returned if it ran. If err == nil, ran
@@ -42,13 +42,15 @@ func (c *Config) exec(ctx context.Context, sio *StdIO, start bool, cmd string, a
 		}
 		return os.Getenv(s)
 	}
-	cmd = os.Expand(cmd, expand)
-	// the expanded args are a new slice, so the caller's are not changed
-	eargs := make([]string, len(args))
-	for i, a := range args {
-		eargs[i] = os.Expand(a, expand)
+	if !c.NoExpand {
+		cmd = os.Expand(cmd, expand)
+		// the expanded args are a new slice, so the caller's are not changed
+		eargs := make([]string, len(args))
+		for i, a := range args {
+			eargs[i] = os.Expand(a, expand)
+		}
+		args = eargs
 	}
-	args = eargs
 	excmd, ran, code, err := c.run(ctx, sio, start, cmd, args...)
 	_ = code
 	if err == nil {

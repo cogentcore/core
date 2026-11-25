@@ -48,6 +48,13 @@ type Config struct { //types:add -setters
 	// commands are run in the current directory.
 	Dir string
 
+	// NoExpand is whether not to expand references to environment
+	// variables in $FOO format in the command and its args, which is
+	// done by default. It is for a caller that expands them where it
+	// should, such as goal, which expands those of the words of its
+	// commands but not those of the values of Go expressions in them.
+	NoExpand bool
+
 	// Env contains any additional environment variables specified.
 	// The current environment variables will also be passed to the
 	// command, but they will be overridden by any variables here

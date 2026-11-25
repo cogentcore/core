@@ -120,6 +120,13 @@ func addFieldsImpl(obj any, path string, cmdPath string, allFields *fields, used
 			if len(names) == 0 {
 				slog.Error("programmer error: expected at least one name in flag struct tag, but got none")
 			}
+			// the command path scoped name is still a name, so that a nested
+			// field can always be set by it, as when a flag name conflicts
+			// with the name of a struct, e.g., -run.run for Run.Run with
+			// flag:"run" in a Run struct
+			if cmdPath != "" {
+				names = append(names, cmdPath+"."+f.Name)
+			}
 		}
 
 		nf := &field{
