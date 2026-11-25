@@ -153,6 +153,33 @@ type person struct {
 core.NewForm(b).SetStruct(&person{Name: "Go", Age: 35, Precision: 50})
 ```
 
+## Selectively displaying fields
+
+You can make a form show only some of the fields of a struct, depending on its values, by giving the struct a `ShouldDisplay` method. The form is updated when a value changes, so checking Employed here shows the Job field:
+
+```Go
+type person struct {
+    Name     string
+    Employed bool
+    Job      string
+    Age      int
+}
+
+func (p *person) ShouldDisplay(field string) bool {
+    switch field {
+    case "Job":
+        return p.Employed
+    }
+    return true
+}
+
+func main() {
+    core.NewForm(b).SetStruct(&person{Name: "Go", Age: 35})
+}
+```
+
+Since a method cannot be declared inside of a function, this example is a program with a `main` function, which adds the form to `b`.
+
 ## Form button
 
 You can make a [[button]] that opens a [[dialog]] with a form:
