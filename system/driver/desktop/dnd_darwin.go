@@ -59,8 +59,9 @@ func (w *Window) StartDrag(data mimedata.Mimes, files []string, img image.Image)
 	var imgw, imgh float64
 	if pngb != nil {
 		sz := img.Bounds().Size()
-		imgw = float64(sz.X) / float64(w.DevicePixelRatio)
-		imgh = float64(sz.Y) / float64(w.DevicePixelRatio)
+		dpr := float64(w.pixelRatio())
+		imgw = float64(sz.X) / dpr
+		imgh = float64(sz.Y) / dpr
 	}
 	cfiles := make([]*C.char, len(files)+1)
 	for i, f := range files {

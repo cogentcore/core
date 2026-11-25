@@ -131,12 +131,12 @@ setScreen:
 	defer w.Mu.Unlock()
 	w.ScreenWindow = sc.Name
 	w.PhysDPI = sc.PhysicalDPI
-	if w.DevicePixelRatio != sc.DevicePixelRatio {
-		w.DevicePixelRatio = sc.DevicePixelRatio
-	}
+	w.GeomMu.Lock() // see [base.WindowMulti.GeomMu]
+	w.DevicePixelRatio = sc.DevicePixelRatio
 	if w.LogDPI == 0 {
 		w.LogDPI = sc.LogicalDPI
 	}
+	w.GeomMu.Unlock()
 	return sc
 }
 
@@ -415,7 +415,8 @@ func (w *Window) SetMousePos(x, y float64) {
 	w.Mu.Lock()
 	defer w.Mu.Unlock()
 	if TheApp.Platform() == system.MacOS {
-		w.Glw.SetCursorPos(x/float64(w.DevicePixelRatio), y/float64(w.DevicePixelRatio))
+		dpr := float64(w.pixelRatio())
+		w.Glw.SetCursorPos(x/dpr, y/dpr)
 	} else {
 		w.Glw.SetCursorPos(x, y)
 	}
@@ -475,14 +476,15 @@ func (w *Window) updateGeometry() {
 	w.GeomMu.Lock()
 	w.WnSize = wsz
 	w.PixelSize = fbsz
+	w.LogDPI = sc.LogicalDPI
 	w.GeomMu.Unlock()
 	w.PhysDPI = sc.PhysicalDPI
-	w.LogDPI = sc.LogicalDPI
+	newsc := w.ScreenWindow // read under Mu: Screen sets it on other goroutines
 	w.Mu.Unlock()
 	w.Draw.System.Renderer.SetSize(fbsz)
-	if cursc != w.ScreenWindow {
+	if cursc != newsc {
 		if ScreenDebug {
-			log.Printf("desktop.Window.updateGeometry: %v: got new screen: %v (was: %v)\n", w.Nm, w.ScreenWindow, cursc)
+			log.Printf("desktop.Window.updateGeometry: %v: got new screen: %v (was: %v)\n", w.Nm, newsc, cursc)
 		}
 	}
 	w.Event.WindowResize()
@@ -528,4 +530,11 @@ func (w *Window) Iconify(gw *glfw.Window, iconified bool) {
 		w.Screen() // gets parameters
 		w.Event.Window(events.WinMinimize)
 	}
+}
+
+// pixelRatio returns the DevicePixelRatio of the window, which is set
+// on other goroutines (see [base.WindowMulti.GeomMu]).
+func (w *Window) pixelRatio() float32 {
+	_, dpr := w.ScaleDPI()
+	return dpr
 }

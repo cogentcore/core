@@ -40,6 +40,9 @@ type WindowMulti[A system.App, C composer.Composer] struct {
 	// rendering and resizing, when they are also read (as by
 	// [Window.RenderGeom]), so it is only held for each read or write of
 	// them, without acquiring any other lock.
+	// [WindowMulti.LogDPI] and [WindowMulti.DevicePixelRatio] are written
+	// holding both [Window.Mu] and GeomMu, so that they can be read holding
+	// either one (GeomMu where Mu could already be held, as by event handling).
 	GeomMu sync.Mutex `display:"-"`
 
 	// Pos is the position of the window
@@ -127,7 +130,18 @@ func (w *WindowMulti[A, D]) LogicalDPI() float32 {
 func (w *WindowMulti[A, D]) SetLogicalDPI(dpi float32) {
 	w.Mu.Lock()
 	defer w.Mu.Unlock()
+	w.GeomMu.Lock()
 	w.LogDPI = dpi
+	w.GeomMu.Unlock()
+}
+
+// ScaleDPI returns the [WindowMulti.LogDPI] and
+// [WindowMulti.DevicePixelRatio] of the window, using
+// [WindowMulti.GeomMu], so it can be called while [Window.Mu] is held.
+func (w *WindowMulti[A, D]) ScaleDPI() (logicalDPI, devicePixelRatio float32) {
+	w.GeomMu.Lock()
+	defer w.GeomMu.Unlock()
+	return w.LogDPI, w.DevicePixelRatio
 }
 
 func (w *WindowMulti[A, D]) SetWinSize(sz image.Point) {
