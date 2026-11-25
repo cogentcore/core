@@ -21,3 +21,18 @@ func TestRun(t *testing.T) {
 func TestError(t *testing.T) {
 	assert.Error(t, Run("go", "bild"))
 }
+
+// TestNoExpand tests that $FOO references in args are expanded, unless
+// [Config.NoExpand], when they are passed as is.
+func TestNoExpand(t *testing.T) {
+	goscript.Skip(t, "running external commands is not supported")
+	c := Major().SetBuffer(false)
+	c.Env = map[string]string{"FOO": "foo"}
+	out, err := c.Output("echo", "$FOO", "a$#b")
+	assert.NoError(t, err)
+	assert.Equal(t, "foo ab", out)
+	c.NoExpand = true
+	out, err = c.Output("echo", "$FOO", "a$#b")
+	assert.NoError(t, err)
+	assert.Equal(t, "$FOO a$#b", out)
+}

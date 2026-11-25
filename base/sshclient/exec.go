@@ -60,9 +60,11 @@ func (cl *Client) ExecContext(ctx context.Context, sio *exec.StdIOState, start e
 		}
 		return os.Getenv(s)
 	}
-	cmd = os.Expand(cmd, expand)
-	for i := range args {
-		args[i] = os.Expand(args[i], expand)
+	if !cl.NoExpand {
+		cmd = os.Expand(cmd, expand)
+		for i := range args {
+			args[i] = os.Expand(args[i], expand)
+		}
 	}
 	if ctx != nil && ctx.Done() != nil && !start { // (Background is never done)
 		done := make(chan struct{})
