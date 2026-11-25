@@ -447,3 +447,22 @@ func TestNestedConfig(t *testing.T) {
 		assert.Equal(t, expected[i], field.Names, "index=%d", i)
 	}
 }
+
+type testFlagRootConfig struct {
+	Run testFlagRunConfig
+}
+
+type testFlagRunConfig struct {
+	Run  int `flag:"run"`
+	Runs int
+}
+
+// TestNestedFlagTag tests that a nested field with a flag tag can be set
+// by its qualified name, also when its flag name is that of its struct.
+func TestNestedFlagTag(t *testing.T) {
+	cfg := &testFlagRootConfig{}
+	_, err := SetFromArgs(cfg, []string{"-run.run", "3", "-run.runs", "1"}, ErrNotFound)
+	require.NoError(t, err)
+	assert.Equal(t, 3, cfg.Run.Run)
+	assert.Equal(t, 1, cfg.Run.Runs)
+}
