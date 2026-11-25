@@ -62,7 +62,7 @@ func (tr *Tree) Resync() {
 func (tr *Tree) syncToSrc(tvIndex *int, init bool, depth int) {
 	sn := tr.SyncNode
 	// root must keep the same name for continuity with surrounding context
-	if tr != tr.Root {
+	if tr.This != tr.Root {
 		nm := "tv_" + sn.AsTree().Name
 		tr.SetName(nm)
 	}

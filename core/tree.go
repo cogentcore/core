@@ -791,7 +791,7 @@ func (tr *Tree) Unselect() {
 		sl := tr.GetSelectedNodes()
 		sz := len(sl)
 		for i := range sz {
-			if sl[i] == tr {
+			if sl[i] == tr.This {
 				sl = append(sl[:i], sl[i+1:]...)
 				break
 			}
@@ -987,7 +987,7 @@ func (tr *Tree) moveDownEvent(selMode events.SelectModes) *Tree {
 	if nn != nil && nn != tr {
 		nn.SetFocusQuiet()
 		nn.ScrollToThis()
-		tr.sendSelectEvent()
+		nn.sendSelectEvent()
 	}
 	return nn
 }
@@ -998,7 +998,7 @@ func (tr *Tree) moveDownSibling(selMode events.SelectModes) *Tree {
 	if tree.IsNil(tr) || tree.IsNil(tr.Parent) {
 		return nil
 	}
-	if tr == tr.Root {
+	if tr.This == tr.Root {
 		return nil
 	}
 	myidx := tr.IndexInParent()
@@ -1018,7 +1018,7 @@ func (tr *Tree) moveDownSibling(selMode events.SelectModes) *Tree {
 // using given select mode (from keyboard modifiers).
 // Returns newly selected node
 func (tr *Tree) moveUp(selMode events.SelectModes) *Tree {
-	if tree.IsNil(tr) || tree.IsNil(tr.Parent) || tr == tr.Root {
+	if tree.IsNil(tr) || tree.IsNil(tr.Parent) || tr.This == tr.Root {
 		return nil
 	}
 	myidx := tr.IndexInParent()
@@ -1047,7 +1047,7 @@ func (tr *Tree) moveUpEvent(selMode events.SelectModes) *Tree {
 	if nn != nil && nn != tr {
 		nn.SetFocusQuiet()
 		nn.ScrollToThis()
-		tr.sendSelectEvent()
+		nn.sendSelectEvent()
 	}
 	return nn
 }
@@ -1081,7 +1081,7 @@ func (tr *Tree) movePageUpEvent(selMode events.SelectModes) *Tree {
 		}
 		fnn.SetFocusQuiet()
 		fnn.ScrollToThis()
-		tr.sendSelectEvent()
+		fnn.sendSelectEvent()
 	}
 	tr.NeedsRender()
 	return fnn
@@ -1113,7 +1113,7 @@ func (tr *Tree) movePageDownEvent(selMode events.SelectModes) *Tree {
 		}
 		fnn.SetFocusQuiet()
 		fnn.ScrollToThis()
-		tr.sendSelectEvent()
+		fnn.sendSelectEvent()
 	}
 	tr.NeedsRender()
 	return fnn
@@ -1122,7 +1122,7 @@ func (tr *Tree) movePageDownEvent(selMode events.SelectModes) *Tree {
 // moveToLastChild moves to the last child under me, using given select mode
 // (from keyboard modifiers)
 func (tr *Tree) moveToLastChild(selMode events.SelectModes) *Tree {
-	if tree.IsNil(tr) || tr.Parent == nil || tr == tr.Root {
+	if tree.IsNil(tr) || tr.Parent == nil || tr.This == tr.Root {
 		return nil
 	}
 	if !tr.Closed && tr.HasChildren() {
@@ -1170,7 +1170,7 @@ func (tr *Tree) moveEndEvent(selMode events.SelectModes) *Tree {
 		}
 		fnn.SetFocusQuiet()
 		fnn.ScrollToThis()
-		tr.sendSelectEvent()
+		fnn.sendSelectEvent()
 	}
 	return fnn
 }
