@@ -52,6 +52,12 @@ type TreeTable struct {
 	// to a struct, with its children, as for filtering the items.
 	ShowItem func(item any) bool `json:"-" xml:"-"`
 
+	// MatchItem, if set, returns whether the given item, a pointer to a
+	// struct, matches a search, in which case only the items that match
+	// are shown, with their children, and with the items that they are
+	// in, which are open, whether they are closed or not.
+	MatchItem func(item any) bool `json:"-" xml:"-"`
+
 	// FitWidth is whether the tree column has the width that the other
 	// columns leave in the width of the table, so that the table fits in
 	// it, without scrolling, as on a small screen, with the values of the
@@ -400,13 +406,17 @@ func (tt *TreeTable) updateRows() {
 	}
 
 	tt.rows = tt.rows[:0]
-	tt.walkItems(tt.itemsValue(), reflect.Value{}, 0, func(item, parent reflect.Value, depth int) bool {
-		if tt.ShowItem != nil && !tt.ShowItem(item.Interface()) {
-			return false
-		}
-		tt.rows = append(tt.rows, treeTableRow{item: item, parent: parent, depth: depth})
-		return !tt.itemClosed(item)
-	})
+	if tt.MatchItem != nil {
+		tt.matchRows(tt.itemsValue(), reflect.Value{}, 0, false)
+	} else {
+		tt.walkItems(tt.itemsValue(), reflect.Value{}, 0, func(item, parent reflect.Value, depth int) bool {
+			if tt.ShowItem != nil && !tt.ShowItem(item.Interface()) {
+				return false
+			}
+			tt.rows = append(tt.rows, treeTableRow{item: item, parent: parent, depth: depth})
+			return !tt.itemClosed(item)
+		})
+	}
 	rs := reflect.MakeSlice(tt.sliceUnderlying.Type(), len(tt.rows), len(tt.rows))
 	for i, r := range tt.rows {
 		rs.Index(i).Set(r.item)
@@ -425,6 +435,30 @@ func (tt *TreeTable) updateRows() {
 		}
 	}
 	tt.SelectedIndex = min(tt.SelectedIndex, len(tt.rows)-1)
+}
+
+// matchRows adds the rows of the given items and their children that are
+// shown for [TreeTable.MatchItem]: those that match, with all of their
+// children, which are all shown if in is true, as they are in an item that
+// matches, and the items that they are in. It returns whether it added any.
+func (tt *TreeTable) matchRows(sl, parent reflect.Value, depth int, in bool) bool {
+	added := false
+	for i := range sl.Len() {
+		item := itemAt(sl, i)
+		if !isItem(item) || (tt.ShowItem != nil && !tt.ShowItem(item.Interface())) {
+			continue
+		}
+		n := len(tt.rows)
+		tt.rows = append(tt.rows, treeTableRow{item: item, parent: parent, depth: depth})
+		match := in || tt.MatchItem(item.Interface())
+		children := tt.childrenIndex != nil && tt.matchRows(tt.children(item), item, depth+1, match)
+		if !match && !children {
+			tt.rows = tt.rows[:n]
+			continue
+		}
+		added = true
+	}
+	return added
 }
 
 // validIndex returns whether the given row index is that of a visible item.
@@ -525,9 +559,10 @@ func (tt *TreeTable) valueChanged(row int) {
 //////// Open and close
 
 // IsClosed returns whether the item at the given row index is closed,
-// with its children not shown.
+// with its children not shown. The items are all open while they are
+// searched, with [TreeTable.MatchItem].
 func (tt *TreeTable) IsClosed(idx int) bool {
-	return tt.validIndex(idx) && tt.itemClosed(tt.rows[idx].item)
+	return tt.MatchItem == nil && tt.validIndex(idx) && tt.itemClosed(tt.rows[idx].item)
 }
 
 // itemClosed returns whether the given item is closed.
@@ -568,9 +603,10 @@ func (tt *TreeTable) ToggleClose(idx int) {
 }
 
 // setClosed sets whether the item at the given row index is closed,
-// if it has children.
+// if it has children, and the items are not searched, while which
+// they are all open (see [TreeTable.MatchItem]).
 func (tt *TreeTable) setClosed(idx int, closed bool) {
-	if !tt.validIndex(idx) || tt.numChildren(tt.rows[idx].item) == 0 || tt.IsClosed(idx) == closed {
+	if tt.MatchItem != nil || !tt.validIndex(idx) || tt.numChildren(tt.rows[idx].item) == 0 || tt.IsClosed(idx) == closed {
 		return
 	}
 	tt.setItemClosed(tt.rows[idx].item, closed)
@@ -617,10 +653,7 @@ func (tt *TreeTable) closedChanged() {
 func (tt *TreeTable) NewAt(idx int) {
 	switch {
 	case idx < 0 || len(tt.rows) == 0:
-		item := tt.newItem()
-		sl := tt.itemsValue()
-		insertItem(sl, sl.Len(), item)
-		tt.edited(item)
+		tt.insertItemAt(-1, 0, tt.newItem())
 	case idx == 0:
 		tt.InsertBefore(0)
 	default:
@@ -640,16 +673,38 @@ func (tt *TreeTable) InsertAfter(idx int) {
 	tt.insertNew(idx, 1)
 }
 
+// NewItem returns a new item, a pointer to a struct with the default
+// values of its fields, for [TreeTable.InsertItemAfter].
+func (tt *TreeTable) NewItem() any {
+	return tt.newItem().Interface()
+}
+
+// InsertItemAfter inserts the given item, as made by [TreeTable.NewItem],
+// after the item at the given row index, as its sibling, or at the end of
+// the top-level items if there is no item at the index.
+func (tt *TreeTable) InsertItemAfter(idx int, item any) {
+	tt.insertItemAt(idx, 1, reflect.ValueOf(item))
+}
+
 // insertNew inserts a new item at the given offset from the item at
 // the given row index among its siblings.
 func (tt *TreeTable) insertNew(idx, offset int) {
-	if !tt.validIndex(idx) {
-		tt.NewAt(-1)
-		return
+	tt.insertItemAt(idx, offset, tt.newItem())
+}
+
+// insertItemAt inserts the given item at the given offset from the item
+// at the given row index among its siblings, or at the end of the
+// top-level items if there is no item at the index.
+func (tt *TreeTable) insertItemAt(idx, offset int, item reflect.Value) {
+	sl, k := tt.itemsValue(), -1
+	if tt.validIndex(idx) {
+		sl, k = tt.siblingsOf(idx)
+		k += offset
 	}
-	item := tt.newItem()
-	sl, k := tt.siblingsOf(idx)
-	insertItem(sl, k+offset, item)
+	if k < 0 {
+		k = sl.Len()
+	}
+	insertItem(sl, k, item)
 	tt.edited(item)
 }
 
