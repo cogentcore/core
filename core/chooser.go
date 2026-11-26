@@ -304,6 +304,14 @@ func (ch *Chooser) Init() {
 				w.Styler(func(s *styles.Style) {
 					s.Grow = ch.Styles.Grow // we grow like our parent
 					s.Max.X.Zero()          // constrained by parent
+					if ch.Styles.Min.X.Value > 0 {
+						// as narrow as the chooser, instead of the min width of
+						// a text field (as for short values)
+						s.Min.X = ch.Styles.Min.X
+					}
+					if ch.Styles.Max.X.Value > 0 { // and at most as wide
+						s.Max.X = ch.Styles.Max.X
+					}
 					s.SetTextWrap(false)
 				})
 				w.SetValidator(func() error {
