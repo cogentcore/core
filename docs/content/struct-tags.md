@@ -5,6 +5,7 @@ Categories = ["Concepts"]
 A cheat sheet of all possible **struct tags** and their meanings. See the linked pages for further explanations with examples.
 
 * `edit:"-"` — prevent users from editing a field in a [[form]] or [[table]]
+* `tab:"-"` — skip a field in a [[form]] when moving the focus with Tab and Shift+Tab (it can still be clicked)
 * `label:"{Label}"` — change the label text for a field in a [[form]] or [[table]]
 * `default:"{value}"` — specify a default value for a field in a [[form]], [[cli]], or [[settings]]
 * `set:"-"` — do not [[generate]] a [[generate#setter]]

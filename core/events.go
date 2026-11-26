@@ -1439,12 +1439,26 @@ func (em *Events) focusNext() bool {
 // that can accept focus after the given item.
 // It returns true if a focus item is found.
 func (em *Events) FocusNextFrom(from Widget) bool {
-	next := widgetNextFunc(from, func(w Widget) bool {
-		wb := w.AsWidget()
-		return wb.IsDisplayable() && !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.Focusable)
-	})
+	next := widgetNextFunc(from, tabFocusable)
 	em.setFocus(next)
 	return !tree.IsNil(next)
+}
+
+// tabFocusable returns whether the given widget gets the focus when it is
+// moved to the next or previous widget, as with Tab: it is shown, enabled,
+// and focusable, and neither it nor a widget it is in has
+// [abilities.SkipTab].
+func tabFocusable(w Widget) bool {
+	wb := w.AsWidget()
+	if !wb.IsDisplayable() || wb.StateIs(states.Disabled) || !wb.AbilityIs(abilities.Focusable) {
+		return false
+	}
+	for n := tree.Node(w); n != nil; n = n.AsTree().Parent {
+		if pw, ok := n.(Widget); ok && pw.AsWidget().AbilityIs(abilities.SkipTab) {
+			return false
+		}
+	}
+	return true
 }
 
 // focusOnOrNext sets the focus on the given item, or the next one that can
@@ -1495,10 +1509,7 @@ func (em *Events) focusPrev() bool {
 // focusPrevFrom sets the focus on the previous item before the given item
 // (can be nil).
 func (em *Events) focusPrevFrom(from Widget) bool {
-	prev := widgetPrevFunc(from, func(w Widget) bool {
-		wb := w.AsWidget()
-		return wb.IsDisplayable() && !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.Focusable)
-	})
+	prev := widgetPrevFunc(from, tabFocusable)
 	em.setFocus(prev)
 	return !tree.IsNil(prev)
 }

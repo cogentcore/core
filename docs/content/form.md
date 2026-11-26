@@ -153,6 +153,8 @@ type person struct {
 core.NewForm(b).SetStruct(&person{Name: "Go", Age: 35, Precision: 50})
 ```
 
+You can skip a field that is rarely used when the user moves the focus with Tab and Shift+Tab, while it can still be clicked, with the `tab:"-"` struct tag (as the Cc and Bcc fields of an email). It uses the `SkipTab` ability, which any widget can have, for itself and the widgets in it.
+
 ## Selectively displaying fields
 
 You can make a form show only some of the fields of a struct, depending on its values, by giving the struct a `ShouldDisplay` method. The form is updated when a value changes, so checking Employed here shows the Job field:
