@@ -98,10 +98,9 @@ func appExecutable(c *config.Config, app string) string {
 }
 
 // removeExecutable removes the given executable of an installed app, if
-// it exists, before a new one is copied there: cp writes through a symbolic
-// link of AppGoSymlink, and it writes over a file in place, which macOS
-// then kills when it starts, with an invalid code signature, as it keeps
-// the signature of the file that was there.
+// it exists, before a new one is copied there: cp writes over a file in
+// place, which macOS then kills when it starts, with an invalid code
+// signature, as it keeps the signature of the file that was there.
 func removeExecutable(file string) error {
 	if err := os.Remove(file); err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return err
@@ -110,8 +109,13 @@ func removeExecutable(file string) error {
 }
 
 // goSymlinkApp installs the app of the given config with go install, and
-// makes the executable of the given macOS app a symbolic link to the one
-// that it installs (see [config.Config.AppGoSymlink]).
+// makes the executable of the given macOS app run the one that it installs
+// (see [config.Config.AppGoSymlink]): the executable is a script that runs
+// a symbolic link to it, next to the script. The executable can not be the
+// link itself, since macOS runs the file that a link points to when it
+// opens an app, and that file is not in the app bundle, so the app has no
+// main bundle, which notifications need, for example. Run by the path of
+// the link, the executable is in the bundle.
 func goSymlinkApp(c *config.Config, app string) error {
 	if err := exec.Major().Run("go", "install"); err != nil {
 		return err
@@ -125,8 +129,20 @@ func goSymlinkApp(c *config.Config, app string) error {
 		return fmt.Errorf("AppGoSymlink: go install does not install an executable here")
 	}
 	exe := appExecutable(c, app)
-	if err := os.Remove(exe); err != nil && !os.IsNotExist(err) {
+	link := filepath.Join(filepath.Dir(exe), filepath.Base(target))
+	for _, f := range []string{exe, link} {
+		if err := os.Remove(f); err != nil && !os.IsNotExist(err) {
+			return err
+		}
+	}
+	if err := os.Symlink(target, link); err != nil {
 		return err
 	}
-	return os.Symlink(target, exe)
+	script := "#!/bin/sh\n# runs the app installed by go install (AppGoSymlink)\nexec \"$(dirname \"$0\")\"/" + shellQuote(filepath.Base(link)) + " \"$@\"\n"
+	return os.WriteFile(exe, []byte(script), 0o755)
+}
+
+// shellQuote returns the given text quoted for a shell.
+func shellQuote(s string) string {
+	return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'"
 }
