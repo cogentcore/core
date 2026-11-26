@@ -180,7 +180,7 @@ func resetSettings(se Settings) error {
 		rf := npv.FieldByName(f)
 		rf.Set(reflect.Zero(rf.Type()))
 	}
-	return loadSettings(se)
+	return LoadSettings(se)
 }
 
 // resetAllSettings resets all of the settings to their default values.
@@ -195,10 +195,12 @@ func resetAllSettings() error { //types:add
 	return nil
 }
 
-// loadSettings sets the defaults of, opens, and applies the given settings.
-// If they are not already saved, it saves them. It process their `default:` struct
-// tags in addition to calling their [Settings.Default] method.
-func loadSettings(se Settings) error {
+// LoadSettings sets the defaults of, opens, and applies the given settings,
+// as [LoadAllSettings] does for [AllSettings], as for those of a package
+// that are not in the settings window of an app. It processes their
+// `default:` struct tags in addition to calling their [Settings.Defaults]
+// method.
+func LoadSettings(se Settings) error {
 	errors.Log(reflectx.SetFromDefaultTags(se))
 	se.Defaults()
 	err := openSettings(se)
@@ -215,7 +217,7 @@ func loadSettings(se Settings) error {
 func LoadAllSettings() error {
 	errs := []error{}
 	for _, se := range AllSettings {
-		err := loadSettings(se)
+		err := LoadSettings(se)
 		if err != nil {
 			errs = append(errs, err)
 		}
