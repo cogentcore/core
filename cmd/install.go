@@ -76,6 +76,9 @@ func Install(c *config.Config) error { //types:add
 					return err
 				}
 			}
+			if err := signApp(c, app); err != nil {
+				return err
+			}
 			if len(c.Opens) == 0 {
 				return nil
 			}
@@ -110,12 +113,13 @@ func removeExecutable(file string) error {
 
 // goSymlinkApp installs the app of the given config with go install, and
 // makes the executable of the given macOS app run the one that it installs
-// (see [config.Config.AppGoSymlink]): the executable is a script that runs
-// a symbolic link to it, next to the script. The executable can not be the
-// link itself, since macOS runs the file that a link points to when it
-// opens an app, and that file is not in the app bundle, so the app has no
-// main bundle, which notifications need, for example. Run by the path of
-// the link, the executable is in the bundle.
+// (see [config.Config.AppGoSymlink]): the executable is a script that
+// copies it into the app, next to the script, and signs it and the app,
+// when it changes, and runs the copy. The executable that runs must be a
+// file in the app (not a symbolic link, which macOS runs the target of),
+// signed with the ID of the app, for macOS to allow notifications, for
+// example. The script is run once here, with CORE_APP_UPDATE set, which
+// only updates the copy.
 func goSymlinkApp(c *config.Config, app string) error {
 	if err := exec.Major().Run("go", "install"); err != nil {
 		return err
@@ -129,17 +133,46 @@ func goSymlinkApp(c *config.Config, app string) error {
 		return fmt.Errorf("AppGoSymlink: go install does not install an executable here")
 	}
 	exe := appExecutable(c, app)
-	link := filepath.Join(filepath.Dir(exe), filepath.Base(target))
-	for _, f := range []string{exe, link} {
+	cp := filepath.Join(filepath.Dir(exe), filepath.Base(target))
+	for _, f := range []string{exe, cp} {
 		if err := os.Remove(f); err != nil && !os.IsNotExist(err) {
 			return err
 		}
 	}
-	if err := os.Symlink(target, link); err != nil {
+	id := shellQuote(c.ID)
+	script := `#!/bin/sh
+# Runs the app installed by go install (AppGoSymlink), which is copied
+# into the app and signed when it changes, as macOS only allows
+# notifications for an executable in an app that is signed with its ID.
+src=` + shellQuote(target) + `
+exe="$(dirname "$0")"/` + shellQuote(filepath.Base(cp)) + `
+if [ ! -e "$exe" ] || [ "$src" -nt "$exe" ]; then
+	if cp "$src" "$exe.new" && codesign -s - -f -i ` + id + ` "$exe.new" && mv -f "$exe.new" "$exe"; then
+		codesign -s - -f -i ` + id + ` "$(dirname "$0")/../.."
+	else
+		rm -f "$exe.new"
+	fi
+fi
+[ -n "$CORE_APP_UPDATE" ] && exit 0
+exec "$exe" "$@"
+`
+	if err := os.WriteFile(exe, []byte(script), 0o755); err != nil {
 		return err
 	}
-	script := "#!/bin/sh\n# runs the app installed by go install (AppGoSymlink)\nexec \"$(dirname \"$0\")\"/" + shellQuote(filepath.Base(link)) + " \"$@\"\n"
-	return os.WriteFile(exe, []byte(script), 0o755)
+	if err := exec.Major().SetEnv("CORE_APP_UPDATE", "1").Run(exe); err != nil {
+		return err
+	}
+	if _, err := os.Stat(cp); err != nil {
+		return fmt.Errorf("AppGoSymlink: the executable was not copied into the app: %w", err)
+	}
+	return nil
+}
+
+// signApp signs the given macOS app ad hoc, with the ID of the given
+// config, as macOS only allows notifications for an app that is signed
+// with its ID, which the signature of the Go linker does not have.
+func signApp(c *config.Config, app string) error {
+	return exec.Major().Run("codesign", "-s", "-", "-f", "-i", c.ID, app)
 }
 
 // shellQuote returns the given text quoted for a shell.

@@ -8,7 +8,9 @@ import (
 	"os"
 	osexec "os/exec"
 	"path/filepath"
+	"runtime"
 	"testing"
+	"time"
 
 	"cogentcore.org/core/cmd/config"
 	"github.com/stretchr/testify/assert"
@@ -16,9 +18,13 @@ import (
 )
 
 // TestGoSymlinkApp tests that the executable of an app is made a script
-// that runs a symbolic link to the one installed by go install, for
-// AppGoSymlink, with a module and a Go bin directory of the test.
+// that runs a copy of the one installed by go install, in the app, signed
+// with the ID of the app, for AppGoSymlink, and copies it again when it
+// changes, with a module and a Go bin directory of the test.
 func TestGoSymlinkApp(t *testing.T) {
+	if runtime.GOOS != "darwin" {
+		t.Skip("the app is signed with codesign, on macOS")
+	}
 	tmp := t.TempDir()
 	mod := filepath.Join(tmp, "zzapp")
 	require.NoError(t, os.MkdirAll(mod, 0o755))
@@ -29,10 +35,11 @@ func TestGoSymlinkApp(t *testing.T) {
 	t.Setenv("GOWORK", "off")
 	t.Chdir(mod)
 
-	c := &config.Config{Name: "ZZ App"}
+	c := &config.Config{Name: "ZZ App", ID: "com.example.zzapp"}
 	app := filepath.Join(tmp, "ZZ App.app")
 	exe := appExecutable(c, app)
 	require.NoError(t, os.MkdirAll(filepath.Dir(exe), 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(app, "Contents", "Info.plist"), []byte(`<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict><key>CFBundleExecutable</key><string>ZZ App.app</string><key>CFBundleIdentifier</key><string>com.example.zzapp</string></dict></plist>`), 0o644))
 	require.NoError(t, os.WriteFile(exe, []byte("packed"), 0o755))
 
 	// a packed executable is removed too, so that cp does not write over it
@@ -42,15 +49,29 @@ func TestGoSymlinkApp(t *testing.T) {
 	require.NoError(t, removeExecutable(exe)) // none is fine
 
 	require.NoError(t, goSymlinkApp(c, app))
-	link := filepath.Join(filepath.Dir(exe), "zzapp")
-	target, err := os.Readlink(link)
-	require.NoError(t, err)
-	assert.Equal(t, filepath.Join(bin, "zzapp"), target)
+	cp := filepath.Join(filepath.Dir(exe), "zzapp")
+	target := filepath.Join(bin, "zzapp")
 	assert.FileExists(t, target, "installed by go install")
-	// it runs the installed one, in the bundle, with the arguments
-	out, err := osexec.Command(exe, "arg").CombinedOutput()
+	fi, err := os.Lstat(cp)
+	require.NoError(t, err)
+	assert.True(t, fi.Mode().IsRegular(), "a copy, not a link")
+	out, err := osexec.Command("codesign", "-dv", cp).CombinedOutput()
 	require.NoError(t, err, string(out))
-	assert.Equal(t, link+" arg", string(out))
+	assert.Contains(t, string(out), "Identifier=com.example.zzapp")
+
+	// it runs the copy, in the app, with the arguments
+	out, err = osexec.Command(exe, "arg").CombinedOutput()
+	require.NoError(t, err, string(out))
+	assert.Equal(t, cp+" arg", string(out))
+
+	// a newer one installed by go install is copied when the app starts
+	before := time.Now().Add(-time.Hour)
+	require.NoError(t, os.Chtimes(cp, before, before))
+	_, err = osexec.Command(exe, "arg").CombinedOutput()
+	require.NoError(t, err)
+	fi, err = os.Stat(cp)
+	require.NoError(t, err)
+	assert.True(t, fi.ModTime().After(before.Add(time.Minute)), "copied again")
 
 	require.NoError(t, goSymlinkApp(c, app)) // again
 	require.NoError(t, removeExecutable(exe))
