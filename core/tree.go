@@ -1525,15 +1525,15 @@ func (tr *Tree) PasteAssign(md mimedata.Mimes) {
 }
 
 // PasteBefore inserts object(s) from mime data before this node.
-// If another item with the same name already exists, it will
-// append _Copy on the name of the inserted objects
+// An object with the name of another one gets a unique name, except
+// for one moved within its parent (see [namePasted]).
 func (tr *Tree) PasteBefore(md mimedata.Mimes, mod events.DropMods) {
 	tr.pasteAt(md, mod, 0, "Paste before")
 }
 
 // PasteAfter inserts object(s) from mime data after this node.
-// If another item with the same name already exists, it will
-// append _Copy on the name of the inserted objects
+// An object with the name of another one gets a unique name, except
+// for one moved within its parent (see [namePasted]).
 func (tr *Tree) PasteAfter(md mimedata.Mimes, mod events.DropMods) {
 	tr.pasteAt(md, mod, 1, "Paste after")
 }
@@ -1541,12 +1541,31 @@ func (tr *Tree) PasteAfter(md mimedata.Mimes, mod events.DropMods) {
 // treeTempMovedTag is a kind of hack to prevent moved items from being deleted, using DND
 const treeTempMovedTag = `_\&MOVED\&`
 
+// namePasted names the given node pasted into the given parent, from the
+// given path of its source from the root. A node moved within the same
+// parent (mod is DropMove) has the name of its source plus
+// [treeTempMovedTag], until [Tree.DropDeleteSource] deletes the source and
+// restores its name, so that it keeps its name. Other nodes get a unique
+// name if theirs is a duplicate.
+func namePasted(parent, ns, root tree.Node, mod events.DropMods, orgpath string) {
+	nt := ns.AsTree()
+	opar := nt.Parent
+	nt.Parent = parent // the path relies on the parent
+	npath := nt.PathFrom(root)
+	nt.Parent = opar
+	if mod == events.DropMove && npath == orgpath {
+		nt.SetName(nt.Name + treeTempMovedTag)
+		return
+	}
+	tree.SetUniqueNameIfDuplicate(parent, ns)
+}
+
 // todo: these methods require an interface to work for descended
 // nodes, based on base code
 
 // pasteAt inserts object(s) from mime data at rel position to this node.
-// If another item with the same name already exists, it will
-// append _Copy on the name of the inserted objects
+// An object with the name of another one gets a unique name, except
+// for one moved within its parent (see [namePasted]).
 func (tr *Tree) pasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm string) {
 	if tr.Parent == nil {
 		return
@@ -1570,18 +1589,12 @@ func (tr *Tree) pasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm s
 	sz := len(sl)
 	var selTv *Tree
 	for i, ns := range sl {
-		nst := ns.AsTree()
-		orgpath := pl[i]
-		tree.SetUniqueNameIfDuplicate(parent, ns)
+		namePasted(parent.This, ns, tr.Root, mod, pl[i])
 		parent.InsertChild(ns, myidx+i)
 		nwb := AsWidget(ns)
 		AsTree(ns).Root = tr.Root
 		nwb.SetScene(tr.Scene)
 		nwb.Update() // incl children
-		npath := nst.PathFrom(tr.Root)
-		if mod == events.DropMove && npath == orgpath { // we will be nuked immediately after drag
-			nst.SetName(nst.Name + treeTempMovedTag) // special keyword :)
-		}
 		if i == sz-1 {
 			selTv = AsTree(ns)
 		}

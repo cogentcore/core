@@ -457,8 +457,8 @@ func (tr *Tree) pasteAssignSync(md mimedata.Mimes) {
 }
 
 // pasteAtSync inserts object(s) from mime data at rel position to this node.
-// If another item with the same name already exists, it will
-// append _Copy on the name of the inserted objects
+// An object with the name of another one gets a unique name, except
+// for one moved within its parent (see [namePasted]).
 func (tr *Tree) pasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int, _ string) {
 	sn := tr.SyncNode
 	sl, pl := tr.nodesFromMimeData(md)
@@ -474,14 +474,8 @@ func (tr *Tree) pasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int, _ s
 	sz := len(sl)
 	var seln tree.Node
 	for i, ns := range sl {
-		nst := ns.AsTree()
-		orgpath := pl[i]
-		tree.SetUniqueNameIfDuplicate(parent, ns)
+		namePasted(parent, ns, sroot, mod, pl[i])
 		pt.InsertChild(ns, myidx+i)
-		npath := nst.PathFrom(sroot)
-		if mod == events.DropMove && npath == orgpath { // we will be nuked immediately after drag
-			nst.SetName(nst.Name + treeTempMovedTag) // special keyword :)
-		}
 		if i == sz-1 {
 			seln = ns
 		}
