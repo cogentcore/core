@@ -122,3 +122,32 @@ func TestCompleteLookup(t *testing.T) {
 	ed := CompleteEditText("fmt.Pr", 6, "Println", "Pr")
 	assert.Equal(t, "Println", ed.NewText)
 }
+
+// TestCompleteLabelText tests that the labels of completions are shown as
+// plain text, not markup, as the <address> of an email address.
+func TestCompleteLabelText(t *testing.T) {
+	wait := TimingSettings.CompleteWaitDuration
+	TimingSettings.CompleteWaitDuration = 0 // shows at once
+	defer func() { TimingSettings.CompleteWaitDuration = wait }()
+
+	b, tf := newEditTextField("")
+	tf.SetCompleter(nil, func(data any, text string, posLine, posChar int) complete.Matches {
+		return complete.Matches{Seed: text, Matches: complete.Completions{{Text: "Alice <alice@x.test>"}}}
+	}, testEdit)
+	RenderImage(b, Locked(b, func() {
+		tf.SetFocus()
+		TypeText(tf, "Ali")
+		tf.offerComplete()
+	}), Locked(b, func() {
+		require.NotNil(t, tf.complete.stage, "the popup is shown")
+		var tx *Text
+		for w := range tf.complete.stage.Scene.AllWidgets() {
+			if t, ok := w.(*Text); ok && tx == nil {
+				tx = t
+			}
+		}
+		require.NotNil(t, tx)
+		require.NotNil(t, tx.PaintText())
+		assert.Equal(t, "Alice <alice@x.test>", string(tx.PaintText().Source.Join()), "all of it shown")
+	}))
+}
