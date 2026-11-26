@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 )
 
@@ -31,6 +32,13 @@ func (il *InlineList) WidgetValue() any { return &il.Slice }
 
 func (il *InlineList) Init() {
 	il.Frame.Init()
+	il.Styler(func(s *styles.Style) {
+		// the items flow onto the next lines when there is not room for
+		// all of them on one, which they are on otherwise (as it shrinks),
+		// instead of needing a horizontal scrollbar
+		s.Wrap = true
+		s.Shrink.X = 1
+	})
 	il.Maker(func(p *tree.Plan) {
 		sl := reflectx.Underlying(reflect.ValueOf(il.Slice))
 
