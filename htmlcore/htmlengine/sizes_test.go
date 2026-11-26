@@ -1604,3 +1604,18 @@ func TestButtonContentCentered(t *testing.T) {
 			assert.InDelta(t, mid, tx.Pos.Total.Y+tx.Size.Actual.Total.Y/2, float64(dp), "centered")
 		})
 }
+
+// TestTableAlignCenter tests that a table with align="center" and no width
+// is centered in its container, alone in it, as in the body or in a block
+// of a max-width (as the email of Facebook, whose tables were at the left).
+func TestTableAlignCenter(t *testing.T) {
+	widgetsByID(t, `<div style="width: 800px"><div id="d" style="max-width: 420px"><table id="in" align="center"><tr><td>Hello there</td></tr></table></div>`+
+		`<div id="d2"><table id="in2" align="center"><tr><td>Hello there</td></tr></table></div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			for _, p := range [][2]string{{"d", "in"}, {"d2", "in2"}} {
+				d, tb := ws[p[0]].Geom, ws[p[1]].Geom
+				mid := d.Pos.Content.X + d.Size.Actual.Content.X/2
+				assert.InDelta(t, mid, tb.Pos.Total.X+tb.Size.Actual.Total.X/2, float64(2*dp), p[1])
+			}
+		})
+}

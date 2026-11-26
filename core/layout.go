@@ -2986,8 +2986,10 @@ func (fr *Frame) positionCellsMainX() {
 // lineCrosses returns, for each line of the children along the given main
 // axis, its size on the cross axis: the largest allocation of its children,
 // within which they are aligned on the cross axis (as a child that is
-// centered in a column next to a child that grows to its width). It has
-// one line (of size 0) if there are no children.
+// centered in a column next to a child that grows to its width). A column
+// of one line (see [Frame.singleLineColumn]) is at least as wide as its
+// content (as a table that is centered in a column by itself, as with
+// align="center" in HTML). It has one line if there are no children.
 func (fr *Frame) lineCrosses(ma math32.Dims) []float32 {
 	ca := ma.Other()
 	crosses := []float32{0}
@@ -3001,7 +3003,21 @@ func (fr *Frame) lineCrosses(ma math32.Dims) []float32 {
 		idx++
 		return tree.Continue
 	})
+	if ma == math32.Y && len(crosses) == 1 && fr.singleLineColumn() {
+		crosses[0] = max(crosses[0], fr.Geom.Size.Actual.Content.Dim(ca))
+	}
 	return crosses
+}
+
+// singleLineColumn returns whether the frame is a column of one line, a
+// flex one that does not wrap, whose line is the width of its content, in
+// which its children are aligned (see [Frame.lineCrosses]), as in CSS. Its
+// Align.Content must be Start: otherwise it places its children as a group,
+// of the width of the widest, in which they are aligned.
+func (fr *Frame) singleLineColumn() bool {
+	st := &fr.Styles
+	return st.Direction == styles.Column && !st.Wrap && st.Display == styles.Flex &&
+		(st.Align.Content == styles.Start || st.Align.Content == styles.Auto)
 }
 
 // lineBaselines returns, for each line of the children of the frame in
