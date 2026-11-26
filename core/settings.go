@@ -40,9 +40,29 @@ import (
 // app settings.
 var AllSettings = []Settings{AppearanceSettings, SystemSettings, &printer.Settings, TimingSettings, DebugSettings}
 
-// AddAppSettings inserts app-specific settings after the AppearanceSettings
+// AddAppSettings inserts app-specific settings after the AppearanceSettings,
+// which are loaded in that order. Their tabs come first in the settings
+// editor (see [SettingsEditor]).
 func AddAppSettings(sets ...Settings) {
 	AllSettings = slices.Insert(AllSettings, 1, sets...)
+	appSettings = append(appSettings, sets...)
+}
+
+// appSettings are the app-specific settings added by [AddAppSettings].
+var appSettings []Settings
+
+// editorSettings returns [AllSettings] in the order of the tabs of the
+// settings editor: the app-specific settings first, then the others.
+func editorSettings() []Settings {
+	var app, others []Settings
+	for _, se := range AllSettings {
+		if slices.Contains(appSettings, se) {
+			app = append(app, se)
+		} else {
+			others = append(others, se)
+		}
+	}
+	return append(app, others...)
 }
 
 // Settings is the interface that describes the functionality common

@@ -81,11 +81,13 @@ func TestUpdateSettings(t *testing.T) {
 		restyleAll()
 	}))
 
-	all := slices.Clone(AllSettings)
-	defer func() { AllSettings = all }()
+	all, app := slices.Clone(AllSettings), slices.Clone(appSettings)
+	defer func() { AllSettings, appSettings = all, app }()
 	AddAppSettings(ts)
-	assert.Same(t, ts, AllSettings[1], "after the appearance settings")
+	assert.Same(t, ts, AllSettings[1], "loaded after the appearance settings")
 	assert.Len(t, AllSettings, len(all)+1)
+	assert.Same(t, ts, editorSettings()[0], "its tab is first")
+	assert.Len(t, editorSettings(), len(all)+1)
 }
 
 // TestSettingsHelpers tests the smaller helpers of the settings.
