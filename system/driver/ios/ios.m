@@ -20,8 +20,51 @@
 
 struct utsname sysInfo;
 
-@interface GoAppAppController : UIViewController<UIContentContainer>
+@interface GoAppAppController : UIViewController<UIContentContainer, UIGestureRecognizerDelegate>
 @end
+
+// windowScene returns the window scene of the app, preferring the one in
+// the foreground, or nil if there is none yet.
+static UIWindowScene* windowScene(void) {
+	UIWindowScene* found = nil;
+	for (UIScene* scene in [UIApplication sharedApplication].connectedScenes) {
+		if (![scene isKindOfClass:[UIWindowScene class]]) {
+			continue;
+		}
+		if (scene.activationState == UISceneActivationStateForegroundActive) {
+			return (UIWindowScene*)scene;
+		}
+		if (found == nil) {
+			found = (UIWindowScene*)scene;
+		}
+	}
+	return found;
+}
+
+// currentOrientation returns the interface orientation of the window
+// scene of the app, or portrait if there is none yet.
+static UIInterfaceOrientation currentOrientation(void) {
+	UIWindowScene* scene = windowScene();
+	if (scene == nil) {
+		return UIInterfaceOrientationPortrait;
+	}
+	return scene.interfaceOrientation;
+}
+
+// keyWindow returns the key window of the window scene of the app,
+// or else its first window, or nil if there is none.
+static UIWindow* keyWindow(void) {
+	UIWindowScene* scene = windowScene();
+	if (scene == nil) {
+		return nil;
+	}
+	for (UIWindow* w in scene.windows) {
+		if (w.isKeyWindow) {
+			return w;
+		}
+	}
+	return scene.windows.firstObject;
+}
 
 @interface GoAppView : UIView
 @end
@@ -34,50 +77,41 @@ struct utsname sysInfo;
 - (void)resetText;
 @end
 
+// GoAppAppDelegate is the delegate of the app, which has the scene life
+// cycle, as required for apps built with the iOS 27 SDK: the window and
+// the controller are made by the delegate of the window scene
+// (GoAppSceneDelegate), which UIKit sends the foreground and background
+// events. There is one scene (UIApplicationSupportsMultipleScenes is false
+// in the Info.plist made by the core tool; see cmd/mobile/build_apple.go).
 @interface GoAppAppDelegate : UIResponder<UIApplicationDelegate, UNUserNotificationCenterDelegate>
-@property (strong, nonatomic) UIWindow *window;
 @property (strong, nonatomic) GoAppAppController *controller;
+@end
+
+@interface GoAppSceneDelegate : UIResponder<UIWindowSceneDelegate>
+@property (strong, nonatomic) UIWindow *window;
 @end
 
 @implementation GoAppAppDelegate
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    int scale = 1;
-    if ([[UIScreen mainScreen] respondsToSelector:@selector(displayLinkWithTarget:selector:)]) {
-		scale = (int)[UIScreen mainScreen].scale; // either 1.0, 2.0, or 3.0.
-	}
-    CGSize size = [UIScreen mainScreen].nativeBounds.size;
-    setDisplayMetrics((int)size.width, (int)size.height, scale);
-
 	lifecycleAlive();
-	self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-	self.controller = [[GoAppAppController alloc] initWithNibName:nil bundle:nil];
-	self.window.rootViewController = self.controller;
-	[self.window makeKeyAndVisible];
 
-    // update insets once key window is set
-	UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
-	updateConfig((int)size.width, (int)size.height, orientation);
-
+	// set at launch, so that a tap on a notification that starts the app
+	// is sent to it (see didReceiveNotificationResponse)
 	UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
 	center.delegate = self;
 
 	return YES;
 }
 
-- (void)applicationDidBecomeActive:(UIApplication * )application {
-	lifecycleFocused();
-}
-
-- (void)applicationWillResignActive:(UIApplication *)application {
-	lifecycleVisible();
-}
-
-- (void)applicationDidEnterBackground:(UIApplication *)application {
-	lifecycleAlive();
-	// a while for the app to complete the edits that were in progress,
-	// and to start any work on them, such as saving and syncing data,
-	// which ends it (see lifecycleBackground)
-	lifecycleBackground(beginBackgroundTask("background"));
+// the window scene is configured with GoAppSceneDelegate, as in the
+// scene manifest of the Info.plist, for an Info.plist without one
+- (UISceneConfiguration *)application:(UIApplication *)application
+configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession
+                               options:(UISceneConnectionOptions *)options {
+	UISceneConfiguration *config = [UISceneConfiguration configurationWithName:@"Default Configuration"
+		sessionRole:connectingSceneSession.role];
+	config.delegateClass = [GoAppSceneDelegate class];
+	return config;
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {
@@ -106,6 +140,45 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
 		}
 	}
 	completionHandler();
+}
+@end
+
+@implementation GoAppSceneDelegate
+- (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session
+	options:(UISceneConnectionOptions *)connectionOptions {
+	if (![scene isKindOfClass:[UIWindowScene class]]) {
+		return;
+	}
+	UIWindowScene *windowScene = (UIWindowScene *)scene;
+	UIScreen *screen = windowScene.screen;
+	int scale = (int)screen.scale; // either 1.0, 2.0, or 3.0.
+	CGSize size = screen.nativeBounds.size;
+	setDisplayMetrics((int)size.width, (int)size.height, scale);
+
+	GoAppAppDelegate *appDelegate = (GoAppAppDelegate *)[[UIApplication sharedApplication] delegate];
+	self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
+	appDelegate.controller = [[GoAppAppController alloc] initWithNibName:nil bundle:nil];
+	self.window.rootViewController = appDelegate.controller;
+	[self.window makeKeyAndVisible];
+
+	// update insets once key window is set
+	updateConfig((int)size.width, (int)size.height, windowScene.interfaceOrientation);
+}
+
+- (void)sceneDidBecomeActive:(UIScene *)scene {
+	lifecycleFocused();
+}
+
+- (void)sceneWillResignActive:(UIScene *)scene {
+	lifecycleVisible();
+}
+
+- (void)sceneDidEnterBackground:(UIScene *)scene {
+	lifecycleAlive();
+	// a while for the app to complete the edits that were in progress,
+	// and to start any work on them, such as saving and syncing data,
+	// which ends it (see lifecycleBackground)
+	lifecycleBackground(beginBackgroundTask("background"));
 }
 @end
 
@@ -153,7 +226,7 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
 	setScreen(scale);
 
 	CGSize size = [UIScreen mainScreen].nativeBounds.size;
-	UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+	UIInterfaceOrientation orientation = currentOrientation();
 	updateConfig((int)size.width, (int)size.height, orientation);
 
     setWindowPtr([self.view layer]);
@@ -188,7 +261,7 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
 	[coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
 		// TODO(crawshaw): come up with a plan to handle animations.
 	} completion:^(id<UIViewControllerTransitionCoordinatorContext> context) {
-		UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+		UIInterfaceOrientation orientation = currentOrientation();
 		CGSize size = [UIScreen mainScreen].nativeBounds.size;
 		updateConfig((int)size.width, (int)size.height, orientation);
 	}];
@@ -229,7 +302,7 @@ static void sendTouches(int change, NSSet* touches) {
 - (void) traitCollectionDidChange: (UITraitCollection *) previousTraitCollection {
     [super traitCollectionDidChange: previousTraitCollection];
 
-	UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+	UIInterfaceOrientation orientation = currentOrientation();
 	CGSize size = [UIScreen mainScreen].nativeBounds.size;
 	updateConfig((int)size.width, (int)size.height, orientation);
 }
@@ -373,7 +446,7 @@ uint64_t threadID() {
 
 UIEdgeInsets getDevicePadding() {
     if (@available(iOS 11.0, *)) {
-        UIWindow *window = UIApplication.sharedApplication.keyWindow;
+        UIWindow *window = keyWindow();
 
         return window.safeAreaInsets;
     }
@@ -382,8 +455,8 @@ UIEdgeInsets getDevicePadding() {
 }
 
 bool isDark() {
-    UIViewController *rootVC = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
-    return rootVC.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark;
+    GoAppAppDelegate *appDelegate = (GoAppAppDelegate *)[[UIApplication sharedApplication] delegate];
+    return appDelegate.controller.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark;
 }
 
 // setTextBefore sets the text of the input view to the given text before
@@ -542,5 +615,5 @@ void setClipboardContent(char *content) {
 char *getClipboardContent() {
     NSString *str = [[UIPasteboard generalPasteboard] string];
 
-    return [str UTF8String];
+    return (char*)[str UTF8String];
 }
