@@ -20,8 +20,51 @@
 
 struct utsname sysInfo;
 
-@interface GoAppAppController : UIViewController<UIContentContainer>
+@interface GoAppAppController : UIViewController<UIContentContainer, UIGestureRecognizerDelegate>
 @end
+
+// windowScene returns the window scene of the app, preferring the one in
+// the foreground, or nil if there is none yet.
+static UIWindowScene* windowScene(void) {
+	UIWindowScene* found = nil;
+	for (UIScene* scene in [UIApplication sharedApplication].connectedScenes) {
+		if (![scene isKindOfClass:[UIWindowScene class]]) {
+			continue;
+		}
+		if (scene.activationState == UISceneActivationStateForegroundActive) {
+			return (UIWindowScene*)scene;
+		}
+		if (found == nil) {
+			found = (UIWindowScene*)scene;
+		}
+	}
+	return found;
+}
+
+// currentOrientation returns the interface orientation of the window
+// scene of the app, or portrait if there is none yet.
+static UIInterfaceOrientation currentOrientation(void) {
+	UIWindowScene* scene = windowScene();
+	if (scene == nil) {
+		return UIInterfaceOrientationPortrait;
+	}
+	return scene.interfaceOrientation;
+}
+
+// keyWindow returns the key window of the window scene of the app,
+// or else its first window, or nil if there is none.
+static UIWindow* keyWindow(void) {
+	UIWindowScene* scene = windowScene();
+	if (scene == nil) {
+		return nil;
+	}
+	for (UIWindow* w in scene.windows) {
+		if (w.isKeyWindow) {
+			return w;
+		}
+	}
+	return scene.windows.firstObject;
+}
 
 @interface GoAppView : UIView
 @end
@@ -55,7 +98,7 @@ struct utsname sysInfo;
 	[self.window makeKeyAndVisible];
 
     // update insets once key window is set
-	UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+	UIInterfaceOrientation orientation = currentOrientation();
 	updateConfig((int)size.width, (int)size.height, orientation);
 
 	UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
@@ -153,7 +196,7 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
 	setScreen(scale);
 
 	CGSize size = [UIScreen mainScreen].nativeBounds.size;
-	UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+	UIInterfaceOrientation orientation = currentOrientation();
 	updateConfig((int)size.width, (int)size.height, orientation);
 
     setWindowPtr([self.view layer]);
@@ -188,7 +231,7 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
 	[coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
 		// TODO(crawshaw): come up with a plan to handle animations.
 	} completion:^(id<UIViewControllerTransitionCoordinatorContext> context) {
-		UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+		UIInterfaceOrientation orientation = currentOrientation();
 		CGSize size = [UIScreen mainScreen].nativeBounds.size;
 		updateConfig((int)size.width, (int)size.height, orientation);
 	}];
@@ -229,7 +272,7 @@ static void sendTouches(int change, NSSet* touches) {
 - (void) traitCollectionDidChange: (UITraitCollection *) previousTraitCollection {
     [super traitCollectionDidChange: previousTraitCollection];
 
-	UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+	UIInterfaceOrientation orientation = currentOrientation();
 	CGSize size = [UIScreen mainScreen].nativeBounds.size;
 	updateConfig((int)size.width, (int)size.height, orientation);
 }
@@ -373,7 +416,7 @@ uint64_t threadID() {
 
 UIEdgeInsets getDevicePadding() {
     if (@available(iOS 11.0, *)) {
-        UIWindow *window = UIApplication.sharedApplication.keyWindow;
+        UIWindow *window = keyWindow();
 
         return window.safeAreaInsets;
     }
@@ -542,5 +585,5 @@ void setClipboardContent(char *content) {
 char *getClipboardContent() {
     NSString *str = [[UIPasteboard generalPasteboard] string];
 
-    return [str UTF8String];
+    return (char*)[str UTF8String];
 }
