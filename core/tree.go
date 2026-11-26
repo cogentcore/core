@@ -1468,7 +1468,7 @@ func (tr *Tree) Paste() { //types:add
 func (tr *Tree) pasteMenu(md mimedata.Mimes) {
 	tr.UnselectAll()
 	mf := func(m *Scene, pos image.Point) {
-		tr.makePasteMenu(m, pos, md, nil)
+		tr.makePasteMenu(m, pos, md, events.DropCopy, nil)
 	}
 	pos := tr.ContextMenuPos(nil)
 	NewMenu(mf, tr.This.(Widget), pos).Run()
@@ -1477,7 +1477,7 @@ func (tr *Tree) pasteMenu(md mimedata.Mimes) {
 // makePasteMenu makes the menu of options for paste events
 // Optional function is typically the DropFinalize but could also be other actions
 // to take after each optional action.
-func (tr *Tree) makePasteMenu(m *Scene, _ image.Point, md mimedata.Mimes, fun func()) {
+func (tr *Tree) makePasteMenu(m *Scene, _ image.Point, md mimedata.Mimes, mod events.DropMods, fun func()) {
 	NewButton(m).SetText("Assign To").OnClick(func(e events.Event) {
 		tr.PasteAssign(md)
 		if fun != nil {
@@ -1485,20 +1485,20 @@ func (tr *Tree) makePasteMenu(m *Scene, _ image.Point, md mimedata.Mimes, fun fu
 		}
 	})
 	NewButton(m).SetText("Add to Children").OnClick(func(e events.Event) {
-		tr.PasteChildren(md, events.DropCopy)
+		tr.PasteChildren(md, mod)
 		if fun != nil {
 			fun()
 		}
 	})
 	if !tr.IsRoot() {
 		NewButton(m).SetText("Insert Before").OnClick(func(e events.Event) {
-			tr.PasteBefore(md, events.DropCopy)
+			tr.PasteBefore(md, mod)
 			if fun != nil {
 				fun()
 			}
 		})
 		NewButton(m).SetText("Insert After").OnClick(func(e events.Event) {
-			tr.PasteAfter(md, events.DropCopy)
+			tr.PasteAfter(md, mod)
 			if fun != nil {
 				fun()
 			}
@@ -1613,10 +1613,10 @@ func (tr *Tree) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
 		tr.pasteChildrenSync(md, mod)
 		return
 	}
-	sl, _ := tr.nodesFromMimeData(md)
+	sl, pl := tr.nodesFromMimeData(md)
 
-	for _, ns := range sl {
-		tree.SetUniqueNameIfDuplicate(tr.This, ns)
+	for i, ns := range sl {
+		namePasted(tr.This, ns, tr.Root, mod, pl[i])
 		tr.AddChild(ns)
 		AsTree(ns).Root = tr.Root
 		AsWidget(ns).SetScene(tr.Scene)
@@ -1670,7 +1670,7 @@ func (tr *Tree) DragDrop(e events.Event) {
 	md := de.Data.(mimedata.Mimes)
 	mf := func(m *Scene, pos image.Point) {
 		tr.Scene.Events.DragMenuAddModText(m, de.DropMod)
-		tr.makePasteMenu(m, pos, md, func() {
+		tr.makePasteMenu(m, pos, md, de.DropMod, func() {
 			tr.DropFinalize(de)
 		})
 	}

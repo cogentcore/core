@@ -145,4 +145,13 @@ func TestTreeMoveKeepsName(t *testing.T) {
 	move(st.FindSyncNode(src.Child(0)), st.FindSyncNode(src.Child(2)), events.DropMove)
 	assert.Equal(t, []string{"tx", "sub", "bt"}, treeChildNames(src))
 	assert.Equal(t, st.NumChildren(), len(src.Children), "resynced")
+
+	// a sync tree of nodes that are not widgets, as for the lists of Lists
+	data := tree.NewNodeBase()
+	for _, nm := range []string{"a", "b", "c"} {
+		tree.NewNodeBase(data).SetName(nm)
+	}
+	dt := NewTree(NewBody()).SyncTree(data)
+	move(dt.FindSyncNode(data.Child(0)), dt.FindSyncNode(data.Child(2)), events.DropMove)
+	assert.Equal(t, []string{"b", "c", "a"}, treeChildNames(data))
 }

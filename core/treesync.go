@@ -491,11 +491,12 @@ func (tr *Tree) pasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int, _ s
 
 // pasteChildrenSync inserts object(s) from mime data at
 // end of children of this node
-func (tr *Tree) pasteChildrenSync(md mimedata.Mimes, _ events.DropMods) {
-	sl, _ := tr.nodesFromMimeData(md)
+func (tr *Tree) pasteChildrenSync(md mimedata.Mimes, mod events.DropMods) {
+	sl, pl := tr.nodesFromMimeData(md)
 	spar := tr.SyncNode
-	for _, ns := range sl {
-		tree.SetUniqueNameIfDuplicate(spar, ns)
+	sroot := tr.Root.AsCoreTree().SyncNode
+	for i, ns := range sl {
+		namePasted(spar, ns, sroot, mod, pl[i])
 		spar.AsTree().AddChild(ns)
 	}
 	tr.sendChangeEventReSync(nil)
@@ -529,8 +530,7 @@ func (tr *Tree) dropDeleteSourceSync(de *events.DragDrop) {
 		if sn != nil {
 			psplt := strings.Split(path, "/")
 			orgnm := psplt[len(psplt)-1]
-			sn.AsTree().SetName(orgnm)
-			AsWidget(sn).NeedsRender()
+			sn.AsTree().SetName(orgnm) // the resync renders it
 		}
 	}
 	tr.sendChangeEventReSync(nil)
