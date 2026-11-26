@@ -204,7 +204,7 @@ func TestScopes(t *testing.T) {
 
 // TestTokenStorage tests saving the tokens in the system keychain, moving
 // those in files there, falling back to files without a keychain, and
-// moving and deleting them.
+// deleting them.
 func TestTokenStorage(t *testing.T) {
 	dir := t.TempDir()
 	file := filepath.Join(dir, "e@x.test", "token.json")
@@ -223,14 +223,8 @@ func TestTokenStorage(t *testing.T) {
 	require.NotNil(t, token, "from the keychain")
 	assert.Equal(t, "refresh-e@x.test", token.RefreshToken)
 
-	moved := filepath.Join(dir, "e", "token.json")
-	require.NoError(t, MoveToken(file, moved))
+	require.NoError(t, DeleteToken(file))
 	token, _ = loadToken(file)
-	assert.Nil(t, token, "not at the old name")
-	token, _ = loadToken(moved)
-	require.NotNil(t, token, "at the new name")
-	require.NoError(t, DeleteToken(moved))
-	token, _ = loadToken(moved)
 	assert.Nil(t, token, "deleted")
 
 	// without a keychain: in the file, only readable by the user

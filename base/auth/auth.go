@@ -431,17 +431,3 @@ func DeleteToken(file string) error {
 	}
 	return nil
 }
-
-// MoveToken moves the token saved for the given old token file to the
-// given new one (see [AuthConfig.TokenFile]), as when the token files of
-// an app move. It does nothing if there is no token saved for the old one.
-func MoveToken(old, new string) error {
-	token, err := loadToken(old)
-	if err != nil || token == nil {
-		return err
-	}
-	if err := SaveToken(token, new); err != nil {
-		return err
-	}
-	return DeleteToken(old)
-}
