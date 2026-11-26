@@ -49,8 +49,21 @@ func (il *InlineList) Init() {
 				if il.IsReadOnly() {
 					wb.SetReadOnly(true)
 				} else {
-					wb.AddContextMenu(func(m *Scene, pos image.Point) {
+					menu := func(m *Scene, pos image.Point) {
 						il.contextMenu(m, i)
+					}
+					wb.AddContextMenu(menu)
+					// also on the widgets in it, as the fields of a struct,
+					// which get the clicks, and have their own menus
+					wb.FinalUpdater(func() {
+						wb.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+							if cwb == wb || cwb.Property(inlineListItemMenu) != nil {
+								return tree.Continue
+							}
+							cwb.SetProperty(inlineListItemMenu, true)
+							cwb.AddContextMenu(menu)
+							return tree.Continue
+						})
 					})
 				}
 				wb.Updater(func() {
@@ -113,6 +126,10 @@ func (il *InlineList) DeleteAt(idx int) {
 	reflectx.SliceDeleteAt(il.Slice, idx)
 	il.UpdateChange()
 }
+
+// inlineListItemMenu is the property of the widgets in an item of an
+// [InlineList] that have the context menu of the item.
+const inlineListItemMenu = "inline-list-item-menu"
 
 func (il *InlineList) contextMenu(m *Scene, idx int) {
 	if il.IsReadOnly() || il.isArray {
