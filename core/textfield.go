@@ -57,6 +57,11 @@ type TextField struct { //core:embedder
 	// then an error color, icon, and tooltip will be displayed.
 	Validator func() error `json:"-" xml:"-"`
 
+	// PasteFilter, if set, is a function that changes the text pasted
+	// into the text field before it is inserted, as to take an email
+	// address out of a mailto: link.
+	PasteFilter func(text string) string `json:"-" xml:"-"`
+
 	// LeadingIcon, if specified, indicates to add a button
 	// at the start of the text field with this icon.
 	// See [TextField.SetLeadingIcon].
@@ -1039,7 +1044,11 @@ func (tf *TextField) paste() { //types:add
 		if tf.cursorPos >= tf.selectRange.Start && tf.cursorPos < tf.selectRange.End {
 			tf.deleteSelection()
 		}
-		tf.insertAtCursor(data.Text(mimedata.TextPlain))
+		text := data.Text(mimedata.TextPlain)
+		if tf.PasteFilter != nil {
+			text = tf.PasteFilter(text)
+		}
+		tf.insertAtCursor(text)
 	}
 }
 

@@ -8,9 +8,11 @@ import (
 	"errors"
 	"image"
 	"math/rand"
+	"strings"
 	"testing"
 	"time"
 
+	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
@@ -500,4 +502,16 @@ func TestTextFieldScrollCursorIntoView(t *testing.T) {
 	b.AsyncUnlock()
 	render()
 	assert.False(t, cursorShown(), "not scrolled back to the cursor")
+}
+
+// TestTextFieldPasteFilter tests changing the pasted text with
+// [TextField.PasteFilter].
+func TestTextFieldPasteFilter(t *testing.T) {
+	b := NewBody()
+	tf := NewTextField(b).SetPasteFilter(strings.ToUpper)
+	RenderImage(b, Locked(b, func() {
+		tf.Clipboard().Write(mimedata.NewText("pasted"))
+		tf.paste()
+		assert.Equal(t, "PASTED", tf.Text())
+	}))
 }
