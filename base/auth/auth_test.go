@@ -6,6 +6,7 @@ package auth
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -18,6 +19,7 @@ import (
 	"cogentcore.org/core/base/iox/jsonx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/zalando/go-keyring"
 	"golang.org/x/oauth2"
 )
 
@@ -31,6 +33,10 @@ type fakeProvider struct {
 	// granted, if set, are the scopes that the tokens allow, as the
 	// provider says in its responses.
 	granted atomic.Value
+
+	// offline makes the token endpoint drop the connections, as if
+	// the provider could not be reached.
+	offline atomic.Bool
 }
 
 func newFakeProvider(t *testing.T) *fakeProvider {
@@ -48,6 +54,11 @@ func newFakeProvider(t *testing.T) *fakeProvider {
 		})
 	})
 	mux.HandleFunc("/token", func(w http.ResponseWriter, r *http.Request) {
+		if p.offline.Load() {
+			conn, _, _ := w.(http.Hijacker).Hijack()
+			conn.Close()
+			return
+		}
 		r.ParseForm()
 		rt := r.Form.Get("refresh_token")
 		email, ok := strings.CutPrefix(rt, "refresh-")
@@ -81,8 +92,15 @@ func newFakeProvider(t *testing.T) *fakeProvider {
 	return p
 }
 
-// saveToken saves a token for the given email, whose access token has expired.
-func saveToken(t *testing.T, file, email string) {
+// TestMain uses a keychain in memory instead of the real one.
+func TestMain(m *testing.M) {
+	keyring.MockInit()
+	os.Exit(m.Run())
+}
+
+// saveTestToken saves a token for the given email in its token file,
+// as before the keychain, whose access token has expired.
+func saveTestToken(t *testing.T, file, email string) {
 	t.Helper()
 	require.NoError(t, os.MkdirAll(filepath.Dir(file), 0o700))
 	require.NoError(t, jsonx.Save(&oauth2.Token{AccessToken: "access-" + email + "-old", TokenType: "Bearer",
@@ -106,7 +124,7 @@ func TestTokenSource(t *testing.T) {
 	_, _, err := TokenSource(config("a@x.test"))
 	assert.ErrorIs(t, err, ErrNoToken, "no saved token")
 
-	saveToken(t, tokenFile("b@x.test"), "b@x.test")
+	saveTestToken(t, tokenFile("b@x.test"), "b@x.test")
 	ts, userInfo, err := TokenSource(config("a@x.test", "b@x.test"))
 	require.NoError(t, err, "the token of the second account")
 	assert.Equal(t, "b@x.test", userInfo.Email)
@@ -114,16 +132,39 @@ func TestTokenSource(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "access-b@x.test-1", token.AccessToken, "refreshed")
 
-	var saved oauth2.Token
-	require.NoError(t, jsonx.Open(&saved, tokenFile("b@x.test")))
+	saved, err := loadToken(tokenFile("b@x.test"))
+	require.NoError(t, err)
+	require.NotNil(t, saved)
 	assert.Equal(t, "access-b@x.test-1", saved.AccessToken, "the refreshed token is saved")
+	assert.NoFileExists(t, tokenFile("b@x.test"), "in the keychain, not the file")
 	assert.Equal(t, "refresh-b@x.test", saved.RefreshToken, "with the refresh token")
 
 	// a revoked refresh token does not work
-	require.NoError(t, jsonx.Save(&oauth2.Token{AccessToken: "x", RefreshToken: "revoked",
+	require.NoError(t, SaveToken(&oauth2.Token{AccessToken: "x", RefreshToken: "revoked",
 		Expiry: time.Now().Add(-time.Hour)}, tokenFile("b@x.test")))
 	_, _, err = TokenSource(config("b@x.test"))
 	assert.ErrorIs(t, err, ErrNoToken)
+}
+
+// TestTokenSourceOffline tests that a saved token that cannot be
+// refreshed because the provider cannot be reached, as when offline,
+// is an error other than [ErrNoToken], as it may still work.
+func TestTokenSourceOffline(t *testing.T) {
+	p := newFakeProvider(t)
+	dir := t.TempDir()
+	tokenFile := func(email string) string { return filepath.Join(dir, email, "token.json") }
+	saveTestToken(t, tokenFile("d@x.test"), "d@x.test")
+	config := &AuthConfig{ProviderName: "fake", ProviderURL: p.URL, ClientID: "id", ClientSecret: "secret",
+		TokenFile: tokenFile, Accounts: []string{"d@x.test"}, NoPrompt: true}
+	p.offline.Store(true)
+	_, _, err := TokenSource(config)
+	assert.Error(t, err)
+	assert.NotErrorIs(t, err, ErrNoToken)
+
+	p.offline.Store(false)
+	_, userInfo, err := TokenSource(config)
+	require.NoError(t, err, "online again")
+	assert.Equal(t, "d@x.test", userInfo.Email)
 }
 
 // TestScopes tests that a saved token that does not allow all of the
@@ -136,7 +177,7 @@ func TestScopes(t *testing.T) {
 	mail := "https://mail.google.com/"
 	config := &AuthConfig{ProviderName: "fake", ProviderURL: p.URL, ClientID: "id", ClientSecret: "secret",
 		TokenFile: tokenFile, Accounts: []string{"c@x.test"}, Scopes: []string{mail}, NoPrompt: true}
-	saveToken(t, tokenFile("c@x.test"), "c@x.test")
+	saveTestToken(t, tokenFile("c@x.test"), "c@x.test")
 
 	p.granted.Store("openid https://www.googleapis.com/auth/userinfo.email")
 	_, _, err := TokenSource(config)
@@ -149,7 +190,7 @@ func TestScopes(t *testing.T) {
 	assert.NoError(t, err)
 
 	// a saved token that has not expired is refreshed to check it
-	require.NoError(t, jsonx.Save(&oauth2.Token{AccessToken: "access-c@x.test-old", TokenType: "Bearer",
+	require.NoError(t, SaveToken(&oauth2.Token{AccessToken: "access-c@x.test-old", TokenType: "Bearer",
 		RefreshToken: "refresh-c@x.test", Expiry: time.Now().Add(time.Hour)}, tokenFile("c@x.test")))
 	p.granted.Store("openid")
 	_, _, err = TokenSource(config)
@@ -159,4 +200,50 @@ func TestScopes(t *testing.T) {
 	assert.ErrorAs(t, checkScopes((&oauth2.Token{}).WithExtra(map[string]any{"scope": "openid"}), []string{mail}), &se)
 	assert.Equal(t, []string{mail}, se.Missing)
 	assert.NoError(t, checkScopes(&oauth2.Token{}, []string{mail}), "unknown scopes are not checked")
+}
+
+// TestTokenStorage tests saving the tokens in the system keychain, moving
+// those in files there, falling back to files without a keychain, and
+// moving and deleting them.
+func TestTokenStorage(t *testing.T) {
+	dir := t.TempDir()
+	file := filepath.Join(dir, "e@x.test", "token.json")
+	token, err := loadToken(file)
+	assert.NoError(t, err)
+	assert.Nil(t, token, "none")
+
+	saveTestToken(t, file, "e@x.test") // in a file, as before
+	token, err = loadToken(file)
+	require.NoError(t, err)
+	require.NotNil(t, token)
+	assert.Equal(t, "refresh-e@x.test", token.RefreshToken)
+	assert.NoFileExists(t, file, "moved to the keychain")
+	token, err = loadToken(file)
+	require.NoError(t, err)
+	require.NotNil(t, token, "from the keychain")
+	assert.Equal(t, "refresh-e@x.test", token.RefreshToken)
+
+	moved := filepath.Join(dir, "e", "token.json")
+	require.NoError(t, MoveToken(file, moved))
+	token, _ = loadToken(file)
+	assert.Nil(t, token, "not at the old name")
+	token, _ = loadToken(moved)
+	require.NotNil(t, token, "at the new name")
+	require.NoError(t, DeleteToken(moved))
+	token, _ = loadToken(moved)
+	assert.Nil(t, token, "deleted")
+
+	// without a keychain: in the file, only readable by the user
+	keyring.MockInitWithError(errors.New("no keychain"))
+	defer keyring.MockInit()
+	require.NoError(t, SaveToken(&oauth2.Token{AccessToken: "a", RefreshToken: "r"}, file))
+	fi, err := os.Stat(file)
+	require.NoError(t, err)
+	assert.Equal(t, os.FileMode(0o600), fi.Mode().Perm())
+	token, err = loadToken(file)
+	require.NoError(t, err)
+	require.NotNil(t, token)
+	assert.Equal(t, "r", token.RefreshToken)
+	require.NoError(t, DeleteToken(file))
+	assert.NoFileExists(t, file)
 }

@@ -10,6 +10,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -26,6 +27,7 @@ import (
 	"cogentcore.org/core/base/iox/jsonx"
 	"cogentcore.org/core/core"
 	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/zalando/go-keyring"
 	"golang.org/x/oauth2"
 )
 
@@ -49,7 +51,8 @@ type AuthConfig struct {
 	// portal (eg: the Credentials section of https://console.developers.google.com/).
 	ClientSecret string
 
-	// TokenFile is an optional function that returns the filename at which the token for the given user will be stored as JSON.
+	// TokenFile is an optional function that returns the filename at which the token for the given user will be stored as JSON,
+	// or rather the name of the token in the system keychain, where it is stored if there is one (see [SaveToken]).
 	// If it is nil or it returns "", the token is not stored. Also, if it is non-nil, Auth skips the user-facing authentication
 	// step if it finds a valid token at the file (ie: remember me). It checks all [AuthConfig.Accounts] until it finds one
 	// that works for that step. If [AuthConfig.Accounts] is nil, it checks with a blank ("") email account.
@@ -155,11 +158,13 @@ func TokenSource(c *AuthConfig) (oauth2.TokenSource, *oidc.UserInfo, error) {
 			if tf == "" {
 				continue
 			}
-			var token *oauth2.Token
-			err := jsonx.Open(&token, tf)
-			if errors.Is(err, fs.ErrNotExist) || token == nil {
+			token, err := loadToken(tf)
+			if token == nil && err == nil {
+				slog.Debug("auth: no saved token", "account", account)
 				continue
 			}
+			slog.Debug("auth: trying the saved token", "account", account, "file", tf,
+				"hasRefreshToken", token.RefreshToken != "", "expiry", token.Expiry)
 			if err != nil {
 				return nil, nil, err
 			}
@@ -169,10 +174,19 @@ func TokenSource(c *AuthConfig) (oauth2.TokenSource, *oidc.UserInfo, error) {
 				token.Expiry = time.Unix(1, 0)
 			}
 			ts, userInfo, err := tokenSource(c, provider, config, token)
-			if err != nil { // such as a revoked or expired refresh token
+			if err != nil {
+				var re *oauth2.RetrieveError
+				var se *ScopesError
+				if !errors.As(err, &re) && !errors.As(err, &se) {
+					// not known not to work, as when offline
+					slog.Debug("auth: could not check the saved token", "account", account, "err", err)
+					return nil, nil, err
+				}
+				// such as a revoked or expired refresh token
 				slog.Info("auth: saved token does not work", "account", account, "err", err)
 				continue
 			}
+			slog.Debug("auth: the saved token works", "account", account, "email", userInfo.Email)
 			return ts, userInfo, nil
 		}
 	}
@@ -182,9 +196,16 @@ func TokenSource(c *AuthConfig) (oauth2.TokenSource, *oidc.UserInfo, error) {
 
 	token, err := signIn(c, config)
 	if err != nil {
+		slog.Debug("auth: signing in failed", "err", err)
 		return nil, nil, err
 	}
-	return tokenSource(c, provider, config, token)
+	ts, userInfo, err := tokenSource(c, provider, config, token)
+	if err != nil {
+		slog.Debug("auth: the token of signing in does not work", "err", err)
+		return nil, nil, err
+	}
+	slog.Debug("auth: signed in", "email", userInfo.Email)
+	return ts, userInfo, nil
 }
 
 // tokenSource returns the saving token source for the given token and
@@ -193,13 +214,18 @@ func tokenSource(c *AuthConfig, provider *oidc.Provider, config *oauth2.Config, 
 	src := config.TokenSource(c.Ctx, token)
 	fresh, err := src.Token()
 	if err != nil {
+		slog.Debug("auth: getting a fresh token failed", "err", err)
 		return nil, nil, err
 	}
+	slog.Debug("auth: fresh token", "grantedScopes", fresh.Extra("scope"), "expiry", fresh.Expiry,
+		"hasRefreshToken", fresh.RefreshToken != "", "refreshed", fresh.AccessToken != token.AccessToken)
 	if err := checkScopes(fresh, c.Scopes); err != nil {
+		slog.Debug("auth: missing scopes", "err", err)
 		return nil, nil, err
 	}
 	userInfo, err := provider.UserInfo(c.Ctx, oauth2.StaticTokenSource(fresh))
 	if err != nil {
+		slog.Debug("auth: getting the user info failed", "err", err)
 		return nil, nil, fmt.Errorf("failed to get user info: %w", err)
 	}
 	ts := &savingTokenSource{src: src}
@@ -254,9 +280,11 @@ func signIn(c *AuthConfig, config *oauth2.Config) (*oauth2.Token, error) {
 			return
 		}
 		if e := r.URL.Query().Get("error"); e != "" {
+			slog.Debug("auth: the provider returned an error", "error", e, "description", r.URL.Query().Get("error_description"))
 			http.Error(w, "Not signed in: "+e, http.StatusBadRequest)
 			return
 		}
+		slog.Debug("auth: got the result of signing in", "scope", r.URL.Query().Get("scope"))
 		select {
 		case code <- r.URL.Query().Get("code"):
 		default:
@@ -277,6 +305,8 @@ func signIn(c *AuthConfig, config *oauth2.Config) (*oauth2.Token, error) {
 	if c.LoginHint != "" {
 		opts = append(opts, oauth2.SetAuthURLParam("login_hint", c.LoginHint))
 	}
+	slog.Debug("auth: opening the browser to sign in", "provider", c.ProviderName, "scopes", config.Scopes,
+		"prompt", prompt, "loginHint", c.LoginHint)
 	core.TheApp.OpenURL(config.AuthCodeURL(state, opts...))
 
 	var cs string
@@ -287,8 +317,10 @@ func signIn(c *AuthConfig, config *oauth2.Config) (*oauth2.Token, error) {
 	}
 	token, err := config.Exchange(c.Ctx, cs)
 	if err != nil {
+		slog.Debug("auth: exchanging the code for a token failed", "err", err)
 		return nil, fmt.Errorf("failed to exchange token: %w", err)
 	}
+	slog.Debug("auth: got a token", "grantedScopes", token.Extra("scope"), "hasRefreshToken", token.RefreshToken != "")
 	return token, nil
 }
 
@@ -317,13 +349,99 @@ func (ts *savingTokenSource) save(token *oauth2.Token) error {
 	if ts.file == "" || token.AccessToken == ts.access {
 		return nil
 	}
-	if err := os.MkdirAll(filepath.Dir(ts.file), 0700); err != nil {
+	if err := SaveToken(token, ts.file); err != nil {
+		slog.Debug("auth: saving the token failed", "file", ts.file, "err", err)
 		return err
 	}
-	// TODO(kai/auth): more secure saving of token file
-	if err := jsonx.Save(token, ts.file); err != nil {
-		return err
-	}
+	slog.Debug("auth: saved the token", "file", ts.file, "expiry", token.Expiry)
 	ts.access = token.AccessToken
 	return nil
+}
+
+// keyringService is the service of the tokens in the system keychain
+// (as the macOS Keychain), whose names are their token files.
+const keyringService = "Cogent Core auth"
+
+// loadToken returns the token saved for the given token file (see
+// [AuthConfig.TokenFile]): from the system keychain, or else from the
+// file, which is then moved to the keychain, if there is one. It returns
+// nil if there is no saved token.
+func loadToken(file string) (*oauth2.Token, error) {
+	data, err := keyring.Get(keyringService, file)
+	if err == nil {
+		token := &oauth2.Token{}
+		if err := json.Unmarshal([]byte(data), token); err != nil {
+			return nil, fmt.Errorf("reading the saved token: %w", err)
+		}
+		return token, nil
+	}
+	if !errors.Is(err, keyring.ErrNotFound) {
+		slog.Debug("auth: the keychain is not available", "err", err)
+	}
+	var token *oauth2.Token
+	err = jsonx.Open(&token, file)
+	if errors.Is(err, fs.ErrNotExist) || (err == nil && token == nil) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	if err := SaveToken(token, file); err != nil { // to the keychain
+		slog.Warn("auth: could not move the saved token", "file", file, "err", err)
+	}
+	return token, nil
+}
+
+// SaveToken saves the given token for the given token file (see
+// [AuthConfig.TokenFile]) in the system keychain (as the macOS Keychain),
+// with the name of the file, removing the file if any. Where there is no
+// keychain, as on a Linux server, it is saved in the file instead,
+// readable only by the user.
+func SaveToken(token *oauth2.Token, file string) error {
+	data, err := json.Marshal(token)
+	if err != nil {
+		return err
+	}
+	kerr := keyring.Set(keyringService, file, string(data))
+	if kerr == nil {
+		if err := os.Remove(file); err != nil && !errors.Is(err, fs.ErrNotExist) {
+			return err
+		}
+		return nil
+	}
+	slog.Debug("auth: saving the token in a file, without a keychain", "file", file, "err", kerr)
+	if err := os.MkdirAll(filepath.Dir(file), 0o700); err != nil {
+		return err
+	}
+	return os.WriteFile(file, data, 0o600)
+}
+
+// DeleteToken deletes the token saved for the given token file (see
+// [AuthConfig.TokenFile]), from the system keychain and the file.
+func DeleteToken(file string) error {
+	err := keyring.Delete(keyringService, file)
+	if errors.Is(err, keyring.ErrNotFound) {
+		err = nil
+	}
+	if ferr := os.Remove(file); ferr != nil && !errors.Is(ferr, fs.ErrNotExist) {
+		return ferr
+	}
+	if err != nil {
+		slog.Debug("auth: deleting the token from the keychain", "file", file, "err", err)
+	}
+	return nil
+}
+
+// MoveToken moves the token saved for the given old token file to the
+// given new one (see [AuthConfig.TokenFile]), as when the token files of
+// an app move. It does nothing if there is no token saved for the old one.
+func MoveToken(old, new string) error {
+	token, err := loadToken(old)
+	if err != nil || token == nil {
+		return err
+	}
+	if err := SaveToken(token, new); err != nil {
+		return err
+	}
+	return DeleteToken(old)
 }
