@@ -89,3 +89,44 @@ func CrashLogText(r any, stack string) string {
 	}
 	return fmt.Sprintf("Platform: %v\nSystem platform: %v\nApp version: %s\nCore version: %s\nTime: %s\n%s\npanic: %v\n\n%s", TheApp.Platform(), TheApp.SystemPlatform(), AppVersion, CoreVersion, time.Now().Format(time.DateTime), info, r, stack)
 }
+
+// crashOutputPrefix is the prefix of the files of the output of the Go
+// runtime for crashes (see [SaveCrashOutput]).
+const crashOutputPrefix = "runtime_"
+
+// SaveCrashOutput makes the Go runtime write the output of a crash that
+// [HandleRecover] does not handle, a panic in another goroutine or a fatal
+// error (as a concurrent map read and write), with the stacks of all of the
+// goroutines, to a file in the crash-logs of [App.AppDataDir], named for
+// the time the app started. Otherwise that output goes to the standard
+// error, which is lost for an app that is not run from a terminal, as an
+// app bundle on macOS, which just exits. The files of earlier runs that
+// did not crash, which are empty, are removed. It does nothing on mobile,
+// on the web, and offscreen (as in tests).
+func SaveCrashOutput() {
+	p := TheApp.Platform()
+	if p.IsMobile() || p == Web || p == Offscreen {
+		return
+	}
+	dnm := filepath.Join(TheApp.AppDataDir(), "crash-logs")
+	if errors.Log(os.MkdirAll(dnm, 0755)) != nil {
+		return
+	}
+	if old, err := filepath.Glob(filepath.Join(dnm, crashOutputPrefix+"*")); err == nil {
+		for _, f := range old {
+			if fi, err := os.Stat(f); err == nil && fi.Size() == 0 {
+				os.Remove(f)
+			}
+		}
+	}
+	fnm := filepath.Join(dnm, crashOutputPrefix+time.Now().Format("2006-01-02_15-04-05")+"_"+fmt.Sprint(os.Getpid()))
+	f, err := os.Create(fnm)
+	if errors.Log(err) != nil {
+		return
+	}
+	// with the stacks of all of the goroutines, as for a concurrent map
+	// write, whose other goroutine is the one to find
+	debug.SetTraceback("all")
+	errors.Log(debug.SetCrashOutput(f, debug.CrashOptions{}))
+	f.Close() // SetCrashOutput has its own copy
+}

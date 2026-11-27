@@ -1643,3 +1643,15 @@ func TestCellAlignCenterFixedTable(t *testing.T) {
 			assert.InDelta(t, mid, tb.Pos.Total.X+tb.Size.Actual.Total.X/2, float64(2*dp), "centered")
 		})
 }
+
+// TestFloatCellInRow tests that a cell of a table row that floats (as the
+// #bodyCell of the emails of DHL, with float:left) stays in the row with
+// all of its content, as in browsers, which make it a block in an
+// anonymous cell, instead of the row being as high as its first child.
+func TestFloatCellInRow(t *testing.T) {
+	widgetsByID(t, `<style>#c { float: left; height: 100%; width: 100% }</style><div style="width: 800px"><table id="t" width="100%" cellpadding="0" cellspacing="0"><tr><td id="c" align="center"><div style="height: 20px; width: 600px"></div><table width="600"><tr><td><div style="height: 300px">The body</div></td></tr></table></td></tr></table></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.GreaterOrEqual(t, ws["c"].Geom.Size.Actual.Total.Y, 320*dp, "the cell with all of its content")
+			assert.GreaterOrEqual(t, ws["t"].Geom.Size.Actual.Total.Y, 320*dp, "the table too")
+		})
+}

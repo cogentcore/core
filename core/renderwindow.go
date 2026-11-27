@@ -39,6 +39,8 @@ var windowWait sync.WaitGroup
 // and nothing needs to run on the main thread).
 func Wait() {
 	waitCalled = true
+	// crashes that are not recovered, as in other goroutines, are saved
+	system.SaveCrashOutput()
 	defer func() { system.HandleRecover(recover()) }()
 	go func() {
 		defer func() { system.HandleRecover(recover()) }()

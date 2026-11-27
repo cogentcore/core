@@ -162,7 +162,8 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 		bs.markers = !strings.Contains(ls, "none")
 	}
 	var trBg image.Image // background of a table row, for its cells
-	if (tag == "td" || tag == "th") && node.Parent != nil && node.Parent.Data == "tr" {
+	isCell := (tag == "td" || tag == "th") && node.Parent != nil && node.Parent.Data == "tr"
+	if isCell {
 		if bg := c.declaration(node.Parent, "background-color"); bg != "" {
 			trBg = css.ParseColor(bg)
 		}
@@ -291,6 +292,14 @@ func (c *Context) browserStyler(node *html.Node, w core.Widget, decls []*cssDecl
 		}
 		for _, op := range bs.ops {
 			op(st, s, ps)
+		}
+		if isCell && s.Float != styles.FloatNone {
+			// A floated cell of a row is made a block in an anonymous cell
+			// in browsers, which contains it, so it stays in the row with
+			// all of its content: it is not floated out of it (as the
+			// float:left of the #bodyCell of the emails of DHL, which only
+			// showed their header, in a row as high as that).
+			s.Float = styles.FloatNone
 		}
 		if node != nil {
 			st.display = c.displayOf(node)
