@@ -152,6 +152,19 @@ func TestTreeMoveKeepsName(t *testing.T) {
 		tree.NewNodeBase(data).SetName(nm)
 	}
 	dt := NewTree(NewBody()).SyncTree(data)
+	var changed [][]string // the names when changed
+	dt.OnChange(func(e events.Event) {
+		changed = append(changed, treeChildNames(data))
+	})
 	move(dt.FindSyncNode(data.Child(0)), dt.FindSyncNode(data.Child(2)), events.DropMove)
 	assert.Equal(t, []string{"b", "c", "a"}, treeChildNames(data))
+	assert.Equal(t, [][]string{{"b", "c", "a"}}, changed, "one change, after the source is deleted")
+
+	changed = nil
+	_, root, kids = newDnDTree()
+	root.OnChange(func(e events.Event) {
+		changed = append(changed, treeTexts(root))
+	})
+	move(kids[0], kids[2], events.DropMove)
+	assert.Equal(t, [][]string{{"b", "c", "a"}}, changed, "in a plain tree too")
 }

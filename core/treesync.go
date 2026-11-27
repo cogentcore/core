@@ -480,7 +480,7 @@ func (tr *Tree) pasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int, _ s
 			seln = ns
 		}
 	}
-	tvparent.sendChangeEventReSync(nil)
+	tvparent.pasteChanged(mod)
 	if seln != nil {
 		if tvk := tvparent.ChildByName("tv_"+seln.AsTree().Name, myidx); tvk != nil {
 			stv := AsTree(tvk)
@@ -499,7 +499,7 @@ func (tr *Tree) pasteChildrenSync(md mimedata.Mimes, mod events.DropMods) {
 		namePasted(spar, ns, sroot, mod, pl[i])
 		spar.AsTree().AddChild(ns)
 	}
-	tr.sendChangeEventReSync(nil)
+	tr.pasteChanged(mod)
 }
 
 // cutSync copies to system.Clipboard and deletes selected items.

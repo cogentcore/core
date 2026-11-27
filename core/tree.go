@@ -1599,7 +1599,7 @@ func (tr *Tree) pasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm s
 			selTv = AsTree(ns)
 		}
 	}
-	tr.sendChangeEvent()
+	tr.pasteChanged(mod)
 	parent.NeedsLayout()
 	if selTv != nil {
 		selTv.SelectEvent(events.SelectOne)
@@ -1623,7 +1623,21 @@ func (tr *Tree) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
 	}
 	tr.Update()
 	tr.Open()
-	tr.sendChangeEvent()
+	tr.pasteChanged(mod)
+}
+
+// pasteChanged sends the change event for a paste with the given drop
+// mod, resyncing a sync tree, except for a move (DropMove): its source is
+// deleted after it ([Tree.DropDeleteSource]), which sends it then, so that
+// the moved nodes are never seen with their sources, as with the same IDs.
+func (tr *Tree) pasteChanged(mod events.DropMods) {
+	if mod != events.DropMove {
+		tr.sendChangeEventReSync()
+		return
+	}
+	if rn := tr.Root.AsCoreTree(); rn.SyncNode != nil {
+		rn.Resync()
+	}
 }
 
 ////////  Drag-n-Drop
@@ -1713,6 +1727,7 @@ func (tr *Tree) DropDeleteSource(e events.Event) {
 			AsWidget(sn).NeedsRender()
 		}
 	}
+	rn.sendChangeEvent()
 }
 
 //////// Search interface
