@@ -1423,8 +1423,13 @@ func (tt *TreeTable) makeBranch(p *tree.Plan, i int) {
 		w.Updater(func() {
 			si, _, invis := tt.SliceIndex(i)
 			leaf := invis || !tt.validIndex(si) || tt.numChildren(tt.rows[si].item) == 0
+			wasLeaf := w.StateIs(states.Indeterminate)
 			w.SetState(leaf, states.Indeterminate)
 			w.SetState(!leaf && !tt.IsClosed(si), states.Checked)
+			if leaf != wasLeaf { // as when scrolled, which only updates: its abilities
+				w.Style()
+				w.NeedsRender()
+			}
 		})
 	})
 }

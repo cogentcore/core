@@ -1519,3 +1519,69 @@ func TestTreeTableScrollIndent(t *testing.T) {
 		}
 	})
 }
+
+// TestTreeTableScrollBranch tests that the branch of a group opens with a
+// click after the tree table is scrolled, when its row showed an item
+// without children before, whose branch does nothing: the abilities of
+// the branch are styled for the item that it shows.
+func TestTreeTableScrollBranch(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) {
+		s.Min.Y.Dp(250)
+		s.Max.Y.Dp(250)
+	})
+	var tasks []*task
+	for g := range 20 { // groups and items without children, alternating
+		gr := &task{Name: fmt.Sprintf("Item %d", g)}
+		if g%2 == 0 {
+			gr.Children = []*task{{Name: fmt.Sprintf("Task %d", g)}}
+		}
+		tasks = append(tasks, gr)
+	}
+	tt := NewTreeTable(b).SetItems(&tasks)
+	tt.SetReadOnly(true)
+	RenderImage(b, func() {
+		for _, c := range tasks {
+			tt.setItemClosed(reflect.ValueOf(c), true)
+		}
+		b.AsyncLock()
+		tt.Update()
+		bb := tt.ListGrid.Geom.TotalBBox
+		b.AsyncUnlock()
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		for range 10 { // until scrolled by an odd number of rows
+			src.Scroll(bb.Min.Add(bb.Size().Div(2)), math32.Vec2(0, 10))
+			time.Sleep(100 * time.Millisecond)
+			b.AsyncLock()
+			odd := tt.StartIndex%2 == 1
+			b.AsyncUnlock()
+			if odd {
+				break
+			}
+		}
+		b.AsyncLock()
+		require.Equal(t, 1, tt.StartIndex%2, "scrolled by an odd number of rows")
+		// the odd rows now show groups, where they showed items without children
+		nw, _ := tt.RowWidgetNs()
+		si := -1
+		var branch *Switch
+		for i := range tt.VisibleRows {
+			s, _, _ := tt.SliceIndex(i)
+			if tt.numChildren(tt.rows[s].item) > 0 && i%2 == 1 { // a leaf before
+				si = s
+				branch = tt.ListGrid.Child(i * nw).AsTree().Child(0).(*Switch)
+				break
+			}
+		}
+		require.NotNil(t, branch)
+		require.True(t, tt.IsClosed(si))
+		pt := branch.Geom.ContentBBox.Min.Add(branch.Geom.ContentBBox.Size().Div(2))
+		b.AsyncUnlock()
+		src.MouseButton(events.MouseDown, events.Left, pt, 0)
+		src.MouseButton(events.MouseUp, events.Left, pt, 0)
+		time.Sleep(200 * time.Millisecond)
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		assert.False(t, tt.IsClosed(si), "opened by a click on its branch")
+	})
+}
