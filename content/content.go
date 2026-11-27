@@ -65,6 +65,11 @@ type Content struct {
 	// for literature reference wikilinks in the format [[@CiteKey]].
 	References *csl.KeyList
 
+	// NoTabs is whether the page is shown without tabs, as it is on the
+	// web, where pages can not be opened in new tabs, as for content that
+	// is one page, such as a document in another app.
+	NoTabs bool
+
 	// pages are the pages that constitute the content.
 	pages []*bcontent.Page
 
@@ -224,7 +229,7 @@ func (ct *Content) Init() {
 		tree.Add(p, func(w *core.Frame) {
 			ct.rightFrame = w
 			w.Maker(func(p *tree.Plan) {
-				if core.TheApp.Platform() == system.Web || system.GenerateHTMLArg() {
+				if ct.NoTabs || core.TheApp.Platform() == system.Web || system.GenerateHTMLArg() {
 					ct.pageMaker(p, 0)
 				} else {
 					tree.Add(p, func(w *core.Tabs) {
