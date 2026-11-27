@@ -467,6 +467,14 @@ func (lb *ListBase) rowFromEventPos(e events.Event) (row, idx int, isValid bool)
 	return
 }
 
+// IndexFromEvent returns the index of the item under the position of the
+// given event, as for a drop of something onto an item, and whether there
+// is an item there.
+func (lb *ListBase) IndexFromEvent(e events.Event) (int, bool) {
+	_, idx, ok := lb.rowFromEventPos(e)
+	return idx, ok
+}
+
 // clickSelectEvent is a helper for processing selection events
 // based on a mouse click, which could be a double or triple
 // in addition to a regular click.

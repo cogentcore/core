@@ -433,6 +433,13 @@ func (fr *Frame) scrollToBoxDim(d math32.Dims, tmini, tmaxi int) bool {
 	if tmin >= cmin && tmax <= cmax {
 		return false
 	}
+	if tmin <= cmin && tmax >= cmax {
+		// it fills the view, as a widget larger than the frame, such as
+		// a grid of photos that gets the focus when clicked, and so it
+		// is in view as much as it can be: scrolling to its start would
+		// lose the place
+		return false
+	}
 	h := fr.Styles.Font.Size.Dots
 	if tmin < cmin { // favors scrolling to start
 		trg := sb.Value + tmin - cmin - h
