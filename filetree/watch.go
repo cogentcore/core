@@ -369,8 +369,25 @@ func (ft *Tree) nodeToUpdate(fc FileChange, update map[*Node]bool) {
 	if fc.Path == string(ft.Filepath) {
 		return
 	}
-	dn := ft.dirNode(filepath.Dir(fc.Path))
-	if dn == nil || !ft.isDirOpen(dn.Filepath) {
+	dir := filepath.Dir(fc.Path)
+	dn := ft.dirNode(dir)
+	if dn == nil {
+		// within a new directory, whose own change can be missed, as when a
+		// directory is made again soon after it was renamed or removed: the
+		// nearest directory in the tree is updated, to add it
+		if fc.Removed {
+			return
+		}
+		for dn == nil && isWithin(dir, string(ft.Filepath)) {
+			dir = filepath.Dir(dir)
+			dn = ft.dirNode(dir)
+		}
+		if dn != nil && ft.isDirOpen(dn.Filepath) {
+			update[dn] = true
+		}
+		return
+	}
+	if !ft.isDirOpen(dn.Filepath) {
 		return
 	}
 	cn := dn.ChildByName(filepath.Base(fc.Path), 0)
