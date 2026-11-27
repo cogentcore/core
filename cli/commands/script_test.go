@@ -261,3 +261,20 @@ func TestEditorSelectedScript(t *testing.T) {
 		assert.Equal(t, "grep", selectedEntry(tt).Command)
 	})
 }
+
+// TestCachedAfterDelete tests that a cached command, as in a menu, keeps
+// its scripts and macros when they are deleted, which deletes from their
+// slices in place.
+func TestCachedAfterDelete(t *testing.T) {
+	cs := testCommands(t, filepath.Join(t.TempDir(), "commands.json"))
+	s := &Script{Name: "one", Code: "#!/bin/sh\ngit status\n"}
+	require.NoError(t, cs.SaveScript("git", s, nil))
+	require.NoError(t, cs.SaveScript("git", &Script{Name: "two", Code: "#!/bin/sh\ngit log\n"}, nil))
+	cm := cs.cached("git")
+	require.Len(t, cm.Scripts, 2)
+	require.NoError(t, cs.DeleteScript("git", s))
+	assert.Len(t, cs.cached("git").Scripts, 1)
+	for _, sc := range cm.Scripts {
+		assert.NotNil(t, sc, "the copy is not changed")
+	}
+}
