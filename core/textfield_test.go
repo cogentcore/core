@@ -5,6 +5,7 @@
 package core
 
 import (
+	"cogentcore.org/core/base/fileinfo"
 	"errors"
 	"image"
 	"math/rand"
@@ -245,7 +246,7 @@ func TestTextFieldCopy(t *testing.T) {
 	AssertRender(t, b, "text-field/copy", func() {
 		b.AsyncLock()
 		tf.SetFocus()
-		tf.selectAll()
+		tf.SelectAll()
 		assert.True(t, tf.hasSelection())
 		b.AsyncUnlock()
 		src := b.Scene.RenderWindow().SystemWindow.Events()
@@ -513,5 +514,23 @@ func TestTextFieldPasteFilter(t *testing.T) {
 		tf.Clipboard().Write(mimedata.NewText("pasted"))
 		tf.paste()
 		assert.Equal(t, "PASTED", tf.Text())
+	}))
+}
+
+// TestTextFieldTypeOverSelection tests that typing replaces the selected
+// text (as all of it, selected with SelectAll), without putting it in the
+// clipboard, as in browsers.
+func TestTextFieldTypeOverSelection(t *testing.T) {
+	b := NewBody()
+	tf := NewTextField(b).SetText("Family")
+	RenderImage(b, func() {}, Locked(b, func() {
+		tf.Clipboard().Write(mimedata.NewText("kept"))
+		tf.SetFocus()
+		tf.SelectAll()
+	}), func() {
+		b.Scene.RenderWindow().SystemWindow.Events().KeyChord('W', key.CodeW, 0)
+	}, Locked(b, func() {
+		assert.Equal(t, "W", tf.Text(), "replaced")
+		assert.Equal(t, "kept", tf.Clipboard().Read([]string{fileinfo.TextPlain}).Text(fileinfo.TextPlain), "the clipboard")
 	}))
 }

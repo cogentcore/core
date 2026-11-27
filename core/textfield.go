@@ -350,7 +350,7 @@ func (tf *TextField) Init() {
 			tf.SetFocus()
 		}
 		e.SetHandled()
-		tf.selectAll()
+		tf.SelectAll()
 		tf.startCursor()
 	})
 	tf.On(events.SlideStart, func(e events.Event) {
@@ -933,8 +933,9 @@ func (tf *TextField) selectRegionUpdate(pos int) {
 	tf.selectUpdate()
 }
 
-// selectAll selects all the text
-func (tf *TextField) selectAll() {
+// SelectAll selects all of the text, which typing then replaces (as for a
+// value proposed in a field, such as the last one chosen).
+func (tf *TextField) SelectAll() {
 	tf.selectRange.Start = 0
 	tf.selectInit = 0
 	tf.selectRange.End = len(tf.editText)
@@ -948,7 +949,7 @@ func (tf *TextField) selectAll() {
 func (tf *TextField) selectWord() {
 	sz := len(tf.editText)
 	if sz <= 3 {
-		tf.selectAll()
+		tf.SelectAll()
 		return
 	}
 	tf.selectRange = textpos.WordAt(tf.editText, tf.cursorPos)
@@ -1054,8 +1055,8 @@ func (tf *TextField) paste() { //types:add
 
 // insertAtCursor inserts the given text at current cursor position.
 func (tf *TextField) insertAtCursor(str string) {
-	if tf.hasSelection() {
-		tf.cut()
+	if tf.hasSelection() { // replaced, not cut to the clipboard, as in browsers
+		tf.deleteSelection()
 	}
 	rs := []rune(str)
 	rsl := len(rs)
@@ -1641,7 +1642,7 @@ func (tf *TextField) handleKeyEvents() {
 		case keymap.SelectAll:
 			e.SetHandled()
 			tf.cancelComplete()
-			tf.selectAll()
+			tf.SelectAll()
 		case keymap.Copy:
 			e.SetHandled()
 			tf.cancelComplete()

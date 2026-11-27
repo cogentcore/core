@@ -492,6 +492,12 @@ func (ch *Chooser) SetPlaceholder(text string) *Chooser {
 	return ch
 }
 
+// TextField returns the text field of an [Chooser.Editable] chooser, or nil
+// if it is not editable or not made yet, as for selecting its text.
+func (ch *Chooser) TextField() *TextField {
+	return ch.textField
+}
+
 // SetCurrentValue sets the current item and index to those associated with the given value.
 // If the given item is not found, it adds it to the items list if it is not "". It also
 // sets the text of the chooser to the label of the item.
