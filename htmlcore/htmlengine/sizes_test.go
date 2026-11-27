@@ -1631,3 +1631,15 @@ func TestCellAlignCenterTable(t *testing.T) {
 			assert.InDelta(t, mid, tb.Pos.Total.X+tb.Size.Actual.Total.X/2, float64(2*dp), "centered")
 		})
 }
+
+// TestCellAlignCenterFixedTable tests that a table of a fixed width
+// centered in a cell that is centered (as the 600px bodies of many emails)
+// is centered in it, not off to its end, by the centering of both.
+func TestCellAlignCenterFixedTable(t *testing.T) {
+	widgetsByID(t, `<div style="width: 1000px"><table width="100%" cellspacing="0" cellpadding="0" style="width: 100%"><tr><td valign="top" style="padding: 0"><table cellspacing="0" cellpadding="0" align="center" style="table-layout: fixed !important; width: 100%"><tr><td id="c" align="center" style="padding: 0"><table id="in" cellspacing="0" cellpadding="0" align="center" style="width: 600px"><tr><td align="left" style="padding: 40px 20px">A logo</td></tr></table></td></tr></table></td></tr></table></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			c, tb := ws["c"].Geom, ws["in"].Geom
+			mid := c.Pos.Content.X + c.Size.Actual.Content.X/2
+			assert.InDelta(t, mid, tb.Pos.Total.X+tb.Size.Actual.Total.X/2, float64(2*dp), "centered")
+		})
+}

@@ -3012,7 +3012,11 @@ func (fr *Frame) lineCrosses(ma math32.Dims) []float32 {
 			crosses = append(crosses, 0)
 		}
 		ln := len(crosses) - 1
-		crosses[ln] = max(crosses[ln], cwb.Geom.Size.Alloc.Total.Dim(ca))
+		// the size it is aligned in (see [WidgetBase.alignSize]), as its
+		// slot, which can be wider than its allocation (as a table of
+		// 600px centered in a cell), so that it is not offset twice: as
+		// a line (by Align.Content) and in its line (by Align.Items)
+		crosses[ln] = max(crosses[ln], cwb.alignSize().Dim(ca))
 		idx++
 		return tree.Continue
 	})
