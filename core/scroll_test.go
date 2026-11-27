@@ -72,7 +72,8 @@ func TestScrollbarsMovedScene(t *testing.T) {
 
 // TestScrollKeys tests that a frame that has the focus itself, as a panel
 // of text to read, scrolls with the arrow keys, PageUp and PageDown, and
-// Home and End, and that it does not when it does not have the focus.
+// Home and End, and that it does not when it does not have the focus,
+// or with Shift.
 func TestScrollKeys(t *testing.T) {
 	b := NewBody()
 	fr := NewFrame(b)
@@ -109,5 +110,9 @@ func TestScrollKeys(t *testing.T) {
 		assert.Equal(t, end, sb.Value, "no further than the end")
 		press(key.CodeHome)
 		assert.Zero(t, sb.Value, "the start")
+		var shift key.Modifiers
+		shift.SetFlag(true, key.Shift)
+		b.Scene.Events.handleEvent(events.NewKey(events.KeyChord, 0, key.CodeDownArrow, shift))
+		assert.Zero(t, sb.Value, "not with Shift, which selects or goes to another tab")
 	})
 }

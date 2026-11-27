@@ -11,6 +11,7 @@ import (
 
 	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
@@ -119,7 +120,9 @@ func (fr *Frame) Init() {
 		if em == nil {
 			return
 		}
-		if em.focus == fr.This && fr.scrollKey(kf) { // the frame itself, also with a quiet focus
+		// the frame itself, also with a quiet focus; not with Shift, which
+		// selects, or goes to the next or previous tab (see [keymap.OfFallback])
+		if em.focus == fr.This && !e.HasAnyModifier(key.Shift) && fr.scrollKey(kf) {
 			e.SetHandled()
 			return
 		}
