@@ -35,7 +35,7 @@ func decode(r io.Reader) (image.Image, string, error) {
 			return im, format, nil
 		}
 	}
-	return image.Decode(bytes.NewReader(b))
+	return decodeOriented(b)
 }
 
 // decodeBrowser decodes the given encoded image bytes with the browser's
@@ -52,7 +52,9 @@ func decodeBrowser(b []byte, cfg image.Config) *JSRGBA {
 	}
 	im := &JSRGBA{}
 	im.JS.Bitmap = bitmap
-	im.JS.Bounds = image.Rect(0, 0, cfg.Width, cfg.Height)
+	// the size of the bitmap, which the browser turns upright as the EXIF
+	// orientation of a JPEG says, unlike its header (cfg)
+	im.JS.Bounds = image.Rect(0, 0, bitmap.Get("width").Int(), bitmap.Get("height").Int())
 	return im
 }
 

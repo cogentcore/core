@@ -433,7 +433,13 @@ func addButtonItems(items *[]ChooserItem, sc *Scene, parent tree.Node, path stri
 		}
 		label := bt.Text
 		if label == "" {
-			label = bt.Tooltip
+			// the tooltip of a button with only an icon can be long, so a
+			// func button uses the name of its function
+			if fb, ok := n.(*FuncButton); ok {
+				label = fb.Label()
+			} else {
+				label = bt.Tooltip
+			}
 		}
 		if bt.HasMenu() {
 			tmps := menuSearchScene(sc)

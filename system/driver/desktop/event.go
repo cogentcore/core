@@ -89,7 +89,8 @@ func (w *Window) CurMousePosPoint(gw *glfw.Window) image.Point {
 func (w *Window) MousePosToPoint(x, y float64) image.Point {
 	var where image.Point
 	if TheApp.Platform() == system.MacOS {
-		where = image.Pt(int(w.DevicePixelRatio*float32(x)), int(w.DevicePixelRatio*float32(y)))
+		dpr := w.pixelRatio()
+		where = image.Pt(int(dpr*float32(x)), int(dpr*float32(y)))
 	} else {
 		where = image.Pt(int(x), int(y))
 	}
@@ -120,7 +121,7 @@ func (w *Window) MouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, acti
 func (w *Window) ScrollEvent(gw *glfw.Window, xoff, yoff float64) {
 	delta := math32.Vec2(float32(xoff), float32(yoff)).MulScalar(-10)
 	if TheApp.Platform() == system.MacOS {
-		delta.SetMulScalar(w.DevicePixelRatio)
+		delta.SetMulScalar(w.pixelRatio())
 	} else {
 		delta.SetMulScalar(4) // other platforms need a bigger multiplier in general
 	}
@@ -137,7 +138,8 @@ func (w *Window) CursorPosEvent(gw *glfw.Window, x, y float64) {
 	if !w.CursorEnabled {
 		w.Event.ResettingPos = true
 		if TheApp.Platform() == system.MacOS {
-			w.Glw.SetCursorPos(float64(w.Event.Last.MousePos.X)/float64(w.DevicePixelRatio), float64(w.Event.Last.MousePos.Y)/float64(w.DevicePixelRatio))
+			dpr := float64(w.pixelRatio())
+			w.Glw.SetCursorPos(float64(w.Event.Last.MousePos.X)/dpr, float64(w.Event.Last.MousePos.Y)/dpr)
 		} else {
 			w.Glw.SetCursorPos(float64(w.Event.Last.MousePos.X), float64(w.Event.Last.MousePos.Y))
 		}

@@ -116,6 +116,7 @@ func Button(par core.Widget, c *ButtonsConfig, provider string, authFunc func(c 
 					bt.OnShow(func(e events.Event) {
 						auth()
 					})
+					break // auth uses the first that works
 				}
 			}
 		}

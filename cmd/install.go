@@ -76,6 +76,9 @@ func Install(c *config.Config) error { //types:add
 					return err
 				}
 			}
+			if err := signApp(c, app); err != nil {
+				return err
+			}
 			if len(c.Opens) == 0 {
 				return nil
 			}
@@ -98,10 +101,9 @@ func appExecutable(c *config.Config, app string) string {
 }
 
 // removeExecutable removes the given executable of an installed app, if
-// it exists, before a new one is copied there: cp writes through a symbolic
-// link of AppGoSymlink, and it writes over a file in place, which macOS
-// then kills when it starts, with an invalid code signature, as it keeps
-// the signature of the file that was there.
+// it exists, before a new one is copied there: cp writes over a file in
+// place, which macOS then kills when it starts, with an invalid code
+// signature, as it keeps the signature of the file that was there.
 func removeExecutable(file string) error {
 	if err := os.Remove(file); err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return err
@@ -110,8 +112,14 @@ func removeExecutable(file string) error {
 }
 
 // goSymlinkApp installs the app of the given config with go install, and
-// makes the executable of the given macOS app a symbolic link to the one
-// that it installs (see [config.Config.AppGoSymlink]).
+// makes the executable of the given macOS app run the one that it installs
+// (see [config.Config.AppGoSymlink]): the executable is a script that
+// copies it into the app, next to the script, and signs it and the app,
+// when it changes, and runs the copy. The executable that runs must be a
+// file in the app (not a symbolic link, which macOS runs the target of),
+// signed with the ID of the app, for macOS to allow notifications, for
+// example. The script is run once here, with CORE_APP_UPDATE set, which
+// only updates the copy.
 func goSymlinkApp(c *config.Config, app string) error {
 	if err := exec.Major().Run("go", "install"); err != nil {
 		return err
@@ -125,8 +133,76 @@ func goSymlinkApp(c *config.Config, app string) error {
 		return fmt.Errorf("AppGoSymlink: go install does not install an executable here")
 	}
 	exe := appExecutable(c, app)
-	if err := os.Remove(exe); err != nil && !os.IsNotExist(err) {
+	cp := filepath.Join(filepath.Dir(exe), filepath.Base(target))
+	for _, f := range []string{exe, cp} {
+		if err := os.Remove(f); err != nil && !os.IsNotExist(err) {
+			return err
+		}
+	}
+	id := shellQuote(c.ID)
+	sign := shellQuote(signIdentity())
+	script := `#!/bin/sh
+# Runs the app installed by go install (AppGoSymlink), which is copied
+# into the app and signed when it changes, as macOS only allows
+# notifications for an executable in an app that is signed with its ID.
+src=` + shellQuote(target) + `
+exe="$(dirname "$0")"/` + shellQuote(filepath.Base(cp)) + `
+if [ ! -e "$exe" ] || [ "$src" -nt "$exe" ]; then
+	if cp "$src" "$exe.new" && codesign -s ` + sign + ` -f -i ` + id + ` "$exe.new" && mv -f "$exe.new" "$exe"; then
+		codesign -s ` + sign + ` -f -i ` + id + ` "$(dirname "$0")/../.."
+	else
+		rm -f "$exe.new"
+	fi
+fi
+[ -n "$CORE_APP_UPDATE" ] && exit 0
+exec "$exe" "$@"
+`
+	if err := os.WriteFile(exe, []byte(script), 0o755); err != nil {
 		return err
 	}
-	return os.Symlink(target, exe)
+	if err := exec.Major().SetEnv("CORE_APP_UPDATE", "1").Run(exe); err != nil {
+		return err
+	}
+	if _, err := os.Stat(cp); err != nil {
+		return fmt.Errorf("AppGoSymlink: the executable was not copied into the app: %w", err)
+	}
+	return nil
+}
+
+// signApp signs the given macOS app with [signIdentity], with the ID of
+// the given config, as macOS only allows notifications for an app that is
+// signed with its ID, which the signature of the Go linker does not have.
+func signApp(c *config.Config, app string) error {
+	return exec.Major().Run("codesign", "-s", signIdentity(), "-f", "-i", c.ID, app)
+}
+
+// signIdentity returns the identity for signing macOS apps that are
+// installed: the first Apple Development certificate, or else "-" to sign
+// ad hoc. The notifications that an app schedules belong to its
+// signature, and an ad hoc one changes with every build, so the scheduled
+// notifications of the previous builds can no longer be removed, and are
+// all shown, whereas those of a certificate stay the same.
+func signIdentity() string {
+	out, err := exec.Silent().Output("security", "find-identity", "-v", "-p", "codesigning")
+	if err != nil {
+		return "-"
+	}
+	return parseSignIdentity(out)
+}
+
+// parseSignIdentity returns the hash of the first Apple Development
+// identity in the given output of security find-identity, or "-".
+func parseSignIdentity(out string) string {
+	for line := range strings.Lines(out) {
+		f := strings.Fields(line)
+		if len(f) >= 3 && strings.HasSuffix(f[0], ")") && strings.Contains(line, `"Apple Development:`) {
+			return f[1]
+		}
+	}
+	return "-"
+}
+
+// shellQuote returns the given text quoted for a shell.
+func shellQuote(s string) string {
+	return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'"
 }

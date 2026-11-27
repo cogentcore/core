@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
@@ -198,4 +199,26 @@ func TestMenuInDialogAtPosition(t *testing.T) {
 		assert.LessOrEqual(t, mg.Pos.X+mg.Size.X, win.Size.X, "in the window")
 		assert.GreaterOrEqual(t, mg.Size.Y, int(item.Geom.Size.Actual.Total.Y+menu.Scene.Styles.ScrollbarWidth.Dots), "the item and the scroll bar fit")
 	})
+}
+
+func updateFiles() {}
+
+// TestMenuSearchFuncButtonLabel tests that the menu search item of a func
+// button with only an icon has the name of its function as its text, not
+// its tooltip, which can be long.
+func TestMenuSearchFuncButtonLabel(t *testing.T) {
+	b := NewBody()
+	tb := NewToolbar(b)
+	fb := NewFuncButton(tb)
+	fb.WarnUnadded = false
+	fb.SetFunc(updateFiles).SetText("").SetIcon(icons.Refresh).SetTooltip("Updates the files, with a long explanation of what that does")
+	NewButton(tb).SetIcon(icons.Add).SetTooltip("Add")
+	assert.Equal(t, "Update files", fb.Label())
+	var items []ChooserItem
+	addButtonItems(&items, b.Scene, b, "")
+	var texts []string
+	for _, it := range items {
+		texts = append(texts, it.Text)
+	}
+	assert.Equal(t, []string{"Update files", "Add"}, texts)
 }

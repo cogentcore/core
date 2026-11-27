@@ -304,6 +304,14 @@ func (ch *Chooser) Init() {
 				w.Styler(func(s *styles.Style) {
 					s.Grow = ch.Styles.Grow // we grow like our parent
 					s.Max.X.Zero()          // constrained by parent
+					if ch.Styles.Min.X.Value > 0 {
+						// as narrow as the chooser, instead of the min width of
+						// a text field (as for short values)
+						s.Min.X = ch.Styles.Min.X
+					}
+					if ch.Styles.Max.X.Value > 0 { // and at most as wide
+						s.Max.X = ch.Styles.Max.X
+					}
 					s.SetTextWrap(false)
 				})
 				w.SetValidator(func() error {
@@ -440,6 +448,9 @@ func (ch *Chooser) SetEnums(es ...enums.Enum) *Chooser {
 	for i, enum := range es {
 		str := enum.String()
 		lbl := strcase.ToSentence(str)
+		if lb, ok := enum.(labels.Labeler); ok { // its own label, as "iCloud"
+			lbl = lb.Label()
+		}
 		desc := enum.Desc()
 		// If the documentation does not start with the transformed name, but it does
 		// start with an uppercase letter, then we assume that the first word of the
@@ -479,6 +490,12 @@ func (ch *Chooser) SetPlaceholder(text string) *Chooser {
 	}
 	ch.CurrentIndex = -1
 	return ch
+}
+
+// TextField returns the text field of an [Chooser.Editable] chooser, or nil
+// if it is not editable or not made yet, as for selecting its text.
+func (ch *Chooser) TextField() *TextField {
+	return ch.textField
 }
 
 // SetCurrentValue sets the current item and index to those associated with the given value.

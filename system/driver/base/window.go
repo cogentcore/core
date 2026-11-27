@@ -43,6 +43,10 @@ type Window[A system.App] struct {
 	// closing is set when the window starts closing (see [Window.MarkClosing]).
 	closing atomic.Bool
 
+	// closed is set when the window is closed (see [Window.MarkClosed]),
+	// for platforms whose [system.Window.IsClosed] uses it.
+	closed atomic.Bool
+
 	// CloseReqFunc is the function to call on a close request
 	CloseReqFunc func(win system.Window)
 
@@ -306,6 +310,20 @@ func (w *Window[A]) Close() {
 // only once, and then calls [Window.CloseBase].
 func (w *Window[A]) MarkClosing() bool {
 	return w.closing.CompareAndSwap(false, true)
+}
+
+// MarkClosed marks the window as closed, for platforms whose
+// [system.Window.IsClosed] uses [Window.IsMarkedClosed], which, unlike
+// [Window.IsClosed] (based on the composer), can be called from any
+// goroutine while the window is being closed, without holding [Window.Mu].
+func (w *Window[A]) MarkClosed() {
+	w.closed.Store(true)
+}
+
+// IsMarkedClosed returns whether the window has been marked as closed
+// by [Window.MarkClosed].
+func (w *Window[A]) IsMarkedClosed() bool {
+	return w.closed.Load()
 }
 
 // CloseBase does the closing of the window by the base implementation,

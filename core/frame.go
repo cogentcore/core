@@ -119,6 +119,10 @@ func (fr *Frame) Init() {
 		if em == nil {
 			return
 		}
+		if em.focus == fr.This && fr.scrollKey(kf) { // the frame itself, also with a quiet focus
+			e.SetHandled()
+			return
+		}
 		grid := fr.Styles.Display == styles.Grid
 		if fr.Styles.Direction == styles.Row || grid {
 			switch kf {

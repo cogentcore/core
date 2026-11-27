@@ -136,3 +136,24 @@ func TestTextLinks(t *testing.T) {
 		assert.Empty(t, matches)
 	}))
 }
+
+// TestTextLinkContextMenu tests that the context menu of a right click on
+// a link that is not at the center of the text has Copy link: the context
+// menu event made from the mouse event has its position.
+func TestTextLinkContextMenu(t *testing.T) {
+	b := NewBody()
+	tx := NewText(b).SetText(`<a href="https://example.com">Link</a> and then a lot more words after it`)
+	var p image.Point
+	RenderImage(b, Locked(b, func() {
+		p = runePoint(tx, 1)
+	}), func() {
+		ev := b.Scene.RenderWindow().SystemWindow.Events()
+		ev.MouseButton(events.MouseDown, events.Right, p, 0)
+		ev.MouseButton(events.MouseUp, events.Right, p, 0)
+	}, Locked(b, func() {
+		m := TopScene(b)
+		require.NotEqual(t, b.Scene, m, "the menu")
+		assert.NotNil(t, ButtonByText(m, "Copy link"))
+		m.Close()
+	}))
+}

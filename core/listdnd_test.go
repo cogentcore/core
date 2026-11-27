@@ -94,7 +94,11 @@ func TestTreePasteMenu(t *testing.T) {
 		a.MimeData(&md)
 		menu := func(tr *Tree, fun func()) *Scene {
 			m := NewScene()
-			tr.makePasteMenu(m, image.Point{}, md, fun)
+			mod := events.DropCopy
+			if fun != nil {
+				mod = events.DropMove
+			}
+			tr.makePasteMenu(m, image.Point{}, md, mod, fun)
 			return m
 		}
 		c := treeNode(root, "c")
@@ -111,12 +115,14 @@ func TestTreePasteMenu(t *testing.T) {
 
 		// a drop of a moved node deletes its source after the paste
 		n := root.NumChildren()
+		aName := a.Name
 		bb := treeNode(root, "b")
 		de := &events.DragDrop{DropMod: events.DropMove, Data: md, Source: a.This}
 		de.Typ = events.Drop
 		ButtonByText(menu(bb, func() { bb.DropFinalize(de) }), "Insert After").Send(events.Click)
 		assert.Equal(t, n, root.NumChildren(), "moved: added and deleted")
 		assert.NotContains(t, root.Children, a.This, "the source is deleted")
+		assert.Equal(t, bb.IndexInParent()+1, root.ChildByName(aName, 0).AsTree().IndexInParent(), "moved after b, keeping its name")
 
 		c.SelectEvent(events.SelectOne)
 		var cmd mimedata.Mimes

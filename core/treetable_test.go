@@ -878,6 +878,67 @@ func TestTreeTableShowItem(t *testing.T) {
 	assert.Len(t, tt.rows, 6)
 }
 
+// TestTreeTableMatchItem tests searching the items of a [TreeTable] with
+// [TreeTable.MatchItem]: the items that match are shown, with their
+// children, and the items that they are in, which are open.
+func TestTreeTableMatchItem(t *testing.T) {
+	tasks := testTasks()
+	tt := NewTreeTable().SetItems(&tasks)
+	search := func(s string) {
+		tt.MatchItem = func(item any) bool {
+			return strings.Contains(strings.ToLower(item.(*task).Name), s)
+		}
+		tt.updateRows()
+	}
+	search("outline")
+	assert.Equal(t, []string{"Work", "  Report", "    Outline"}, rowNames(tt), "with the items that it is in")
+	search("report")
+	assert.Equal(t, []string{"Work", "  Report", "    Outline"}, rowNames(tt), "with its children")
+	search("e")
+	assert.Equal(t, []string{"Work", "  Email", "  Report", "    Outline", "Home", "  Dishes"}, rowNames(tt))
+	search("zzz")
+	assert.Empty(t, rowNames(tt))
+
+	// the closed items are open while searching, and stay closed
+	tt.MatchItem = nil
+	tt.updateRows()
+	tt.Close(0)
+	assert.True(t, tt.IsClosed(0))
+	search("email")
+	assert.Equal(t, []string{"Work", "  Email"}, rowNames(tt), "in a closed item")
+	assert.False(t, tt.IsClosed(0))
+	tt.Close(0) // nothing while searching
+	tt.MatchItem = nil
+	tt.updateRows()
+	assert.True(t, tt.IsClosed(0), "still closed")
+	assert.Equal(t, []string{"Work", "Home", "  Dishes"}, rowNames(tt))
+
+	// the items that are not shown are not searched
+	tt.ShowItem = func(item any) bool { return !item.(*task).Done }
+	search("email")
+	assert.Empty(t, rowNames(tt))
+}
+
+// TestTreeTableInsertItemAfter tests inserting an item made with
+// [TreeTable.NewItem], with values set before it is inserted.
+func TestTreeTableInsertItemAfter(t *testing.T) {
+	tasks := testTasks()
+	tt := NewTreeTable().SetItems(&tasks)
+	tt.updateRows()
+	changes := 0
+	tt.OnChange(func(e events.Event) { changes++ })
+	item := tt.NewItem().(*task)
+	item.Name = "Slides"
+	tt.InsertItemAfter(1, item) // after Email
+	assert.Equal(t, []string{"Work", "  Email", "  Slides", "  Report", "    Outline", "Home", "  Dishes"}, rowNames(tt))
+	assert.Equal(t, 2, tt.SelectedIndex)
+	assert.Equal(t, 1, changes)
+	item = tt.NewItem().(*task)
+	item.Name = "Garden"
+	tt.InsertItemAfter(-1, item)
+	assert.Equal(t, "Garden", tasks[2].Name, "at the end of the top-level items")
+}
+
 // TestRowButton tests the button at the end of each row of a [Table] and
 // a [TreeTable], which calls its function with the item of its row.
 func TestRowButton(t *testing.T) {

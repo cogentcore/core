@@ -84,6 +84,11 @@ func (c *Context) SetOpenURL(f func(url string, e events.Event)) *Context {
 	return c
 }
 
+// GetURL returns the function used to get resources from URLs (see
+// [Context.SetGetURL]), as for one that gets some URLs itself and the
+// others with it.
+func (c *Context) GetURL() func(url string) (*http.Response, error) { return c.e.GetURL }
+
 // SetGetURL sets the function used to get resources from URLs, as images
 // and style sheets, which defaults to [http.Get].
 func (c *Context) SetGetURL(f func(url string) (*http.Response, error)) *Context {

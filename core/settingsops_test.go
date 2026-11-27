@@ -36,7 +36,7 @@ func TestSettingsSaveLoadReset(t *testing.T) {
 	skipOnWeb(t, "it saves the settings in files of a temporary directory")
 	for _, ext := range []string{".toml", ".json"} {
 		ts := newTestSettings(t, ext)
-		require.NoError(t, loadSettings(ts), "not saved yet is fine")
+		require.NoError(t, LoadSettings(ts), "not saved yet is fine")
 		assert.Equal(t, 3, ts.Count, "the default")
 		assert.Equal(t, 1, ts.applied)
 		assert.Equal(t, "Test", ts.Label())
@@ -51,7 +51,7 @@ func TestSettingsSaveLoadReset(t *testing.T) {
 
 		ld := newTestSettings(t, ext)
 		ld.File = ts.File
-		require.NoError(t, loadSettings(ld))
+		require.NoError(t, LoadSettings(ld))
 		assert.Equal(t, 7, ld.Count, ext)
 
 		require.NoError(t, resetSettings(ld))
@@ -61,7 +61,7 @@ func TestSettingsSaveLoadReset(t *testing.T) {
 	}
 	bad := newTestSettings(t, ".toml")
 	require.NoError(t, os.WriteFile(bad.File, []byte("Count = ["), 0o644))
-	assert.Error(t, loadSettings(bad))
+	assert.Error(t, LoadSettings(bad))
 	assert.Equal(t, 1, bad.applied, "applied even with an error")
 }
 
@@ -81,11 +81,13 @@ func TestUpdateSettings(t *testing.T) {
 		restyleAll()
 	}))
 
-	all := slices.Clone(AllSettings)
-	defer func() { AllSettings = all }()
+	all, app := slices.Clone(AllSettings), slices.Clone(appSettings)
+	defer func() { AllSettings, appSettings = all, app }()
 	AddAppSettings(ts)
-	assert.Same(t, ts, AllSettings[1], "after the appearance settings")
+	assert.Same(t, ts, AllSettings[1], "loaded after the appearance settings")
 	assert.Len(t, AllSettings, len(all)+1)
+	assert.Same(t, ts, editorSettings()[0], "its tab is first")
+	assert.Len(t, editorSettings(), len(all)+1)
 }
 
 // TestSettingsHelpers tests the smaller helpers of the settings.

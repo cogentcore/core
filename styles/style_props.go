@@ -505,9 +505,9 @@ func (ts *Text) FromProperty(parent *Text, key string, val any, cc colors.Contex
 
 // styleFuncs are functions for styling the Text object.
 var styleFuncs = map[string]styleprops.Func{
-	"text-align": styleprops.Enum(Start,
-		func(obj *Text) enums.EnumSetter { return &obj.Align }),
-	"text-vertical-align": styleprops.Enum(Start,
+	// text.Start, not the Start of the layout, whose value is that of End
+	"text-align": text.AlignProperty(func(obj *Text) enums.EnumSetter { return &obj.Align }),
+	"text-vertical-align": styleprops.Enum(text.Start,
 		func(obj *Text) enums.EnumSetter { return &obj.AlignV }),
 	"line-height": styleprops.FloatProportion(float32(1.2),
 		func(obj *Text) *float32 { return &obj.LineHeight }),

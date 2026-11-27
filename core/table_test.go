@@ -6,6 +6,7 @@ package core
 
 import (
 	"image"
+	"strings"
 	"testing"
 	"time"
 
@@ -553,4 +554,34 @@ func TestTableSliceTags(t *testing.T) {
 		assert.True(t, lb.DragMoves, "the drag-moves tag of the field")
 		assert.True(t, lb.AsWidget().hasFlag(widgetValueNewWindow), "the new-window tag of the table")
 	})
+}
+
+// TestTableHeaderIcons tests showing an icon in the header of a column
+// instead of its label, which is in its tooltip.
+func TestTableHeaderIcons(t *testing.T) {
+	type row struct {
+		Name        string
+		Attachments int
+	}
+	rows := []row{{"a", 1}, {"b", 0}}
+	b := NewBody()
+	tb := NewTable(b)
+	tb.HeaderIcons = map[string]icons.Icon{"Attachments": icons.AttachFile}
+	tb.SetSlice(&rows)
+	RenderImage(b, Locked(b, func() {
+		var head, name *Button
+		for w := range tb.AllWidgets() {
+			if bt, ok := w.(*Button); ok && strings.HasPrefix(bt.Name, "head-") {
+				if bt.Icon == icons.AttachFile {
+					head = bt
+				} else if bt.Text == "Name" {
+					name = bt
+				}
+			}
+		}
+		require.NotNil(t, head, "the icon")
+		assert.Empty(t, head.Text)
+		assert.Contains(t, head.Tooltip, "Attachments", "the label in the tooltip")
+		assert.NotNil(t, name, "the other columns have their labels")
+	}))
 }

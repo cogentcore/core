@@ -22,6 +22,7 @@ void notifySchedule(char* nid, char* title, char* body, double unix);
 import "C"
 
 import (
+	"log/slog"
 	"runtime/cgo"
 	"sync"
 	"time"
@@ -50,6 +51,7 @@ var (
 func (a *App) Notifier() system.Notifier {
 	notifierOnce.Do(func() {
 		if !bool(C.notifyAvailable()) {
+			slog.Warn("system/driver/desktop: notifications are not supported: the executable is not in an app bundle")
 			theNotifier = &system.NotifierBase{}
 			return
 		}

@@ -42,8 +42,7 @@ func (ts *Style) FromProperty(parent *Style, key string, val any, cc colors.Cont
 
 // styleFuncs are functions for styling the text.Style object.
 var styleFuncs = map[string]styleprops.Func{
-	"text-align": styleprops.Enum(Start,
-		func(obj *Style) enums.EnumSetter { return &obj.Align }),
+	"text-align": AlignProperty(func(obj *Style) enums.EnumSetter { return &obj.Align }),
 	"text-vertical-align": styleprops.Enum(Start,
 		func(obj *Style) enums.EnumSetter { return &obj.AlignV }),
 	// note: text-style reads the font-size setting for regular units cases.
@@ -143,5 +142,24 @@ func (ts *Style) ToProperties(sty *rich.Style, p map[string]any) {
 	}
 	if ts.HighlightColor != nil {
 		p["highlight-color"] = colors.AsHex(colors.ToUniform(ts.HighlightColor))
+	}
+}
+
+// AlignProperty returns the style function of the text-align property of
+// the given field of the alignment of text, of type [Aligns], whose initial
+// value is [Start], and for which the CSS values left and right are
+// [Start] and [End], as in the default left-to-right direction.
+func AlignProperty[T any](getField func(obj *T) enums.EnumSetter) styleprops.Func {
+	f := styleprops.Enum(Start, getField)
+	return func(obj any, key string, val any, parent any, cc colors.Context) {
+		if s, ok := val.(string); ok {
+			switch s {
+			case "left":
+				val = "start"
+			case "right":
+				val = "end"
+			}
+		}
+		f(obj, key, val, parent, cc)
 	}
 }

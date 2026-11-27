@@ -36,6 +36,12 @@ type Table struct {
 	// TableStyler is an optional styling function for table items.
 	TableStyler TableStyler `copier:"-" json:"-" xml:"-"`
 
+	// HeaderIcons are icons shown in the headers of the columns of the
+	// fields with the given names instead of their labels, which are in
+	// their tooltips, as for narrow columns (such as a paperclip for the
+	// number of attachments).
+	HeaderIcons map[string]icons.Icon `copier:"-" display:"-" json:"-" xml:"-"`
+
 	// SelectedField is the current selection field; initially select value in this field.
 	SelectedField string `copier:"-" display:"-" json:"-" xml:"-"`
 
@@ -341,13 +347,18 @@ func (tb *Table) makeHeader(p *tree.Plan) {
 						} else {
 							htxt = strcase.ToSentence(field.Name)
 						}
-						w.SetText(htxt)
 						w.Tooltip = htxt + " (click to sort by)"
 						doc, ok := types.GetDoc(reflect.Value{}, tb.elementValue, field, htxt)
 						if ok && doc != "" {
 							w.Tooltip += ": " + doc
 						}
-						tb.headerWidths[fli] = len(htxt)
+						if ic := tb.HeaderIcons[field.Name]; ic != "" {
+							w.SetIcon(ic).SetText("") // the label is in the tooltip
+							tb.headerWidths[fli] = 2
+						} else {
+							w.SetText(htxt)
+							tb.headerWidths[fli] = len(htxt)
+						}
 						if fli == tb.sortIndex {
 							if tb.sortDescending {
 								w.SetIndicator(icons.KeyboardArrowDown)

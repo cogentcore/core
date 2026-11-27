@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/tree"
@@ -115,4 +116,55 @@ func TestTreeSyncPaste(t *testing.T) {
 		assert.IsType(t, &Text{}, tx.SyncNode, "assigning keeps the type of the node")
 		assert.Equal(t, st.NumChildren(), len(src.Children), "resynced")
 	}))
+}
+
+// TestTreeMoveKeepsName tests that moving a node within its parent by
+// drag-and-drop keeps its name, in a plain and a sync tree, and that moving
+// a copy of it still gives a unique name.
+func TestTreeMoveKeepsName(t *testing.T) {
+	// move drags a node and drops it after another one, deleting the source
+	move := func(from, to *Tree, mod events.DropMods) {
+		var md mimedata.Mimes
+		from.MimeData(&md)
+		to.PasteAfter(md, mod)
+		if mod == events.DropMove {
+			from.DropDeleteSource(&events.DragDrop{Data: md, DropMod: mod})
+		}
+	}
+	_, root, kids := newDnDTree()
+	for i, k := range kids {
+		k.SetName([]string{"a", "b", "c"}[i])
+	}
+	move(kids[0], kids[2], events.DropMove)
+	assert.Equal(t, []string{"b", "c", "a"}, treeChildNames(root))
+	move(AsTree(root.Child(0)), AsTree(root.Child(2)), events.DropCopy)
+	assert.Equal(t, "b", root.Child(0).AsTree().Name)
+	assert.NotEqual(t, "b", root.Child(3).AsTree().Name, "a copy has a unique name")
+
+	_, src, st := newSyncTestTree()
+	move(st.FindSyncNode(src.Child(0)), st.FindSyncNode(src.Child(2)), events.DropMove)
+	assert.Equal(t, []string{"tx", "sub", "bt"}, treeChildNames(src))
+	assert.Equal(t, st.NumChildren(), len(src.Children), "resynced")
+
+	// a sync tree of nodes that are not widgets, as for the lists of Lists
+	data := tree.NewNodeBase()
+	for _, nm := range []string{"a", "b", "c"} {
+		tree.NewNodeBase(data).SetName(nm)
+	}
+	dt := NewTree(NewBody()).SyncTree(data)
+	var changed [][]string // the names when changed
+	dt.OnChange(func(e events.Event) {
+		changed = append(changed, treeChildNames(data))
+	})
+	move(dt.FindSyncNode(data.Child(0)), dt.FindSyncNode(data.Child(2)), events.DropMove)
+	assert.Equal(t, []string{"b", "c", "a"}, treeChildNames(data))
+	assert.Equal(t, [][]string{{"b", "c", "a"}}, changed, "one change, after the source is deleted")
+
+	changed = nil
+	_, root, kids = newDnDTree()
+	root.OnChange(func(e events.Event) {
+		changed = append(changed, treeTexts(root))
+	})
+	move(kids[0], kids[2], events.DropMove)
+	assert.Equal(t, [][]string{{"b", "c", "a"}}, changed, "in a plain tree too")
 }

@@ -40,9 +40,29 @@ import (
 // app settings.
 var AllSettings = []Settings{AppearanceSettings, SystemSettings, &printer.Settings, TimingSettings, DebugSettings}
 
-// AddAppSettings inserts app-specific settings after the AppearanceSettings
+// AddAppSettings inserts app-specific settings after the AppearanceSettings,
+// which are loaded in that order. Their tabs come first in the settings
+// editor (see [SettingsEditor]).
 func AddAppSettings(sets ...Settings) {
 	AllSettings = slices.Insert(AllSettings, 1, sets...)
+	appSettings = append(appSettings, sets...)
+}
+
+// appSettings are the app-specific settings added by [AddAppSettings].
+var appSettings []Settings
+
+// editorSettings returns [AllSettings] in the order of the tabs of the
+// settings editor: the app-specific settings first, then the others.
+func editorSettings() []Settings {
+	var app, others []Settings
+	for _, se := range AllSettings {
+		if slices.Contains(appSettings, se) {
+			app = append(app, se)
+		} else {
+			others = append(others, se)
+		}
+	}
+	return append(app, others...)
 }
 
 // Settings is the interface that describes the functionality common
@@ -160,7 +180,7 @@ func resetSettings(se Settings) error {
 		rf := npv.FieldByName(f)
 		rf.Set(reflect.Zero(rf.Type()))
 	}
-	return loadSettings(se)
+	return LoadSettings(se)
 }
 
 // resetAllSettings resets all of the settings to their default values.
@@ -175,10 +195,12 @@ func resetAllSettings() error { //types:add
 	return nil
 }
 
-// loadSettings sets the defaults of, opens, and applies the given settings.
-// If they are not already saved, it saves them. It process their `default:` struct
-// tags in addition to calling their [Settings.Default] method.
-func loadSettings(se Settings) error {
+// LoadSettings sets the defaults of, opens, and applies the given settings,
+// as [LoadAllSettings] does for [AllSettings], as for those of a package
+// that are not in the settings window of an app. It processes their
+// `default:` struct tags in addition to calling their [Settings.Defaults]
+// method.
+func LoadSettings(se Settings) error {
 	errors.Log(reflectx.SetFromDefaultTags(se))
 	se.Defaults()
 	err := openSettings(se)
@@ -195,7 +217,7 @@ func loadSettings(se Settings) error {
 func LoadAllSettings() error {
 	errs := []error{}
 	for _, se := range AllSettings {
-		err := loadSettings(se)
+		err := LoadSettings(se)
 		if err != nil {
 			errs = append(errs, err)
 		}

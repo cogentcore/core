@@ -35,7 +35,7 @@ func (w *Window) SetTextInput(ti *system.TextInput) {
 		return
 	}
 	// window coordinates are pixels, and the view is in points
-	dpr := float64(w.DevicePixelRatio)
+	dpr := float64(w.pixelRatio())
 	r := ti.Caret
 	C.setTextInput(w.Glw.GetCocoaWindow(), 1, C.double(float64(r.Min.X)/dpr), C.double(float64(r.Min.Y)/dpr),
 		C.double(float64(r.Dx())/dpr), C.double(float64(r.Dy())/dpr))

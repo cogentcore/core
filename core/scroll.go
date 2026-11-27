@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
@@ -219,6 +220,50 @@ func (fr *Frame) scrollActionDelta(d math32.Dims, delta float32) bool {
 			fr.NeedsRender() // only render needed -- scroll updates pos
 		}
 		return chg
+	}
+	return false
+}
+
+// scrollKey scrolls the frame for the given key function, when the frame
+// itself has the focus, as a panel of text to read: by lines for the arrow
+// keys, by pages for PageUp and PageDown, and to the start or end of
+// its content for Home and End. It returns whether it handled the key,
+// which it does not if the frame cannot scroll in that direction.
+func (fr *Frame) scrollKey(kf keymap.Functions) bool {
+	line := 3 * fr.Styles.UnitContext.FontEm
+	if line <= 0 {
+		line = 48
+	}
+	page := func(d math32.Dims) float32 {
+		return max(line, 0.9*fr.Geom.Size.Alloc.Content.Dim(d))
+	}
+	by := func(d math32.Dims, delta float32) bool {
+		if !fr.HasScroll[d] || fr.Scrolls[d] == nil {
+			return false
+		}
+		sb := fr.Scrolls[d]
+		if sb.setValueEvent(sb.Value + delta) {
+			fr.NeedsRender()
+		}
+		return true
+	}
+	switch kf {
+	case keymap.MoveDown:
+		return by(math32.Y, line)
+	case keymap.MoveUp:
+		return by(math32.Y, -line)
+	case keymap.MoveRight:
+		return by(math32.X, line)
+	case keymap.MoveLeft:
+		return by(math32.X, -line)
+	case keymap.PageDown:
+		return by(math32.Y, page(math32.Y))
+	case keymap.PageUp:
+		return by(math32.Y, -page(math32.Y))
+	case keymap.Home, keymap.DocHome:
+		return fr.ScrollDimToContentStart(math32.Y)
+	case keymap.End, keymap.DocEnd:
+		return fr.ScrollDimToContentEnd(math32.Y)
 	}
 	return false
 }

@@ -39,7 +39,7 @@ func SettingsEditor(b *Body) {
 	b.AddTopBar(func(bar *Frame) {
 		tb := NewToolbar(bar)
 		tb.Maker(settingsEditorToolbarBase)
-		for _, se := range AllSettings {
+		for _, se := range editorSettings() {
 			tb.Maker(se.MakeToolbar)
 		}
 		tb.AddOverflowMenu(func(m *Scene, pos image.Point) {
@@ -51,7 +51,7 @@ func SettingsEditor(b *Body) {
 
 	tabs := NewTabs(b)
 
-	for _, se := range AllSettings {
+	for _, se := range editorSettings() { // the app settings first
 		fr, _ := tabs.NewTab(se.Label())
 
 		NewForm(fr).SetStruct(se).OnChange(func(e events.Event) {

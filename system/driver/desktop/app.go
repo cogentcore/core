@@ -250,15 +250,25 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 }
 
 func (a *App) Clipboard(win system.Window) system.Clipboard {
-	a.Mu.Lock()
-	a.CtxWindow = win.(*Window)
-	a.Mu.Unlock()
+	a.setContext(win)
 	return TheClipboard
 }
 
 func (a *App) Cursor(win system.Window) system.Cursor {
-	a.Mu.Lock()
-	a.CtxWindow = win.(*Window)
-	a.Mu.Unlock()
+	a.setContext(win)
 	return TheCursor
+}
+
+// setContext sets [App.CtxWindow] to the given window, if it is one,
+// or else keeps the last one, as for the clipboard of a widget whose
+// window has closed, such as a snackbar (which was a panic while
+// holding [App.Mu], which hung the app in the crash dialog).
+func (a *App) setContext(win system.Window) {
+	w, ok := win.(*Window)
+	if !ok || w == nil {
+		return
+	}
+	a.Mu.Lock()
+	a.CtxWindow = w
+	a.Mu.Unlock()
 }

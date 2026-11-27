@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
@@ -251,6 +252,11 @@ func (fm *Form) Init() {
 			}, func(w Value) {
 				valueWidget = w
 				wb := w.AsWidget()
+				if f.field.Tag.Get("tab") == "-" { // skipped by Tab
+					wb.FirstStyler(func(s *styles.Style) {
+						s.SetAbilities(true, abilities.SkipTab)
+					})
+				}
 				wb.Styler(func(s *styles.Style) {
 					// the values fill the width of a small screen, but for a
 					// switch, which would be at the end of it

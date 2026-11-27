@@ -94,6 +94,12 @@ const (
 	// (as the transparent overlays of the search box of Google, over its
 	// buttons). The widgets in it still get them, unless they have it too.
 	NoPointerEvents
+
+	// SkipTab means that it and the widgets in it are skipped when moving
+	// the focus with Tab and Shift+Tab, but can still be focused by
+	// clicking them (or by code), as for the less used fields of a form
+	// (see the tab:"-" tag of [core.Form]).
+	SkipTab
 )
 
 var (

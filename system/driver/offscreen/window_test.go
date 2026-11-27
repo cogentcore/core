@@ -53,3 +53,33 @@ func TestWindowGeometryConcurrent(t *testing.T) {
 		t.Errorf("pixel size %v, want %v", sz, image.Pt(300, 200))
 	}
 }
+
+// A window can be locked (which checks whether it is closed) by other
+// goroutines while it is being closed, as by the event loop of the window
+// in core. This test is for the race detector.
+func TestWindowCloseConcurrent(t *testing.T) {
+	TheApp.GetScreens()
+	sw, err := TheApp.NewWindow(&system.NewWindowOptions{Size: image.Pt(300, 200)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	w := sw.(*Window)
+	var wg sync.WaitGroup
+	for range 4 {
+		wg.Go(func() {
+			for !w.IsClosed() {
+				if w.Lock() {
+					w.Unlock()
+				}
+			}
+		})
+	}
+	w.Close()
+	wg.Wait()
+	if w.Lock() {
+		t.Error("closed window can be locked")
+	}
+	if w.Composer() != nil {
+		t.Error("closed window has a composer")
+	}
+}

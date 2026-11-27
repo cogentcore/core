@@ -5,6 +5,7 @@
 package core
 
 import (
+	"strings"
 	"testing"
 
 	"cogentcore.org/core/colors"
@@ -13,6 +14,7 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type person struct {
@@ -163,4 +165,45 @@ func TestFormTextFieldWidth(t *testing.T) {
 			assert.Less(t, tf.Geom.TotalBBox.Max.X, fm.Geom.TotalBBox.Max.X-2, "a margin at the right of the form")
 		}
 	})
+}
+
+// TestFormSkipTab tests the tab:"-" tag of a form, whose fields are skipped
+// by Tab and Shift+Tab ([abilities.SkipTab]), with the widgets in them, as
+// those of an inline list, but can still be focused by clicking them.
+func TestFormSkipTab(t *testing.T) {
+	type email struct {
+		To      string
+		Cc      []string `tab:"-"`
+		Bcc     string   `tab:"-"`
+		Subject string
+	}
+	v := &email{Cc: []string{"a@x.test"}}
+	b := NewBody()
+	fm := NewForm(b).SetStruct(v)
+	field := func(name string) Widget {
+		for w := range fm.AllWidgets() {
+			if strings.HasPrefix(w.AsTree().Name, "value-"+name+"-") {
+				return w
+			}
+		}
+		return nil
+	}
+	focused := func() string {
+		for _, name := range []string{"To", "Cc", "Bcc", "Subject"} {
+			if f := field(name); f != nil && f.AsWidget().ContainsFocus() {
+				return name
+			}
+		}
+		return ""
+	}
+	RenderImage(b, Locked(b, func() {
+		field("To").AsWidget().SetFocus()
+		require.Equal(t, "To", focused())
+		b.Events().focusNext()
+		assert.Equal(t, "Subject", focused(), "Cc, its text field and add button, and Bcc skipped")
+		b.Events().focusPrev()
+		assert.Equal(t, "To", focused(), "back")
+		field("Bcc").AsWidget().SetFocus()
+		assert.Equal(t, "Bcc", focused(), "still focused by clicking")
+	}))
 }

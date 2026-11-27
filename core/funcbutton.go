@@ -59,6 +59,10 @@ type FuncButton struct {
 	// bet set using [FuncButton.SetFunc].
 	reflectFunc reflect.Value
 
+	// funcText is the name of the function as text, such as "Update files",
+	// which is the default text of the button, for [FuncButton.Label].
+	funcText string
+
 	// Args are the [FuncArg] objects associated with the
 	// arguments of the function. They are automatically set in
 	// [FuncButton.SetFunc], but they can be customized to configure
@@ -167,7 +171,7 @@ func (fb *FuncButton) Init() {
 func (fb *FuncButton) SetText(v string) *FuncButton {
 	ptext := fb.Text
 	fb.Text = v
-	if fb.typesFunc != nil && fb.Text != ptext && ptext != "" {
+	if fb.typesFunc != nil && fb.Text != ptext && ptext != "" && v != "" {
 		fb.typesFunc.Doc = types.FormatDoc(fb.typesFunc.Doc, ptext, fb.Text)
 		fb.SetTooltip(fb.typesFunc.Doc)
 	}
@@ -242,6 +246,19 @@ func isAnonymousFunction(fnm string) bool {
 	return funcN || fnm == "reflect.makeFuncStub" // used for anonymous functions in interpreters
 }
 
+// Label returns the text of the button if it is set; otherwise it returns
+// the name of the function as text, such as "Update files", for a button
+// with only an icon.
+func (fb *FuncButton) Label() string {
+	if fb.Text != "" {
+		return fb.Text
+	}
+	if fb.funcText != "" {
+		return fb.funcText
+	}
+	return fb.Name
+}
+
 // setFuncImpl is the underlying implementation of [FuncButton.SetFunc].
 // It should typically not be used by end-user code.
 func (fb *FuncButton) setFuncImpl(gfun *types.Func, rfun reflect.Value) *FuncButton {
@@ -280,6 +297,7 @@ func (fb *FuncButton) setFuncImpl(gfun *types.Func, rfun reflect.Value) *FuncBut
 		return r
 	}, snm)
 	txt := strcase.ToSentence(snm)
+	fb.funcText = txt
 	fb.SetText(txt)
 	// doc formatting interferes with anonymous functions
 	if !isAnonymous {

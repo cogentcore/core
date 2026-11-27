@@ -1604,3 +1604,54 @@ func TestButtonContentCentered(t *testing.T) {
 			assert.InDelta(t, mid, tx.Pos.Total.Y+tx.Size.Actual.Total.Y/2, float64(dp), "centered")
 		})
 }
+
+// TestTableAlignCenter tests that a table with align="center" and no width
+// is centered in its container, alone in it, as in the body or in a block
+// of a max-width (as the email of Facebook, whose tables were at the left).
+func TestTableAlignCenter(t *testing.T) {
+	widgetsByID(t, `<div style="width: 800px"><div id="d" style="max-width: 420px"><table id="in" align="center"><tr><td>Hello there</td></tr></table></div>`+
+		`<div id="d2"><table id="in2" align="center"><tr><td>Hello there</td></tr></table></div></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			for _, p := range [][2]string{{"d", "in"}, {"d2", "in2"}} {
+				d, tb := ws[p[0]].Geom, ws[p[1]].Geom
+				mid := d.Pos.Content.X + d.Size.Actual.Content.X/2
+				assert.InDelta(t, mid, tb.Pos.Total.X+tb.Size.Actual.Total.X/2, float64(2*dp), p[1])
+			}
+		})
+}
+
+// TestCellAlignCenterTable tests that a table of a fixed width in a cell
+// with align="center" is centered in the cell, as in the emails of
+// LessWrong, whose content was at the right.
+func TestCellAlignCenterTable(t *testing.T) {
+	widgetsByID(t, `<div style="width: 1000px"><table width="100%" cellpadding="0" cellspacing="0"><tbody><tr><td id="c" align="center" valign="top"><br><table id="in" width="600" cellpadding="0" cellspacing="0"><tbody><tr><td><div style="text-align: center"><h1>A title</h1></div><div><p>Some text of the post, which is long enough to wrap in the table.</p></div></td></tr></tbody></table></td></tr></tbody></table></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			c, tb := ws["c"].Geom, ws["in"].Geom
+			mid := c.Pos.Content.X + c.Size.Actual.Content.X/2
+			assert.InDelta(t, mid, tb.Pos.Total.X+tb.Size.Actual.Total.X/2, float64(2*dp), "centered")
+		})
+}
+
+// TestCellAlignCenterFixedTable tests that a table of a fixed width
+// centered in a cell that is centered (as the 600px bodies of many emails)
+// is centered in it, not off to its end, by the centering of both.
+func TestCellAlignCenterFixedTable(t *testing.T) {
+	widgetsByID(t, `<div style="width: 1000px"><table width="100%" cellspacing="0" cellpadding="0" style="width: 100%"><tr><td valign="top" style="padding: 0"><table cellspacing="0" cellpadding="0" align="center" style="table-layout: fixed !important; width: 100%"><tr><td id="c" align="center" style="padding: 0"><table id="in" cellspacing="0" cellpadding="0" align="center" style="width: 600px"><tr><td align="left" style="padding: 40px 20px">A logo</td></tr></table></td></tr></table></td></tr></table></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			c, tb := ws["c"].Geom, ws["in"].Geom
+			mid := c.Pos.Content.X + c.Size.Actual.Content.X/2
+			assert.InDelta(t, mid, tb.Pos.Total.X+tb.Size.Actual.Total.X/2, float64(2*dp), "centered")
+		})
+}
+
+// TestFloatCellInRow tests that a cell of a table row that floats (as the
+// #bodyCell of the emails of DHL, with float:left) stays in the row with
+// all of its content, as in browsers, which make it a block in an
+// anonymous cell, instead of the row being as high as its first child.
+func TestFloatCellInRow(t *testing.T) {
+	widgetsByID(t, `<style>#c { float: left; height: 100%; width: 100% }</style><div style="width: 800px"><table id="t" width="100%" cellpadding="0" cellspacing="0"><tr><td id="c" align="center"><div style="height: 20px; width: 600px"></div><table width="600"><tr><td><div style="height: 300px">The body</div></td></tr></table></td></tr></table></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			assert.GreaterOrEqual(t, ws["c"].Geom.Size.Actual.Total.Y, 320*dp, "the cell with all of its content")
+			assert.GreaterOrEqual(t, ws["t"].Geom.Size.Actual.Total.Y, 320*dp, "the table too")
+		})
+}

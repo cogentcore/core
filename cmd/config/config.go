@@ -65,11 +65,13 @@ type Config struct { //types:add
 	// [system.App.OpenFiles] when it starts, or its arguments on Linux.
 	Opens []string
 
-	// AppGoSymlink makes the executable of the app installed in /Applications
-	// on macOS a symbolic link to the one installed by go install (in the
-	// Go bin directory), which the install command also does, so that go
-	// install is enough to update the app after that, as for apps that are
-	// updated often.
+	// AppGoSymlink makes the app installed in /Applications on macOS run
+	// the executable installed by go install (in the Go bin directory),
+	// which the install command also does, so that go install is enough to
+	// update the app after that, as for apps that are updated often: the
+	// app copies it into itself, and signs it, when it starts after it
+	// changes, as macOS only allows notifications for an executable in
+	// the app.
 	AppGoSymlink bool
 
 	// Video installs (setup) or updates (update) FFmpeg, which the video

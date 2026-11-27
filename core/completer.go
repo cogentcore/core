@@ -5,6 +5,7 @@
 package core
 
 import (
+	"html"
 	"image"
 	"sync"
 	"time"
@@ -166,7 +167,9 @@ func (c *Complete) showMatches(ctx Widget, pos image.Point, md complete.Matches)
 			text = cmp.Label
 		}
 		icon := cmp.Icon
-		mi := NewButton(sc).SetText(text).SetIcon(icons.Icon(icon))
+		// the text of a completion is plain text, not markup (as the <...>
+		// of an email address, or of a Go channel type)
+		mi := NewButton(sc).SetText(html.EscapeString(text)).SetIcon(icons.Icon(icon))
 		mi.SetTooltip(cmp.Desc)
 		mi.OnClick(func(e events.Event) {
 			c.complete(cmp.Text)

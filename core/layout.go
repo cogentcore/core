@@ -1828,6 +1828,10 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 		widths = fr.growWidths(widths, alloc.X)
 	}
 	lineUsed, lineGrow := fr.wrapLines()
+	// the width that the widgets of each line of a wrapped row could not
+	// take, and their grow, which the others of the same line get, not
+	// those of other lines, which have their own widths
+	lineExtra, lineExn := make([]float32, len(lineUsed)), make([]float32, len(lineUsed))
 	for exitr := range 2 {
 		fr.forFlowChildren(func(i int, cw Widget, cwb *WidgetBase) bool {
 			cidx := cwb.Geom.Cell
@@ -1859,7 +1863,8 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 				mx := md.Size.Dim(ma)
 				asz := mx
 				gsum := cd.Grow.Dim(ma)
-				if lineUsed != nil && ma == math32.X && ci < len(lineUsed) {
+				wrapLine := lineUsed != nil && ma == math32.X && ci < len(lineUsed)
+				if wrapLine {
 					// a line of a wrapped row grows into the width that is
 					// left in it (not by the widest widgets in its column
 					// across the lines, as the first of two items of width
@@ -1894,16 +1899,24 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 					if asz < oasz { // didn't consume its full amount
 						ksz.slot.SetDim(ma, oasz)
 						if exitr == 0 { // (of its share as it is, not rounded)
-							maxExtra.SetDim(ma, maxExtra.Dim(ma)+(share-asz))
-							exn.SetDim(ma, exn.Dim(ma)+gr)
+							if wrapLine {
+								lineExtra[ci] += share - asz
+								lineExn[ci] += gr
+							} else {
+								maxExtra.SetDim(ma, maxExtra.Dim(ma)+(share-asz))
+								exn.SetDim(ma, exn.Dim(ma)+gr)
+							}
 						}
 					} else {
 						if exitr == 1 { // get more!
-							nsum := gsum - exn.Dim(ma)
+							more, nsum := maxExtra.Dim(ma), gsum-exn.Dim(ma)
+							if wrapLine {
+								more, nsum = lineExtra[ci], gsum-lineExn[ci]
+							}
 							if nsum > 0 {
 								// (rounded with its share, rather than each
 								// rounded up, which overflowed by a pixel)
-								asz = math32.Round(share + maxExtra.Dim(ma)*(gr/nsum))
+								asz = math32.Round(share + more*(gr/nsum))
 							}
 						}
 					}
@@ -1940,7 +1953,7 @@ func (fr *Frame) sizeDownGrowCells(iter int, extra math32.Vector2) bool {
 			ksz.SetContentFromTotal(&ksz.Alloc)
 			return tree.Continue
 		})
-		if exn.X == 0 && exn.Y == 0 {
+		if exn.X == 0 && exn.Y == 0 && !slices.ContainsFunc(lineExn, func(n float32) bool { return n > 0 }) {
 			break
 		}
 	}
@@ -2910,9 +2923,9 @@ func (fr *Frame) positionCellsMainX() {
 	}
 	var stPos math32.Vector2
 	stPos.X = styles.AlignPos(fr.Styles.Justify.Content, sz.Internal.X, sz.Actual.Content.X)
-	stPos.Y = styles.AlignPos(fr.Styles.Align.Content, sz.Internal.Y, sz.Actual.Content.Y)
 	spaces := fr.lineSpaces(math32.X, sz.Actual.Content.X)
 	crosses := fr.lineCrosses(math32.X)
+	stPos.Y = styles.AlignPos(fr.Styles.Align.Content, max(sz.Internal.Y, linesSize(crosses, gap.Y)), sz.Actual.Content.Y)
 	baselines := fr.lineBaselines()
 	// the cells of a grid are at the positions of their columns, which a
 	// cell narrower than its column (as one with a max width) does not move
@@ -2986,8 +2999,10 @@ func (fr *Frame) positionCellsMainX() {
 // lineCrosses returns, for each line of the children along the given main
 // axis, its size on the cross axis: the largest allocation of its children,
 // within which they are aligned on the cross axis (as a child that is
-// centered in a column next to a child that grows to its width). It has
-// one line (of size 0) if there are no children.
+// centered in a column next to a child that grows to its width). A column
+// of one line (see [Frame.singleLineColumn]) is at least as wide as its
+// content (as a table that is centered in a column by itself, as with
+// align="center" in HTML). It has one line if there are no children.
 func (fr *Frame) lineCrosses(ma math32.Dims) []float32 {
 	ca := ma.Other()
 	crosses := []float32{0}
@@ -2997,11 +3012,46 @@ func (fr *Frame) lineCrosses(ma math32.Dims) []float32 {
 			crosses = append(crosses, 0)
 		}
 		ln := len(crosses) - 1
-		crosses[ln] = max(crosses[ln], cwb.Geom.Size.Alloc.Total.Dim(ca))
+		// the size it is aligned in (see [WidgetBase.alignSize]), as its
+		// slot, which can be wider than its allocation (as a table of
+		// 600px centered in a cell), so that it is not offset twice: as
+		// a line (by Align.Content) and in its line (by Align.Items)
+		crosses[ln] = max(crosses[ln], cwb.alignSize().Dim(ca))
 		idx++
 		return tree.Continue
 	})
+	if ma == math32.Y && len(crosses) == 1 && fr.singleLineColumn() {
+		crosses[0] = max(crosses[0], fr.Geom.Size.Actual.Content.Dim(ca))
+	}
 	return crosses
+}
+
+// linesSize returns the total size of lines of the given sizes on the
+// cross axis (see [Frame.lineCrosses]), with the given gap between them,
+// which the lines are aligned as a group by (with Align.Content): their
+// items may have grown wider than the internal size of the frame (as a
+// line of text before a table, both centered in a column, which the text
+// made as wide as the column, and the table was off to its end).
+func linesSize(crosses []float32, gap float32) float32 {
+	var sz float32
+	for i, c := range crosses {
+		if i > 0 {
+			sz += gap
+		}
+		sz += c
+	}
+	return sz
+}
+
+// singleLineColumn returns whether the frame is a column of one line, a
+// flex one that does not wrap, whose line is the width of its content, in
+// which its children are aligned (see [Frame.lineCrosses]), as in CSS. Its
+// Align.Content must be Start: otherwise it places its children as a group,
+// of the width of the widest, in which they are aligned.
+func (fr *Frame) singleLineColumn() bool {
+	st := &fr.Styles
+	return st.Direction == styles.Column && !st.Wrap && st.Display == styles.Flex &&
+		(st.Align.Content == styles.Start || st.Align.Content == styles.Auto)
 }
 
 // lineBaselines returns, for each line of the children of the frame in
@@ -3179,9 +3229,9 @@ func (fr *Frame) positionCellsMainY() {
 	var lastSz math32.Vector2
 	var stPos math32.Vector2
 	stPos.Y = styles.AlignPos(fr.Styles.Justify.Content, sz.Internal.Y, sz.Actual.Content.Y)
-	stPos.X = styles.AlignPos(fr.Styles.Align.Content, sz.Internal.X, sz.Actual.Content.X)
 	spaces := fr.lineSpaces(math32.Y, sz.Actual.Content.Y)
 	crosses := fr.lineCrosses(math32.Y)
+	stPos.X = styles.AlignPos(fr.Styles.Align.Content, max(sz.Internal.X, linesSize(crosses, gap.X)), sz.Actual.Content.X)
 	pos := stPos
 	idx := 0
 	line := 0

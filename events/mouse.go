@@ -56,6 +56,26 @@ func (ev *Mouse) String() string {
 	return fmt.Sprintf("%v{Button: %v, Pos: %v, Mods: %v, Time: %v}", ev.Type(), ev.Button, ev.Where, ev.Mods.ModifiersString(), ev.Time().Format("04:05"))
 }
 
+// Clone returns a copy of the mouse event, not handled, which is a
+// mouse event, with its button and position (see [Event.HasPos]).
+func (ev Mouse) Clone() Event {
+	nm := &Mouse{}
+	*nm = ev
+	nm.Flags.SetFlag(false, Handled)
+	return nm
+}
+
+// NewFromClone returns a copy of the mouse event with the given type,
+// as a mouse event, so that an event made from it (as a [ContextMenu]
+// from a right [MouseUp]) has its position.
+func (ev Mouse) NewFromClone(typ Types) Event {
+	e := ev.Clone()
+	eb := e.AsBase()
+	eb.Typ = typ
+	eb.ClearHandled()
+	return e
+}
+
 func (ev Mouse) HasPos() bool {
 	return true
 }
@@ -90,6 +110,23 @@ type MouseScroll struct {
 	// Delta is the amount of scrolling in each axis, which is always in pixel/dot
 	// units (see [Scroll]).
 	Delta math32.Vector2
+}
+
+// Clone returns a copy of the scroll event, not handled.
+func (ev MouseScroll) Clone() Event {
+	nm := &MouseScroll{}
+	*nm = ev
+	nm.Flags.SetFlag(false, Handled)
+	return nm
+}
+
+// NewFromClone returns a copy of the scroll event with the given type.
+func (ev MouseScroll) NewFromClone(typ Types) Event {
+	e := ev.Clone()
+	eb := e.AsBase()
+	eb.Typ = typ
+	eb.ClearHandled()
+	return e
 }
 
 func (ev *MouseScroll) String() string {

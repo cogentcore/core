@@ -11,7 +11,12 @@ import (
 	"io"
 )
 
-// decode decodes an image from the given reader.
+// decode decodes an image from the given reader, turning JPEG images
+// upright as their EXIF orientation says (see [decodeOriented]).
 func decode(r io.Reader) (image.Image, string, error) {
-	return image.Decode(r)
+	b, err := io.ReadAll(r)
+	if err != nil {
+		return nil, "", err
+	}
+	return decodeOriented(b)
 }
