@@ -53,6 +53,12 @@ type Media struct {
 	// Duration is the duration of the media, or 0 if it is not known.
 	Duration time.Duration
 
+	// Metadata are the tags of the metadata of the media file, as
+	// creation_time, and those of phones, as com.apple.quicktime.creationdate
+	// and location (in ISO 6709, as +40.0257-105.2701/), with those of its
+	// video stream that the file does not have. It is not set on the web.
+	Metadata map[string]string
+
 	// HasAudio is whether the media has an audio stream.
 	HasAudio bool
 
@@ -84,6 +90,16 @@ func (m *Media) keepProbe(d *decoder) {
 			d.free()
 		}
 	})
+}
+
+// Close frees the decoder kept from opening the media for its first
+// decoding (see [Media.probe]), which is otherwise freed after a while,
+// as for media opened only to read its properties or a frame of it, as
+// for thumbnails of many videos. The media can still be decoded after.
+func (m *Media) Close() {
+	if d := m.takeProbe(); d != nil {
+		d.free()
+	}
 }
 
 // takeProbe returns the decoder that opened the media, if it is still

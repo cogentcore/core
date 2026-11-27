@@ -6,6 +6,7 @@ package core
 
 import (
 	"image"
+	"image/color"
 	"path/filepath"
 	"testing"
 
@@ -14,6 +15,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/image/draw"
 )
 
@@ -85,4 +87,38 @@ func TestImageAspectRatio(t *testing.T) {
 	RenderImage(b, func() {}, Locked(b, func() {
 		assert.Equal(t, math32.Vec2(200, 100), img.Geom.Size.Actual.Content)
 	}))
+}
+
+// TestImageContainCentered tests that an image that ObjectFit contain
+// makes smaller than its box is centered in it, as in CSS.
+func TestImageContainCentered(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) {
+		s.Padding.Zero()
+	})
+	src := image.NewRGBA(image.Rect(0, 0, 100, 50))
+	draw.Draw(src, src.Bounds(), image.NewUniform(color.RGBA{255, 0, 0, 255}), image.Point{}, draw.Src)
+	fr := NewFrame(b)
+	fr.Styler(func(s *styles.Style) {
+		s.Min.Set(units.Dot(100), units.Dot(100))
+		s.Max.Set(units.Dot(100), units.Dot(100))
+		s.Padding.Zero()
+	})
+	im := NewImage(fr).SetImage(src)
+	im.Styler(func(s *styles.Style) { // filling the frame
+		s.Grow.Set(1, 1)
+		s.Min.Zero()
+		s.ObjectFit = styles.FitContain
+	})
+	img := RenderImage(b)
+	require.NotNil(t, img)
+	bb := im.Geom.ContentBBox
+	red := func(x, y int) bool {
+		c := img.RGBAAt(bb.Min.X+x, bb.Min.Y+y)
+		return c.R > 200 && c.G < 50 && c.B < 50
+	}
+	require.Equal(t, 100, bb.Dy(), "the image fills the frame")
+	assert.False(t, red(50, 10), "above the image")
+	assert.True(t, red(50, 50), "the middle")
+	assert.False(t, red(50, 90), "below the image")
 }

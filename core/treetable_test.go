@@ -1469,3 +1469,53 @@ func TestTreeTableScrollSelectedBackground(t *testing.T) {
 		assert.Equal(t, -1, tt.hoverRow, "no hovered row")
 	})
 }
+
+// TestTreeTableScrollIndent tests that the rows of a [TreeTable] have the
+// indentation of the depths of their items after it is scrolled, as the
+// widgets of the rows show other items then.
+func TestTreeTableScrollIndent(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) {
+		s.Min.Y.Dp(250)
+		s.Max.Y.Dp(250)
+	})
+	var tasks []*task
+	for g := range 10 {
+		gr := &task{Name: fmt.Sprintf("Group %d", g)}
+		for c := range g % 3 { // groups of different sizes, and plain items
+			gr.Children = append(gr.Children, &task{Name: fmt.Sprintf("Task %d.%d", g, c)})
+		}
+		tasks = append(tasks, gr)
+	}
+	tt := NewTreeTable(b).SetItems(&tasks)
+	RenderImage(b, func() {
+		b.AsyncLock()
+		bb := tt.ListGrid.Geom.TotalBBox
+		b.AsyncUnlock()
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		for range 6 {
+			src.Scroll(bb.Min.Add(bb.Size().Div(2)), math32.Vec2(0, 25))
+			time.Sleep(100 * time.Millisecond)
+			b.AsyncLock()
+			nw, _ := tt.RowWidgetNs()
+			pad0 := float32(-1)
+			for i := range tt.VisibleRows {
+				si, _, invis := tt.SliceIndex(i)
+				if invis {
+					continue
+				}
+				cell := tt.ListGrid.Child(i * nw).(*treeTableCell)
+				pad := cell.Styles.Padding.Left.Dots
+				if tt.rows[si].depth == 0 {
+					if pad0 < 0 {
+						pad0 = pad
+					}
+					assert.Equal(t, pad0, pad, "row %d, item %d at depth 0, start %d", i, si, tt.StartIndex)
+				} else {
+					assert.Greater(t, pad, pad0, "row %d, item %d at depth 1, start %d", i, si, tt.StartIndex)
+				}
+			}
+			b.AsyncUnlock()
+		}
+	})
+}

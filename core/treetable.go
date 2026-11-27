@@ -1233,7 +1233,8 @@ func (tt *TreeTable) makeTreeCell(p *tree.Plan, i int) {
 			s.Padding.Zero()
 			// the indentation is padding, which the spacing setting scales,
 			// but it is not for spacing, so it stays the same, as in a Tree
-			s.Padding.Left.Em(ConstantSpacing(float32(tt.rowDepth(i))))
+			w.depth = tt.rowDepth(i)
+			s.Padding.Left.Em(ConstantSpacing(float32(w.depth)))
 			s.Grow.Set(1, 0)
 			if tt.treeWidthSet() { // see ListGrid.fixColumnWidths
 				s.Overflow.X = styles.OverflowHidden
@@ -1266,6 +1267,10 @@ func (tt *TreeTable) makeTreeCell(p *tree.Plan, i int) {
 		w.Updater(func() {
 			_, _, invis := tt.SliceIndex(i)
 			w.SetState(invis, states.Invisible)
+			if tt.rowDepth(i) != w.depth { // as when scrolled, which only updates
+				w.Style()
+				tt.NeedsLayout()
+			}
 		})
 		w.Maker(func(p *tree.Plan) {
 			tt.makeBranch(p, i)
@@ -1344,6 +1349,11 @@ type treeTableCell struct {
 
 	// tt is the tree table of the cell.
 	tt *TreeTable
+
+	// depth is the depth of the item for which the cell was styled, which
+	// its indentation is for: when the cell shows an item of another depth,
+	// as when the table is scrolled, it is styled again.
+	depth int
 }
 
 func (tc *treeTableCell) SizeDown(iter int) bool {

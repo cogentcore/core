@@ -53,10 +53,17 @@ func (wb *WidgetBase) Style() {
 
 	// we do these things even if we are overriding the style
 	defer func() {
-		// note: this does not un-set the Invisible if not None, because all kinds of things
-		// can turn invisible to off.
+		// Invisible is only un-set here if it was set here, for Display
+		// none, as other things can set it too (as the stacks of a Frame).
 		if wb.Styles.Display == styles.DisplayNone {
 			wb.SetState(true, states.Invisible)
+			wb.displayNone = true
+		} else if wb.displayNone {
+			wb.SetState(false, states.Invisible)
+			wb.displayNone = false
+			if pw != nil { // its parent is laid out again, with it
+				pw.NeedsLayout()
+			}
 		}
 		psz := math32.Vector2{}
 		if pw != nil {
