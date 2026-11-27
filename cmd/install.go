@@ -140,6 +140,7 @@ func goSymlinkApp(c *config.Config, app string) error {
 		}
 	}
 	id := shellQuote(c.ID)
+	sign := shellQuote(signIdentity())
 	script := `#!/bin/sh
 # Runs the app installed by go install (AppGoSymlink), which is copied
 # into the app and signed when it changes, as macOS only allows
@@ -147,8 +148,8 @@ func goSymlinkApp(c *config.Config, app string) error {
 src=` + shellQuote(target) + `
 exe="$(dirname "$0")"/` + shellQuote(filepath.Base(cp)) + `
 if [ ! -e "$exe" ] || [ "$src" -nt "$exe" ]; then
-	if cp "$src" "$exe.new" && codesign -s - -f -i ` + id + ` "$exe.new" && mv -f "$exe.new" "$exe"; then
-		codesign -s - -f -i ` + id + ` "$(dirname "$0")/../.."
+	if cp "$src" "$exe.new" && codesign -s ` + sign + ` -f -i ` + id + ` "$exe.new" && mv -f "$exe.new" "$exe"; then
+		codesign -s ` + sign + ` -f -i ` + id + ` "$(dirname "$0")/../.."
 	else
 		rm -f "$exe.new"
 	fi
@@ -168,11 +169,37 @@ exec "$exe" "$@"
 	return nil
 }
 
-// signApp signs the given macOS app ad hoc, with the ID of the given
-// config, as macOS only allows notifications for an app that is signed
-// with its ID, which the signature of the Go linker does not have.
+// signApp signs the given macOS app with [signIdentity], with the ID of
+// the given config, as macOS only allows notifications for an app that is
+// signed with its ID, which the signature of the Go linker does not have.
 func signApp(c *config.Config, app string) error {
-	return exec.Major().Run("codesign", "-s", "-", "-f", "-i", c.ID, app)
+	return exec.Major().Run("codesign", "-s", signIdentity(), "-f", "-i", c.ID, app)
+}
+
+// signIdentity returns the identity for signing macOS apps that are
+// installed: the first Apple Development certificate, or else "-" to sign
+// ad hoc. The notifications that an app schedules belong to its
+// signature, and an ad hoc one changes with every build, so the scheduled
+// notifications of the previous builds can no longer be removed, and are
+// all shown, whereas those of a certificate stay the same.
+func signIdentity() string {
+	out, err := exec.Silent().Output("security", "find-identity", "-v", "-p", "codesigning")
+	if err != nil {
+		return "-"
+	}
+	return parseSignIdentity(out)
+}
+
+// parseSignIdentity returns the hash of the first Apple Development
+// identity in the given output of security find-identity, or "-".
+func parseSignIdentity(out string) string {
+	for line := range strings.Lines(out) {
+		f := strings.Fields(line)
+		if len(f) >= 3 && strings.HasSuffix(f[0], ")") && strings.Contains(line, `"Apple Development:`) {
+			return f[1]
+		}
+	}
+	return "-"
 }
 
 // shellQuote returns the given text quoted for a shell.

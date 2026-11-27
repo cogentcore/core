@@ -78,3 +78,13 @@ func TestGoSymlinkApp(t *testing.T) {
 	assert.NoFileExists(t, exe)
 	assert.FileExists(t, target, "the installed one stays")
 }
+
+// TestParseSignIdentity tests choosing the identity for signing apps.
+func TestParseSignIdentity(t *testing.T) {
+	out := `  1) 0123456789ABCDEF0123456789ABCDEF01234567 "Developer ID Application: Someone (TEAM1)"
+  2) 89ABCDEF0123456789ABCDEF0123456789ABCDEF "Apple Development: Someone (TEAM2)"
+     2 valid identities found
+`
+	assert.Equal(t, "89ABCDEF0123456789ABCDEF0123456789ABCDEF", parseSignIdentity(out))
+	assert.Equal(t, "-", parseSignIdentity("     0 valid identities found\n"), "ad hoc")
+}
