@@ -8,6 +8,7 @@ import (
 	"cmp"
 	"context"
 	"fmt"
+	"maps"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -313,7 +314,9 @@ func (cs *Commands) Save() error {
 }
 
 // cached returns the cached parse of the given command, such as "git",
-// if any, as a copy, which is not changed by parsing.
+// if any, as a copy, which is not changed by parsing, nor by changes to
+// its macros, scripts, and choosers: those delete from their slices in
+// place, which would leave nil elements in the menus made from a copy.
 func (cs *Commands) cached(cmd string) *Cmd {
 	cs.mu.Lock()
 	defer cs.mu.Unlock()
@@ -324,6 +327,9 @@ func (cs *Commands) cached(cmd string) *Cmd {
 	}
 	c := *cm
 	c.SubCmds = slices.Clone(cm.SubCmds)
+	c.Macros = slices.Clone(cm.Macros)
+	c.Scripts = slices.Clone(cm.Scripts)
+	c.Choosers = maps.Clone(cm.Choosers)
 	return &c
 }
 
