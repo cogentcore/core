@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/styles"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -57,5 +58,40 @@ func TestInlineListItemMenu(t *testing.T) {
 		assert.Equal(t, 1, n, "Delete, once")
 		ButtonByText(m, "Delete").Send(events.Click)
 		assert.Equal(t, []labeled{{"home", "b@x.test"}}, items, "the item deleted")
+	}))
+}
+
+// TestInlineListWrapInForm tests that an inline list of text fields that
+// wraps in a form fits in the width of its column: the text fields of each
+// line grow only into the width left in their line (they grew to their
+// max, wider than the form, with the width that the field of another line
+// could not use, as the accounts in the settings of Cogent Mail).
+func TestInlineListWrapInForm(t *testing.T) {
+	type st struct {
+		Accounts            []string
+		LongerLabelOfAField string
+	}
+	v := &st{Accounts: []string{"someone8@gmail.com", "someone5@gmail.com", "someone.else@example.org"}}
+	b := NewBody()
+	b.Styler(func(s *styles.Style) {
+		s.Min.X.Dp(600)
+		s.Max.X.Dp(600)
+	})
+	tb := NewTabs(b)
+	fr, _ := tb.NewTab("Tab")
+	fm := NewForm(fr).SetStruct(v)
+	RenderImage(b, Locked(b, func() {
+		var il *InlineList
+		fm.WidgetWalkDown(func(cw Widget, cwb *WidgetBase) bool {
+			if l, ok := cw.(*InlineList); ok {
+				il = l
+			}
+			return il == nil
+		})
+		require.NotNil(t, il)
+		assert.Greater(t, il.Geom.Size.Actual.Total.Y, float32(60), "wrapped")
+		right := fr.Geom.Pos.Content.X + fr.Geom.Size.Actual.Content.X
+		assert.LessOrEqual(t, fm.Geom.Pos.Total.X+fm.Geom.Size.Actual.Total.X, right+0.5, "the form fits")
+		assert.LessOrEqual(t, il.Geom.Pos.Total.X+il.Geom.Size.Actual.Total.X, right+0.5, "the list fits")
 	}))
 }

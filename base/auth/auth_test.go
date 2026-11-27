@@ -241,3 +241,25 @@ func TestTokenStorage(t *testing.T) {
 	require.NoError(t, DeleteToken(file))
 	assert.NoFileExists(t, file)
 }
+
+// TestMicrosoftConfig tests the configuration of signing in with
+// Microsoft: its endpoint for all organizations (with their own issuers),
+// the offline_access scope for a refresh token, the email address from the
+// ID token, and one prompt; and that a refreshed token without an ID token
+// is of the account of the saved token.
+func TestMicrosoftConfig(t *testing.T) {
+	t.Setenv("MICROSOFT_OAUTH2_CLIENT_ID", "id")
+	c := microsoftConfig(&AuthConfig{Scopes: []string{"https://outlook.office.com/IMAP.AccessAsUser.All"}})
+	assert.Equal(t, "microsoft", c.ProviderName)
+	assert.Equal(t, "id", c.ClientID)
+	assert.Equal(t, "https://login.microsoftonline.com/{tenantid}/v2.0", c.IssuerURL)
+	assert.Contains(t, c.Scopes, "offline_access")
+	assert.True(t, c.UserFromIDToken)
+	assert.True(t, c.OnePrompt)
+
+	ui, err := idTokenUser(c, nil, &oauth2.Token{AccessToken: "x"}, "me@ru.nl")
+	require.NoError(t, err)
+	assert.Equal(t, "me@ru.nl", ui.Email)
+	_, err = idTokenUser(c, nil, &oauth2.Token{AccessToken: "x"}, "")
+	assert.Error(t, err)
+}

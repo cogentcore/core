@@ -80,6 +80,24 @@ type AuthConfig struct {
 	// [ErrNoToken] if there is none that works, instead of having the
 	// user sign in in the browser.
 	NoPrompt bool
+
+	// IssuerURL, if set, is the issuer in the discovery document of the
+	// provider, when it is not the ProviderURL, as for the endpoint of
+	// Microsoft for the accounts of all organizations, whose issuer has
+	// "{tenantid}" in it (each organization has its own).
+	IssuerURL string
+
+	// UserFromIDToken is whether to get the user info (the email address)
+	// from the ID token of the provider, instead of its user info
+	// endpoint, as for Microsoft, whose endpoint does not accept the
+	// access tokens of other resources (as those for mail).
+	UserFromIDToken bool
+
+	// OnePrompt is whether the provider takes only one value of the
+	// prompt parameter, as Microsoft: "select_account" for
+	// SelectAccount, and none otherwise (it returns a refresh token for
+	// the offline_access scope without asking for consent each time).
+	OnePrompt bool
 }
 
 // ScopesError is the error of [Auth] and [TokenSource] when the user did
@@ -130,11 +148,15 @@ func TokenSource(c *AuthConfig) (oauth2.TokenSource, *oidc.UserInfo, error) {
 	if c.Ctx == nil {
 		c.Ctx = context.TODO()
 	}
-	if c.ClientID == "" || c.ClientSecret == "" {
+	if c.ClientID == "" || (c.ClientSecret == "" && !c.UserFromIDToken) {
 		slog.Warn("got empty client id and/or client secret; did you forgot to set env variables?")
 	}
 
-	provider, err := oidc.NewProvider(c.Ctx, c.ProviderURL)
+	pctx := c.Ctx
+	if c.IssuerURL != "" {
+		pctx = oidc.InsecureIssuerURLContext(pctx, c.IssuerURL)
+	}
+	provider, err := oidc.NewProvider(pctx, c.ProviderURL)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -173,7 +195,7 @@ func TokenSource(c *AuthConfig) (oauth2.TokenSource, *oidc.UserInfo, error) {
 				// works, and gets the scopes that it allows
 				token.Expiry = time.Unix(1, 0)
 			}
-			ts, userInfo, err := tokenSource(c, provider, config, token)
+			ts, userInfo, err := tokenSource(c, provider, config, token, account)
 			if err != nil {
 				var re *oauth2.RetrieveError
 				var se *ScopesError
@@ -199,7 +221,7 @@ func TokenSource(c *AuthConfig) (oauth2.TokenSource, *oidc.UserInfo, error) {
 		slog.Debug("auth: signing in failed", "err", err)
 		return nil, nil, err
 	}
-	ts, userInfo, err := tokenSource(c, provider, config, token)
+	ts, userInfo, err := tokenSource(c, provider, config, token, "")
 	if err != nil {
 		slog.Debug("auth: the token of signing in does not work", "err", err)
 		return nil, nil, err
@@ -209,8 +231,10 @@ func TokenSource(c *AuthConfig) (oauth2.TokenSource, *oidc.UserInfo, error) {
 }
 
 // tokenSource returns the saving token source for the given token and
-// the user info, saving the token.
-func tokenSource(c *AuthConfig, provider *oidc.Provider, config *oauth2.Config, token *oauth2.Token) (oauth2.TokenSource, *oidc.UserInfo, error) {
+// the user info, saving the token. The given account, if any, is that of
+// a saved token, for [AuthConfig.UserFromIDToken] when a refreshed token
+// has no ID token.
+func tokenSource(c *AuthConfig, provider *oidc.Provider, config *oauth2.Config, token *oauth2.Token, account string) (oauth2.TokenSource, *oidc.UserInfo, error) {
 	src := config.TokenSource(c.Ctx, token)
 	fresh, err := src.Token()
 	if err != nil {
@@ -223,7 +247,12 @@ func tokenSource(c *AuthConfig, provider *oidc.Provider, config *oauth2.Config, 
 		slog.Debug("auth: missing scopes", "err", err)
 		return nil, nil, err
 	}
-	userInfo, err := provider.UserInfo(c.Ctx, oauth2.StaticTokenSource(fresh))
+	var userInfo *oidc.UserInfo
+	if c.UserFromIDToken {
+		userInfo, err = idTokenUser(c, provider, fresh, account)
+	} else {
+		userInfo, err = provider.UserInfo(c.Ctx, oauth2.StaticTokenSource(fresh))
+	}
 	if err != nil {
 		slog.Debug("auth: getting the user info failed", "err", err)
 		return nil, nil, fmt.Errorf("failed to get user info: %w", err)
@@ -236,6 +265,42 @@ func tokenSource(c *AuthConfig, provider *oidc.Provider, config *oauth2.Config, 
 		return nil, nil, err
 	}
 	return ts, userInfo, nil
+}
+
+// idTokenUser returns the user info of the ID token of the given token
+// (see [AuthConfig.UserFromIDToken]), which is verified (except for its
+// issuer, which is of the organization of the user), with the email
+// address of its email claim, or else its preferred username (which is the
+// address of a Microsoft account). A token without an ID token, as some
+// refreshed ones, is of the given account, if any.
+func idTokenUser(c *AuthConfig, provider *oidc.Provider, token *oauth2.Token, account string) (*oidc.UserInfo, error) {
+	raw, _ := token.Extra("id_token").(string)
+	if raw == "" {
+		if account != "" {
+			return &oidc.UserInfo{Email: account}, nil
+		}
+		return nil, errors.New("no ID token")
+	}
+	verifier := provider.Verifier(&oidc.Config{ClientID: c.ClientID, SkipIssuerCheck: true})
+	idt, err := verifier.Verify(c.Ctx, raw)
+	if err != nil {
+		return nil, fmt.Errorf("verifying the ID token: %w", err)
+	}
+	var claims struct {
+		Email             string `json:"email"`
+		PreferredUsername string `json:"preferred_username"`
+	}
+	if err := idt.Claims(&claims); err != nil {
+		return nil, err
+	}
+	email := claims.Email
+	if email == "" {
+		email = claims.PreferredUsername
+	}
+	if email == "" {
+		return nil, errors.New("no email address in the ID token")
+	}
+	return &oidc.UserInfo{Subject: idt.Subject, Email: email, EmailVerified: true}, nil
 }
 
 // checkScopes returns a [*ScopesError] if the given token, from the
@@ -301,7 +366,19 @@ func signIn(c *AuthConfig, config *oauth2.Config) (*oauth2.Token, error) {
 	if c.SelectAccount {
 		prompt = "select_account consent"
 	}
-	opts := []oauth2.AuthCodeOption{oauth2.AccessTypeOffline, oauth2.SetAuthURLParam("prompt", prompt)}
+	if c.OnePrompt {
+		prompt = ""
+		if c.SelectAccount {
+			prompt = "select_account"
+		}
+	}
+	// with PKCE, which public clients (without a secret, as the desktop
+	// apps of Microsoft) need, and which protects the code
+	verifier := oauth2.GenerateVerifier()
+	opts := []oauth2.AuthCodeOption{oauth2.AccessTypeOffline, oauth2.S256ChallengeOption(verifier)}
+	if prompt != "" {
+		opts = append(opts, oauth2.SetAuthURLParam("prompt", prompt))
+	}
 	if c.LoginHint != "" {
 		opts = append(opts, oauth2.SetAuthURLParam("login_hint", c.LoginHint))
 	}
@@ -315,7 +392,7 @@ func signIn(c *AuthConfig, config *oauth2.Config) (*oauth2.Token, error) {
 	case <-c.Ctx.Done():
 		return nil, c.Ctx.Err()
 	}
-	token, err := config.Exchange(c.Ctx, cs)
+	token, err := config.Exchange(c.Ctx, cs, oauth2.VerifierOption(verifier))
 	if err != nil {
 		slog.Debug("auth: exchanging the code for a token failed", "err", err)
 		return nil, fmt.Errorf("failed to exchange token: %w", err)

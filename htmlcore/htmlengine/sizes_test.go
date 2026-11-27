@@ -1619,3 +1619,15 @@ func TestTableAlignCenter(t *testing.T) {
 			}
 		})
 }
+
+// TestCellAlignCenterTable tests that a table of a fixed width in a cell
+// with align="center" is centered in the cell, as in the emails of
+// LessWrong, whose content was at the right.
+func TestCellAlignCenterTable(t *testing.T) {
+	widgetsByID(t, `<div style="width: 1000px"><table width="100%" cellpadding="0" cellspacing="0"><tbody><tr><td id="c" align="center" valign="top"><br><table id="in" width="600" cellpadding="0" cellspacing="0"><tbody><tr><td><div style="text-align: center"><h1>A title</h1></div><div><p>Some text of the post, which is long enough to wrap in the table.</p></div></td></tr></tbody></table></td></tr></tbody></table></div>`,
+		func(ws map[string]*core.WidgetBase, dp float32) {
+			c, tb := ws["c"].Geom, ws["in"].Geom
+			mid := c.Pos.Content.X + c.Size.Actual.Content.X/2
+			assert.InDelta(t, mid, tb.Pos.Total.X+tb.Size.Actual.Total.X/2, float64(2*dp), "centered")
+		})
+}

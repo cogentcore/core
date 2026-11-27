@@ -448,6 +448,9 @@ func (ch *Chooser) SetEnums(es ...enums.Enum) *Chooser {
 	for i, enum := range es {
 		str := enum.String()
 		lbl := strcase.ToSentence(str)
+		if lb, ok := enum.(labels.Labeler); ok { // its own label, as "iCloud"
+			lbl = lb.Label()
+		}
 		desc := enum.Desc()
 		// If the documentation does not start with the transformed name, but it does
 		// start with an uppercase letter, then we assume that the first word of the
