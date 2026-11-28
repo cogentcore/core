@@ -19,9 +19,9 @@ type toolbarDrag struct {
 	item    Widget
 }
 
-// dragMovesDefault returns that a drag of an item of the toolbar moves it
-// (see [dragMover]).
-func (tb *Toolbar) dragMovesDefault() bool { return tb.MoveFunc != nil }
+// DragMovesDefault returns that a drag of an item of the toolbar moves it
+// (see [DragMover]).
+func (tb *Toolbar) DragMovesDefault() bool { return tb.MoveFunc != nil }
 
 // itemIndex returns the index of the given item among the items of the
 // toolbar, or -1 if it is not one of them (as the overflow menu).

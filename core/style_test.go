@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestParentActualBackground(t *testing.T) {
@@ -86,4 +87,43 @@ func TestParentUnits(t *testing.T) {
 		s.Min.Set(units.Pw(50), units.Ph(75))
 	})
 	AssertRender(t, b, "style/parent-units")
+}
+
+// TestDisplayNoneToggled tests that a widget whose Display is none is
+// shown again, with a size, when its Display is no longer none, and that
+// a widget made invisible otherwise stays invisible.
+func TestDisplayNoneToggled(t *testing.T) {
+	b := NewBody()
+	hidden := true
+	fr := NewFrame(b)
+	fr.Styler(func(s *styles.Style) {
+		s.Min.Set(units.Dp(100), units.Dp(50))
+		if hidden {
+			s.Display = styles.DisplayNone
+		}
+	})
+	other := NewFrame(b)
+	other.Styler(func(s *styles.Style) {
+		s.Min.Set(units.Dp(100), units.Dp(50))
+	})
+	other.SetState(true, states.Invisible)
+	RenderImage(b, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		assert.True(t, fr.StateIs(states.Invisible))
+		hidden = false
+		b.Update()
+	}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		assert.False(t, fr.StateIs(states.Invisible), "shown again")
+		assert.Greater(t, fr.Geom.Size.Actual.Total.Y, float32(0), "laid out")
+		assert.True(t, other.StateIs(states.Invisible), "invisible otherwise")
+		hidden = true
+		b.Update()
+	}, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		assert.True(t, fr.StateIs(states.Invisible), "hidden again")
+	})
 }

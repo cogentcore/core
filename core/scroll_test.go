@@ -116,3 +116,36 @@ func TestScrollKeys(t *testing.T) {
 		assert.Zero(t, sb.Value, "not with Shift, which selects or goes to another tab")
 	})
 }
+
+// TestScrollToLargeWidget tests that focusing a widget that is larger than
+// its scrolling frame, and fills its view, does not scroll the frame to its
+// start, as clicking on a large grid of photos far down does.
+func TestScrollToLargeWidget(t *testing.T) {
+	b := NewBody()
+	fr := NewFrame(b)
+	fr.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+		s.Overflow.Set(styles.OverflowAuto)
+		s.Min.Set(units.Dp(200), units.Dp(200))
+		s.Max.Set(units.Dp(200), units.Dp(200))
+	})
+	NewText(fr).SetText("Above")
+	big := NewFrame(fr)
+	big.Styler(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.Focusable)
+		s.Min.Set(units.Dp(100), units.Dp(5000))
+	})
+	RenderImage(b, func() {
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		fr.ScrollDimToStart(math32.Y, int(big.Geom.Pos.Total.Y)+2000)
+		scroll := fr.Geom.Scroll.Y
+		require.Less(t, scroll, float32(-1000))
+		big.SetFocus()
+		assert.Equal(t, scroll, fr.Geom.Scroll.Y, "focusing it kept the place")
+		fr.ScrollDimToStart(math32.Y, int(big.Geom.Pos.Total.Y)-50) // part of the text above
+		scroll = fr.Geom.Scroll.Y
+		big.ScrollToThis()
+		assert.Equal(t, scroll, fr.Geom.Scroll.Y, "already filling the view")
+	})
+}

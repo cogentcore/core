@@ -419,3 +419,25 @@ func TestPlaybackLiveResume(t *testing.T) {
 	p.Resume()
 	require.Eventually(t, func() bool { return reqs.Load() == 2 && p.IsPlaying() }, 5*time.Second, 20*time.Millisecond, "requested again, and playing")
 }
+
+func TestPlaybackAudioChanged(t *testing.T) {
+	// testdata/u8mono.avi is 1 second, of 5 frames per second, with audio
+	// of unsigned 8-bit mono samples at 11024 Hz, as the AVI files of old
+	// cameras, whose frames are not of the format of the first one for the
+	// resampler (Input changed).
+	m, err := OpenMedia("testdata/u8mono.avi", nil)
+	require.NoError(t, err)
+	fl := &frameLog{}
+	ended := make(chan struct{})
+	var errs []error
+	p := &Playback{Media: m, Muted: true, OnFrame: fl.add, OnEnd: func() { close(ended) },
+		OnError: func(err error) { errs = append(errs, err) }}
+	require.NoError(t, p.Play())
+	select {
+	case <-ended:
+	case <-time.After(3 * time.Second):
+		t.Fatal("no end")
+	}
+	assert.Empty(t, errs)
+	assert.Equal(t, 5, fl.len(), "all of the frames")
+}

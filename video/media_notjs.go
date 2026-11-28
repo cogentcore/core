@@ -67,6 +67,29 @@ func (d *decoder) setProperties(m *Media) {
 	if du := d.inputs[0].fc.Duration(); du > 0 {
 		m.Duration = time.Duration(du) * time.Second / time.Duration(astiav.TimeBase)
 	}
+	m.Metadata = map[string]string{}
+	addMetadata(m.Metadata, d.inputs[0].fc.Metadata())
+	if d.video != nil {
+		addMetadata(m.Metadata, d.video.stream.Metadata())
+	}
+}
+
+// addMetadata adds the entries of the given metadata to the given map,
+// except for those that it has already.
+func addMetadata(md map[string]string, dict *astiav.Dictionary) {
+	if dict == nil {
+		return
+	}
+	var e *astiav.DictionaryEntry
+	for {
+		e = dict.Get("", e, astiav.NewDictionaryFlags(astiav.DictionaryFlagIgnoreSuffix))
+		if e == nil {
+			return
+		}
+		if _, ok := md[e.Key()]; !ok {
+			md[e.Key()] = e.Value()
+		}
+	}
 }
 
 // decodeStream is an opened decoder for one stream of a media file.
@@ -577,7 +600,20 @@ func (d *decoder) sendAudio(sink decodeSink) (bool, error) {
 	r.SetChannelLayout(astiav.ChannelLayoutStereo)
 	r.SetSampleFormat(astiav.SampleFormatDbl)
 	r.SetSampleRate(sampleRate)
-	if err := d.resampler.ConvertFrame(af, r); err != nil {
+	err := d.resampler.ConvertFrame(af, r)
+	if errors.Is(err, astiav.ErrInputChanged) {
+		// the format of the audio frames changed (as in the AVI files of old
+		// cameras), for which the resampler, which is configured from the
+		// first frame it converts, is made again, for the new format
+		d.resampler.Free()
+		d.resampler = astiav.AllocSoftwareResampleContext()
+		r.Unref()
+		r.SetChannelLayout(astiav.ChannelLayoutStereo)
+		r.SetSampleFormat(astiav.SampleFormatDbl)
+		r.SetSampleRate(sampleRate)
+		err = d.resampler.ConvertFrame(af, r)
+	}
+	if err != nil {
 		return false, fmt.Errorf("video: resampling audio: %w", err)
 	}
 	n := r.NbSamples()

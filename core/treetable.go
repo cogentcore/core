@@ -69,6 +69,11 @@ type TreeTable struct {
 	// of their other fields.
 	HideGroupValues bool
 
+	// ReadOnlyDrag is whether the rows of a read-only tree table can be
+	// dragged, for the app to handle where they are dropped, as for
+	// moving them in its own data: the tree table itself does not change.
+	ReadOnlyDrag bool
+
 	// itemsSet is the Items for which the item type and rows were set.
 	itemsSet any
 
@@ -1136,6 +1141,9 @@ func (tt *TreeTable) dragStart(e events.Event, cell Widget) {
 // dragDrop handles a drop onto the tree table, with a menu of the ways
 // to paste the dropped items relative to the item under the mouse.
 func (tt *TreeTable) dragDrop(e events.Event) {
+	if tt.IsReadOnly() { // for the app to handle (see ReadOnlyDrag)
+		return
+	}
 	e.SetHandled()
 	de := e.(*events.DragDrop)
 	md, ok := de.Data.(mimedata.Mimes)
@@ -1191,6 +1199,10 @@ func (tt *TreeTable) withinDragged(item reflect.Value) bool {
 
 // dropDeleteItems deletes the dragged items after they are moved.
 func (tt *TreeTable) dropDeleteItems() {
+	if tt.IsReadOnly() { // the app handles it (see ReadOnlyDrag)
+		tt.draggedItems = nil
+		return
+	}
 	for _, item := range tt.draggedItems {
 		tt.removeItem(tt.itemsValue(), item)
 	}
@@ -1226,14 +1238,15 @@ func (tt *TreeTable) makeTreeCell(p *tree.Plan, i int) {
 		w.SetProperty(ListRowProperty, i)
 		w.SetProperty(ListColProperty, 0)
 		w.Styler(func(s *styles.Style) {
-			s.SetAbilities(!tt.IsReadOnly(), abilities.Draggable)
+			s.SetAbilities(!tt.IsReadOnly() || tt.ReadOnlyDrag, abilities.Draggable)
 			s.Direction = styles.Row
 			s.Align.Items = styles.Center
 			s.Gap.X.Em(0.1)
 			s.Padding.Zero()
 			// the indentation is padding, which the spacing setting scales,
 			// but it is not for spacing, so it stays the same, as in a Tree
-			s.Padding.Left.Em(ConstantSpacing(float32(tt.rowDepth(i))))
+			w.depth = tt.rowDepth(i)
+			s.Padding.Left.Em(ConstantSpacing(float32(w.depth)))
 			s.Grow.Set(1, 0)
 			if tt.treeWidthSet() { // see ListGrid.fixColumnWidths
 				s.Overflow.X = styles.OverflowHidden
@@ -1266,6 +1279,10 @@ func (tt *TreeTable) makeTreeCell(p *tree.Plan, i int) {
 		w.Updater(func() {
 			_, _, invis := tt.SliceIndex(i)
 			w.SetState(invis, states.Invisible)
+			if tt.rowDepth(i) != w.depth { // as when scrolled, which only updates
+				w.Style()
+				tt.NeedsLayout()
+			}
 		})
 		w.Maker(func(p *tree.Plan) {
 			tt.makeBranch(p, i)
@@ -1344,6 +1361,11 @@ type treeTableCell struct {
 
 	// tt is the tree table of the cell.
 	tt *TreeTable
+
+	// depth is the depth of the item for which the cell was styled, which
+	// its indentation is for: when the cell shows an item of another depth,
+	// as when the table is scrolled, it is styled again.
+	depth int
 }
 
 func (tc *treeTableCell) SizeDown(iter int) bool {
@@ -1413,8 +1435,13 @@ func (tt *TreeTable) makeBranch(p *tree.Plan, i int) {
 		w.Updater(func() {
 			si, _, invis := tt.SliceIndex(i)
 			leaf := invis || !tt.validIndex(si) || tt.numChildren(tt.rows[si].item) == 0
+			wasLeaf := w.StateIs(states.Indeterminate)
 			w.SetState(leaf, states.Indeterminate)
 			w.SetState(!leaf && !tt.IsClosed(si), states.Checked)
+			if leaf != wasLeaf { // as when scrolled, which only updates: its abilities
+				w.Style()
+				w.NeedsRender()
+			}
 		})
 	})
 }

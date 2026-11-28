@@ -71,7 +71,9 @@ type Config struct { //types:add
 	// update the app after that, as for apps that are updated often: the
 	// app copies it into itself, and signs it, when it starts after it
 	// changes, as macOS only allows notifications for an executable in
-	// the app.
+	// the app. It is typically set in the core.toml of the user (see
+	// [UserFile]), for all apps, and a project can set it to false, as when
+	// its go install executable has the same name as that of another app.
 	AppGoSymlink bool
 
 	// Video installs (setup) or updates (update) FFmpeg, which the video

@@ -311,8 +311,8 @@ func draggingTab(sc *Scene) bool {
 	return ok
 }
 
-// dragMovesDefault returns that a drag of a tab moves it (see [dragMover]).
-func (tb *Tab) dragMovesDefault() bool { return true }
+// DragMovesDefault returns that a drag of a tab moves it (see [DragMover]).
+func (tb *Tab) DragMovesDefault() bool { return true }
 
 // osDragData returns the data of a drag of a tab of tabs with
 // [Tabs.DragToWindow] that leaves its window, which the operating system

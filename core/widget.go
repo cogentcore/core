@@ -191,6 +191,11 @@ type WidgetBase struct {
 	// the inspector.
 	OverrideStyle bool `copier:"-" json:"-" xml:"-" set:"-"`
 
+	// displayNone is whether the widget is [states.Invisible] because its
+	// [styles.Style.Display] is [styles.DisplayNone], so that it is shown
+	// again when its Display is no longer none (see [WidgetBase.Style]).
+	displayNone bool
+
 	// Styles are styling settings for this widget. They are set by
 	// [WidgetBase.Stylers] in [WidgetBase.Style].
 	Styles styles.Style `json:"-" xml:"-" set:"-"`

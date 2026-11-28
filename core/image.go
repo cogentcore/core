@@ -215,6 +215,17 @@ func (im *Image) Render() {
 		}
 		im.prevRenderImage = rimg
 	}
+	// the image is centered in the content box when it is smaller, as by
+	// ObjectFit contain, as object-position is 50% 50% by default in CSS
+	if isz, box := rimg.Bounds().Size(), im.Geom.Size.Actual.Content.ToPoint(); isz.X < box.X || isz.Y < box.Y {
+		off := image.Pt(max(box.X-isz.X, 0)/2, max(box.Y-isz.Y, 0)/2)
+		org := im.Geom.Pos.Content.ToPoint().Add(off)
+		r = image.Rectangle{Min: org, Max: org.Add(isz)}.Intersect(im.Geom.ContentBBox)
+		if r.Empty() {
+			return
+		}
+		sp = r.Min.Sub(org)
+	}
 	pim := im.Scene.Painter.DrawImage(rimg, im.Image, r, sp, draw.Over)
 	if id, ok := im.Properties["id"]; ok {
 		pim.Anchor = id.(string)

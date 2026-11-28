@@ -404,7 +404,8 @@ func (lb *ListBase) StyleValue(w Widget, s *styles.Style, row, col int) {
 	s.SetTextWrap(false)
 }
 
-func (lb *ListBase) dragMovesDefault() bool { return lb.DragMoves }
+// DragMovesDefault returns [ListBase.DragMoves] (see [DragMover]).
+func (lb *ListBase) DragMovesDefault() bool { return lb.DragMoves }
 
 func (lb *ListBase) AsListBase() *ListBase {
 	return lb
@@ -465,6 +466,14 @@ func (lb *ListBase) rowFromEventPos(e events.Event) (row, idx int, isValid bool)
 		isValid = false
 	}
 	return
+}
+
+// IndexFromEvent returns the index of the item under the position of the
+// given event, as for a drop of something onto an item, and whether there
+// is an item there.
+func (lb *ListBase) IndexFromEvent(e events.Event) (int, bool) {
+	_, idx, ok := lb.rowFromEventPos(e)
+	return idx, ok
 }
 
 // clickSelectEvent is a helper for processing selection events
@@ -1659,7 +1668,7 @@ func (lb *ListBase) dragStart(e events.Event) {
 
 func (lb *ListBase) dragDrop(e events.Event) {
 	de := e.(*events.DragDrop)
-	if de.Data == nil {
+	if de.Data == nil || lb.IsReadOnly() { // (made read-only after Init)
 		return
 	}
 	pos := de.Pos()
@@ -2444,8 +2453,12 @@ func (lg *ListGrid) renderStripes() {
 }
 
 // mousePosInGrid returns true if the event mouse position is
-// located within the slicegrid.
+// located within the slicegrid. It is false for a nil grid, as that of a
+// list before it is first made, which can get events then.
 func (lg *ListGrid) mousePosInGrid(pt image.Point) bool {
+	if lg == nil {
+		return false
+	}
 	ptrel := lg.PointToRelPos(pt)
 	sz := lg.Geom.ContentBBox.Size()
 	if lg.visibleRows == 0 || sz.Y == 0 {

@@ -13,6 +13,7 @@ import (
 	"testing"
 	"time"
 
+	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/events"
@@ -21,6 +22,7 @@ import (
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"github.com/stretchr/testify/assert"
@@ -1467,5 +1469,183 @@ func TestTreeTableScrollSelectedBackground(t *testing.T) {
 		assert.Equal(t, selBg, cellBackground(sel), "the selected item keeps its background")
 		assert.NotEqual(t, selBg, cellBackground(sel+2), "the item now in its old row does not have it")
 		assert.Equal(t, -1, tt.hoverRow, "no hovered row")
+	})
+}
+
+// TestTreeTableScrollIndent tests that the rows of a [TreeTable] have the
+// indentation of the depths of their items after it is scrolled, as the
+// widgets of the rows show other items then.
+func TestTreeTableScrollIndent(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) {
+		s.Min.Y.Dp(250)
+		s.Max.Y.Dp(250)
+	})
+	var tasks []*task
+	for g := range 10 {
+		gr := &task{Name: fmt.Sprintf("Group %d", g)}
+		for c := range g % 3 { // groups of different sizes, and plain items
+			gr.Children = append(gr.Children, &task{Name: fmt.Sprintf("Task %d.%d", g, c)})
+		}
+		tasks = append(tasks, gr)
+	}
+	tt := NewTreeTable(b).SetItems(&tasks)
+	RenderImage(b, func() {
+		b.AsyncLock()
+		bb := tt.ListGrid.Geom.TotalBBox
+		b.AsyncUnlock()
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		for range 6 {
+			src.Scroll(bb.Min.Add(bb.Size().Div(2)), math32.Vec2(0, 25))
+			time.Sleep(100 * time.Millisecond)
+			b.AsyncLock()
+			nw, _ := tt.RowWidgetNs()
+			pad0 := float32(-1)
+			for i := range tt.VisibleRows {
+				si, _, invis := tt.SliceIndex(i)
+				if invis {
+					continue
+				}
+				cell := tt.ListGrid.Child(i * nw).(*treeTableCell)
+				pad := cell.Styles.Padding.Left.Dots
+				if tt.rows[si].depth == 0 {
+					if pad0 < 0 {
+						pad0 = pad
+					}
+					assert.Equal(t, pad0, pad, "row %d, item %d at depth 0, start %d", i, si, tt.StartIndex)
+				} else {
+					assert.Greater(t, pad, pad0, "row %d, item %d at depth 1, start %d", i, si, tt.StartIndex)
+				}
+			}
+			b.AsyncUnlock()
+		}
+	})
+}
+
+// TestTreeTableScrollBranch tests that the branch of a group opens with a
+// click after the tree table is scrolled, when its row showed an item
+// without children before, whose branch does nothing: the abilities of
+// the branch are styled for the item that it shows.
+func TestTreeTableScrollBranch(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) {
+		s.Min.Y.Dp(250)
+		s.Max.Y.Dp(250)
+	})
+	var tasks []*task
+	for g := range 20 { // groups and items without children, alternating
+		gr := &task{Name: fmt.Sprintf("Item %d", g)}
+		if g%2 == 0 {
+			gr.Children = []*task{{Name: fmt.Sprintf("Task %d", g)}}
+		}
+		tasks = append(tasks, gr)
+	}
+	tt := NewTreeTable(b).SetItems(&tasks)
+	tt.SetReadOnly(true)
+	RenderImage(b, func() {
+		for _, c := range tasks {
+			tt.setItemClosed(reflect.ValueOf(c), true)
+		}
+		b.AsyncLock()
+		tt.Update()
+		bb := tt.ListGrid.Geom.TotalBBox
+		b.AsyncUnlock()
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		for range 10 { // until scrolled by an odd number of rows
+			src.Scroll(bb.Min.Add(bb.Size().Div(2)), math32.Vec2(0, 10))
+			time.Sleep(100 * time.Millisecond)
+			b.AsyncLock()
+			odd := tt.StartIndex%2 == 1
+			b.AsyncUnlock()
+			if odd {
+				break
+			}
+		}
+		b.AsyncLock()
+		require.Equal(t, 1, tt.StartIndex%2, "scrolled by an odd number of rows")
+		// the odd rows now show groups, where they showed items without children
+		nw, _ := tt.RowWidgetNs()
+		si := -1
+		var branch *Switch
+		for i := range tt.VisibleRows {
+			s, _, _ := tt.SliceIndex(i)
+			if tt.numChildren(tt.rows[s].item) > 0 && i%2 == 1 { // a leaf before
+				si = s
+				branch = tt.ListGrid.Child(i * nw).AsTree().Child(0).(*Switch)
+				break
+			}
+		}
+		require.NotNil(t, branch)
+		require.True(t, tt.IsClosed(si))
+		pt := branch.Geom.ContentBBox.Min.Add(branch.Geom.ContentBBox.Size().Div(2))
+		b.AsyncUnlock()
+		src.MouseButton(events.MouseDown, events.Left, pt, 0)
+		src.MouseButton(events.MouseUp, events.Left, pt, 0)
+		time.Sleep(200 * time.Millisecond)
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		assert.False(t, tt.IsClosed(si), "opened by a click on its branch")
+	})
+}
+
+// TestTreeTableReadOnlyDrag tests dragging an item of a read-only tree
+// table with ReadOnlyDrag, whose drop the app handles: the tree table
+// itself does not change.
+func TestTreeTableReadOnlyDrag(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(600), units.Dp(500)) })
+	tasks := testTasks()
+	tt := NewTreeTable(b).SetItems(&tasks)
+	tt.SetReadOnly(true)
+	tt.ReadOnlyDrag = true
+	tt.Styler(func(s *styles.Style) { s.SetAbilities(true, abilities.Droppable) })
+	dropped := make(chan string, 1)
+	droppedRow := -1
+	tt.On(events.Drop, func(e events.Event) {
+		de := e.(*events.DragDrop)
+		md := de.Data.(mimedata.Mimes)
+		if row, _, ok := tt.ListGrid.indexFromPixel(de.Pos()); ok {
+			droppedRow = tt.StartIndex + row
+		}
+		e.SetHandled()
+		tt.Scene.Events.DropFinalize(de)
+		dropped <- string(md[0].Data)
+	})
+	imagex.UpdateTestImagesFor(t) // the image is not compared
+	AssertRender(t, b, "tree-table/read-only-drag", func() {
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		b.AsyncLock()
+		cell := func(row int) *WidgetBase {
+			nw, _ := tt.RowWidgetNs()
+			return tt.ListGrid.Child(row * nw).(Widget).AsWidget()
+		}
+		email := cell(1).Geom.TotalBBox
+		from := image.Pt(email.Min.X+4, (email.Min.Y+email.Max.Y)/2)
+		home := cell(4).Geom.TotalBBox
+		to := home.Min.Add(home.Size().Div(2))
+		b.AsyncUnlock()
+
+		var shift key.Modifiers
+		shift.SetFlag(true, key.Shift) // a move, which must not delete it
+		src.MouseButton(events.MouseDown, events.Left, from, shift)
+		for i := 1; i <= 10; i++ {
+			src.MouseMove(from.Add(to.Sub(from).Mul(i).Div(10)))
+			time.Sleep(20 * time.Millisecond)
+		}
+		waitDragOver(b, src, to)
+		src.MouseButton(events.MouseUp, events.Left, to, shift)
+		select {
+		case data := <-dropped:
+			assert.Contains(t, data, `"Name": "Email"`)
+		case <-time.After(2 * time.Second):
+			t.Fatal("not dropped")
+		}
+		time.Sleep(100 * time.Millisecond)
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		assert.Equal(t, 4, droppedRow, "onto Home")
+		assert.Equal(t, testTasks()[0].Children[0].Name, tasks[0].Children[0].Name, "not moved")
+		assert.Len(t, tasks[0].Children, 2, "not deleted")
+		assert.Nil(t, b.Scene.Stage.popups.top(), "no menu")
 	})
 }
