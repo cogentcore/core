@@ -69,6 +69,11 @@ type TreeTable struct {
 	// of their other fields.
 	HideGroupValues bool
 
+	// ReadOnlyDrag is whether the rows of a read-only tree table can be
+	// dragged, for the app to handle where they are dropped, as for
+	// moving them in its own data: the tree table itself does not change.
+	ReadOnlyDrag bool
+
 	// itemsSet is the Items for which the item type and rows were set.
 	itemsSet any
 
@@ -1136,6 +1141,9 @@ func (tt *TreeTable) dragStart(e events.Event, cell Widget) {
 // dragDrop handles a drop onto the tree table, with a menu of the ways
 // to paste the dropped items relative to the item under the mouse.
 func (tt *TreeTable) dragDrop(e events.Event) {
+	if tt.IsReadOnly() { // for the app to handle (see ReadOnlyDrag)
+		return
+	}
 	e.SetHandled()
 	de := e.(*events.DragDrop)
 	md, ok := de.Data.(mimedata.Mimes)
@@ -1191,6 +1199,10 @@ func (tt *TreeTable) withinDragged(item reflect.Value) bool {
 
 // dropDeleteItems deletes the dragged items after they are moved.
 func (tt *TreeTable) dropDeleteItems() {
+	if tt.IsReadOnly() { // the app handles it (see ReadOnlyDrag)
+		tt.draggedItems = nil
+		return
+	}
 	for _, item := range tt.draggedItems {
 		tt.removeItem(tt.itemsValue(), item)
 	}
@@ -1226,7 +1238,7 @@ func (tt *TreeTable) makeTreeCell(p *tree.Plan, i int) {
 		w.SetProperty(ListRowProperty, i)
 		w.SetProperty(ListColProperty, 0)
 		w.Styler(func(s *styles.Style) {
-			s.SetAbilities(!tt.IsReadOnly(), abilities.Draggable)
+			s.SetAbilities(!tt.IsReadOnly() || tt.ReadOnlyDrag, abilities.Draggable)
 			s.Direction = styles.Row
 			s.Align.Items = styles.Center
 			s.Gap.X.Em(0.1)

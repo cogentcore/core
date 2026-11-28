@@ -1295,12 +1295,14 @@ func (em *Events) DropFinalize(de *events.DragDrop) {
 	if de.DropMod != events.DropMove {
 		return
 	}
-	de.Typ = events.DropDeleteSource
-	de.ClearHandled()
+	// a copy, so that the drop stays handled for the other listeners of it
+	dd := *de
+	dd.Typ = events.DropDeleteSource
+	dd.ClearHandled()
 	// the source can be in another window, for a drop from the operating system
 	src := de.Source.(Widget).AsWidget()
 	src.runInWindow(em.scene.AsWidget(), func() {
-		src.HandleEvent(de)
+		src.HandleEvent(&dd)
 	})
 }
 

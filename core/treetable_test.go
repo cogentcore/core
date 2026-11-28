@@ -13,6 +13,7 @@ import (
 	"testing"
 	"time"
 
+	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/events"
@@ -21,6 +22,7 @@ import (
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"github.com/stretchr/testify/assert"
@@ -1583,5 +1585,67 @@ func TestTreeTableScrollBranch(t *testing.T) {
 		b.AsyncLock()
 		defer b.AsyncUnlock()
 		assert.False(t, tt.IsClosed(si), "opened by a click on its branch")
+	})
+}
+
+// TestTreeTableReadOnlyDrag tests dragging an item of a read-only tree
+// table with ReadOnlyDrag, whose drop the app handles: the tree table
+// itself does not change.
+func TestTreeTableReadOnlyDrag(t *testing.T) {
+	b := NewBody()
+	b.Styler(func(s *styles.Style) { s.Min.Set(units.Dp(600), units.Dp(500)) })
+	tasks := testTasks()
+	tt := NewTreeTable(b).SetItems(&tasks)
+	tt.SetReadOnly(true)
+	tt.ReadOnlyDrag = true
+	tt.Styler(func(s *styles.Style) { s.SetAbilities(true, abilities.Droppable) })
+	dropped := make(chan string, 1)
+	droppedRow := -1
+	tt.On(events.Drop, func(e events.Event) {
+		de := e.(*events.DragDrop)
+		md := de.Data.(mimedata.Mimes)
+		if row, _, ok := tt.ListGrid.indexFromPixel(de.Pos()); ok {
+			droppedRow = tt.StartIndex + row
+		}
+		e.SetHandled()
+		tt.Scene.Events.DropFinalize(de)
+		dropped <- string(md[0].Data)
+	})
+	imagex.UpdateTestImagesFor(t) // the image is not compared
+	AssertRender(t, b, "tree-table/read-only-drag", func() {
+		src := b.Scene.RenderWindow().SystemWindow.Events()
+		b.AsyncLock()
+		cell := func(row int) *WidgetBase {
+			nw, _ := tt.RowWidgetNs()
+			return tt.ListGrid.Child(row * nw).(Widget).AsWidget()
+		}
+		email := cell(1).Geom.TotalBBox
+		from := image.Pt(email.Min.X+4, (email.Min.Y+email.Max.Y)/2)
+		home := cell(4).Geom.TotalBBox
+		to := home.Min.Add(home.Size().Div(2))
+		b.AsyncUnlock()
+
+		var shift key.Modifiers
+		shift.SetFlag(true, key.Shift) // a move, which must not delete it
+		src.MouseButton(events.MouseDown, events.Left, from, shift)
+		for i := 1; i <= 10; i++ {
+			src.MouseMove(from.Add(to.Sub(from).Mul(i).Div(10)))
+			time.Sleep(20 * time.Millisecond)
+		}
+		waitDragOver(b, src, to)
+		src.MouseButton(events.MouseUp, events.Left, to, shift)
+		select {
+		case data := <-dropped:
+			assert.Contains(t, data, `"Name": "Email"`)
+		case <-time.After(2 * time.Second):
+			t.Fatal("not dropped")
+		}
+		time.Sleep(100 * time.Millisecond)
+		b.AsyncLock()
+		defer b.AsyncUnlock()
+		assert.Equal(t, 4, droppedRow, "onto Home")
+		assert.Equal(t, testTasks()[0].Children[0].Name, tasks[0].Children[0].Name, "not moved")
+		assert.Len(t, tasks[0].Children, 2, "not deleted")
+		assert.Nil(t, b.Scene.Stage.popups.top(), "no menu")
 	})
 }

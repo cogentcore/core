@@ -1667,7 +1667,7 @@ func (lb *ListBase) dragStart(e events.Event) {
 
 func (lb *ListBase) dragDrop(e events.Event) {
 	de := e.(*events.DragDrop)
-	if de.Data == nil {
+	if de.Data == nil || lb.IsReadOnly() { // (made read-only after Init)
 		return
 	}
 	pos := de.Pos()
@@ -2452,8 +2452,12 @@ func (lg *ListGrid) renderStripes() {
 }
 
 // mousePosInGrid returns true if the event mouse position is
-// located within the slicegrid.
+// located within the slicegrid. It is false for a nil grid, as that of a
+// list before it is first made, which can get events then.
 func (lg *ListGrid) mousePosInGrid(pt image.Point) bool {
+	if lg == nil {
+		return false
+	}
 	ptrel := lg.PointToRelPos(pt)
 	sz := lg.Geom.ContentBBox.Size()
 	if lg.visibleRows == 0 || sz.Y == 0 {
