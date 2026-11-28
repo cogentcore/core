@@ -2,6 +2,12 @@ Name = "Cogent Core Docs"
 
 About = "Cogent Core is a free and open source framework for building powerful, fast, elegant 2D and 3D apps that run on macOS, Windows, Linux, iOS, Android, and the web with a single pure Go codebase, allowing you to Code Once, Run Everywhere."
 
+# not AppGoSymlink, which the user may set for all apps: the executables
+# that go install installs for the docs of Cogent Core and Cogent Lab are
+# both named docs, in the same Go bin directory, so each app would run the
+# one installed last
+AppGoSymlink = false
+
 [Web]
   # mvm is loaded when code is first edited (see interp.go)
   DeferredFunctions = ["cogentcore.org/core/mvmcore.BindTextEditor"]

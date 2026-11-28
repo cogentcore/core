@@ -388,8 +388,8 @@ func TestConfigUserFiles(t *testing.T) {
 	os.Args = []string{"test"}
 	dir := t.TempDir()
 	user := filepath.Join(dir, "user.toml")
-	require.NoError(t, os.WriteFile(user, []byte("Note = \"user\"\nNData = 3\n"), 0o644))
-	require.NoError(t, os.WriteFile(filepath.Join(dir, "proj.toml"), []byte("NData = 12\n"), 0o644))
+	require.NoError(t, os.WriteFile(user, []byte("Note = \"user\"\nNData = 3\nDebug = true\n"), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "proj.toml"), []byte("NData = 12\nDebug = false\n"), 0o644))
 	opts := DefaultOptions("Test")
 	opts.IncludePaths = []string{dir}
 	opts.UserFiles = []string{filepath.Join(dir, "missing.toml"), user}
@@ -399,6 +399,7 @@ func TestConfigUserFiles(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "user", cfg.Note)
 	assert.Equal(t, 12, cfg.NData)
+	assert.False(t, cfg.Debug, "an explicit false of the project overrides the user")
 
 	// an existing user file with a syntax error is reported
 	require.NoError(t, os.WriteFile(user, []byte("Note = \n"), 0o644))
