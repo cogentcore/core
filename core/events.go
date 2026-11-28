@@ -169,7 +169,7 @@ type Events struct {
 	dragOS bool
 
 	// dragMoves is whether the last drag moves by default, instead of
-	// copying, as set by its source (see [dragMover]).
+	// copying, as set by its source (see [DragMover]).
 	dragMoves bool
 
 	// dragCopy is whether the drag sprite shows that the drop would copy.
@@ -180,19 +180,19 @@ type Events struct {
 	dragCopyOffset image.Point
 }
 
-// dragMover is implemented by widgets with an option for whether dragging
+// DragMover is implemented by widgets with an option for whether dragging
 // their items moves them by default, instead of copying them, in which
 // case the modifier keys that otherwise move them copy them.
-type dragMover interface {
-	dragMovesDefault() bool
+type DragMover interface {
+	DragMovesDefault() bool
 }
 
 // dragMovesFrom returns whether a drag from the given widget moves by
-// default, as set by it or the first widget above it that is a [dragMover].
+// default, as set by it or the first widget above it that is a [DragMover].
 func dragMovesFrom(w Widget) bool {
 	for n := tree.Node(w); n != nil; n = n.AsTree().Parent {
-		if dm, ok := n.(dragMover); ok {
-			return dm.dragMovesDefault()
+		if dm, ok := n.(DragMover); ok {
+			return dm.DragMovesDefault()
 		}
 	}
 	return false

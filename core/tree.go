@@ -191,7 +191,9 @@ type Tree struct {
 	Branch *Switch `json:"-" xml:"-" copier:"-" set:"-" display:"-"`
 }
 
-func (tr *Tree) dragMovesDefault() bool {
+// DragMovesDefault returns whether a drag of a node moves it (see [DragMover]),
+// which is the [Tree.DragMoves] of its root.
+func (tr *Tree) DragMovesDefault() bool {
 	return tr.Root != nil && tr.Root.AsCoreTree().DragMoves
 }
 

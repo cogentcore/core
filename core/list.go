@@ -404,7 +404,8 @@ func (lb *ListBase) StyleValue(w Widget, s *styles.Style, row, col int) {
 	s.SetTextWrap(false)
 }
 
-func (lb *ListBase) dragMovesDefault() bool { return lb.DragMoves }
+// DragMovesDefault returns [ListBase.DragMoves] (see [DragMover]).
+func (lb *ListBase) DragMovesDefault() bool { return lb.DragMoves }
 
 func (lb *ListBase) AsListBase() *ListBase {
 	return lb
